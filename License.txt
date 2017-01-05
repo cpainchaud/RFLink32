@@ -1,0 +1,65 @@
+=====================================================================================================================================
+                                                      RFLINK GATEWAY LICENSE v1.0
+=====================================================================================================================================
+Arduino project "RFLink Gateway"
+
+© Copyright 2015..2016 Stuntteam
+(Portions © Copyright 2010..2015 Paul Tonkes (some Nodo 3.7 code parts))
+
+Documentation                                   : http://sourceforge.net/projects/rflink/
+Questions/Suggestions etc. mail to              : frankzirrone@gmail.com
+Compiler                                        : http://arduino.cc
+=====================================================================================================================================
+LICENSE TERMS AND CONDITIONS
+
+The RFLink distributed and pre-compiled code is made available free of charge and without any warranties.
+This License explicitly affirms your unlimited permission to run the unmodified Program.
+If someone made you pay for this program, contact us!
+
+
+The RFLink Gateway Source Code is made available so that third parties can develop their own plugins for the RFLink Gateway.
+Availability of the core code and functional sample plugins does not mean that each and every plugin will be open source.
+The fact that the code is published does not mean you obtain any kind of ownership or get any rights to the code.
+This License explicitly affirms that you have the right to use the source code as a development environment to create your 
+own plugins which you can share with the community and project maintainers. 
+When you publish your plugin with the community it automatically falls under this license. However, it is also possible to share your 
+plugin with the project maintainers and keep your plugin closed source. In that case, the compiled portions of your code will 
+automatically fall under this license. All contributors hold the copyright for their own work.
+The source code is free for use in any open source project when the original copyright notices, headers and this license file are included. 
+This program is free software: you can redistribute it and/or modify it when the original copyright notices and headers are included. 
+
+You are not allowed to sell the pre-compiled code or the source code or distribute it without this license file. 
+
+Usage of any parts of this code in a commercial work is prohibited unless express written approval is granted!
+Some parts of the code might contain watermarking to identify our work.
+You are not allowed to decompile, disassemble or reverse engineer any parts of the pre-compiled program.
+
+The license does not permit incorporating this program into proprietary programs.
+
+Disclaimer of Warranty.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+The copyright holders provide the program "AS IS" without warranty of any kind, either expressed or implied, including, but not limited to, 
+the implied warranties of merchantability or fitness for a particular purpose. The entire risk as to the quality and performance of the program
+is with you. Should the program prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Limitation of Liability.
+In no event unless required by applicable law or agreed to in writing will any copyright holder, or any other party who modifies and/or conveys
+the program as permitted above, be liable to you for damages, including any general, special, incidental or consequential damages arising out of the 
+ues or inability to use the program (including but not limited to loss of data being rendered inaccurate or losses sustained by you or third 
+parties or a failure of the program to operate with any other programs), even if such holder or other party has been advised of the possibility of
+such damages.
+-------------------------------------------------------------------------------------------------------------------------------------
+Warning: 
+The RFLink Gateway should not be used in any life-threatening situations. 
+
+The RFLink Gateway is NOT justified to be used as a main part of a primary alarm system. 
+RFLink may only be used to listen to alarm sensors or activate a siren to complement a home automation system.
+Note that if you own an alarm system which RFLink could disarm by broadcasting a recorded signal, it is time to upgrade your alarm system.
+-------------------------------------------------------------------------------------------------------------------------------------
+Installation information:
+
+All files should be located in a directory named "RFLink".
+Install the Arduino compiler. You can download the compiler at www.arduino.cc
+Preffered is 1.6.5 or similar
+Open from the Arduino IDE the file RFlink.ino
+-------------------------------------------------------------------------------------------------------------------------------------
