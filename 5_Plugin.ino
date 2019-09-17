@@ -1032,7 +1032,8 @@ void PluginInit(void)
   PluginInitCall(0,0);
 }
 /*********************************************************************************************/
-void PluginTXInit(void)
+/*
+  void PluginTXInit(void)
   {
   byte x;
 
@@ -1473,6 +1474,7 @@ void PluginTXInit(void)
   PluginTXInitCall(0,0);
   
 }
+*/
  /*********************************************************************************************\
  * This function initializes the Receive plugin function table
  \*********************************************************************************************/
@@ -1489,6 +1491,7 @@ byte PluginInitCall(byte Function, char *str) {
  /*********************************************************************************************\
  * This function initializes the Transmit plugin function table
  \*********************************************************************************************/
+/*
 byte PluginTXInitCall(byte Function, char *str) {
   int x;
 
@@ -1499,6 +1502,7 @@ byte PluginTXInitCall(byte Function, char *str) {
   }
   return true;
 }
+*/
  /*********************************************************************************************\
  * With this function plugins are called that have Receive functionality. 
  \*********************************************************************************************/
@@ -1519,7 +1523,8 @@ byte PluginRXCall(byte Function, char *str) {
  /*********************************************************************************************\
  * With this function plugins are called that have Transmit functionality. 
  \*********************************************************************************************/
-byte PluginTXCall(byte Function, char *str) {
+/*
+  byte PluginTXCall(byte Function, char *str) {
   int x;
 
   for (x=0; x<PLUGIN_TX_MAX; x++) {
@@ -1531,4 +1536,5 @@ byte PluginTXCall(byte Function, char *str) {
   }
   return false;
 }
+*/
 /*********************************************************************************************/

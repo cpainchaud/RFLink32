@@ -8,7 +8,7 @@
 // ****************************************************************************************************************************************
 // Translation Plugin for oversized packets due to their breaks/pause being too short between packets
 // Used for Flamingo FA500R and various others, do NOT exclude this plugin.
-#define PLUGIN_001              // DO NOT CHANGE OR EXCLUDE!!
+// #define PLUGIN_001              // DO NOT CHANGE OR EXCLUDE!!
 // ------------------------------------------------------------------------
 // -- Any of the following protocols can be excluded whenever not needed --
 // ------------------------------------------------------------------------

@@ -1,12 +1,11 @@
 /*********************************************************************************************/
-boolean ScanEvent(void) {                                         // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
-  unsigned long Timer = millis() + SCAN_HIGH_TIME;
+boolean ScanEvent(void) {                                    // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
+  unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
 
   while (Timer > millis() || RepeatingTimer > millis()) {
-    //       if (FetchSignal(PIN_RF_RX_DATA,HIGH)) {                    // RF: *** data start ***
-    if (FetchSignal()) {                                         // RF: *** data start ***
-      if ( PluginRXCall(0, 0) ) {                               // Check all plugins to see which plugin can handle the received signal.
-        RepeatingTimer = millis() + SIGNAL_REPEAT_TIME;
+    if (FetchSignal()) {                                     // RF: *** data start ***
+      if (PluginRXCall(0, 0)) {                              // Check all plugins to see which plugin can handle the received signal.
+        RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
         return true;
       }
     }
@@ -14,9 +13,10 @@ boolean ScanEvent(void) {                                         // Deze routin
   return false;
 }
 
+/*********************************************************************************************/
 /*
   // RFLink Board specific: Generate a short pulse to switch the Aurel Transceiver from TX to RX mode.
-  void RFLinkHW( void ) {
+  void RFLinkHW( void) {
      delayMicroseconds(36);
      digitalWrite(PIN_BSF_0,LOW);
      delayMicroseconds(16);

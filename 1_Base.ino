@@ -1,5 +1,5 @@
 //****************************************************************************************************************************************
-void(*Reboot)(void) = 0;                                                        // reset function on adres 0.
+// void(*Reboot)(void) = 0;                                                        // reset function on adres 0.
 byte PKSequenceNumber = 0;                                                      // 1 byte packet counter
 boolean RFDebug = false;                                                        // debug RF signals with plugin 001
 boolean RFUDebug = false;                                                       // debug RF signals with plugin 254
@@ -10,11 +10,11 @@ char InputBuffer_Serial[INPUT_COMMAND_SIZE];                                    
 
 // Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
 void PluginInit(void);
-void PluginTXInit(void);
+// void PluginTXInit(void);
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char*);                                 // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
-boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char*);                            // Transmit plugins
-byte PluginTX_id[PLUGIN_TX_MAX];
+// boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char*);                            // Transmit plugins
+// byte PluginTX_id[PLUGIN_TX_MAX];
 
 void PrintHex8(uint8_t *data, uint8_t length);                                  // prototype
 void PrintHexByte(uint8_t data);                                                // prototype
@@ -30,7 +30,8 @@ struct RawSignalStruct                                                          
   unsigned long Time;                                                           // Timestamp indicating when the signal was received (millis())
   byte Pulses[RAW_BUFFER_SIZE + 2];                                             // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (halves RAM usage)
   // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
-} RawSignal = {0, 0, 0, 0, 0L, 0};
+} RawSignal = {0, 0, 0, 0, 0UL};
+
 // ===============================================================================
 unsigned long RepeatingTimer = 0L;
 unsigned long SignalCRC = 0L;                                                   // holds the bitstream value for some plugins to identify RF repeats
@@ -39,13 +40,9 @@ unsigned long SignalHashPrevious = 0L;                                          
 
 void setup() {
 
-  // Low Power Arduino
-  ADCSRA = 0;             // disable ADC
-  power_all_disable();    // turn off all modules
-  power_timer0_enable();  // Timer 0
-  power_usart0_enable();  // UART
-
   Serial.begin(BAUD);                                                           // Initialise the serial port
+  Serial.println(); // ESP "Garbage" message
+
   pinMode(PIN_RF_RX_DATA, INPUT);                                               // Initialise in/output ports
   pinMode(PIN_RF_TX_DATA, OUTPUT);                                              // Initialise in/output ports
   pinMode(PIN_RF_TX_VCC,  OUTPUT);                                              // Initialise in/output ports
@@ -68,11 +65,11 @@ void setup() {
 
   PKSequenceNumber++;
   PluginInit();
-  PluginTXInit();
+  //  PluginTXInit();
 }
 
 void loop() {
   ScanEvent();
-  CheckSerial();
+  //  CheckSerial();
 }
 /*********************************************************************************************/

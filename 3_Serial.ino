@@ -1,4 +1,5 @@
 /*********************************************************************************************/
+/*
 boolean CheckSerial()
 {
   static byte SerialInByte = 0;                                               // incoming character value
@@ -10,7 +11,7 @@ boolean CheckSerial()
 
   // SERIAL: *************** Check if there is data ready on the serial port **********************
   if (Serial.available()) {
-    FocusTimer = millis() + FOCUS_TIME;
+    FocusTimer = millis() + FOCUS_TIME_MS;
 
     while (millis() < FocusTimer) {                                           // standby
       if (Serial.available()) {
@@ -35,7 +36,7 @@ boolean CheckSerial()
                 Serial.println(InputBuffer_Serial);
               } else if (strcasecmp(InputBuffer_Serial + 3, "REBOOT;") == 0) {
                 strcpy(InputBuffer_Serial, "reboot");
-                Reboot();
+                // Reboot();
               } else if (strncasecmp(InputBuffer_Serial + 3, "RFDEBUG=O", 9) == 0) {
                 if (InputBuffer_Serial[12] == 'N' || InputBuffer_Serial[12] == 'n' ) {
                   RFDebug = true;                                        // full debug on
@@ -99,7 +100,7 @@ boolean CheckSerial()
           SerialInByteCounter = 0;
           InputBuffer_Serial[0] = 0;                                          // serial data has been processed.
           ValidCommand = 0;
-          FocusTimer = millis() + FOCUS_TIME;
+          FocusTimer = millis() + FOCUS_TIME_MS;
         }// if(SerialInByte
       }// if(Serial.available())
     }// while
@@ -107,6 +108,6 @@ boolean CheckSerial()
 
   return true;
 }
-
+*/
 
 /*********************************************************************************************/
