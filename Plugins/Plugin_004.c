@@ -121,7 +121,7 @@ boolean Plugin_004(byte function, char *string) {
       Serial.print(F("NewKaku;"));                         // Label
       sprintf(pbuffer, "ID=%08lx;",((bitstream) >> 6) );   // ID   
       Serial.print( pbuffer );
-      sprintf(pbuffer, "SWITCH=%x;", ((bitstream)&0x0f)+1 );
+      sprintf(pbuffer, "SWITCH=%x;", (unsigned int)((bitstream)&0x0f)+1 );
       Serial.print( pbuffer );
       Serial.print(F("CMD="));                    
       int command = (bitstream >> 4) & 0x03;
