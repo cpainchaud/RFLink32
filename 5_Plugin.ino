@@ -1,8 +1,11 @@
 /**********************************************************************************************\
  * Load plugins
 \*********************************************************************************************/
-#define PLUGINFILE2(a, b) stringify(a/Plugins/b)
-#define PLUGINFILE(a, b) PLUGINFILE2(a, b)
+#include "5_Plugin_Config_01.h"
+
+#define SKETCH_PATH ./
+#define stringify(x) #x
+#define PLUGINFILE(a, b) stringify(a/Plugins/b)
 
 #ifdef PLUGIN_001
 #include PLUGINFILE(SKETCH_PATH,Plugin_001.c)
@@ -1529,4 +1532,3 @@ byte PluginTXCall(byte Function, char *str) {
   return false;
 }
 /*********************************************************************************************/
-
