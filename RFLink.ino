@@ -1,14 +1,14 @@
 // *********************************************************************************************************************************
-// * Arduino project "Nodo RadioFrequencyLink aka Nodo RFLink Version 1.1" 
-// * © Copyright 2015 StuntTeam - NodoRFLink 
+// * Arduino project "Nodo RadioFrequencyLink aka Nodo RFLink Version 1.1"
+// * © Copyright 2015 StuntTeam - NodoRFLink
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
 // *
 // *                                       Nodo RadioFrequencyLink aka Nodo RFLink Version 1.1
-// *                                                      
+// *
 // ********************************************************************************************************************************
-// * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License 
+// * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 // * as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-// * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
+// * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 // * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 // * You received a copy of the GNU General Public License along with this program in file 'COPYING.TXT'.
 // * For more information on GPL licensing: http://www.gnu.org/licenses
@@ -59,15 +59,7 @@
 #define PIN_RF_RX_GND           NOT_A_PIN               // Ground to the receiver on this pin
 #define PIN_RF_RX_DATA          D1                      // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 
-/*
-  // Mega
-  #define PIN_BSF_0                   22                // Board Specific Function lijn-0
-  #define PIN_BSF_1                   23                // Board Specific Function lijn-1
-  #define PIN_BSF_2                   24                // Board Specific Function lijn-2
-  #define PIN_BSF_3                   25                // Board Specific Function lijn-3
-  #define PIN_RF_TX_VCC               15                // +5 volt / Vcc power to the transmitter on this pin
-  #define PIN_RF_TX_DATA              14                // Data to the 433Mhz transmitter on this pin
-  #define PIN_RF_RX_VCC               16                // Power to the receiver on this pin
-  #define PIN_RF_RX_DATA              19                // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-*/
+// MQTT messages
+#define MQTT_ACTIVATED
+
 //****************************************************************************************************************************************

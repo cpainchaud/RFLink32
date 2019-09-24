@@ -6,15 +6,13 @@ boolean RFUDebug = false;                                                       
 boolean QRFDebug = false;                                                       // debug RF signals with plugin 254 but no multiplication
 
 char pbuffer[PRINT_BUFFER_SIZE];                                                // Buffer for printing data
+char MQTTbuffer[PRINT_BUFFER_SIZE];                                             // Buffer for MQTT message
 char InputBuffer_Serial[INPUT_COMMAND_SIZE];                                    // Buffer for Seriel data
 
 // Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
 void PluginInit(void);
-// void PluginTXInit(void);
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char*);                                 // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
-// boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char*);                            // Transmit plugins
-// byte PluginTX_id[PLUGIN_TX_MAX];
 
 void PrintHex8(uint8_t *data, uint8_t length);                                  // prototype
 void PrintHexByte(uint8_t data);                                                // prototype
@@ -54,22 +52,41 @@ void setup() {
   digitalWrite(PIN_RF_RX_VCC, HIGH);                                            // turn VCC to RF receiver ON
   digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP);                                   // pull-up resister on (to prevent garbage)
 
-  /*
-    pinMode(PIN_BSF_0, OUTPUT);                                                   // rflink board switch signal
-    digitalWrite(PIN_BSF_0, HIGH);                                                // rflink board switch signal
-  */
+  PluginInit();
 
-  Serial.print(F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V1.1 - "));
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+  setup_wifi();
+  setup_MQTT();
+#endif
+
+  sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V1.1 - "));
+  Serial.print(pbuffer);
+
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+  strcpy(MQTTbuffer, pbuffer);
+#endif
+
   sprintf_P(pbuffer, PSTR("R%02x;"), REVNR);
   Serial.println(pbuffer);
 
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+  strcat(MQTTbuffer, pbuffer);
+  strcat(MQTTbuffer, "\r\n");
+#endif
+
   PKSequenceNumber++;
-  PluginInit();
-  //  PluginTXInit();
+
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+  publishMsg();
+#endif
 }
 
 void loop() {
-  ScanEvent();
-  //  CheckSerial();
+
+  if (ScanEvent()) {
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+    publishMsg();
+#endif
+  }
 }
 /*********************************************************************************************/
