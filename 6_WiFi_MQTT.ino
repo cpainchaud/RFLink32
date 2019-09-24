@@ -38,12 +38,14 @@ void setup_wifi() {
 
   Serial.print(F("\nWiFi connected\t"));
   Serial.print(F("IP address: "));
-  Serial.println(WiFi.localIP());
+  Serial.print(WiFi.localIP());
+  Serial.print(F("\tRSSI "));
+  Serial.println(WiFi.RSSI());
 }
 
 void setup_MQTT() {
   client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  // client.setCallback(callback);
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -65,13 +67,13 @@ void reconnect() {
     if (client.connect(MQTT_ID, MQTT_USER, MQTT_PSWD)) {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      client.subscribe(MQTT_TOPIC_IN);
+      // client.subscribe(MQTT_TOPIC_IN);
     } else {
       Serial.print(F("Failed, rc="));
       Serial.print(client.state());
       Serial.println(F("Try again in 5 seconds"));
       // Wait 5 seconds before retrying
-      delay(5000);
+      for (byte i=0; i<10; i++) delay(500); // delay(5000) may cause hang
     }
   }
 }
