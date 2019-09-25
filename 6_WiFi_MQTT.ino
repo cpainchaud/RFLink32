@@ -44,7 +44,7 @@ void setup_wifi() {
 }
 
 void setup_MQTT() {
-  client.setServer(mqtt_server, 1883);
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   // client.setCallback(callback);
 }
 
