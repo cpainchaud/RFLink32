@@ -3,6 +3,7 @@ boolean ScanEvent(void) {                                    // Deze routine maa
   unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
 
   while (Timer > millis() || RepeatingTimer > millis()) {
+    delay(1); // For Modem Sleep
     if (FetchSignal()) {                                     // RF: *** data start ***
       if (PluginRXCall(0, 0)) {                              // Check all plugins to see which plugin can handle the received signal.
         RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
