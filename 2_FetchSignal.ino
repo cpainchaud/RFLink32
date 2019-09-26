@@ -11,7 +11,7 @@ boolean FetchSignal () {
 
 
 #define RESET_SEEKSTART timeStartSeek_ms = millis();
-#define RESET_TIMESTART   timeStartLoop_us = micros();
+#define RESET_TIMESTART timeStartLoop_us = micros();
 #define CHECK_RF        ((digitalRead(PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
 #define CHECK_TIMEOUT   ((millis() - timeStartSeek_ms) < SIGNAL_SEEK_TIMEOUT_MS)
 #define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
@@ -37,7 +37,7 @@ boolean FetchSignal () {
     GET_PULSELENGTH;
     SWITCH_TOGGLE;
     if (!CHECK_TIMEOUT) return false;
-    }
+  }
   //Serial.print ("PulseLength: "); Serial.println (PulseLength);
   STORE_PULSE;
 

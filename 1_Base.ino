@@ -55,7 +55,7 @@ void setup() {
   PluginInit();
 
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
-  setup_wifi();
+  setup_WIFI();
   setup_MQTT();
 #endif
 

@@ -11,11 +11,10 @@
 
 // Update these with values suitable for your network.
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClient WIFIClient;
+PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
-
-void setup_wifi() {
+void setup_WIFI() {
 
   delay(10);
 
@@ -44,11 +43,13 @@ void setup_wifi() {
 }
 
 void setup_MQTT() {
-  client.setServer(MQTT_SERVER, MQTT_PORT);
-  // client.setCallback(callback);
+  MQTTClient.setClient(WIFIClient);
+  MQTTClient.setServer(MQTT_SERVER, MQTT_PORT);
+  // MQTTClient.setCallback(callback);
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
+/*
+  void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(F("Message arrived ["));
   Serial.print(topic);
   Serial.print("] ");
@@ -57,23 +58,28 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.write('\n');
   Serial.println();
-}
+  }
+*/
 
 void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected()) {
+  delay(1);
+  while (!MQTTClient.connected()) {
     Serial.print(F("Attempting MQTT connection..."));
     // Attempt to connect
-    if (client.connect(MQTT_ID, MQTT_USER, MQTT_PSWD)) {
+    if (MQTTClient.connect(MQTT_ID, MQTT_USER, MQTT_PSWD))
+    {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      // client.subscribe(MQTT_TOPIC_IN);
-    } else {
-      Serial.print(F("Failed, rc="));
-      Serial.print(client.state());
-      Serial.println(F("Try again in 5 seconds"));
+      // MQTTClient.subscribe(MQTT_TOPIC_IN);
+    }
+    else
+    {
+      Serial.print(F("\nFailed, rc="));
+      Serial.print(MQTTClient.state());
+      Serial.println(F("\tTry again in 5 seconds"));
       // Wait 5 seconds before retrying
-      for (byte i=0; i<10; i++) delay(500); // delay(5000) may cause hang
+      for (byte i = 0; i < 10; i++) delay(500); // delay(5000) may cause hang
     }
   }
 }
@@ -81,12 +87,12 @@ void reconnect() {
 void publishMsg() {
   if (MQTTbuffer[0] != 0)
   {
-    if (!client.connected()) {
+    if (!MQTTClient.connected()) {
       reconnect();
     }
-    client.loop();
+    // MQTTClient.loop();
 
-    client.publish(MQTT_TOPIC_OUT, MQTTbuffer);
+    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer);
     MQTTbuffer[0] = 0;
   }
 }
