@@ -1,11 +1,18 @@
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
-
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
 #include <ESP8266WiFi.h>
 #endif
 
+void setup_WIFI_OFF() {
+  WiFi.persistent(false);
+  WiFi.setAutoReconnect(false);
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
+}
+
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
 #include <PubSubClient.h>
 #include "6_Credentials.h"
 
@@ -15,9 +22,6 @@ WiFiClient WIFIClient;
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
 void setup_WIFI() {
-
-  delay(10);
-
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);

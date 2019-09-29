@@ -57,6 +57,8 @@ void setup() {
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
   setup_WIFI();
   setup_MQTT();
+#else
+  setup_WIFI_OFF();
 #endif
 
   sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V1.1 - "));
@@ -86,6 +88,8 @@ void loop() {
   if (ScanEvent()) {
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
+#else
+    MQTTbuffer[0] = 0;
 #endif
   }
 }
