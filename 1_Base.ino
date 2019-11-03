@@ -61,7 +61,7 @@ void setup() {
   setup_WIFI_OFF();
 #endif
 
-  sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V1.1 - "));
+  sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V3.0 - "));
   Serial.print(pbuffer);
 
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))

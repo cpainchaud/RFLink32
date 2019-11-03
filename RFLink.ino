@@ -17,8 +17,8 @@
 // ****************************************************************************
 // ****************************************************************************
 
-#define BUILDNR                      0x04               // shown in version
-#define REVNR                        0x99               // shown in version and startup string
+#define BUILDNR                      0x05               // shown in version
+#define REVNR                        0x42               // shown in version and startup string
 #define BAUD                       115200               // Baudrate for serial communication.
 #define MIN_RAW_PULSES                 74               // Minimal number of bits*2 that need to have been received before we spend CPU time on decoding the signal.
 #define RAW_BUFFER_SIZE               148 // 512        // Maximum number of pulses that is received in one go.
@@ -36,6 +36,7 @@
 #define INPUT_COMMAND_SIZE             60               // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE              60               // Maximum number of characters that a command should print in one go via the print buffer.
 
+/*
 #define VALUE_PAIR                     44
 #define VALUE_ALLOFF                   55
 #define VALUE_OFF                      74
@@ -48,6 +49,7 @@
 #define VALUE_CONFIRM                  81
 #define VALUE_LIMIT                    82
 #define VALUE_ALLON                   141
+*/
 
 // PIN Definition
 

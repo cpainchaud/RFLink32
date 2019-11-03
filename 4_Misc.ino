@@ -7,6 +7,7 @@ unsigned long str2int(char *string) {
 /*********************************************************************************************\
    Convert string to command code
   \*********************************************************************************************/
+/*
   int str2cmd(char *command) {
   if (strcasecmp(command, "ON") == 0) return VALUE_ON;
   if (strcasecmp(command, "OFF") == 0) return VALUE_OFF;
@@ -22,14 +23,15 @@ unsigned long str2int(char *string) {
   if (strcasecmp(command, "LIMIT") == 0) return VALUE_LIMIT;
   return false;
   }
+*/
 /********************************************************************************************\
    Convert unsigned long to float long through memory
   \*********************************************************************************************/
-  float ul2float(unsigned long ul) {
+float ul2float(unsigned long ul) {
   float f;
   memcpy(&f, &ul, 4);
   return f;
-  }
+}
 /*********************************************************************************************/
 void PrintHex8(uint8_t *data, uint8_t length) { // prints 8-bit data in hex (lowercase)
   char tmp[length * 2 + 1];
