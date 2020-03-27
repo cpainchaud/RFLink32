@@ -1,3 +1,30 @@
+#include <Arduino.h>
+#include "2_Signal.h"
+#include "5_Plugin.h"
+
+RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
+byte PKSequenceNumber = 0;             // 1 byte packet counter
+unsigned long SignalCRC = 0L;          // holds the bitstream value for some plugins to identify RF repeats
+unsigned long SignalHash = 0L;         // holds the processed plugin number
+unsigned long SignalHashPrevious = 0L; // holds the last processed plugin number
+unsigned long RepeatingTimer = 0L;
+
+/*********************************************************************************************/
+boolean ScanEvent(void) {                                    // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
+  unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
+
+  while (Timer > millis() || RepeatingTimer > millis()) {
+    delay(1); // For Modem Sleep
+    if (FetchSignal()) {                                     // RF: *** data start ***
+      if (PluginRXCall(0, 0)) {                              // Check all plugins to see which plugin can handle the received signal.
+        RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
+        return true;
+      }
+    }
+  }// while
+  return false;
+}
+
 // ***********************************************************************************
 boolean FetchSignal () {
   // *********************************************************************************
@@ -92,23 +119,6 @@ boolean FetchSignal () {
     RawSignal.Number = 0;
   }
 
-  return false;
-}
-// ***********************************************************************************
-
-/*********************************************************************************************/
-boolean ScanEvent(void) {                                    // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
-  unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
-
-  while (Timer > millis() || RepeatingTimer > millis()) {
-    delay(1); // For Modem Sleep
-    if (FetchSignal()) {                                     // RF: *** data start ***
-      if (PluginRXCall(0, 0)) {                              // Check all plugins to see which plugin can handle the received signal.
-        RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
-        return true;
-      }
-    }
-  }// while
   return false;
 }
 

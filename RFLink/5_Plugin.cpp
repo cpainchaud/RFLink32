@@ -1,3 +1,16 @@
+#include <Arduino.h>
+#include "2_Signal.h"
+#include "3_Serial.h"
+#include "5_Plugin.h"
+#include "6_WiFi_MQTT.h"
+
+boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char*);                                 // Receive plugins
+byte Plugin_id[PLUGIN_MAX];
+
+boolean RFDebug = false;   // debug RF signals with plugin 001
+boolean RFUDebug = false;  // debug RF signals with plugin 254
+boolean QRFDebug = false;  // debug RF signals with plugin 254 but no multiplication
+
 /**********************************************************************************************\
  * Load plugins
 \*********************************************************************************************/

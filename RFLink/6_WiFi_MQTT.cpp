@@ -1,18 +1,24 @@
+#include <Arduino.h>
+#include "RFLink.h"
+//#include "1_Base.h"
+#include "6_WiFi_MQTT.h"
+
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
 #include <ESP8266WiFi.h>
 #endif
 
-void setup_WIFI_OFF() {
-  WiFi.persistent(false);
-  WiFi.setAutoReconnect(false);
-  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-  WiFi.mode(WIFI_OFF);
-  WiFi.forceSleepBegin();
-}
+char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+
+// MQTT_KEEPALIVE : keepAlive interval in Seconds
+#define MQTT_KEEPALIVE 60
+
+// MQTT_SOCKET_TIMEOUT: socket timeout interval in Seconds
+#define MQTT_SOCKET_TIMEOUT 60
+
 #include <PubSubClient.h>
 #include "6_Credentials.h"
 
@@ -21,7 +27,8 @@ void setup_WIFI_OFF() {
 WiFiClient WIFIClient;
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
-void setup_WIFI() {
+void setup_WIFI()
+{
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
@@ -35,7 +42,8 @@ void setup_WIFI() {
   Serial.print(ssid);
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -47,7 +55,8 @@ void setup_WIFI() {
   Serial.println(WiFi.RSSI());
 }
 
-void setup_MQTT() {
+void setup_MQTT()
+{
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER, MQTT_PORT);
   // MQTTClient.setCallback(callback);
@@ -66,10 +75,12 @@ void setup_MQTT() {
   }
 */
 
-void reconnect() {
+void reconnect()
+{
   // Loop until we're reconnected
   delay(1);
-  while (!MQTTClient.connected()) {
+  while (!MQTTClient.connected())
+  {
     Serial.print(F("Attempting MQTT connection..."));
     // Attempt to connect
     if (MQTTClient.connect(MQTT_ID, MQTT_USER, MQTT_PSWD))
@@ -84,15 +95,18 @@ void reconnect() {
       Serial.print(MQTTClient.state());
       Serial.println(F("\tTry again in 5 seconds"));
       // Wait 5 seconds before retrying
-      for (byte i = 0; i < 10; i++) delay(500); // delay(5000) may cause hang
+      for (byte i = 0; i < 10; i++)
+        delay(500); // delay(5000) may cause hang
     }
   }
 }
 
-void publishMsg() {
+void publishMsg()
+{
   if (MQTTbuffer[0] != 0)
   {
-    if (!MQTTClient.connected()) {
+    if (!MQTTClient.connected())
+    {
       reconnect();
     }
     // MQTTClient.loop();
@@ -100,6 +114,16 @@ void publishMsg() {
     MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer);
     MQTTbuffer[0] = 0;
   }
+}
+#else
+
+void setup_WIFI_OFF()
+{
+  WiFi.persistent(false);
+  WiFi.setAutoReconnect(false);
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  WiFi.mode(WIFI_OFF);
+  WiFi.forceSleepBegin();
 }
 
 #endif

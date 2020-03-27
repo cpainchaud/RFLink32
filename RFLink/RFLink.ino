@@ -15,110 +15,29 @@
 // ********************************************************************************************************************************
 
 // ****************************************************************************
-// ****************************************************************************
-
-#define BUILDNR                      0x05               // shown in version
-#define REVNR                        0x42               // shown in version and startup string
-#define BAUD                       115200               // Baudrate for serial communication.
-#define MIN_RAW_PULSES                 74               // Minimal number of bits*2 that need to have been received before we spend CPU time on decoding the signal.
-#define RAW_BUFFER_SIZE               148 // 512        // Maximum number of pulses that is received in one go.
-#define RAWSIGNAL_SAMPLE_RATE          32               // =8 bits. Sample width / resolution in uSec for raw RF pulses.
-#define SIGNAL_SEEK_TIMEOUT_MS         25               // After this time in mSec. RF signal will be considered absent.
-#define SIGNAL_MIN_PREAMBLE_US       3500
-#define MIN_PULSE_LENGTH_US            60 // 25         // Pulses shorter than this value in uSec. will be seen as garbage and not taken as actual pulses.
-#define SIGNAL_END_TIMEOUT_US        3000               // After this time in uSec. the RF signal will be considered to have stopped.
-#define SIGNAL_REPEAT_TIME_MS         250 // 500        // Time in mSec. in which the same RF signal should not be accepted again. Filters out retransmits.
-#define TRANSMITTER_STABLE_DELAY_US   500               // delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
-#define SCAN_HIGH_TIME_MS              50               // time interval in ms. fast processing for background tasks
-#define FOCUS_TIME_MS                  50               // Duration in mSec. that, after receiving serial data from USB only the serial port is checked. 
-#define PLUGIN_MAX                      5 // 55         // Maximum number of Receive plugins
-#define PLUGIN_TX_MAX                   0 // 26         // Maximum number of Transmit plugins
-#define INPUT_COMMAND_SIZE             60               // Maximum number of characters that a command via serial can be.
-#define PRINT_BUFFER_SIZE              60               // Maximum number of characters that a command should print in one go via the print buffer.
-
-/*
-#define VALUE_PAIR                     44
-#define VALUE_ALLOFF                   55
-#define VALUE_OFF                      74
-#define VALUE_ON                       75
-#define VALUE_DIM                      76
-#define VALUE_BRIGHT                   77
-#define VALUE_UP                       78
-#define VALUE_DOWN                     79
-#define VALUE_STOP                     80
-#define VALUE_CONFIRM                  81
-#define VALUE_LIMIT                    82
-#define VALUE_ALLON                   141
-*/
-
-// PIN Definition
-
-// NodeMCUv2
-#define PIN_RF_TX_VCC           NOT_A_PIN               // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND           NOT_A_PIN               // Ground power to the transmitter on this pin
-#define PIN_RF_TX_DATA          NOT_A_PIN               // Data to the 433Mhz transmitter on this pin
-#define PIN_RF_RX_VCC           NOT_A_PIN               // Power to the receiver on this pin
-#define PIN_RF_RX_GND           NOT_A_PIN               // Ground to the receiver on this pin
-#define PIN_RF_RX_DATA          D1                      // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-
-// MQTT messages
-#define MQTT_ACTIVATED
-
+#include <Arduino.h>
+#include "RFLink.h"
+#include "2_Signal.h"
+#include "3_Serial.h"
+#include "5_Plugin.h"
+#include "6_WiFi_MQTT.h"
 //****************************************************************************************************************************************
 
-//****************************************************************************************************************************************
-// void(*Reboot)(void) = 0;                                                        // reset function on adres 0.
-byte PKSequenceNumber = 0;                                                      // 1 byte packet counter
-boolean RFDebug = false;                                                        // debug RF signals with plugin 001
-boolean RFUDebug = false;                                                       // debug RF signals with plugin 254
-boolean QRFDebug = false;                                                       // debug RF signals with plugin 254 but no multiplication
-
-char pbuffer[PRINT_BUFFER_SIZE];                                                // Buffer for printing data
-char MQTTbuffer[PRINT_BUFFER_SIZE];                                             // Buffer for MQTT message
-char InputBuffer_Serial[INPUT_COMMAND_SIZE];                                    // Buffer for Seriel data
-
-// Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
-void PluginInit(void);
-boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char*);                                 // Receive plugins
-byte Plugin_id[PLUGIN_MAX];
-
-void PrintHex8(uint8_t *data, uint8_t length);                                  // prototype
-void PrintHexByte(uint8_t data);                                                // prototype
-byte reverseBits(byte data);                                                    // prototype
-void RFLinkHW( void );                                                          // prototype
-
-struct RawSignalStruct                                                          // Raw signal variabelen places in a struct
+void setup()
 {
-  int  Number;                                                                  // Number of pulses, times two as every pulse has a mark and a space.
-  byte Repeats;                                                                 // Number of re-transmits on transmit actions.
-  byte Delay;                                                                   // Delay in ms. after transmit of a single RF pulse packet
-  byte Multiply;                                                                // Pulses[] * Multiply is the real pulse time in microseconds
-  unsigned long Time;                                                           // Timestamp indicating when the signal was received (millis())
-  byte Pulses[RAW_BUFFER_SIZE + 2];                                             // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (halves RAM usage)
-  // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
-} RawSignal = {0, 0, 0, 0, 0UL};
+  Serial.begin(BAUD); // Initialise the serial port
+  Serial.println();   // ESP "Garbage" message
 
-// ===============================================================================
-unsigned long RepeatingTimer = 0L;
-unsigned long SignalCRC = 0L;                                                   // holds the bitstream value for some plugins to identify RF repeats
-unsigned long SignalHash = 0L;                                                  // holds the processed plugin number
-unsigned long SignalHashPrevious = 0L;                                          // holds the last processed plugin number
-
-void setup() {
-
-  Serial.begin(BAUD);                                                           // Initialise the serial port
-  Serial.println(); // ESP "Garbage" message
-
-  pinMode(PIN_RF_RX_DATA, INPUT);                                               // Initialise in/output ports
-  pinMode(PIN_RF_TX_DATA, OUTPUT);                                              // Initialise in/output ports
-  pinMode(PIN_RF_TX_VCC,  OUTPUT);                                              // Initialise in/output ports
-  pinMode(PIN_RF_TX_GND,  OUTPUT);                                              // Initialise in/output ports
-  pinMode(PIN_RF_RX_VCC,  OUTPUT);                                              // Initialise in/output ports
-  pinMode(PIN_RF_RX_GND,  OUTPUT);                                              // Initialise in/output ports
-  digitalWrite(PIN_RF_TX_GND, LOW);                                             // turn GND to TX receiver ON
-  digitalWrite(PIN_RF_RX_GND, LOW);                                             // turn GND to RF receiver ON
-  digitalWrite(PIN_RF_RX_VCC, HIGH);                                            // turn VCC to RF receiver ON
-  digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP);                                   // pull-up resister on (to prevent garbage)
+  pinMode(PIN_RF_RX_DATA, INPUT);             // Initialise in/output ports
+  pinMode(PIN_RF_TX_DATA, OUTPUT);            // Initialise in/output ports
+  pinMode(PIN_RF_TX_VCC, OUTPUT);             // Initialise in/output ports
+  pinMode(PIN_RF_TX_GND, OUTPUT);             // Initialise in/output ports
+  pinMode(PIN_RF_RX_VCC, OUTPUT);             // Initialise in/output ports
+  pinMode(PIN_RF_RX_GND, OUTPUT);             // Initialise in/output ports
+  digitalWrite(PIN_RF_TX_GND, LOW);           // turn GND to TX receiver ON
+  digitalWrite(PIN_RF_RX_GND, LOW);           // turn GND to RF receiver ON
+  digitalWrite(PIN_RF_RX_VCC, HIGH);          // turn VCC to RF receiver ON
+  digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP); // pull-up resister on (to prevent garbage)
 
   PluginInit();
 
@@ -126,7 +45,7 @@ void setup() {
   setup_WIFI();
   setup_MQTT();
 #else
-  setup_WIFI_OFF();
+  setup_WIFI_OFFq();
 #endif
 
   sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V3.0 - "));
@@ -151,9 +70,11 @@ void setup() {
 #endif
 }
 
-void loop() {
+void loop()
+{
 
-  if (ScanEvent()) {
+  if (ScanEvent())
+  {
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
 #else
