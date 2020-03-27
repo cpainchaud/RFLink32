@@ -18,6 +18,8 @@
  * others can analyse it.
  \*********************************************************************************************/
 #ifdef PLUGIN_254
+#include "../4_Misc.h"
+
 boolean Plugin_254(byte function, char *string) {
         if (QRFDebug==true) {                      // debug is on? 
            if(RawSignal.Number<26)return false;        // make sure the packet is long enough to have a meaning 
