@@ -215,757 +215,941 @@
  * 360/1380  12/46
  * 20;54;DEBUG;Pulses=50;Pulses(uSec)=1410,390,1350,360,1350,360,1380,360,1350,360,1380,360,1380,360,1380,360,1350,360,1350,360,1350,360,1380,360,1380,360,1380,360,1350,360,1380,360,1350,360,1350,360,390,1350,390,1350,390,1320,390,1320,420,1320,420,1320,390,6990;
  \*********************************************************************************************/
-#define KAKU_CodeLength             12              // number of data bits
-#define KAKU_R         300/RAWSIGNAL_SAMPLE_RATE    //360 // 300          // 370? 350 us
-#define KAKU_PULSEMID  600/RAWSIGNAL_SAMPLE_RATE    // (17)  510 = KAKU_R*2 not sufficient!
+#define KAKU_CodeLength 12                        // number of data bits
+#define KAKU_R 300 / RAWSIGNAL_SAMPLE_RATE        //360 // 300          // 370? 350 us
+#define KAKU_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE // (17)  510 = KAKU_R*2 not sufficient!
 
 #ifdef PLUGIN_003
-boolean Plugin_003(byte function, char *string) {
-      if (RawSignal.Number!=(KAKU_CodeLength*4)+2) return false; // conventionele KAKU bestaat altijd uit 12 data bits plus stop. Ongelijk, dan geen KAKU!
-      if (RawSignal.Pulses[0]==15) return true;     // Home Easy, skip KAKU
-      if (RawSignal.Pulses[0]==63) return false;    // No need to test, packet for plugin 63
-      if (RawSignal.Pulses[0]==19) return false;    // No need to test, packet for plugin 19
-      // -------------------------------------------
-      int i,j;
-      boolean error=false; 
-      unsigned long bitstream=0L;                   // to store a 12 bit code (ARC type)
-      unsigned long bitstream2=0L;                  // to store a 24 bit code (Extended ARC type)
-      byte tricount=0;
-      // -------------------------------------------
-      byte command=0;                               // ON/OFF/DIM/BRIGHT
-      byte group=0;                                 // flags group command
-      byte housecode=0;                             // 0x40 + 1 to 16?  (41-5a?)
-      byte unitcode=0;                              // 1 to 16
-      // -------------------------------------------
-      int PTLow=22;                                 // Pulse Time - lowest found value (22 = a pulse duration of 550)
-      int PTHigh=22;                                // Pulse Time - highest found value
-      byte signaltype=0;                            // bit map:  bit 0 = 0   bit 1 = f   bit 2 = 0/1 (PT2262)    
-                                                    // meaning: byte value    3 = kaku (bit 0/f)  5=PT2262  7=tristate 0/1/f
-      byte devicetype=0;                            // 0=Kaku   5=Impuls  7=Perel
-      // -------------------------------------------
+boolean Plugin_003(byte function, char *string)
+{
+   if (RawSignal.Number != (KAKU_CodeLength * 4) + 2)
+      return false; // conventionele KAKU bestaat altijd uit 12 data bits plus stop. Ongelijk, dan geen KAKU!
+   if (RawSignal.Pulses[0] == 15)
+      return true; // Home Easy, skip KAKU
+   if (RawSignal.Pulses[0] == 63)
+      return false; // No need to test, packet for plugin 63
+   if (RawSignal.Pulses[0] == 19)
+      return false; // No need to test, packet for plugin 19
+   // -------------------------------------------
+   int i, j;
+   boolean error = false;
+   unsigned long bitstream = 0L;  // to store a 12 bit code (ARC type)
+   unsigned long bitstream2 = 0L; // to store a 24 bit code (Extended ARC type)
+   byte tricount = 0;
+   // -------------------------------------------
+   byte command = 0;   // ON/OFF/DIM/BRIGHT
+   byte group = 0;     // flags group command
+   byte housecode = 0; // 0x40 + 1 to 16?  (41-5a?)
+   byte unitcode = 0;  // 1 to 16
+   // -------------------------------------------
+   int PTLow = 22;      // Pulse Time - lowest found value (22 = a pulse duration of 550)
+   int PTHigh = 22;     // Pulse Time - highest found value
+   byte signaltype = 0; // bit map:  bit 0 = 0   bit 1 = f   bit 2 = 0/1 (PT2262)
+                        // meaning: byte value    3 = kaku (bit 0/f)  5=PT2262  7=tristate 0/1/f
+   byte devicetype = 0; // 0=Kaku   5=Impuls  7=Perel
+   // -------------------------------------------
 
-      // -------------------------------------------
-      // ==========================================================================
-      j=KAKU_PULSEMID;                              // set MID value
-      j--;
-      if (RawSignal.Pulses[0]==33) {                // If device is "Impuls" 
-         RawSignal.Pulses[0]=0;                     // Unset Impuls conversion indicator
-         j=KAKU_R;                                  // Set new (LOWER!) MID value
-         devicetype=5;                              // Indicate Impuls device
+   // -------------------------------------------
+   // ==========================================================================
+   j = KAKU_PULSEMID; // set MID value
+   j--;
+   if (RawSignal.Pulses[0] == 33)
+   {                           // If device is "Impuls"
+      RawSignal.Pulses[0] = 0; // Unset Impuls conversion indicator
+      j = KAKU_R;              // Set new (LOWER!) MID value
+      devicetype = 5;          // Indicate Impuls device
+   }
+   // -------------------------------------------
+   if (RawSignal.Pulses[49] > j)
+      return false; // Last pulse has to be low! Otherwise we are not dealing with an ARC signal
+   // ==========================================================================
+   // TIMING MEASUREMENT, this will find the shortest and longest pulse within the RF packet
+   // ==========================================================================
+   for (i = 2; i < RawSignal.Number; i++)
+   { // skip first pulse as it is often affected by the start bit pulse duration
+      if (RawSignal.Pulses[i] < PTLow)
+      {                               // shortest pulse?
+         PTLow = RawSignal.Pulses[i]; // new value
       }
-      // -------------------------------------------
-      if (RawSignal.Pulses[49] > j) return false;   // Last pulse has to be low! Otherwise we are not dealing with an ARC signal
-      // ==========================================================================
-      // TIMING MEASUREMENT, this will find the shortest and longest pulse within the RF packet
-      // ==========================================================================
-      for (i=2;i<RawSignal.Number;i++) {            // skip first pulse as it is often affected by the start bit pulse duration
-          if(RawSignal.Pulses[i] < PTLow) {         // shortest pulse?
-             PTLow=RawSignal.Pulses[i];             // new value
-          } else 
-          if(RawSignal.Pulses[i] > PTHigh) {        // longest pulse?
-             PTHigh=RawSignal.Pulses[i];            // new value
-          }
+      else if (RawSignal.Pulses[i] > PTHigh)
+      {                                // longest pulse?
+         PTHigh = RawSignal.Pulses[i]; // new value
       }
-      // -------------------------------------------
-      // TIMING MEASUREMENT to devicetype
-      if (devicetype != 5) {                        // Dont do the timing check for Impuls, it is already identified at this point
-         if( ((PTLow==7)||(PTLow==8)) && ((PTHigh ==30) || (PTHigh ==31) ) ) devicetype=4; // ELRO AB400
-         if( ((PTLow==9)||(PTLow==10)) && ((PTHigh==36)||(PTHigh==37)||((PTHigh >=40)&&(PTHigh <=42))) ) devicetype=1; // ELRO AB600
-         else
-         if( ((PTLow==10)||(PTLow == 11)) && ((PTHigh >=40)&&(PTHigh <=42)) ) devicetype=2; // Profile PR44N  / Promax rsl366t
-         else 
-         if( (PTLow==13) && ((PTHigh >=32)&&(PTHigh <=34)) ) devicetype=3; // Profile PR47N
-         else
-         if( ((PTLow >=11)&&(PTLow <=12)) && ((PTHigh >=31)&&(PTHigh <=37)) ) devicetype=4; // Sartano
-         else
-         if( ((PTLow==12)||(PTLow==13)) && ((PTHigh==45)||(PTHigh==46)) ) devicetype=4; // Philips SBC
-         else
-         if( (PTLow <=3) && ((PTHigh==22)||(PTHigh==23)) ) devicetype=5; // Philips SBC
-         //else
-         //if( (PTLow == 8 ||  PTLow == 9) && (PTHigh == 33 ||  PTHigh == 34) ) devicetype=7; // Perel st=0,dt=7
+   }
+   // -------------------------------------------
+   // TIMING MEASUREMENT to devicetype
+   if (devicetype != 5)
+   { // Dont do the timing check for Impuls, it is already identified at this point
+      if (((PTLow == 7) || (PTLow == 8)) && ((PTHigh == 30) || (PTHigh == 31)))
+         devicetype = 4; // ELRO AB400
+      if (((PTLow == 9) || (PTLow == 10)) && ((PTHigh == 36) || (PTHigh == 37) || ((PTHigh >= 40) && (PTHigh <= 42))))
+         devicetype = 1; // ELRO AB600
+      else if (((PTLow == 10) || (PTLow == 11)) && ((PTHigh >= 40) && (PTHigh <= 42)))
+         devicetype = 2; // Profile PR44N  / Promax rsl366t
+      else if ((PTLow == 13) && ((PTHigh >= 32) && (PTHigh <= 34)))
+         devicetype = 3; // Profile PR47N
+      else if (((PTLow >= 11) && (PTLow <= 12)) && ((PTHigh >= 31) && (PTHigh <= 37)))
+         devicetype = 4; // Sartano
+      else if (((PTLow == 12) || (PTLow == 13)) && ((PTHigh == 45) || (PTHigh == 46)))
+         devicetype = 4; // Philips SBC
+      else if ((PTLow <= 3) && ((PTHigh == 22) || (PTHigh == 23)))
+         devicetype = 5; // Philips SBC
+      //else
+      //if( (PTLow == 8 ||  PTLow == 9) && (PTHigh == 33 ||  PTHigh == 34) ) devicetype=7; // Perel st=0,dt=7
+   }
+   //sprintf(pbuffer, "ST=%d DT=%d %d/%d",signaltype,devicetype,PTLow,PTHigh);
+   //Serial.println( pbuffer );
+   // ==========================================================================
+   // Turn pulses into bits
+   // -------------------------------------------
+   for (i = 0; i < KAKU_CodeLength; i++)
+   {
+      if (RawSignal.Pulses[4 * i + 1] < j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] < j && RawSignal.Pulses[4 * i + 4] > j)
+      {                                  // 0101
+         bitstream = (bitstream >> 1);   // bit '0'
+         bitstream2 = (bitstream2 << 2); // bit '0' written as '00'
+         signaltype = signaltype | 1;    // bit '0' present in signal '0001'
       }
-      //sprintf(pbuffer, "ST=%d DT=%d %d/%d",signaltype,devicetype,PTLow,PTHigh);     
-      //Serial.println( pbuffer );
-      // ==========================================================================
-      // Turn pulses into bits
-      // -------------------------------------------
-      for (i=0; i<KAKU_CodeLength; i++) {
-        if (RawSignal.Pulses[4*i+1]<j && RawSignal.Pulses[4*i+2]>j && RawSignal.Pulses[4*i+3]<j && RawSignal.Pulses[4*i+4]>j) { // 0101
-            bitstream=(bitstream >> 1);             // bit '0' 
-            bitstream2=(bitstream2 << 2);           // bit '0' written as '00'
-            signaltype=signaltype|1;                // bit '0' present in signal '0001'
-        } else 
-        if (RawSignal.Pulses[4*i+1]<j && RawSignal.Pulses[4*i+2]>j && RawSignal.Pulses[4*i+3]>j && RawSignal.Pulses[4*i+4]<j) { // 0110
-//!! untested !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!       
-           tricount++;                              // tri-state bit counter
-           if ((i==11) && (tricount==1)) {          // only the last bit, "on/off command" is in tristate mode? then it must be EMW200
-              bitstream=(bitstream >> 1 | (1 << (KAKU_CodeLength-1)));  // bit f (1)
-              bitstream2=(bitstream2 << 2) | 2;        // bit 'f' written as '10' 
-              // DONT CHANGE signal type to tri-state to keep EMW200 in KAKU mode
-           } else {
-              bitstream=(bitstream >> 1 | (1 << (KAKU_CodeLength-1)));  // bit f (1)
-              bitstream2=(bitstream2 << 2) | 2;        // bit 'f' written as '10' 
-              signaltype=signaltype|2;                 // bit 'f' present in signal '0010'
-           }
-        } else 
-        if (RawSignal.Pulses[4*i+1]<j && RawSignal.Pulses[4*i+2]>j && RawSignal.Pulses[4*i+3]<j && RawSignal.Pulses[4*i+4]<j) { // 0100
-           bitstream=(bitstream >> 1);              // Short 0, Group command on 2nd bit.  (NOT USED?!)
-           bitstream2=(bitstream2 << 2) | 3;        // bit 'short' written as '11'
-           group=1;
-        } else 
-        if (RawSignal.Pulses[4*i+1]>j && RawSignal.Pulses[4*i+2]<j && RawSignal.Pulses[4*i+3]>j && RawSignal.Pulses[4*i+4]<j) { // 1010
-           bitstream2=(bitstream2 << 2) | 1;        // bit '1' written as '01'
-           signaltype=signaltype|4;                 // bit '1' present in signal '0100'
-           if (devicetype==5) {                     // in case of 'impuls remote' store 
-              bitstream=(bitstream >> 1);           // bit 1 (stored as 0) (IMPULS REMOTE) 
-           } else {
-              if (i==11) {                          // last bit seems to cause trouble every now and then..?!
-                 bitstream=(bitstream >> 1);        // bit 1 (stored as 0) (IMPULS REMOTE) 
-              } else {
-                 devicetype=6;
-                 bitstream=(bitstream >> 1 | (1 << (KAKU_CodeLength-1)));  // bit f (1)
-              }
-           }
-        } else {
-          // -------------------------------------------
-          // following are signal patches to fix bad transmission/receptions
-          // -------------------------------------------
-          if (i==0) {                     // are we dealing with a RTK/AB600 device? then the first bit is sometimes mistakenly seen as 1101  
-             bitstream2=(bitstream2 << 2);          // bit 0
-             if (RawSignal.Pulses[4*i+1]>j && RawSignal.Pulses[4*i+2]>j && RawSignal.Pulses[4*i+3]<j && RawSignal.Pulses[4*i+4]>j) { // 1101
-                bitstream=(bitstream >> 1);  // 0, treat as 0101 eg 0 bit
-             } else { 
-                error=true;
-                signaltype=signaltype|8;
-             } 
-          } else {
-             error=true;
-             signaltype=signaltype|8;
-          }
-        }                                 // bad signal
+      else if (RawSignal.Pulses[4 * i + 1] < j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] > j && RawSignal.Pulses[4 * i + 4] < j)
+      {              // 0110
+                     //!! untested !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         tricount++; // tri-state bit counter
+         if ((i == 11) && (tricount == 1))
+         {                                                               // only the last bit, "on/off command" is in tristate mode? then it must be EMW200
+            bitstream = (bitstream >> 1 | (1 << (KAKU_CodeLength - 1))); // bit f (1)
+            bitstream2 = (bitstream2 << 2) | 2;                          // bit 'f' written as '10'
+            // DONT CHANGE signal type to tri-state to keep EMW200 in KAKU mode
+         }
+         else
+         {
+            bitstream = (bitstream >> 1 | (1 << (KAKU_CodeLength - 1))); // bit f (1)
+            bitstream2 = (bitstream2 << 2) | 2;                          // bit 'f' written as '10'
+            signaltype = signaltype | 2;                                 // bit 'f' present in signal '0010'
+         }
       }
-      //==================================================================================
-      // Sort out devices based on signal type and timing measurements
-      // -------------------------------------------
-      //sprintf(pbuffer, "ST=%d DT=%d [%d]",signaltype,devicetype, error);
-      //Serial.println( pbuffer );
-      //Serial.println(bitstream,BIN);
-      //Serial.println(bitstream2,BIN);
-      // -------------------------------------------
-      // END OF TIMING MEASUREMENTS
-      // ==========================================================================
-      if (error==true) {                            // Error means that a pattern other than 0101/0110 was found 
-         return false;                              // This usually means we are dealing with a semi-compatible device 
-      }                                             // that might have more states than used by ARC    
-      if ((signaltype != 0x03) && (signaltype != 0x05) && (signaltype != 0x07)) return false;
-      //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      //if( (SignalHash!=SignalHashPrevious) || ((RepeatingTimer+500)<millis()) ) { 
-      if( (SignalHash!=SignalHashPrevious) || ((RepeatingTimer+500)<millis()) || (((RepeatingTimer+1000)>millis())&&(SignalCRC != bitstream2)) ) { 
-         // not seen the RF packet recently   
-         if (signaltype == 0x07) {
-            if (((RepeatingTimer+1000)>millis())&&(SignalCRC != bitstream2)) {
-               return true;       // skip tristate after normal arc 
+      else if (RawSignal.Pulses[4 * i + 1] < j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] < j && RawSignal.Pulses[4 * i + 4] < j)
+      {                                      // 0100
+         bitstream = (bitstream >> 1);       // Short 0, Group command on 2nd bit.  (NOT USED?!)
+         bitstream2 = (bitstream2 << 2) | 3; // bit 'short' written as '11'
+         group = 1;
+      }
+      else if (RawSignal.Pulses[4 * i + 1] > j && RawSignal.Pulses[4 * i + 2] < j && RawSignal.Pulses[4 * i + 3] > j && RawSignal.Pulses[4 * i + 4] < j)
+      {                                      // 1010
+         bitstream2 = (bitstream2 << 2) | 1; // bit '1' written as '01'
+         signaltype = signaltype | 4;        // bit '1' present in signal '0100'
+         if (devicetype == 5)
+         {                                // in case of 'impuls remote' store
+            bitstream = (bitstream >> 1); // bit 1 (stored as 0) (IMPULS REMOTE)
+         }
+         else
+         {
+            if (i == 11)
+            {                                // last bit seems to cause trouble every now and then..?!
+               bitstream = (bitstream >> 1); // bit 1 (stored as 0) (IMPULS REMOTE)
+            }
+            else
+            {
+               devicetype = 6;
+               bitstream = (bitstream >> 1 | (1 << (KAKU_CodeLength - 1))); // bit f (1)
             }
          }
-         //Serial.print("KAKU PREV:");
-         //Serial.println(SignalHashPrevious);
-         if ((SignalHashPrevious==14) && ((RepeatingTimer+2000)>millis()) ) {
-            SignalHash=14;
-            return true;                            // SignalHash 14 = HomeEasy, eg. cant switch KAKU after HE for 2 seconds
-         }
-         if ((SignalHashPrevious==11) && ((RepeatingTimer+2000)>millis()) ) {
-            SignalHash=11;
-            return true;                            // SignalHash 11 = FA500, eg. cant switch KAKU after FA500 for 2 seconds
-         }
-         SignalCRC=bitstream2;                      // store RF packet identifier
-      } else {
-         // already seen the RF packet recently
-         return true;
-      }       
-      //==================================================================================
-      // Determine signal type to sort out the various houdecode/unitcode/button bits and on/off command bits
-      //==================================================================================
-      if (signaltype != 0x07) {
-         if ((bitstream&0x700)!=0x600) {            // valid but not real KAKU
-            devicetype=4;
-         }       
+      }
+      else
+      {
          // -------------------------------------------
-         if (devicetype == 4) {                        // Sartano 
-            // ----------------------------------      // Sartano 
-            housecode = ((bitstream) & 0x0000001FL);       // .......11111b
-            unitcode = (((bitstream) & 0x000003E0L) >> 5); // ..1111100000b
-            housecode = ~housecode;                    // Sartano housecode is 5 bit ('A' - '`')
-            housecode &= 0x0000001FL;                  // Translate housecode so that all jumpers off = 'A' and all jumpers on = '`'
-            housecode += 0x41;
-            switch(unitcode) {                         // Translate unit code into button number 1 - 5
-              case 0x1E:                     // E=1110
-                      unitcode = 1;
-                      break;
-              case 0x1D:                     // D=1101
-                      unitcode = 2;
-                      break;
-              case 0x1B:                     // B=1011
-                      unitcode = 3;
-                      break;
-              case 0x17:                     // 7=0111
-                      unitcode = 4;
-                      break;
-              case 0x0F:                     // f=1111 
-                      unitcode = 5;
-                      break;
-              default:
-                     //Serial.print("Sartano:");
-                     devicetype=3;         // invalid for Sartano, fall back
-                     break;
-            }	  
-            if (devicetype == 4) {                        // Sartano 
-               if ( ((bitstream >> 10) & 0x03) == 2) {
-                  command = 1; // On
-               } else if ( ((bitstream >> 10) & 0x03) == 1){
-                  command = 0;// Off
-               }		  
+         // following are signal patches to fix bad transmission/receptions
+         // -------------------------------------------
+         if (i == 0)
+         {                                  // are we dealing with a RTK/AB600 device? then the first bit is sometimes mistakenly seen as 1101
+            bitstream2 = (bitstream2 << 2); // bit 0
+            if (RawSignal.Pulses[4 * i + 1] > j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] < j && RawSignal.Pulses[4 * i + 4] > j)
+            {                                // 1101
+               bitstream = (bitstream >> 1); // 0, treat as 0101 eg 0 bit
             }
-         } else     
-         // -------------------------------------------
-         if (devicetype == 5) {                        // IMPULS
-            housecode = ((bitstream) & 0x0000000FL);       // ........1111b
-            unitcode = (((bitstream) & 0x000003F0L) >> 4); // ..1111110000b
-            housecode = ~housecode;                    // Impuls housecode is 4 bit ('A' - 'P')
-            housecode &= 0x0000000FL;                  // Translate housecode so that all jumpers off = 'A' and all jumpers on = 'P'
-            housecode += 0x41;
-            unitcode = ~unitcode;                      // Impuls unitcode is 5 bit 
-            unitcode &= 0x0000001FL;                   // Translate unitcode so that all jumpers off = '1' and all jumpers on = '64'
-            if ( ((bitstream >> 10) & 0x03) == 2) {
-               command = 0; // Off
-            } else 
-            if ( ((bitstream >> 10) & 0x03) == 1){
-               command = 1;// On
-            }		  
-         } else 
-         // -------------------------------------------
-         if (devicetype == 6) {                        // Blokker/SelectRemote
-            // ----------------------------------      
-            if ( ((bitstream)&0xef1) != 0) return false; // Not a valid bitstream
-
-            housecode = ((bitstream) & 0x0000000EL);   // Isolate housecode
-            housecode = housecode >> 1;                // shift right 1 bit
-            housecode = (~housecode)&0x07;             // invert bits
-            housecode += 0x41;                         // add 'A'
-            unitcode = 0;
-
-            if ( ((bitstream >> 8) & 0x01) == 1) {
+            else
+            {
+               error = true;
+               signaltype = signaltype | 8;
+            }
+         }
+         else
+         {
+            error = true;
+            signaltype = signaltype | 8;
+         }
+      } // bad signal
+   }
+   //==================================================================================
+   // Sort out devices based on signal type and timing measurements
+   // -------------------------------------------
+   //sprintf(pbuffer, "ST=%d DT=%d [%d]",signaltype,devicetype, error);
+   //Serial.println( pbuffer );
+   //Serial.println(bitstream,BIN);
+   //Serial.println(bitstream2,BIN);
+   // -------------------------------------------
+   // END OF TIMING MEASUREMENTS
+   // ==========================================================================
+   if (error == true)
+   {                // Error means that a pattern other than 0101/0110 was found
+      return false; // This usually means we are dealing with a semi-compatible device
+   }                // that might have more states than used by ARC
+   if ((signaltype != 0x03) && (signaltype != 0x05) && (signaltype != 0x07))
+      return false;
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   //if( (SignalHash!=SignalHashPrevious) || ((RepeatingTimer+500)<millis()) ) {
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (((RepeatingTimer + 1000) > millis()) && (SignalCRC != bitstream2)))
+   {
+      // not seen the RF packet recently
+      if (signaltype == 0x07)
+      {
+         if (((RepeatingTimer + 1000) > millis()) && (SignalCRC != bitstream2))
+         {
+            return true; // skip tristate after normal arc
+         }
+      }
+      //Serial.print("KAKU PREV:");
+      //Serial.println(SignalHashPrevious);
+      if ((SignalHashPrevious == 14) && ((RepeatingTimer + 2000) > millis()))
+      {
+         SignalHash = 14;
+         return true; // SignalHash 14 = HomeEasy, eg. cant switch KAKU after HE for 2 seconds
+      }
+      if ((SignalHashPrevious == 11) && ((RepeatingTimer + 2000) > millis()))
+      {
+         SignalHash = 11;
+         return true; // SignalHash 11 = FA500, eg. cant switch KAKU after FA500 for 2 seconds
+      }
+      SignalCRC = bitstream2; // store RF packet identifier
+   }
+   else
+   {
+      // already seen the RF packet recently
+      return true;
+   }
+   //==================================================================================
+   // Determine signal type to sort out the various houdecode/unitcode/button bits and on/off command bits
+   //==================================================================================
+   if (signaltype != 0x07)
+   {
+      if ((bitstream & 0x700) != 0x600)
+      { // valid but not real KAKU
+         devicetype = 4;
+      }
+      // -------------------------------------------
+      if (devicetype == 4)
+      { // Sartano
+         // ----------------------------------      // Sartano
+         housecode = ((bitstream)&0x0000001FL);       // .......11111b
+         unitcode = (((bitstream)&0x000003E0L) >> 5); // ..1111100000b
+         housecode = ~housecode;                      // Sartano housecode is 5 bit ('A' - '`')
+         housecode &= 0x0000001FL;                    // Translate housecode so that all jumpers off = 'A' and all jumpers on = '`'
+         housecode += 0x41;
+         switch (unitcode)
+         {          // Translate unit code into button number 1 - 5
+         case 0x1E: // E=1110
+            unitcode = 1;
+            break;
+         case 0x1D: // D=1101
+            unitcode = 2;
+            break;
+         case 0x1B: // B=1011
+            unitcode = 3;
+            break;
+         case 0x17: // 7=0111
+            unitcode = 4;
+            break;
+         case 0x0F: // f=1111
+            unitcode = 5;
+            break;
+         default:
+            //Serial.print("Sartano:");
+            devicetype = 3; // invalid for Sartano, fall back
+            break;
+         }
+         if (devicetype == 4)
+         { // Sartano
+            if (((bitstream >> 10) & 0x03) == 2)
+            {
                command = 1; // On
-            } else {
-               command = 0;// Off
-            }		  
-            // ----------------------------------      // Sartano 
-         } else
-         // -------------------------------------------
-         if (devicetype != 4) {                        // KAKU (and some compatibles for now)
-            // ----------------------------------
-            if ((bitstream&0x700)!=0x600) {            // valid but not real KAKU
-               housecode=(((bitstream) &0x0f) +0x41);
-               unitcode=((((bitstream) &0xf0) >> 4)+1);
-               devicetype=1;
-            } else {
-               if ((bitstream&0x600)!=0x600) {
-                  //Serial.println("Kaku 0/1 error");
-                  return false;                           // use two static bits as checksum
-               }
-               //bitstream=(bitstream)&0xffe;               // kill bit to ensure Perel works -> actually kills code wheel letter B 
-               housecode=(((bitstream) &0x0f) +0x41);
-               unitcode=((((bitstream) &0xf0) >> 4)+1);
-               // ----------------------------------
             }
-            if ( ((bitstream >> 11) & 0x01) == 1) {
-               command=1;   // ON
-            } else {
-               command=0;   // OFF
+            else if (((bitstream >> 10) & 0x03) == 1)
+            {
+               command = 0; // Off
             }
          }
       }
-      // ==========================================================================
-      // Output
-      // ----------------------------------
-      sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      else
+          // -------------------------------------------
+          if (devicetype == 5)
+      {                                               // IMPULS
+         housecode = ((bitstream)&0x0000000FL);       // ........1111b
+         unitcode = (((bitstream)&0x000003F0L) >> 4); // ..1111110000b
+         housecode = ~housecode;                      // Impuls housecode is 4 bit ('A' - 'P')
+         housecode &= 0x0000000FL;                    // Translate housecode so that all jumpers off = 'A' and all jumpers on = 'P'
+         housecode += 0x41;
+         unitcode = ~unitcode;    // Impuls unitcode is 5 bit
+         unitcode &= 0x0000001FL; // Translate unitcode so that all jumpers off = '1' and all jumpers on = '64'
+         if (((bitstream >> 10) & 0x03) == 2)
+         {
+            command = 0; // Off
+         }
+         else if (((bitstream >> 10) & 0x03) == 1)
+         {
+            command = 1; // On
+         }
+      }
+      else
+          // -------------------------------------------
+          if (devicetype == 6)
+      { // Blokker/SelectRemote
+         // ----------------------------------
+         if (((bitstream)&0xef1) != 0)
+            return false; // Not a valid bitstream
 
-      // ----------------------------------
-      if (signaltype == 0x03) {                     // '0011' bits indicate bits 0 and f are used in the signal
-         if (devicetype < 4) {                      // KAKU (and some compatibles for now)
-            sprintf_P(pbuffer, PSTR("%S"), F("Kaku;"));               // Label
-		      Serial.print(pbuffer);
-		      strcat(MQTTbuffer, pbuffer);
-	           } else {
-            if (devicetype == 4) {                  // AB440R and Sartano
-               sprintf_P(pbuffer, PSTR("%S"), F("AB400D;"));          // Label
-		         Serial.print(pbuffer);
-		         strcat(MQTTbuffer, pbuffer); 
-      } else 
-            if (devicetype == 5) {                  // Impuls
-               sprintf_P(pbuffer, PSTR("%S"), F("Impuls;"));          // Label
-		         Serial.print(pbuffer);
-		         strcat(MQTTbuffer, pbuffer); 
-	              } else {
-               sprintf_P(pbuffer, PSTR("%S"), F("Sartano;"));         // Others
-		         Serial.print(pbuffer);
-		         strcat(MQTTbuffer, pbuffer); 
+         housecode = ((bitstream)&0x0000000EL); // Isolate housecode
+         housecode = housecode >> 1;            // shift right 1 bit
+         housecode = (~housecode) & 0x07;       // invert bits
+         housecode += 0x41;                     // add 'A'
+         unitcode = 0;
+
+         if (((bitstream >> 8) & 0x01) == 1)
+         {
+            command = 1; // On
+         }
+         else
+         {
+            command = 0; // Off
+         }
+         // ----------------------------------      // Sartano
+      }
+      else
+          // -------------------------------------------
+          if (devicetype != 4)
+      { // KAKU (and some compatibles for now)
+         // ----------------------------------
+         if ((bitstream & 0x700) != 0x600)
+         { // valid but not real KAKU
+            housecode = (((bitstream)&0x0f) + 0x41);
+            unitcode = ((((bitstream)&0xf0) >> 4) + 1);
+            devicetype = 1;
+         }
+         else
+         {
+            if ((bitstream & 0x600) != 0x600)
+            {
+               //Serial.println("Kaku 0/1 error");
+               return false; // use two static bits as checksum
             }
+            //bitstream=(bitstream)&0xffe;               // kill bit to ensure Perel works -> actually kills code wheel letter B
+            housecode = (((bitstream)&0x0f) + 0x41);
+            unitcode = ((((bitstream)&0xf0) >> 4) + 1);
+            // ----------------------------------
          }
-      } else 
-      if (signaltype == 0x05) {                     // '0101' bits indicate bits 0 and 1 are used in the signal
-         if (devicetype == 5) {                      // KAKU (and some compatibles for now)
-            sprintf_P(pbuffer, PSTR("%S"), F("Impuls;"));              // Label
-		      Serial.print(pbuffer);
-		      strcat(MQTTbuffer, pbuffer); 
-	           } else {
-            sprintf_P(pbuffer, PSTR("%S"), F("PT2262;"));               // Label
-		      Serial.print(pbuffer);
-		      strcat(MQTTbuffer, pbuffer); 
+         if (((bitstream >> 11) & 0x01) == 1)
+         {
+            command = 1; // ON
          }
-      } else 
-      if (signaltype == 0x07) {                     // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
-         sprintf_P(pbuffer, PSTR("%S"), F("TriState;"));               // Label
-		   Serial.print(pbuffer);
-		   strcat(MQTTbuffer, pbuffer); 
+         else
+         {
+            command = 0; // OFF
+         }
       }
-      // ----------------------------------
-      if (signaltype == 0x07) {                     // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
-         sprintf_P(pbuffer, PSTR("%S%06lx;"), F("ID="), ((bitstream2)>>4)&0xffffff); // ID
-		   Serial.print(pbuffer);
-		   strcat(MQTTbuffer, pbuffer); 
-         housecode=(bitstream2)&0x03;
-         unitcode=((((bitstream2)>>2)&0x03)^0x03)^housecode;
-         //command=((bitstream2)&1)^1;   << ^1 reverses lidl light
-         command=((bitstream2)&3);       // 00 01 10  0 1 f
-         if (command > 1) command=1;     // 0 stays 0 (OFF), 1 and f become 1 (ON)
-      } else {
-        sprintf_P(pbuffer, PSTR("%S%02x;"), F("ID="), housecode); // ID
-		  Serial.print(pbuffer);
-		  strcat(MQTTbuffer, pbuffer); 
+   }
+   // ==========================================================================
+   // Output
+   // ----------------------------------
+   sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++); // Node and packet number
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
+   // ----------------------------------
+   if (signaltype == 0x03)
+   { // '0011' bits indicate bits 0 and f are used in the signal
+      if (devicetype < 4)
+      {                                              // KAKU (and some compatibles for now)
+         sprintf_P(pbuffer, PSTR("%S"), F("Kaku;")); // Label
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
-      
-      sprintf_P(pbuffer, PSTR("%S%d;"), F("SWITCH="), unitcode);
-		Serial.print(pbuffer);
-		strcat(MQTTbuffer, pbuffer); 
-      
-	   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-	  
-      if (group==1) {
-	   sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-	   }
-      if ( command == 1 ) {
-	   sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-      } else {
-	   sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      else
+      {
+         if (devicetype == 4)
+         {                                                // AB440R and Sartano
+            sprintf_P(pbuffer, PSTR("%S"), F("AB400D;")); // Label
+            Serial.print(pbuffer);
+            strcat(MQTTbuffer, pbuffer);
+         }
+         else if (devicetype == 5)
+         {                                                // Impuls
+            sprintf_P(pbuffer, PSTR("%S"), F("Impuls;")); // Label
+            Serial.print(pbuffer);
+            strcat(MQTTbuffer, pbuffer);
+         }
+         else
+         {
+            sprintf_P(pbuffer, PSTR("%S"), F("Sartano;")); // Others
+            Serial.print(pbuffer);
+            strcat(MQTTbuffer, pbuffer);
+         }
       }
+   }
+   else if (signaltype == 0x05)
+   { // '0101' bits indicate bits 0 and 1 are used in the signal
+      if (devicetype == 5)
+      {                                                // KAKU (and some compatibles for now)
+         sprintf_P(pbuffer, PSTR("%S"), F("Impuls;")); // Label
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
+      }
+      else
+      {
+         sprintf_P(pbuffer, PSTR("%S"), F("PT2262;")); // Label
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
+      }
+   }
+   else if (signaltype == 0x07)
+   {                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
+      sprintf_P(pbuffer, PSTR("%S"), F("TriState;")); // Label
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+   }
+   // ----------------------------------
+   if (signaltype == 0x07)
+   {                                                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
+      sprintf_P(pbuffer, PSTR("%S%06lx;"), F("ID="), ((bitstream2) >> 4) & 0xffffff); // ID
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+      housecode = (bitstream2)&0x03;
+      unitcode = ((((bitstream2) >> 2) & 0x03) ^ 0x03) ^ housecode;
+      //command=((bitstream2)&1)^1;   << ^1 reverses lidl light
+      command = ((bitstream2)&3); // 00 01 10  0 1 f
+      if (command > 1)
+         command = 1; // 0 stays 0 (OFF), 1 and f become 1 (ON)
+   }
+   else
+   {
+      sprintf_P(pbuffer, PSTR("%S%02x;"), F("ID="), housecode); // ID
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+   }
+
+   sprintf_P(pbuffer, PSTR("%S%d;"), F("SWITCH="), unitcode);
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
+   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
+   if (group == 1)
+   {
+      sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+   }
+   if (command == 1)
+   {
+      sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+   }
+   else
+   {
+      sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+   }
    strcat(pbuffer, "\r\n");
    Serial.print(pbuffer);
    strcat(MQTTbuffer, pbuffer);
-	  
-      // ----------------------------------
-      RawSignal.Repeats=true;                    // suppress repeats of the same RF packet 
-      RawSignal.Number=0;
-      return true;
+
+   // ----------------------------------
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif //PLUGIN_003
 
 #ifdef PLUGIN_TX_003
-void Arc_Send(unsigned long address);           // sends 0 and float
-void NArc_Send(unsigned long bitstream);        // sends 0 and 1
-void TriState_Send(unsigned long bitstream);    // sends 0, 1 and float
+void Arc_Send(unsigned long address);        // sends 0 and float
+void NArc_Send(unsigned long bitstream);     // sends 0 and 1
+void TriState_Send(unsigned long bitstream); // sends 0, 1 and float
 
-boolean PluginTX_003(byte function, char *string) {
-        boolean success=false;
-        unsigned long bitstream=0L;
-        byte command=0;
-        uint32_t housecode = 0;
-        uint32_t unitcode = 0;
-        byte Home=0;                             // KAKU home A..P
-        byte Address=0;                          // KAKU Address 1..16
-        byte c=0;
-        byte x=0;
-        // ==========================================================================
-        //10;Kaku;00004d;1;OFF;   
-        //10;Kaku;00004f;e;ON;
-        //10;Kaku;000050;10;ON;
-        //10;Kaku;000049;b;ON;
-        //012345678901234567890
-        // ==========================================================================
-        if (strncasecmp(InputBuffer_Serial+3,"KAKU;",5) == 0) { // KAKU Command eg. Kaku;A1;On
-           if (InputBuffer_Serial[14] != ';') return false;
-        
-           x=15;                                    // character pointer
-           InputBuffer_Serial[10]=0x30;
-           InputBuffer_Serial[11]=0x78;             // Get home from hexadecimal value 
-           InputBuffer_Serial[14]=0x00;             // Get home from hexadecimal value 
-           Home=str2int(InputBuffer_Serial+10);     // KAKU home A is intern 0  
-           if (Home < 0x51)                         // take care of upper/lower case
-              Home=Home - 'A';
-           else 
-           if (Home < 0x71)                         // take care of upper/lower case
-              Home=Home - 'a';
-           else {
-              return false;                         // invalid value
-           }
+boolean PluginTX_003(byte function, char *string)
+{
+   boolean success = false;
+   unsigned long bitstream = 0L;
+   byte command = 0;
+   uint32_t housecode = 0;
+   uint32_t unitcode = 0;
+   byte Home = 0;    // KAKU home A..P
+   byte Address = 0; // KAKU Address 1..16
+   byte c = 0;
+   byte x = 0;
+   // ==========================================================================
+   //10;Kaku;00004d;1;OFF;
+   //10;Kaku;00004f;e;ON;
+   //10;Kaku;000050;10;ON;
+   //10;Kaku;000049;b;ON;
+   //012345678901234567890
+   // ==========================================================================
+   if (strncasecmp(InputBuffer_Serial + 3, "KAKU;", 5) == 0)
+   { // KAKU Command eg. Kaku;A1;On
+      if (InputBuffer_Serial[14] != ';')
+         return false;
 
-           while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16/32
-              if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-              if(c>='a' && c<='f'){Address=Address+(c-'a'+10);}  // 31?
-              if(c>='A' && c<='F'){Address=Address+(c-'A'+10);}  // 51?
-           }
-           //if (Address==0) {                        // group command is given: 0=all 
-           //   command=2;                            // Set 2nd bit for group.
-           //   bitstream=Home;
-           //} else {
-           //   bitstream= Home | ((Address-1)<<4);        
-           //}
+      x = 15; // character pointer
+      InputBuffer_Serial[10] = 0x30;
+      InputBuffer_Serial[11] = 0x78;           // Get home from hexadecimal value
+      InputBuffer_Serial[14] = 0x00;           // Get home from hexadecimal value
+      Home = str2int(InputBuffer_Serial + 10); // KAKU home A is intern 0
+      if (Home < 0x51)                         // take care of upper/lower case
+         Home = Home - 'A';
+      else if (Home < 0x71) // take care of upper/lower case
+         Home = Home - 'a';
+      else
+      {
+         return false; // invalid value
+      }
 
-           bitstream= Home | ((Address-1)<<4);        
-           command |= str2cmd(InputBuffer_Serial+x)==VALUE_ON; // ON/OFF command
-           bitstream = bitstream | (0x600 | ((command & 1) << 11)); // create the bitstream
-           //Serial.println(bitstream);
-           Arc_Send(bitstream);
-           success=true;
-        // --------------- END KAKU SEND ------------
-        } else
-        // ==========================================================================
-        //10;AB400D;00004d;1;OFF;                     
-        //012345678901234567890
-        // ==========================================================================
-        if (strncasecmp(InputBuffer_Serial+3,"AB400D;",7) == 0) { // KAKU Command eg. Kaku;A1;On
-           if (InputBuffer_Serial[16] != ';') return false;
-           x=17;                                    // character pointer
-           InputBuffer_Serial[12]=0x30;
-           InputBuffer_Serial[13]=0x78;             // Get home from hexadecimal value 
-           InputBuffer_Serial[16]=0x00;             // Get home from hexadecimal value 
-           Home=str2int(InputBuffer_Serial+12);     // KAKU home A is intern 0  
-           if (Home < 0x61)                         // take care of upper/lower case
-              Home=Home - 'A';
-           else 
-           if (Home < 0x81)                         // take care of upper/lower case
-              Home=Home - 'a';
-           else {
-              return false;                       // invalid value
-           }
-           while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16/32
-              if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-           }
-           command = str2cmd(InputBuffer_Serial+x)==VALUE_ON; // ON/OFF command
-           housecode = ~Home;
-           housecode &= 0x0000001FL;
-           unitcode=Address;
-           if ((unitcode  >= 1) && (unitcode <= 5) ) {
-              bitstream = housecode & 0x0000001FL;
-              if (unitcode == 1) bitstream |= 0x000003C0L;
-              else if (unitcode == 2) bitstream |= 0x000003A0L;
-              else if (unitcode == 3) bitstream |= 0x00000360L;
-              else if (unitcode == 4) bitstream |= 0x000002E0L;
-              else if (unitcode == 5) bitstream |= 0x000001E0L;
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 1 to 16/32
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+         if (c >= 'a' && c <= 'f')
+         {
+            Address = Address + (c - 'a' + 10);
+         } // 31?
+         if (c >= 'A' && c <= 'F')
+         {
+            Address = Address + (c - 'A' + 10);
+         } // 51?
+      }
+      //if (Address==0) {                        // group command is given: 0=all
+      //   command=2;                            // Set 2nd bit for group.
+      //   bitstream=Home;
+      //} else {
+      //   bitstream= Home | ((Address-1)<<4);
+      //}
 
-              if (command) bitstream |= 0x00000800L;
-              else bitstream |= 0x00000400L;					
-           }
-           //Serial.println(bitstream);
-           Arc_Send(bitstream);
-           success=true;
-        } else
-        // --------------- END SARTANO SEND ------------
-        // ==========================================================================
-        //10;PT2262;000041;1;OFF;                     
-        //012345678901234567890
-        // ==========================================================================
-        if (strncasecmp(InputBuffer_Serial+3,"PT2262;",7) == 0) { // KAKU Command eg. Kaku;A1;On
-           if (InputBuffer_Serial[16] != ';') return false;
-           x=17;                                    // character pointer
-           InputBuffer_Serial[12]=0x30;
-           InputBuffer_Serial[13]=0x78;             // Get home from hexadecimal value 
-           InputBuffer_Serial[16]=0x00;             // Get home from hexadecimal value 
-           Home=str2int(InputBuffer_Serial+12);     // KAKU home A is intern 0  
-           if (Home < 0x61)                         // take care of upper/lower case
-              Home=Home - 'A';
-           else 
-           if (Home < 0x81)                         // take care of upper/lower case
-              Home=Home - 'a';
-           else {
-              return false;                       // invalid value
-           }
-           while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16/32
-              if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-           }
-           // reconstruct bitstream reversed order so that most right bit can be send first
-           command = str2cmd(InputBuffer_Serial+x)==VALUE_ON; // ON/OFF command
-           housecode = ~Home;
-           housecode &= 0x00000007L;
-           housecode=(housecode)<<1;
-           if (command) bitstream |= 0x00000100L;
-           NArc_Send(bitstream);  // send 24 bits tristate signal (0/1/f)
-           success=true;
-        } else
-        // --------------- END Select Remote SEND ------------
-        // ==========================================================================
-        //10;TriState;00004d;1;OFF;       
-        //10;TriState;08000a;2;OFF;       20;1B;TriState;ID=08000a;SWITCH=2;CMD=OFF;        
-        //10;TriState;0a6980;2;OFF;
-        //01234567890123456789012
-        // ==========================================================================
-        if (strncasecmp(InputBuffer_Serial+3,"TriState;",9) == 0) { // KAKU Command eg. Kaku;A1;On
-           if (InputBuffer_Serial[18] != ';') return false;
-           x=19;                                    // character pointer
-           InputBuffer_Serial[10]=0x30;
-           InputBuffer_Serial[11]=0x78;             // Get home from hexadecimal value 
-           InputBuffer_Serial[18]=0x00;             // Get home from hexadecimal value 
-           bitstream=str2int(InputBuffer_Serial+10);     // KAKU home A is intern 0  
-           bitstream=(bitstream<<4);
+      bitstream = Home | ((Address - 1) << 4);
+      command |= str2cmd(InputBuffer_Serial + x) == VALUE_ON;  // ON/OFF command
+      bitstream = bitstream | (0x600 | ((command & 1) << 11)); // create the bitstream
+      //Serial.println(bitstream);
+      Arc_Send(bitstream);
+      success = true;
+      // --------------- END KAKU SEND ------------
+   }
+   else
+       // ==========================================================================
+       //10;AB400D;00004d;1;OFF;
+       //012345678901234567890
+       // ==========================================================================
+       if (strncasecmp(InputBuffer_Serial + 3, "AB400D;", 7) == 0)
+   { // KAKU Command eg. Kaku;A1;On
+      if (InputBuffer_Serial[16] != ';')
+         return false;
+      x = 17; // character pointer
+      InputBuffer_Serial[12] = 0x30;
+      InputBuffer_Serial[13] = 0x78;           // Get home from hexadecimal value
+      InputBuffer_Serial[16] = 0x00;           // Get home from hexadecimal value
+      Home = str2int(InputBuffer_Serial + 12); // KAKU home A is intern 0
+      if (Home < 0x61)                         // take care of upper/lower case
+         Home = Home - 'A';
+      else if (Home < 0x81) // take care of upper/lower case
+         Home = Home - 'a';
+      else
+      {
+         return false; // invalid value
+      }
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 1 to 16/32
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+      }
+      command = str2cmd(InputBuffer_Serial + x) == VALUE_ON; // ON/OFF command
+      housecode = ~Home;
+      housecode &= 0x0000001FL;
+      unitcode = Address;
+      if ((unitcode >= 1) && (unitcode <= 5))
+      {
+         bitstream = housecode & 0x0000001FL;
+         if (unitcode == 1)
+            bitstream |= 0x000003C0L;
+         else if (unitcode == 2)
+            bitstream |= 0x000003A0L;
+         else if (unitcode == 3)
+            bitstream |= 0x00000360L;
+         else if (unitcode == 4)
+            bitstream |= 0x000002E0L;
+         else if (unitcode == 5)
+            bitstream |= 0x000001E0L;
 
-           // 11^00^01=10   11^10^11=01   11^11^00=00
-           while((c=InputBuffer_Serial[x++])!=';'){ // Address: 0/1/2
-              if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-           }
-           Address=(Address)&0x03;                  // only use 3 bits 
-           command = str2cmd(InputBuffer_Serial+x); // ON/OFF command
-           if (command==VALUE_ON) {                 // on
-              if (Address==0x0) bitstream |= 0x0000000bL; // 0011
-              if (Address==0x1) bitstream |= 0x0000000cL; // 1011
-              if (Address==0x2) bitstream |= 0x00000001L; // 0001
-           } else {                                 // off
-              if (Address==0x0) bitstream |= 0x0000000cL; // 1100 
-              if (Address==0x1) bitstream |= 0x0000000eL; // 1110
-              if (Address==0x2) bitstream |= 0x00000004L; // 0100 
-           }
-           TriState_Send(bitstream);
-           success=true;
-        } else
-        // --------------- END TRISTATE SEND ------------
-        // ==========================================================================
-        //10;Impuls;00004d;1;OFF;                     
-        //012345678901234567890
-        // ==========================================================================
-        if (strncasecmp(InputBuffer_Serial+3,"Impuls;",7) == 0) { // KAKU Command eg. Kaku;A1;On
-           if (InputBuffer_Serial[16] != ';') return false;
-           x=17;                                    // character pointer
-           InputBuffer_Serial[12]=0x30;
-           InputBuffer_Serial[13]=0x78;             // Get home from hexadecimal value 
-           InputBuffer_Serial[16]=0x00;             // Get home from hexadecimal value 
-           Home=str2int(InputBuffer_Serial+12);     // KAKU home A is intern 0  
-           if (Home < 0x61)                         // take care of upper/lower case
-              Home=Home - 'A';
-           else 
-           if (Home < 0x81)                         // take care of upper/lower case
-              Home=Home - 'a';
-           else {
-              return false;                       // invalid value
-           }
-           while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16/32
-              if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-           }
-           command = str2cmd(InputBuffer_Serial+x)==VALUE_ON; // ON/OFF command
-           housecode = ~Home;
-           housecode &= 0x0000001FL;
-           unitcode=Address;
-           if ((unitcode  >= 1) && (unitcode <= 5) ) {
-              bitstream = housecode & 0x0000001FL;
-              if (unitcode == 1) bitstream |= 0x000003C0L;
-              else if (unitcode == 2) bitstream |= 0x000003A0L;
-              else if (unitcode == 3) bitstream |= 0x00000360L;
-              else if (unitcode == 4) bitstream |= 0x000002E0L;
-              else if (unitcode == 5) bitstream |= 0x000001E0L;
+         if (command)
+            bitstream |= 0x00000800L;
+         else
+            bitstream |= 0x00000400L;
+      }
+      //Serial.println(bitstream);
+      Arc_Send(bitstream);
+      success = true;
+   }
+   else
+       // --------------- END SARTANO SEND ------------
+       // ==========================================================================
+       //10;PT2262;000041;1;OFF;
+       //012345678901234567890
+       // ==========================================================================
+       if (strncasecmp(InputBuffer_Serial + 3, "PT2262;", 7) == 0)
+   { // KAKU Command eg. Kaku;A1;On
+      if (InputBuffer_Serial[16] != ';')
+         return false;
+      x = 17; // character pointer
+      InputBuffer_Serial[12] = 0x30;
+      InputBuffer_Serial[13] = 0x78;           // Get home from hexadecimal value
+      InputBuffer_Serial[16] = 0x00;           // Get home from hexadecimal value
+      Home = str2int(InputBuffer_Serial + 12); // KAKU home A is intern 0
+      if (Home < 0x61)                         // take care of upper/lower case
+         Home = Home - 'A';
+      else if (Home < 0x81) // take care of upper/lower case
+         Home = Home - 'a';
+      else
+      {
+         return false; // invalid value
+      }
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 1 to 16/32
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+      }
+      // reconstruct bitstream reversed order so that most right bit can be send first
+      command = str2cmd(InputBuffer_Serial + x) == VALUE_ON; // ON/OFF command
+      housecode = ~Home;
+      housecode &= 0x00000007L;
+      housecode = (housecode) << 1;
+      if (command)
+         bitstream |= 0x00000100L;
+      NArc_Send(bitstream); // send 24 bits tristate signal (0/1/f)
+      success = true;
+   }
+   else
+       // --------------- END Select Remote SEND ------------
+       // ==========================================================================
+       //10;TriState;00004d;1;OFF;
+       //10;TriState;08000a;2;OFF;       20;1B;TriState;ID=08000a;SWITCH=2;CMD=OFF;
+       //10;TriState;0a6980;2;OFF;
+       //01234567890123456789012
+       // ==========================================================================
+       if (strncasecmp(InputBuffer_Serial + 3, "TriState;", 9) == 0)
+   { // KAKU Command eg. Kaku;A1;On
+      if (InputBuffer_Serial[18] != ';')
+         return false;
+      x = 19; // character pointer
+      InputBuffer_Serial[10] = 0x30;
+      InputBuffer_Serial[11] = 0x78;                // Get home from hexadecimal value
+      InputBuffer_Serial[18] = 0x00;                // Get home from hexadecimal value
+      bitstream = str2int(InputBuffer_Serial + 10); // KAKU home A is intern 0
+      bitstream = (bitstream << 4);
 
-              if (command) bitstream |= 0x00000800L;
-              else bitstream |= 0x00000400L;					
-           }
-           TriState_Send(bitstream);
-           success=true;
-        }
-        return success;
+      // 11^00^01=10   11^10^11=01   11^11^00=00
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 0/1/2
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+      }
+      Address = (Address)&0x03;                  // only use 3 bits
+      command = str2cmd(InputBuffer_Serial + x); // ON/OFF command
+      if (command == VALUE_ON)
+      { // on
+         if (Address == 0x0)
+            bitstream |= 0x0000000bL; // 0011
+         if (Address == 0x1)
+            bitstream |= 0x0000000cL; // 1011
+         if (Address == 0x2)
+            bitstream |= 0x00000001L; // 0001
+      }
+      else
+      { // off
+         if (Address == 0x0)
+            bitstream |= 0x0000000cL; // 1100
+         if (Address == 0x1)
+            bitstream |= 0x0000000eL; // 1110
+         if (Address == 0x2)
+            bitstream |= 0x00000004L; // 0100
+      }
+      TriState_Send(bitstream);
+      success = true;
+   }
+   else
+       // --------------- END TRISTATE SEND ------------
+       // ==========================================================================
+       //10;Impuls;00004d;1;OFF;
+       //012345678901234567890
+       // ==========================================================================
+       if (strncasecmp(InputBuffer_Serial + 3, "Impuls;", 7) == 0)
+   { // KAKU Command eg. Kaku;A1;On
+      if (InputBuffer_Serial[16] != ';')
+         return false;
+      x = 17; // character pointer
+      InputBuffer_Serial[12] = 0x30;
+      InputBuffer_Serial[13] = 0x78;           // Get home from hexadecimal value
+      InputBuffer_Serial[16] = 0x00;           // Get home from hexadecimal value
+      Home = str2int(InputBuffer_Serial + 12); // KAKU home A is intern 0
+      if (Home < 0x61)                         // take care of upper/lower case
+         Home = Home - 'A';
+      else if (Home < 0x81) // take care of upper/lower case
+         Home = Home - 'a';
+      else
+      {
+         return false; // invalid value
+      }
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 1 to 16/32
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+      }
+      command = str2cmd(InputBuffer_Serial + x) == VALUE_ON; // ON/OFF command
+      housecode = ~Home;
+      housecode &= 0x0000001FL;
+      unitcode = Address;
+      if ((unitcode >= 1) && (unitcode <= 5))
+      {
+         bitstream = housecode & 0x0000001FL;
+         if (unitcode == 1)
+            bitstream |= 0x000003C0L;
+         else if (unitcode == 2)
+            bitstream |= 0x000003A0L;
+         else if (unitcode == 3)
+            bitstream |= 0x00000360L;
+         else if (unitcode == 4)
+            bitstream |= 0x000002E0L;
+         else if (unitcode == 5)
+            bitstream |= 0x000001E0L;
+
+         if (command)
+            bitstream |= 0x00000800L;
+         else
+            bitstream |= 0x00000400L;
+      }
+      TriState_Send(bitstream);
+      success = true;
+   }
+   return success;
 }
 
 //#define KAKU_T                     390 //420 // 370              // 370? 350 us
 //#define Sartano_T                  300 //360 // 300              // 300 uS
 
-void Arc_Send(unsigned long bitstream) { 
-    int fpulse = 360;                               // Pulse width in microseconds
-    int fretrans = 8;                               // Number of code retransmissions
-    uint32_t fdatabit;
-    uint32_t fdatamask = 0x00000001;
-    uint32_t fsendbuff;
+void Arc_Send(unsigned long bitstream)
+{
+   int fpulse = 360; // Pulse width in microseconds
+   int fretrans = 8; // Number of code retransmissions
+   uint32_t fdatabit;
+   uint32_t fdatamask = 0x00000001;
+   uint32_t fsendbuff;
 
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Turn off power to the RF receiver 
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable the 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
+   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
 
-    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
-        fsendbuff = bitstream;
-        // Send command
-        
-		for (int i = 0; i < 12; i++) {              // Arc packet is 12 bits 
-            // read data bit
-            fdatabit = fsendbuff & fdatamask;       // Get most right bit
-            fsendbuff = (fsendbuff >> 1);           // Shift right
+   for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
+   {
+      fsendbuff = bitstream;
+      // Send command
 
-			// PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
-            if (fdatabit != fdatamask) {            // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-            } else {                                // Write float
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-            }
-        }
-		// Send sync bit
-        digitalWrite(PIN_RF_TX_DATA, HIGH);         
-        delayMicroseconds(fpulse * 1);
-        digitalWrite(PIN_RF_TX_DATA, LOW);          // and lower the signal
-        delayMicroseconds(fpulse * 31);
-    }
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Turn the 433Mhz transmitter off
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Turn the 433Mhz receiver on
-    RFLinkHW();
+      for (int i = 0; i < 12; i++)
+      { // Arc packet is 12 bits
+         // read data bit
+         fdatabit = fsendbuff & fdatamask; // Get most right bit
+         fsendbuff = (fsendbuff >> 1);     // Shift right
+
+         // PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
+         if (fdatabit != fdatamask)
+         { // Write 0
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+         }
+         else
+         { // Write float
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+         }
+      }
+      // Send sync bit
+      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      delayMicroseconds(fpulse * 1);
+      digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+      delayMicroseconds(fpulse * 31);
+   }
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn the 433Mhz transmitter off
+   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
+   RFLinkHW();
 }
 
-void NArc_Send(unsigned long bitstream) { 
-    int fpulse = 190;                               // Pulse width in microseconds
-    int fretrans = 7;                               // Number of code retransmissions
-    uint32_t fdatabit;
-    uint32_t fdatamask = 0x00000001;
-    uint32_t fsendbuff;
+void NArc_Send(unsigned long bitstream)
+{
+   int fpulse = 190; // Pulse width in microseconds
+   int fretrans = 7; // Number of code retransmissions
+   uint32_t fdatabit;
+   uint32_t fdatamask = 0x00000001;
+   uint32_t fsendbuff;
 
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Turn off power to the RF receiver 
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable the 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
+   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
 
-    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
-        fsendbuff = bitstream;
-        // Send command
-        
-		for (int i = 0; i < 12; i++) {              // Arc packet is 12 bits 
-            // read data bit
-            fdatabit = fsendbuff & fdatamask;       // Get most right bit
-            fsendbuff = (fsendbuff >> 1);           // Shift right
+   for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
+   {
+      fsendbuff = bitstream;
+      // Send command
 
-			// PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
-            if (fdatabit != fdatamask) {            // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-            } else {                                // Write 1
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-            }
-        }
-		// Send sync bit
-        digitalWrite(PIN_RF_TX_DATA, HIGH);         
-        delayMicroseconds(fpulse * 1);
-        digitalWrite(PIN_RF_TX_DATA, LOW);          // and lower the signal
-        delayMicroseconds(fpulse * 31);
-    }
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Turn thew 433Mhz transmitter off
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Turn the 433Mhz receiver on
-    RFLinkHW();
+      for (int i = 0; i < 12; i++)
+      { // Arc packet is 12 bits
+         // read data bit
+         fdatabit = fsendbuff & fdatamask; // Get most right bit
+         fsendbuff = (fsendbuff >> 1);     // Shift right
+
+         // PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
+         if (fdatabit != fdatamask)
+         { // Write 0
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+         }
+         else
+         { // Write 1
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+         }
+      }
+      // Send sync bit
+      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      delayMicroseconds(fpulse * 1);
+      digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+      delayMicroseconds(fpulse * 31);
+   }
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
+   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
+   RFLinkHW();
 }
 
-void TriState_Send(unsigned long bitstream) { 
-    int fpulse = 360;                               // Pulse width in microseconds
-    int fretrans = 8;                               // Number of code retransmissions
-    uint32_t fdatabit;
-    uint32_t fdatamask = 0x00000003;
-    uint32_t fsendbuff;
+void TriState_Send(unsigned long bitstream)
+{
+   int fpulse = 360; // Pulse width in microseconds
+   int fretrans = 8; // Number of code retransmissions
+   uint32_t fdatabit;
+   uint32_t fdatamask = 0x00000003;
+   uint32_t fsendbuff;
 
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Turn off power to the RF receiver 
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable the 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
+   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
 
-    // reverse data bits (2 by 2)
-	for (unsigned short i=0; i<12; i++) {           // reverse data bits (12 times 2 bits = 24 bits in total)
-		fsendbuff<<=2;
-		fsendbuff|=(bitstream & B11);
-		bitstream>>=2;
-	}
-    bitstream=fsendbuff;                            // store result    
-   
-    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
-        fsendbuff = bitstream;
-        // Send command
-		for (int i = 0; i < 12; i++) {              // 12 times 2 bits = 24 bits in total
-            // read data bit
-            fdatabit = fsendbuff & fdatamask;       // Get most right 2 bits
-            fsendbuff = (fsendbuff >> 2);           // Shift right
-			// data can be 0, 1 or float. 
-            if (fdatabit == 0) {                    // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-            } else 
-            if (fdatabit == 1) {                    // Write 1
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-            } else {                                // Write float
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);
-				digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 1);
-            }
-        }
-		// Send sync bit
-        digitalWrite(PIN_RF_TX_DATA, HIGH);         
-        delayMicroseconds(fpulse * 1);
-        digitalWrite(PIN_RF_TX_DATA, LOW);          // and lower the signal
-        delayMicroseconds(fpulse * 31);
-    }
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Turn thew 433Mhz transmitter off
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Turn the 433Mhz receiver on
-    RFLinkHW();
+   // reverse data bits (2 by 2)
+   for (unsigned short i = 0; i < 12; i++)
+   { // reverse data bits (12 times 2 bits = 24 bits in total)
+      fsendbuff <<= 2;
+      fsendbuff |= (bitstream & B11);
+      bitstream >>= 2;
+   }
+   bitstream = fsendbuff; // store result
+
+   for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
+   {
+      fsendbuff = bitstream;
+      // Send command
+      for (int i = 0; i < 12; i++)
+      { // 12 times 2 bits = 24 bits in total
+         // read data bit
+         fdatabit = fsendbuff & fdatamask; // Get most right 2 bits
+         fsendbuff = (fsendbuff >> 2);     // Shift right
+                                           // data can be 0, 1 or float.
+         if (fdatabit == 0)
+         { // Write 0
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+         }
+         else if (fdatabit == 1)
+         { // Write 1
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+         }
+         else
+         { // Write float
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 1);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            delayMicroseconds(fpulse * 3);
+            digitalWrite(PIN_RF_TX_DATA, LOW);
+            delayMicroseconds(fpulse * 1);
+         }
+      }
+      // Send sync bit
+      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      delayMicroseconds(fpulse * 1);
+      digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+      delayMicroseconds(fpulse * 31);
+   }
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
+   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
+     RFLinkHW();
 }
 #endif //PLUGIN_TX_003

@@ -88,185 +88,206 @@
   \*********************************************************************************************/
 #define LACROSSE43_PULSECOUNT 88
 
-#define LACROSSE43_MIDLO  800/RAWSIGNAL_SAMPLE_RATE //900 //630
-#define LACROSSE43_MIDHI  1000/RAWSIGNAL_SAMPLE_RATE //1500 //1050
+#define LACROSSE43_MIDLO 800 / RAWSIGNAL_SAMPLE_RATE  //900 //630
+#define LACROSSE43_MIDHI 1000 / RAWSIGNAL_SAMPLE_RATE //1500 //1050
 
-#define LACROSSE43_PULSEMID  750/RAWSIGNAL_SAMPLE_RATE //1410 //990
-#define LACROSSE43_PULSEMAX  1350/RAWSIGNAL_SAMPLE_RATE //2100 //1500
-#define LACROSSE43_PULSEMINMAX  550/RAWSIGNAL_SAMPLE_RATE //810 //570
-
+#define LACROSSE43_PULSEMID 750 / RAWSIGNAL_SAMPLE_RATE    //1410 //990
+#define LACROSSE43_PULSEMAX 1350 / RAWSIGNAL_SAMPLE_RATE   //2100 //1500
+#define LACROSSE43_PULSEMINMAX 550 / RAWSIGNAL_SAMPLE_RATE //810 //570
 
 #ifdef PLUGIN_043
-boolean Plugin_043(byte function, char *string) {
-      boolean success=false;
-      if ( (RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4) ) return false;
-      unsigned long bitstream1=0L;                  // holds first 16 bits
-      unsigned long bitstream2=0L;                  // holds last 28 bits
+boolean Plugin_043(byte function, char *string)
+{
+   boolean success = false;
+   if ((RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4))
+      return false;
+   unsigned long bitstream1 = 0L; // holds first 16 bits
+   unsigned long bitstream2 = 0L; // holds last 28 bits
 
-      int temperature=0;
-      int humidity=0;
-      byte checksum=0;
-      byte bitcounter=0;                            // counts number of received bits (converted from pulses)
-      byte data[10];
-      //==================================================================================
-      // get bytes
-      for(int x=1;x<RawSignal.Number;x+=2) {
-         if ((RawSignal.Pulses[x+1] < LACROSSE43_MIDLO) || (RawSignal.Pulses[x+1] > LACROSSE43_MIDHI)) {
-            if (x < 2) {                            // Make sure the first bit is correct..
-               RawSignal.Pulses[1]=1200/RAWSIGNAL_SAMPLE_RATE;
-            } else {
-               if (x+1 < RawSignal.Number)
-			   {
-				   // Serial.println("\nTX3 #1");
-				   // Serial.print("[x+1]\t");Serial.println(x+1);
-				   // Serial.print("RawSignal.Pulses[x+1]\t");Serial.println(RawSignal.Pulses[x+1]);
-				   // Serial.print("LACROSSE43_MIDLO\t");Serial.println(LACROSSE43_MIDLO);
-				   // Serial.print("LACROSSE43_MIDHI\t");Serial.println(LACROSSE43_MIDHI);
-				   return false;
-			   }				   // in between pulse check
-            }
+   int temperature = 0;
+   int humidity = 0;
+   byte checksum = 0;
+   byte bitcounter = 0; // counts number of received bits (converted from pulses)
+   byte data[10];
+   //==================================================================================
+   // get bytes
+   for (int x = 1; x < RawSignal.Number; x += 2)
+   {
+      if ((RawSignal.Pulses[x + 1] < LACROSSE43_MIDLO) || (RawSignal.Pulses[x + 1] > LACROSSE43_MIDHI))
+      {
+         if (x < 2)
+         { // Make sure the first bit is correct..
+            RawSignal.Pulses[1] = 1200 / RAWSIGNAL_SAMPLE_RATE;
          }
-         if (RawSignal.Pulses[x] > LACROSSE43_PULSEMID) {
-            if ((RawSignal.Pulses[x] > LACROSSE43_PULSEMAX) && (x > 1))
-			   {
-				   // Serial.print("\nTX3 #2\n");
-				   // Serial.print("[x]\t");Serial.println(x);
-				   // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
-				   // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
-				   // Serial.print("LACROSSE43_PULSEMAX\t");Serial.println(LACROSSE43_PULSEMAX);
-				   return false;
-			   }
-            if (bitcounter < 16) {
-               bitstream1 = (bitstream1 << 1);
-               bitcounter++;                     // only need to count the first 16 bits
-            } else {
-               bitstream2 = (bitstream2 << 1);
-            }
-         } else {
-            if (RawSignal.Pulses[x] > LACROSSE43_PULSEMINMAX)
-			   {
-				   // Serial.print("\nTX3 #3\n");
-				   // Serial.print("[x]\t");Serial.println(x);
-				   // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
-				   // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
-				   // Serial.print("LACROSSE43_PULSEMINMAX\t");Serial.println(LACROSSE43_PULSEMINMAX);
-				   return false;
-			   }
-            if (bitcounter < 16) {
-               bitstream1 = (bitstream1 << 1) | 0x1;
-               bitcounter++;                     // only need to count the first 16 bits
-            } else {
-               bitstream2 = (bitstream2 << 1) | 0x1;
-            }
+         else
+         {
+            if (x + 1 < RawSignal.Number)
+            {
+               // Serial.println("\nTX3 #1");
+               // Serial.print("[x+1]\t");Serial.println(x+1);
+               // Serial.print("RawSignal.Pulses[x+1]\t");Serial.println(RawSignal.Pulses[x+1]);
+               // Serial.print("LACROSSE43_MIDLO\t");Serial.println(LACROSSE43_MIDLO);
+               // Serial.print("LACROSSE43_MIDHI\t");Serial.println(LACROSSE43_MIDHI);
+               return false;
+            } // in between pulse check
          }
       }
-      //==================================================================================
-      // all bytes received, make sure checksum is okay
-      //==================================================================================
-      if ((bitstream1 == 0) && (bitstream2 == 0))
-		  	   {
-				   // Serial.print("\nTX3 #4\n");
-				   return false;
-			   }
-      data[0] = (bitstream1 >> 12) & 0x0f;  // prepare nibbles from bit stream
-      if (data[0] != 0x00)
-		  	   {
-				   // Serial.print("\nTX3 #5\n");
-				   return false;
-			   }
-      data[1] = (bitstream1 >>  8) & 0x0f;
-      if (data[1] != 0x0a)
-		  	   {
-				   // Serial.print("\nTX3 #6\n");
-				   return false;
-			   }
-      data[2] = (bitstream1 >>  4) & 0x0f;
-      data[3] = (bitstream1 >>  0) & 0x0f;
-      data[4] = (bitstream2 >> 24) & 0x0f;
-      data[5] = (bitstream2 >> 20) & 0x0f;
-      data[6] = (bitstream2 >> 16) & 0x0f;
-      data[7] = (bitstream2 >> 12) & 0x0f;
-      data[8] = (bitstream2 >>  8) & 0x0f;
-      data[9] = (bitstream2 >>  4) & 0x0f;
-      //==================================================================================
-      // first perform a checksum check to make sure the packet is a valid LaCrosse packet
-      for (byte i=0;i<10;i++){
-          checksum=checksum + data[i];
+      if (RawSignal.Pulses[x] > LACROSSE43_PULSEMID)
+      {
+         if ((RawSignal.Pulses[x] > LACROSSE43_PULSEMAX) && (x > 1))
+         {
+            // Serial.print("\nTX3 #2\n");
+            // Serial.print("[x]\t");Serial.println(x);
+            // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
+            // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
+            // Serial.print("LACROSSE43_PULSEMAX\t");Serial.println(LACROSSE43_PULSEMAX);
+            return false;
+         }
+         if (bitcounter < 16)
+         {
+            bitstream1 = (bitstream1 << 1);
+            bitcounter++; // only need to count the first 16 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1);
+         }
       }
-      checksum=checksum & 0x0f;
-      if (checksum != (bitstream2 &0x0f ))
-		  	   {
-				   // Serial.print("\nTX3 #7\n");
-				   return false;
-			   }
-      //==================================================================================
-      // Prevent repeating signals from showing up, skips every second packet!
-      //==================================================================================
-      unsigned long tempval=(data[4])>>1;
-      tempval=((tempval)<<16)+((data[3])<<8)+data[2];
-      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer<millis()) || (SignalCRC != tempval)  ){
-         // not seen this RF packet recently
-         SignalCRC=tempval;
-      } else {
-		 // Serial.print("\nTX3 #8\n");
-		 return true;         // already seen the RF packet recently, but still want the humidity
+      else
+      {
+         if (RawSignal.Pulses[x] > LACROSSE43_PULSEMINMAX)
+         {
+            // Serial.print("\nTX3 #3\n");
+            // Serial.print("[x]\t");Serial.println(x);
+            // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
+            // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
+            // Serial.print("LACROSSE43_PULSEMINMAX\t");Serial.println(LACROSSE43_PULSEMINMAX);
+            return false;
+         }
+         if (bitcounter < 16)
+         {
+            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitcounter++; // only need to count the first 16 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1) | 0x1;
+         }
       }
-      //==================================================================================
-      // now process the various sensor types
-      //==================================================================================
-      // Output
-      // ----------------------------------
-	  if (data[2] == 0x00) {
-         temperature = data[5]*100;
-         temperature = temperature + data[6]*10;
-         temperature = temperature + data[7];
-         temperature = temperature-500;
-         data[4]=(data[4])>>1;
+   }
+   //==================================================================================
+   // all bytes received, make sure checksum is okay
+   //==================================================================================
+   if ((bitstream1 == 0) && (bitstream2 == 0))
+   {
+      // Serial.print("\nTX3 #4\n");
+      return false;
+   }
+   data[0] = (bitstream1 >> 12) & 0x0f; // prepare nibbles from bit stream
+   if (data[0] != 0x00)
+   {
+      // Serial.print("\nTX3 #5\n");
+      return false;
+   }
+   data[1] = (bitstream1 >> 8) & 0x0f;
+   if (data[1] != 0x0a)
+   {
+      // Serial.print("\nTX3 #6\n");
+      return false;
+   }
+   data[2] = (bitstream1 >> 4) & 0x0f;
+   data[3] = (bitstream1 >> 0) & 0x0f;
+   data[4] = (bitstream2 >> 24) & 0x0f;
+   data[5] = (bitstream2 >> 20) & 0x0f;
+   data[6] = (bitstream2 >> 16) & 0x0f;
+   data[7] = (bitstream2 >> 12) & 0x0f;
+   data[8] = (bitstream2 >> 8) & 0x0f;
+   data[9] = (bitstream2 >> 4) & 0x0f;
+   //==================================================================================
+   // first perform a checksum check to make sure the packet is a valid LaCrosse packet
+   for (byte i = 0; i < 10; i++)
+   {
+      checksum = checksum + data[i];
+   }
+   checksum = checksum & 0x0f;
+   if (checksum != (bitstream2 & 0x0f))
+   {
+      // Serial.print("\nTX3 #7\n");
+      return false;
+   }
+   //==================================================================================
+   // Prevent repeating signals from showing up, skips every second packet!
+   //==================================================================================
+   unsigned long tempval = (data[4]) >> 1;
+   tempval = ((tempval) << 16) + ((data[3]) << 8) + data[2];
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != tempval))
+   {
+      // not seen this RF packet recently
+      SignalCRC = tempval;
+   }
+   else
+   {
+      // Serial.print("\nTX3 #8\n");
+      return true; // already seen the RF packet recently, but still want the humidity
+   }
+   //==================================================================================
+   // now process the various sensor types
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   if (data[2] == 0x00)
+   {
+      temperature = data[5] * 100;
+      temperature = temperature + data[6] * 10;
+      temperature = temperature + data[7];
+      temperature = temperature - 500;
+      data[4] = (data[4]) >> 1;
 
-         //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-		 sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-		 Serial.print( pbuffer );
-		 strcat(MQTTbuffer, pbuffer);
+      //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
 
-		 //Serial.print(F("LaCrosse;ID="));           // Label
-		 //PrintHex8(data+3,2);
-         //sprintf(pbuffer, ";TEMP=%04x;", temperature);
-         sprintf_P(pbuffer, PSTR("%S%02x%02x%S%04x;"), F(";LaCrosse;ID="), data[3],data[4], F(";TEMP="), temperature);
-		 strcat(pbuffer, "\r\n");
-		 Serial.print( pbuffer );
-		 strcat(MQTTbuffer, pbuffer);
+      //Serial.print(F("LaCrosse;ID="));           // Label
+      //PrintHex8(data+3,2);
+      //sprintf(pbuffer, ";TEMP=%04x;", temperature);
+      sprintf_P(pbuffer, PSTR("%S%02x%02x%S%04x;"), F(";LaCrosse;ID="), data[3], data[4], F(";TEMP="), temperature);
+      strcat(pbuffer, "\r\n");
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
 
-         RawSignal.Repeats=false;
-         RawSignal.Number=0;
-         success=true;
-      } else
-      if (data[2] == 0x0e) {
-         humidity=(data[5]*16)+data[6];
-         if (humidity==0)
-			   {
-				   // Serial.print("\nTX3 #9\n");
-				   return false;
-			   }             // humidity should not be 0
-         data[4]=(data[4])>>1;
+      RawSignal.Repeats = false;
+      RawSignal.Number = 0;
+      success = true;
+   }
+   else if (data[2] == 0x0e)
+   {
+      humidity = (data[5] * 16) + data[6];
+      if (humidity == 0)
+      {
+         // Serial.print("\nTX3 #9\n");
+         return false;
+      } // humidity should not be 0
+      data[4] = (data[4]) >> 1;
 
-         //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-		 sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-		 Serial.print( pbuffer );
-		 strcat(MQTTbuffer, pbuffer);
+      //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
 
-         //Serial.print(F("LaCrosse;ID="));           // Label
-         //PrintHex8( data+3,2);
-         //sprintf(pbuffer, ";HUM=%02x;", (humidity)&0xff);
-         sprintf_P(pbuffer, PSTR("%S%02x%02x%S%02x;"), F(";LaCrosse;ID="), data[3],data[4], F(";HUM="), (humidity)&0xff);
-		 strcat(pbuffer, "\r\n");
-		 Serial.print( pbuffer );
-		 strcat(MQTTbuffer, pbuffer);
+      //Serial.print(F("LaCrosse;ID="));           // Label
+      //PrintHex8( data+3,2);
+      //sprintf(pbuffer, ";HUM=%02x;", (humidity)&0xff);
+      sprintf_P(pbuffer, PSTR("%S%02x%02x%S%02x;"), F(";LaCrosse;ID="), data[3], data[4], F(";HUM="), (humidity)&0xff);
+      strcat(pbuffer, "\r\n");
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
 
-         RawSignal.Repeats=true;
-         RawSignal.Number=0;
-         success=true;
-      }
-      //==================================================================================
-      return success;
+      RawSignal.Repeats = true;
+      RawSignal.Number = 0;
+      success = true;
+   }
+   //==================================================================================
+   return success;
 }
 #endif // PLUGIN_043

@@ -20,41 +20,50 @@
 #ifdef PLUGIN_254
 #include "../4_Misc.h"
 
-boolean Plugin_254(byte function, char *string) {
-        if (QRFDebug==true) {                      // debug is on? 
-           if(RawSignal.Number<26)return false;        // make sure the packet is long enough to have a meaning 
-           // ----------------------------------
-           // Output
-           // ----------------------------------
-           sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number 
-           Serial.print( pbuffer );
-           // ----------------------------------
-           Serial.print(F("DEBUG;Pulses="));           // debug data
-           Serial.print(RawSignal.Number);             // print number of pulses
-           Serial.print(F(";Pulses(uSec)="));          // print pulse durations
-           //PrintHex8(RawSignal.Pulses+1,RawSignal.Number-1);
-           PrintHex8(RawSignal.Pulses+1,RawSignal.Number);
-        } else {
-           if (RFUDebug==false) return false;          // debug is on? 
-           if(RawSignal.Number<26)return false;        // make sure the packet is long enough to have a meaning 
-           // ----------------------------------
-           // Output
-           // ----------------------------------
-           sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number 
-           Serial.print( pbuffer );
-           // ----------------------------------
-           Serial.print(F("DEBUG;Pulses="));           // debug data
-           Serial.print(RawSignal.Number);             // print number of pulses
-           Serial.print(F(";Pulses(uSec)="));          // print pulse durations
-           //for(int x=1;x<RawSignal.Number;x++) {
-           for(int x=1;x<RawSignal.Number+1;x++) {
-              Serial.print(RawSignal.Pulses[x]*RAWSIGNAL_SAMPLE_RATE); 
-              //if (x < RawSignal.Number-1) Serial.write(',');       
-              if (x < RawSignal.Number) Serial.write(',');       
-           }
-        }
-        Serial.println(";");
-        RawSignal.Number=0;                         // Last plugin, kill packet
-        return true;                                // stop processing 
+boolean Plugin_254(byte function, char *string)
+{
+   if (QRFDebug == true)
+   { // debug is on?
+      if (RawSignal.Number < 26)
+         return false; // make sure the packet is long enough to have a meaning
+      // ----------------------------------
+      // Output
+      // ----------------------------------
+      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+      Serial.print(pbuffer);
+      // ----------------------------------
+      Serial.print(F("DEBUG;Pulses="));  // debug data
+      Serial.print(RawSignal.Number);    // print number of pulses
+      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
+      //PrintHex8(RawSignal.Pulses+1,RawSignal.Number-1);
+      PrintHex8(RawSignal.Pulses + 1, RawSignal.Number);
+   }
+   else
+   {
+      if (RFUDebug == false)
+         return false; // debug is on?
+      if (RawSignal.Number < 26)
+         return false; // make sure the packet is long enough to have a meaning
+      // ----------------------------------
+      // Output
+      // ----------------------------------
+      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+      Serial.print(pbuffer);
+      // ----------------------------------
+      Serial.print(F("DEBUG;Pulses="));  // debug data
+      Serial.print(RawSignal.Number);    // print number of pulses
+      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
+      //for(int x=1;x<RawSignal.Number;x++) {
+      for (int x = 1; x < RawSignal.Number + 1; x++)
+      {
+         Serial.print(RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE);
+         //if (x < RawSignal.Number-1) Serial.write(',');
+         if (x < RawSignal.Number)
+            Serial.write(',');
+      }
+   }
+   Serial.println(";");
+   RawSignal.Number = 0; // Last plugin, kill packet
+   return true;          // stop processing
 }
 #endif // PLUGIN_254
