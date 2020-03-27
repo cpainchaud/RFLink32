@@ -24,7 +24,7 @@
  \*********************************************************************************************/
 
 #include "Arduino.h"
-#include <avr/interrupt.h>
+// #include <avr/interrupt.h>
 
 #ifdef PLUGIN_TX_251
 
