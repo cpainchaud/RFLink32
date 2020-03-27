@@ -2,11 +2,11 @@
 #define RFLink_h
 
 //
-#define BUILDNR                      0x05               // shown in version
+#define BUILDNR                      0x07               // shown in version
 #define REVNR                        0x42               // shown in version and startup string
 #define BAUD                       115200               // Baudrate for serial communication.
 #define MIN_RAW_PULSES                 74               // Minimal number of bits*2 that need to have been received before we spend CPU time on decoding the signal.
-#define RAW_BUFFER_SIZE               148 // 512        // Maximum number of pulses that is received in one go.
+#define RAW_BUFFER_SIZE               512 // 148        // Maximum number of pulses that is received in one go.
 #define RAWSIGNAL_SAMPLE_RATE          32               // =8 bits. Sample width / resolution in uSec for raw RF pulses.
 #define SIGNAL_SEEK_TIMEOUT_MS         25               // After this time in mSec. RF signal will be considered absent.
 #define SIGNAL_MIN_PREAMBLE_US       3500
@@ -16,7 +16,7 @@
 #define TRANSMITTER_STABLE_DELAY_US   500               // delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define SCAN_HIGH_TIME_MS              50               // time interval in ms. fast processing for background tasks
 #define FOCUS_TIME_MS                  50               // Duration in mSec. that, after receiving serial data from USB only the serial port is checked. 
-#define PLUGIN_MAX                      5 // 55         // Maximum number of Receive plugins
+#define PLUGIN_MAX                     15 // 55         // Maximum number of Receive plugins
 #define PLUGIN_TX_MAX                   0 // 26         // Maximum number of Transmit plugins
 #define INPUT_COMMAND_SIZE             60               // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE              60               // Maximum number of characters that a command should print in one go via the print buffer.
