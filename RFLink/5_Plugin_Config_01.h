@@ -29,7 +29,7 @@
 // -------------------
 // Weather sensors
 // -------------------
-// #define PLUGIN_030              // Alecto V1 (WS3500) 434 MHz.
+#define PLUGIN_030 // Alecto V1 (WS3500) 434 MHz.
 // #define PLUGIN_031              // Alecto V3 (WS1100/WS1200/WSD-19) 433.9 MHz.
 // #define PLUGIN_032              // Alecto V4
 // #define PLUGIN_033              // Conrad Pool Thermometer
@@ -40,7 +40,7 @@
 // #define PLUGIN_042              // UPM/Esic
 #define PLUGIN_043 // LaCrosse v1
 // #define PLUGIN_044              // Auriol v3
-#define PLUGIN_045 // Auriol
+// #define PLUGIN_045              // Auriol
 #define PLUGIN_046 // Auriol v2 / Xiron
 // #define PLUGIN_048              // Oregon V1/2/3
 // -------------------
