@@ -10,6 +10,7 @@ void setup_WIFI();
 void setup_MQTT();
 void reconnect();
 void publishMsg();
+void checkMQTTloop();
 #else
 void setup_WIFI_OFF();
 #endif

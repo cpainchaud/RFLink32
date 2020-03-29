@@ -109,12 +109,28 @@ void publishMsg()
     {
       reconnect();
     }
-    // MQTTClient.loop();
-
     MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer);
     MQTTbuffer[0] = 0;
   }
 }
+
+void checkMQTTloop()
+{
+  static unsigned long lastCheck = millis();
+
+  if (millis() > lastCheck + MQTT_LOOP_MS)
+  {
+    if (!MQTTClient.connected())
+    {
+      reconnect();
+    }
+    Serial.print(F("Calling MQTT loop()..."));
+    MQTTClient.loop();
+    Serial.println(F("Done"));
+    lastCheck = millis();
+  }
+}
+
 #else
 
 void setup_WIFI_OFF()

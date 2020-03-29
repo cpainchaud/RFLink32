@@ -72,6 +72,9 @@ void setup()
 
 void loop()
 {
+#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+    checkMQTTloop();
+#endif
 
   if (ScanEvent())
   {
