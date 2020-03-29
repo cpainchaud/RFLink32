@@ -45,7 +45,7 @@ void setup()
   setup_WIFI();
   setup_MQTT();
 #else
-  setup_WIFI_OFFq();
+  setup_WIFI_OFF();
 #endif
 
   sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V3.0 - "));
