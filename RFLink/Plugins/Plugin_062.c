@@ -47,7 +47,7 @@ boolean Plugin_062(byte function, char *string) {
       //==================================================================================
       // Prevent repeating signals from showing up
       //==================================================================================
-      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer+2000<millis()) ){ 
+      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer+700<millis()) ){ 
          // not seen the RF packet recently
          if (bitstream == 0) return false;
       } else {
