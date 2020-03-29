@@ -126,7 +126,7 @@ boolean Plugin_004(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || ((RepeatingTimer + 700) < millis()) || SignalCRC != bitstream)
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 700) < millis()) || (SignalCRC != bitstream))
    { // 1000
       // not seen the RF packet recently
       //Serial.print("NKAKU PREV:");

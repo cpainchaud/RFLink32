@@ -23,54 +23,69 @@
  \*********************************************************************************************/
 #define ALARMPIRV1_PULSECOUNT 50
 
-#define ALARMPIRV1_PULSEMID  700/RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV1_PULSEMAX  2000/RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV1_PULSEMIN  150/RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV1_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV1_PULSEMAX 2000 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV1_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_062
-boolean Plugin_062(byte function, char *string) {
-      if (RawSignal.Number != ALARMPIRV1_PULSECOUNT) return false;
-      if (RawSignal.Pulses[0]==63) return false;    // No need to test, packet for plugin 63
-      unsigned long bitstream=0L;
-      //==================================================================================
-      for(byte x=2;x<=48;x=x+2) {
-        if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMID) {
-           if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMAX) return false;   // pulse too long
-           if (RawSignal.Pulses[x-1] > ALARMPIRV1_PULSEMID) return false; // invalid pulse sequence 10/01
-           bitstream = (bitstream << 1) | 0x1; 
-        } else { 
-           if (RawSignal.Pulses[x] < ALARMPIRV1_PULSEMIN) return false;   // pulse too short
-           if (RawSignal.Pulses[x-1] < ALARMPIRV1_PULSEMID) return false; // invalid pulse sequence 10/01
-           bitstream = bitstream << 1;
-        }
+boolean Plugin_062(byte function, char *string)
+{
+   if (RawSignal.Number != ALARMPIRV1_PULSECOUNT)
+      return false;
+   if (RawSignal.Pulses[0] == 63)
+      return false; // No need to test, packet for plugin 63
+   unsigned long bitstream = 0L;
+   //==================================================================================
+   for (byte x = 2; x <= 48; x = x + 2)
+   {
+      if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMID)
+      {
+         if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMAX)
+            return false; // pulse too long
+         if (RawSignal.Pulses[x - 1] > ALARMPIRV1_PULSEMID)
+            return false; // invalid pulse sequence 10/01
+         bitstream = (bitstream << 1) | 0x1;
       }
-      //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer+700<millis()) ){ 
-         // not seen the RF packet recently
-         if (bitstream == 0) return false;
-      } else {
-         // already seen the RF packet recently
-         return true;
-      }       
-      //==================================================================================
-      // Validity checks
-      //==================================================================================
-      // Output
-      // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number 
-      Serial.print( pbuffer );
-      // ----------------------------------
-      Serial.print(F("Chuango;"));                      // Label
-      sprintf(pbuffer, "ID=%06lx;",(bitstream)&0xffffff) ; // ID    
-      Serial.print( pbuffer );
-      Serial.print(F("SWITCH=02;"));
-      Serial.print(F("CMD=ON;"));                   // this device reports movement only
-      Serial.println();
-      //==================================================================================
-      RawSignal.Repeats=true;                       // suppress repeats of the same RF packet
-      RawSignal.Number=0;
+      else
+      {
+         if (RawSignal.Pulses[x] < ALARMPIRV1_PULSEMIN)
+            return false; // pulse too short
+         if (RawSignal.Pulses[x - 1] < ALARMPIRV1_PULSEMID)
+            return false; // invalid pulse sequence 10/01
+         bitstream = bitstream << 1;
+      }
+   }
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 700) < millis()))
+   {
+      // not seen the RF packet recently
+      if (bitstream == 0)
+         return false;
+   }
+   else
+   {
+      // already seen the RF packet recently
       return true;
+   }
+   //==================================================================================
+   // Validity checks
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+   Serial.print(pbuffer);
+   // ----------------------------------
+   Serial.print(F("Chuango;"));                         // Label
+   sprintf(pbuffer, "ID=%06lx;", (bitstream)&0xffffff); // ID
+   Serial.print(pbuffer);
+   Serial.print(F("SWITCH=02;"));
+   Serial.print(F("CMD=ON;")); // this device reports movement only
+   Serial.println();
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // Plugin_062
