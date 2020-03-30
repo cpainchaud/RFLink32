@@ -73,6 +73,10 @@
 // #define PLUGIN_082              // Mertik Maxitrol / Dru fireplace
 // #define PLUGIN_083              // Alecto SA33
 // -------------------
+// Misc
+// -------------------
+// #define PLUGIN_090              // Nodo Slave
+// -------------------
 // 868 MHZ
 // -------------------
 // #define PLUGIN_100              // Alecto V2 (DKW2012/ACH2010) 868 MHz.  => PLANNED
