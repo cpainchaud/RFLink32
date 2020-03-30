@@ -60,11 +60,13 @@ boolean Plugin_062(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 200) < millis()))
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 200) < millis()) || (SignalCRC != bitstream))
    {
       // not seen the RF packet recently
       if (bitstream == 0)
          return false;
+
+      SignalCRC = bitstream;
    }
    else
    {
