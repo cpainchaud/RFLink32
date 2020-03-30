@@ -2,57 +2,60 @@
 //##             This Plugin is only for use with Nodo 3.7 Slave Devices (variablesend support)        ##
 //##                                     Plugin-090 Nodo Slave                                         ##
 //#######################################################################################################
-// *********************************************************************************************
-// * This Plugin takes care of reception of Nodo 3.7 Slave Devices
-// *
-// * Author             : StuntTeam
-// * Support            : http://sourceforge.net/projects/rflink/
-// * License            : This code is free for use in any open source project when this header is included.
-// *                      Usage of any parts of this code in a commercial application is prohibited!
-// *********************************************************************************************
-// * Changelog: v1.0 initial release
-// *********************************************************************************************
-// ----------------------------------
-// Nodo Slave Unit 1, 2 and 4 till 9: // Individual sensor data
-//
-// Variabele  5 : Temperature
-// Variabele  6 : Humidity           0 - 100
-// Variabele  7 : Rain fall
-// Variabele  8 : Wind speed
-// Variabele  9 : Wind direction     0 - 15
-// Variabele 10 : Wind gust
-// Variabele 11, 12 en 13 : Temperature
-// Variabele 14 : Humidity           0 - 100
-// Variabele 15 : UV meter           0 - 1024
-// Variabele 16 : Barometric pressure
-//
-// ----------------------------------
-// Nodo Slave Unit 10 till 16: // Combined sensor data
-//
-// Variabele  5 : Temperature
-// Variabele  6 : Humidity           0 - 100
-// Variabele  7 : Rain fall
-// Variabele  8 : Wind speed
-// Variabele  9 : Wind direction     0 - 15
-// Variabele 10 : Wind gust
-// Variabele 11, 12 en 13 : Temperature
-// Variabele 14 : Humidity           0 - 100
-// Variabele 15 : UV meter           0 - 1024
-// Variabele 16 : Barometric pressure
-//
-// ----------------------------------
-// Nodo Slave Unit 3: // Pulse Meters
-//
-// Variabele  1 till 16 : Pulse value 1 till 16
-//
-// You can use a Nodo slave device with ID 03 to send variabel numbers 1 til 16
-// which will be passed to Domoticz as pulse meter values (electricity/water/gas etc.)
-// ----------------------------------
-//
-// * Sample:
-// * 20;9E;DEBUG;Pulses=194;Pulses(uSec)=3100,900,500,350,1475,375,525,300,1475,375,500,350,450,375,575,250,525,300,1475,375,1450,400,1450,400,425,425,425,425,1425,425,425,425,425,400,425,400,425,400,425,400,425,400,450,400,425,400,450,400,450,400,450,400,425,400,425,425,425,425,425,425,400,425,425,425,400,425,1425,425,400,425,400,425,400,425,400,425,400,425,425,425,400,425,425,425,425,425,1450,425,425,425,425,425,425,425,425,425,400,425,1425,425,1425,425,400,425,400,425,400,425,400,425,400,425,400,425,400,425,425,425,425,425,400,425,400,425,400,425,400,425,400,425,400,425,400,450,400,450,400,450,400,450,400,450,400,450,1400,450,400,450,400,450,400,425,400,450,400,425,1425,425,400,425,1425,425,1425,450,400,450,400,450,375,450,375,450,400,450,1425,450,400,450,1425,425,1425,450,400,450,400,425,400,450,400,450,400,450,400;
-// * 20;9F;Slave;ID=0307;DEBUG=0014;
-// * slave nodo 7, var 3 value 14
+/**********************************************************************************************
+ * This Plugin takes care of reception of Nodo 3.7 Slave Devices
+ *
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
+ * License            : This code is free for use in any open source project when this header is included.
+ *                      Usage of any parts of this code in a commercial application is prohibited!
+ *********************************************************************************************
+ * Changelog: v1.0 initial release
+ *********************************************************************************************
+ ----------------------------------
+ * Nodo Slave Unit 1, 2 and 4 till 9: // Individual sensor data
+ * 
+ * Variabele  5 : Temperature
+ * Variabele  6 : Humidity           0 - 100
+ * Variabele  7 : Rain fall
+ * Variabele  8 : Wind speed
+ * Variabele  9 : Wind direction     0 - 15
+ * Variabele 10 : Wind gust
+ * Variabele 11, 12 en 13 : Temperature
+ * Variabele 14 : Humidity           0 - 100
+ * Variabele 15 : UV meter           0 - 1024
+ * Variabele 16 : Barometric pressure
+ *
+ * ----------------------------------
+ * Nodo Slave Unit 10 till 16: // Combined sensor data
+ *
+ * Variabele  5 : Temperature
+ * Variabele  6 : Humidity           0 - 100
+ * Variabele  7 : Rain fall
+ * Variabele  8 : Wind speed
+ * Variabele  9 : Wind direction     0 - 15
+ * Variabele 10 : Wind gust
+ * Variabele 11, 12 en 13 : Temperature
+ * Variabele 14 : Humidity           0 - 100
+ * Variabele 15 : UV meter           0 - 1024
+ * Variabele 16 : Barometric pressure
+ *
+ * ----------------------------------
+ * Nodo Slave Unit 3: // Pulse Meters
+ *
+ * Variabele  1 till 16 : Pulse value 1 till 16
+ *
+ * You can use a Nodo slave device with ID 03 to send variabel numbers 1 til 16
+ * which will be passed to Domoticz as pulse meter values (electricity/water/gas etc.)
+ * ----------------------------------
+
+ * Sample:
+ * 20;9E;DEBUG;Pulses=194;Pulses(uSec)=3100,900,500,350,1475,375,525,300,1475,375,500,350,450,375,575,250,525,300,1475,375,1450,400,1450,400,425,425,425,425,1425,425,425,425,425,400,425,400,425,400,425,400,425,400,450,400,425,400,450,400,450,400,450,400,425,400,425,425,425,425,425,425,400,425,425,425,400,425,1425,425,400,425,400,425,400,425,400,425,400,425,425,425,400,425,425,425,425,425,1450,425,425,425,425,425,425,425,425,425,400,425,1425,425,1425,425,400,425,400,425,400,425,400,425,400,425,400,425,400,425,425,425,425,425,400,425,400,425,400,425,400,425,400,425,400,425,400,450,400,450,400,450,400,450,400,450,400,450,1400,450,400,450,400,450,400,425,400,450,400,425,1425,425,400,425,1425,425,1425,450,400,450,400,450,375,450,375,450,400,450,1425,450,400,450,1425,425,1425,450,400,450,400,425,400,450,400,450,400,450,400;
+ * 20;9F;Slave;ID=0307;DEBUG=0014;
+ * slave nodo 7, var 3 value 14
+*/
 
 // 3100,900,
 /*( 194-2=192/2 = 96

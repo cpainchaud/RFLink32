@@ -11,8 +11,10 @@
  *         THWR800, THR128, THR138, THC138, OWL CM119, cent-a-meter, OWL CM113, Electrisave, RGR928 
  *         UVN128, UV138, UVN800, Huger-STR918, WGR918, WGR800, PCR800, WGTR800, RGR126, BTHG968
  *
- * Author             : StuntTeam, Thibaut Girka 
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!  
  *********************************************************************************************
