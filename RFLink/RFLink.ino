@@ -1,9 +1,10 @@
 // *********************************************************************************************************************************
-// * Arduino project "Nodo RadioFrequencyLink aka Nodo RFLink Version 1.1"
-// * © Copyright 2015 StuntTeam - NodoRFLink
+// * Arduino Project RFLink-esp https://github.com/couin3/RFLink (Branch esp)
+// * Portions Free Software 2018..2020 StormTeam - Marc RIVES
+// * Portions Free Software 2015..2016 StuntTeam - (RFLink R29~R33)
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
 // *
-// *                                       Nodo RadioFrequencyLink aka Nodo RFLink Version 1.1
+// *                                       RFLink-esp
 // *
 // ********************************************************************************************************************************
 // * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -73,7 +74,7 @@ void setup()
 void loop()
 {
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
-    checkMQTTloop();
+  checkMQTTloop();
 #endif
 
   if (ScanEvent())

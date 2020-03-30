@@ -11,9 +11,10 @@
  * This plugin also works with the following devices:
  * Princeton PT2262 / MOSDESIGN M3EB / Domia Lite / Klik-Aan-Klik-Uit / Intertechno / Sartano 2606. 
  * 
- * Author             : StuntTeam & Jonas Jespersen (Sartano)
- * Support            : http://sourceforge.net/projects/rflink/
- * License            : This code is free for use in any open source project when this header is included.
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam & Jonas Jespersen (Sartano) 2015..2016 
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  ***********************************************************************************************
@@ -1150,6 +1151,6 @@ void TriState_Send(unsigned long bitstream)
    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
    digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
    digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
-     RFLinkHW();
+   RFLinkHW();
 }
 #endif //PLUGIN_TX_003

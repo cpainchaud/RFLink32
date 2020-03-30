@@ -7,8 +7,10 @@
  * working according to the learning code system. This protocol is also used by the Home Easy devices.
  * It includes direct DIM functionality.
  * 
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  ***********************************************************************************************

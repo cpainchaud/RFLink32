@@ -1,8 +1,15 @@
+/// ************************************* //
+// * Arduino Project RFLink-esp        * //
+// * https://github.com/couin3/RFLink  * //
+// * 2018..2020 Stormteam - Marc RIVES * //
+// * More details in RFLink.ino file   * //
+// ************************************* //
+
 #include <Arduino.h>
 #include "RFLink.h"
 
-char pbuffer[PRINT_BUFFER_SIZE];                                                // Buffer for printing data
-//char InputBuffer_Serial[INPUT_COMMAND_SIZE];     
+char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
+//char InputBuffer_Serial[INPUT_COMMAND_SIZE];
 
 /*********************************************************************************************/
 /*

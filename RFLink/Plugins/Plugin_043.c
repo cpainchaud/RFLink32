@@ -9,8 +9,10 @@
  * WS7000-15: Anemometer, WS7000-16: Rain precipitation, WS2500-19: Brightness Luxmeter, WS7000-20: Thermo/Humidity/Barometer
  * TFA 30.3125 (temperature + humidity), TFA 30.3120.90 (temperature)
  *
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************

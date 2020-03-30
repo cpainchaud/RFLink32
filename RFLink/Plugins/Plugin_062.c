@@ -6,8 +6,10 @@
  * This protocol provides support for Chuango Alarm sensors (Motion detectors and door/window contacts)
  * Note that these modules are reported as X10 switches to the Home Automation software so that they work correctly 
  *
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************

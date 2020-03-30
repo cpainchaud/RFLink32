@@ -7,8 +7,10 @@
  * PCB markings: Quhwa QH-C-CE-3V aka QH-832AC
  * Also sold as "1 by One" and "Delta" wireless doorbell.
  *
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
@@ -41,123 +43,145 @@
  * b) 20;05;DEBUG;Pulses=36;Pulses(uSec)=2100,2100,500,2050,500,2100,500,600,1950,600,1950,600,1950,600,1950,2050,500,2050,500,600,1950,600,1950,2100,500,2050,500,600,1950,600,1950,600,1950,600,1950;
  \*********************************************************************************************/
 #define SELECTPLUS_PULSECOUNT 36
-#define SELECTPLUS_PULSEMID  650/RAWSIGNAL_SAMPLE_RATE
-#define SELECTPLUS_PULSEMAX  2125/RAWSIGNAL_SAMPLE_RATE
+#define SELECTPLUS_PULSEMID 650 / RAWSIGNAL_SAMPLE_RATE
+#define SELECTPLUS_PULSEMAX 2125 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_070
-boolean Plugin_070(byte function, char *string) {
-      if (RawSignal.Number !=SELECTPLUS_PULSECOUNT) return false; 
-      unsigned long bitstream=0L;  
-      byte checksum=0;
-      //==================================================================================
-      // get bytes 
-      for(byte x=2;x < SELECTPLUS_PULSECOUNT;x=x+2) {
-         if (RawSignal.Pulses[x] < SELECTPLUS_PULSEMID) {
-            if (RawSignal.Pulses[x+1] < SELECTPLUS_PULSEMID) return false; // invalid pulse sequence 10/01
+boolean Plugin_070(byte function, char *string)
+{
+    if (RawSignal.Number != SELECTPLUS_PULSECOUNT)
+        return false;
+    unsigned long bitstream = 0L;
+    byte checksum = 0;
+    //==================================================================================
+    // get bytes
+    for (byte x = 2; x < SELECTPLUS_PULSECOUNT; x = x + 2)
+    {
+        if (RawSignal.Pulses[x] < SELECTPLUS_PULSEMID)
+        {
+            if (RawSignal.Pulses[x + 1] < SELECTPLUS_PULSEMID)
+                return false; // invalid pulse sequence 10/01
             bitstream = (bitstream << 1);
-         } else {
-            if (RawSignal.Pulses[x] > SELECTPLUS_PULSEMAX) return false;  // invalid pulse duration, pulse too long 
-            if (RawSignal.Pulses[x+1] > SELECTPLUS_PULSEMID) return false; // invalid pulse sequence 10/01
-            bitstream = (bitstream << 1) | 0x1; 
-         }
-      }
-      if (bitstream == 0) return false;             // sanity check
-      //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      if((SignalHash!=SignalHashPrevious) || ((RepeatingTimer+2000)<millis()) || (SignalCRC != bitstream) ) { 
-         SignalCRC=bitstream;                       // not seen the RF packet recently
-      } else {
-         return true;                               // already seen the RF packet recently
-      }      
-      //==================================================================================
-      // all bytes received, make sure checksum is okay
-      //==================================================================================
-      checksum = (bitstream)&0xf;                   // Second block 
-      if (checksum != 0) return false;              // last 4 bits should always be 0
-      //==================================================================================
-      // Output
-      // ----------------------------------
-      Serial.print("20;");
-      PrintHexByte(PKSequenceNumber++);
-      Serial.print(F(";SelectPlus;"));              // Label
-      // ----------------------------------
-      sprintf(pbuffer, "ID=%04x;",((bitstream)>>4)&0xffff ); // ID    
-      Serial.print( pbuffer );
-      Serial.print(F("SWITCH=1;CMD=ON;"));  
-      Serial.print(F("CHIME=01;"));
-      Serial.println();
-      //==================================================================================
-      RawSignal.Repeats=true;                       // suppress repeats of the same RF packet
-      RawSignal.Number=0;                           // do not process the packet any further
-  return true;
+        }
+        else
+        {
+            if (RawSignal.Pulses[x] > SELECTPLUS_PULSEMAX)
+                return false; // invalid pulse duration, pulse too long
+            if (RawSignal.Pulses[x + 1] > SELECTPLUS_PULSEMID)
+                return false; // invalid pulse sequence 10/01
+            bitstream = (bitstream << 1) | 0x1;
+        }
+    }
+    if (bitstream == 0)
+        return false; // sanity check
+    //==================================================================================
+    // Prevent repeating signals from showing up
+    //==================================================================================
+    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 2000) < millis()) || (SignalCRC != bitstream))
+    {
+        SignalCRC = bitstream; // not seen the RF packet recently
+    }
+    else
+    {
+        return true; // already seen the RF packet recently
+    }
+    //==================================================================================
+    // all bytes received, make sure checksum is okay
+    //==================================================================================
+    checksum = (bitstream)&0xf; // Second block
+    if (checksum != 0)
+        return false; // last 4 bits should always be 0
+    //==================================================================================
+    // Output
+    // ----------------------------------
+    Serial.print("20;");
+    PrintHexByte(PKSequenceNumber++);
+    Serial.print(F(";SelectPlus;")); // Label
+    // ----------------------------------
+    sprintf(pbuffer, "ID=%04x;", ((bitstream) >> 4) & 0xffff); // ID
+    Serial.print(pbuffer);
+    Serial.print(F("SWITCH=1;CMD=ON;"));
+    Serial.print(F("CHIME=01;"));
+    Serial.println();
+    //==================================================================================
+    RawSignal.Repeats = true; // suppress repeats of the same RF packet
+    RawSignal.Number = 0;     // do not process the packet any further
+    return true;
 }
 #endif // PLUGIN_070
 
 #ifdef PLUGIN_TX_070
 void SelectPlus_Send(unsigned long address);
 
-boolean PluginTX_070(byte function, char *string) {
-        boolean success=false;
-        unsigned long bitstream=0L;  
-        //10;SELECTPLUS;001c33;1;OFF;
-        //012345678901234567890123456
-        if (strncasecmp(InputBuffer_Serial+3,"SELECTPLUS;",11) == 0) { 
-           InputBuffer_Serial[12]=0x30;
-           InputBuffer_Serial[13]=0x78;
-           InputBuffer_Serial[20]=0;
-           bitstream=str2int(InputBuffer_Serial+12); 
-           bitstream=bitstream << 4;
-           SelectPlus_Send(bitstream);                // Send RF packet
-           success=true;                            
-        }
-        return success;
+boolean PluginTX_070(byte function, char *string)
+{
+    boolean success = false;
+    unsigned long bitstream = 0L;
+    //10;SELECTPLUS;001c33;1;OFF;
+    //012345678901234567890123456
+    if (strncasecmp(InputBuffer_Serial + 3, "SELECTPLUS;", 11) == 0)
+    {
+        InputBuffer_Serial[12] = 0x30;
+        InputBuffer_Serial[13] = 0x78;
+        InputBuffer_Serial[20] = 0;
+        bitstream = str2int(InputBuffer_Serial + 12);
+        bitstream = bitstream << 4;
+        SelectPlus_Send(bitstream); // Send RF packet
+        success = true;
+    }
+    return success;
 }
-          
-void SelectPlus_Send(unsigned long address) {
-    int fpulse = 364;                               // Pulse witdh in microseconds
-    int fretrans = 16;                              // number of RF packet retransmissions        
+
+void SelectPlus_Send(unsigned long address)
+{
+    int fpulse = 364;  // Pulse witdh in microseconds
+    int fretrans = 16; // number of RF packet retransmissions
     uint32_t fdatabit;
     uint32_t fdatamask = 0x10000;
     uint32_t fsendbuff;
 
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Power off the RF receiver (if wired that way) to protect against interference
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+    digitalWrite(PIN_RF_RX_VCC, LOW);            // Power off the RF receiver (if wired that way) to protect against interference
+    digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable 433Mhz transmitter
+    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
 
-    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
-        fsendbuff=address;  
+    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
+    {
+        fsendbuff = address;
         // send SYNC 3P High
         digitalWrite(PIN_RF_TX_DATA, HIGH);
         delayMicroseconds(fpulse * 3);
         // end send SYNC
         // Send command
-        for (int i = 0; i < 17;i++) {               // SelectPlus address is only 13 bits, last 4 bits are always zero
+        for (int i = 0; i < 17; i++)
+        { // SelectPlus address is only 13 bits, last 4 bits are always zero
             // read data bit7
-            fdatabit = fsendbuff & fdatamask;       // Get most left bit
-            fsendbuff = (fsendbuff << 1);           // Shift left
+            fdatabit = fsendbuff & fdatamask; // Get most left bit
+            fsendbuff = (fsendbuff << 1);     // Shift left
 
-            if (fdatabit != fdatamask) {            // Write 0
-                digitalWrite(PIN_RF_TX_DATA, LOW);  // short low
+            if (fdatabit != fdatamask)
+            {                                      // Write 0
+                digitalWrite(PIN_RF_TX_DATA, LOW); // short low
                 delayMicroseconds(fpulse * 1);
                 digitalWrite(PIN_RF_TX_DATA, HIGH); // long high
                 delayMicroseconds(fpulse * 3);
-            } else {                                // Write 1
+            }
+            else
+            { // Write 1
                 digitalWrite(PIN_RF_TX_DATA, LOW);
-                delayMicroseconds(fpulse * 3);      // long low
+                delayMicroseconds(fpulse * 3); // long low
                 digitalWrite(PIN_RF_TX_DATA, HIGH);
-                delayMicroseconds(fpulse * 1);      // short high
+                delayMicroseconds(fpulse * 1); // short high
             }
         }
-        digitalWrite(PIN_RF_TX_DATA, LOW);          // and lower the signal
-        if (nRepeat < fretrans) {
-            delayMicroseconds(fpulse * 16);         // delay between RF transmits
+        digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+        if (nRepeat < fretrans)
+        {
+            delayMicroseconds(fpulse * 16); // delay between RF transmits
         }
-
     }
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Disable the 433Mhz transmitter
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Enable the 433Mhz receiver
+    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+    digitalWrite(PIN_RF_TX_VCC, LOW);            // Disable the 433Mhz transmitter
+    digitalWrite(PIN_RF_RX_VCC, HIGH);           // Enable the 433Mhz receiver
     RFLinkHW();
 }
 #endif // PLUGIN_070

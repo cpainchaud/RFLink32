@@ -9,11 +9,12 @@
  *                                  Auriol H13726, Ventus WS155, Hama EWS 1500, Meteoscan W155/W160
  *                                  Alecto WS4500, Ventus W044, Balance RF-WS105
  *
- * Author             : Marc RIVES (aka Couin3), based on StuntTeam RFLink
- * Support            : https://github.com/couin3/RFLink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
- *                      Usage of any parts of this code in a commercial application is prohibited!
- *********************************************************************************************
+ *                      Usage of any parts of this code in a commercial application is prohibited! *********************************************************************************************
  * Technical information :
  * Message Format: (9 nibbles, 36 bits):
  *

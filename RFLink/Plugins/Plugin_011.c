@@ -6,8 +6,10 @@
  * Decodes signals from a Home Confort Smart Home - TEL-010 
  * http://idk.home-confort.net/divers/t%C3%A9l%C3%A9commande-rf-pour-produits-smart-home
  *
- * Author             : StuntTeam, François Pasteau
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam & François Pasteau 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
@@ -55,160 +57,211 @@
 #define HC_PULSECOUNT 100
 
 #ifdef PLUGIN_011
-boolean Plugin_011(byte function, char *string) {
-      if (RawSignal.Number != HC_PULSECOUNT ) return false; 
-      if (RawSignal.Pulses[1]*RawSignal.Multiply < 2000) return false; // First (start) pulse needs to be long
+boolean Plugin_011(byte function, char *string)
+{
+   if (RawSignal.Number != HC_PULSECOUNT)
+      return false;
+   if (RawSignal.Pulses[1] * RawSignal.Multiply < 2000)
+      return false; // First (start) pulse needs to be long
 
-      unsigned long bitstream1=0;                   // holds first 24 bits 
-      unsigned long bitstream2=0;                   // holds last 26 bits
-      byte bitcounter=0;                            // counts number of received bits (converted from pulses)
-      byte command=0;
-      byte channel=0;
-      byte subchan=0;
-      byte group=0;
-      //==================================================================================
-      for(int x=2;x < HC_PULSECOUNT-2;x+=2) {       // get bytes
-         if (RawSignal.Pulses[x]*RawSignal.Multiply > 500) { // long pulse
-            if (RawSignal.Pulses[x]*RawSignal.Multiply > 800) return false;   // Pulse range check
-            if (RawSignal.Pulses[x+1]*RawSignal.Multiply > 400) return false; // Manchester check
-            if (bitcounter < 24) {
-               bitstream1 = (bitstream1 << 1) | 0x1; 
-            } else {
-               bitstream2 = (bitstream2 << 1) | 0x1; 
-            }
-            bitcounter++;                       // only need to count the first 10 bits
-         } else { // short pulse
-            if (RawSignal.Pulses[x]*RawSignal.Multiply > 300) return false;   // pulse range check
-            if (RawSignal.Pulses[x+1]*RawSignal.Multiply < 400) return false; // Manchester check
-            if (bitcounter < 24) {
-               bitstream1 = (bitstream1 << 1);
-            } else {
-               bitstream2 = (bitstream2 << 1);
-            }
-            bitcounter++;                       // only need to count the first 10 bits
-         } 
-         if (bitcounter > 50) break;         
+   unsigned long bitstream1 = 0; // holds first 24 bits
+   unsigned long bitstream2 = 0; // holds last 26 bits
+   byte bitcounter = 0;          // counts number of received bits (converted from pulses)
+   byte command = 0;
+   byte channel = 0;
+   byte subchan = 0;
+   byte group = 0;
+   //==================================================================================
+   for (int x = 2; x < HC_PULSECOUNT - 2; x += 2)
+   { // get bytes
+      if (RawSignal.Pulses[x] * RawSignal.Multiply > 500)
+      { // long pulse
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 800)
+            return false; // Pulse range check
+         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 400)
+            return false; // Manchester check
+         if (bitcounter < 24)
+         {
+            bitstream1 = (bitstream1 << 1) | 0x1;
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1) | 0x1;
+         }
+         bitcounter++; // only need to count the first 10 bits
       }
-      if (RawSignal.Pulses[98]*RawSignal.Multiply > 300) return false;  // pulse range check, last two pulses should be short
-      if (RawSignal.Pulses[99]*RawSignal.Multiply > 300) return false;  // pulse range check
-      //==================================================================================
-      // first perform a check to make sure the packet is valid 
-      byte tempbyte=(bitstream2 >>8) & 0xff; 
-      if (tempbyte != 0x0) return false;            // always 0x00?
-      tempbyte=(bitstream2 >>16) & 0xff; 
-      if (tempbyte != 0x0) return false;            // always 0x00?
-      tempbyte=(bitstream2) & 0x3f; 
-      if (tempbyte != 0x01) return false;           // low 6 bits are always '000001'?
-      //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      if(SignalHash!=SignalHashPrevious || ((RepeatingTimer+1500)<millis()) || SignalCRC != bitstream2 ) { 
-         // not seen the RF packet recently
-         SignalCRC=bitstream2;
-      } else {
-         // already seen the RF packet recently
-         return true;
-      }       
-      //==================================================================================
-      // now process the command / switch settings     
-      //==================================================================================
-      tempbyte=(bitstream1 >> 3) & 0x03;            // determine switch setting (a/b/c/d)
-      channel=0x41; 
-      if (tempbyte==2) channel=0x42; 
-      if (tempbyte==1) channel=0x43; 
-      if (tempbyte==3) channel=0x44; 
-
-      subchan=((bitstream1)&0x03)+1;                // determine button number
-      
-      command=(bitstream2 >> 7) & 0x01;             // on/off command
-      group=(bitstream2 >> 6) & 0x01;               // group setting
-      
-      bitstream1=bitstream1 >> 5;
-      //==================================================================================
-      // Output
-      // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number 
-      Serial.print( pbuffer );
-      Serial.print(F("HomeConfort;"));              // Label
-      sprintf(pbuffer, "ID=%06lx;",((bitstream1) &0xffffff) );   // ID   
-      Serial.print( pbuffer );
-      sprintf(pbuffer, "SWITCH=%c%d;", channel,subchan);    
-      Serial.print( pbuffer );
-      Serial.print(F("CMD="));
-      if (group==1) Serial.print(F("ALL"));
-      if (command==0) Serial.print(F("OFF;")); 
-      if (command==1) Serial.print(F("ON;"));
-      Serial.println();
-      //==================================================================================
-      RawSignal.Repeats=true;                       // suppress repeats of the same RF packet
-      RawSignal.Number=0;
+      else
+      { // short pulse
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 300)
+            return false; // pulse range check
+         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply < 400)
+            return false; // Manchester check
+         if (bitcounter < 24)
+         {
+            bitstream1 = (bitstream1 << 1);
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1);
+         }
+         bitcounter++; // only need to count the first 10 bits
+      }
+      if (bitcounter > 50)
+         break;
+   }
+   if (RawSignal.Pulses[98] * RawSignal.Multiply > 300)
+      return false; // pulse range check, last two pulses should be short
+   if (RawSignal.Pulses[99] * RawSignal.Multiply > 300)
+      return false; // pulse range check
+   //==================================================================================
+   // first perform a check to make sure the packet is valid
+   byte tempbyte = (bitstream2 >> 8) & 0xff;
+   if (tempbyte != 0x0)
+      return false; // always 0x00?
+   tempbyte = (bitstream2 >> 16) & 0xff;
+   if (tempbyte != 0x0)
+      return false; // always 0x00?
+   tempbyte = (bitstream2)&0x3f;
+   if (tempbyte != 0x01)
+      return false; // low 6 bits are always '000001'?
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   if (SignalHash != SignalHashPrevious || ((RepeatingTimer + 1500) < millis()) || SignalCRC != bitstream2)
+   {
+      // not seen the RF packet recently
+      SignalCRC = bitstream2;
+   }
+   else
+   {
+      // already seen the RF packet recently
       return true;
+   }
+   //==================================================================================
+   // now process the command / switch settings
+   //==================================================================================
+   tempbyte = (bitstream1 >> 3) & 0x03; // determine switch setting (a/b/c/d)
+   channel = 0x41;
+   if (tempbyte == 2)
+      channel = 0x42;
+   if (tempbyte == 1)
+      channel = 0x43;
+   if (tempbyte == 3)
+      channel = 0x44;
+
+   subchan = ((bitstream1)&0x03) + 1; // determine button number
+
+   command = (bitstream2 >> 7) & 0x01; // on/off command
+   group = (bitstream2 >> 6) & 0x01;   // group setting
+
+   bitstream1 = bitstream1 >> 5;
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+   Serial.print(pbuffer);
+   Serial.print(F("HomeConfort;"));                        // Label
+   sprintf(pbuffer, "ID=%06lx;", ((bitstream1)&0xffffff)); // ID
+   Serial.print(pbuffer);
+   sprintf(pbuffer, "SWITCH=%c%d;", channel, subchan);
+   Serial.print(pbuffer);
+   Serial.print(F("CMD="));
+   if (group == 1)
+      Serial.print(F("ALL"));
+   if (command == 0)
+      Serial.print(F("OFF;"));
+   if (command == 1)
+      Serial.print(F("ON;"));
+   Serial.println();
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // PLUGIN_011
 
 #ifdef PLUGIN_TX_011
 void HomeConfort_Send(unsigned long bitstream1, unsigned long bitstream2);
 
-boolean PluginTX_011(byte function, char *string) {
-        boolean success=false;
-        //10;HomeConfort;01b523;D3;ON;
-        //0123456789012345678901234567
-        if (strncasecmp(InputBuffer_Serial+3,"HomeConfort;",12) == 0) { // KAKU Command eg. 
-           if (InputBuffer_Serial[21] != ';') return success;
-          
-           InputBuffer_Serial[13]=0x30;
-           InputBuffer_Serial[14]=0x78;                            // Get address from hexadecimal value 
-           InputBuffer_Serial[21]=0x00;                            // Get address from hexadecimal value 
+boolean PluginTX_011(byte function, char *string)
+{
+   boolean success = false;
+   //10;HomeConfort;01b523;D3;ON;
+   //0123456789012345678901234567
+   if (strncasecmp(InputBuffer_Serial + 3, "HomeConfort;", 12) == 0)
+   { // KAKU Command eg.
+      if (InputBuffer_Serial[21] != ';')
+         return success;
 
-           unsigned long bitstream1=0L;                            // First Main placeholder
-           unsigned long bitstream2=0L;                            // Second Main placeholder
-           byte Home=0;                                            // channel A..D
-           byte Address=0;                                         // subchannel 1..5
-           byte c;
-           byte x=22;                                              // pointer
-           // -------------------------------
-           bitstream1=str2int(InputBuffer_Serial+13);              // Address (first 19 bits)
-           // -------------------------------
-           while((c=tolower(InputBuffer_Serial[x++]))!=';') {
-                 if(c>='0' && c<='9'){Address=Address+c-'0';}      // Home 0..9
-                 if(c>='a' && c<='d'){Home=c-'a';}                 // Address a..d
-           }
-           // -------------------------------
-           // prepare bitstream1
-           // -------------------------------
-           bitstream1 = bitstream1 << 5;                           // make space for first 5 command bits 
-           Address--;                                              // 1..4 to 0..3
-           Address=Address & 0x03;                                 // only accept 2 bits for the button number part 
-           bitstream1=bitstream1+Address;
-           
-           if (Home == 0) c=0;                                     // A
-           if (Home == 1) c=2;                                     // B
-           if (Home == 2) c=1;                                     // C
-           if (Home == 3) c=3;                                     // D
-           Home=c << 3;                                            // shift left for the right position
-           bitstream1=bitstream1+Home;
-           // -------------------------------
-           // prepare bitsrteam2
-           c=0;
-           c = str2cmd(InputBuffer_Serial+x);                      // ON/OFF command
-           bitstream2=1;                                           // value off     
-           if (c == VALUE_ON) { 
-              bitstream2=0x81;                                     // value on
-           } else {
-              if (c == VALUE_ALLOFF) { 
-                 bitstream2=0x41;
-                 bitstream1=bitstream1+4;                          // set group
-              } else
-              if (c == VALUE_ALLON) { 
-                 bitstream2=0xc1;
-                 bitstream1=bitstream1+4;                          // set group
-              } 
-           }
-           // -------------------------------
-           HomeConfort_Send(bitstream1,bitstream2);                // bitstream to send
-           success=true;
-        }
-        return success;
+      InputBuffer_Serial[13] = 0x30;
+      InputBuffer_Serial[14] = 0x78; // Get address from hexadecimal value
+      InputBuffer_Serial[21] = 0x00; // Get address from hexadecimal value
+
+      unsigned long bitstream1 = 0L; // First Main placeholder
+      unsigned long bitstream2 = 0L; // Second Main placeholder
+      byte Home = 0;                 // channel A..D
+      byte Address = 0;              // subchannel 1..5
+      byte c;
+      byte x = 22; // pointer
+      // -------------------------------
+      bitstream1 = str2int(InputBuffer_Serial + 13); // Address (first 19 bits)
+      // -------------------------------
+      while ((c = tolower(InputBuffer_Serial[x++])) != ';')
+      {
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address + c - '0';
+         } // Home 0..9
+         if (c >= 'a' && c <= 'd')
+         {
+            Home = c - 'a';
+         } // Address a..d
+      }
+      // -------------------------------
+      // prepare bitstream1
+      // -------------------------------
+      bitstream1 = bitstream1 << 5; // make space for first 5 command bits
+      Address--;                    // 1..4 to 0..3
+      Address = Address & 0x03;     // only accept 2 bits for the button number part
+      bitstream1 = bitstream1 + Address;
+
+      if (Home == 0)
+         c = 0; // A
+      if (Home == 1)
+         c = 2; // B
+      if (Home == 2)
+         c = 1; // C
+      if (Home == 3)
+         c = 3;      // D
+      Home = c << 3; // shift left for the right position
+      bitstream1 = bitstream1 + Home;
+      // -------------------------------
+      // prepare bitsrteam2
+      c = 0;
+      c = str2cmd(InputBuffer_Serial + x); // ON/OFF command
+      bitstream2 = 1;                      // value off
+      if (c == VALUE_ON)
+      {
+         bitstream2 = 0x81; // value on
+      }
+      else
+      {
+         if (c == VALUE_ALLOFF)
+         {
+            bitstream2 = 0x41;
+            bitstream1 = bitstream1 + 4; // set group
+         }
+         else if (c == VALUE_ALLON)
+         {
+            bitstream2 = 0xc1;
+            bitstream1 = bitstream1 + 4; // set group
+         }
+      }
+      // -------------------------------
+      HomeConfort_Send(bitstream1, bitstream2); // bitstream to send
+      success = true;
+   }
+   return success;
 }
 /*
 void HomeConfort_Send(unsigned long data1, unsigned long data2) { 
@@ -395,50 +448,60 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
     2490,180,630,150,630,600,180,600,180,150,630,600,180,600,180,150,630,630,180,150,630,630,180,150,630,150,630,630,180,150,630,150,630,150,630,630,180,600,180,600,180,600,180,150,630,600,180,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,150,630,630,180,180,60,6990;
 */
 
-#define PLUGIN_011_RFLOW        270                   // 300
-#define PLUGIN_011_RFHIGH       720                   // 800
+#define PLUGIN_011_RFLOW 270  // 300
+#define PLUGIN_011_RFHIGH 720 // 800
 
-void HomeConfort_Send(unsigned long bitstream1, unsigned long bitstream2) { 
-     RawSignal.Repeats=8;                            // Number of RF packet retransmits
-     RawSignal.Delay=125;                             // Delay between RF packets
-     RawSignal.Number=100;                            // Length
+void HomeConfort_Send(unsigned long bitstream1, unsigned long bitstream2)
+{
+   RawSignal.Repeats = 8;  // Number of RF packet retransmits
+   RawSignal.Delay = 125;  // Delay between RF packets
+   RawSignal.Number = 100; // Length
 
-     uint32_t fdatabit;
-     uint32_t fdatamask = 0x800000;
-     // -------------------------------
-     // bitstream1 holds first 24 bits of the RF data, bitstream2 holds last 24 bits of the RF data
-     // -------------------------------
-     RawSignal.Pulses[1]=2600/RawSignal.Multiply;
-     
-     for (byte i=2; i<103; i=i+2) {
-         if (i<50) {                                  // first 24 bits
-            fdatabit = bitstream1 & fdatamask;        // Get most left bit
-            bitstream1 = (bitstream1 << 1);           // Shift left
+   uint32_t fdatabit;
+   uint32_t fdatamask = 0x800000;
+   // -------------------------------
+   // bitstream1 holds first 24 bits of the RF data, bitstream2 holds last 24 bits of the RF data
+   // -------------------------------
+   RawSignal.Pulses[1] = 2600 / RawSignal.Multiply;
 
-            if (fdatabit != fdatamask) {              // Write 0
-               RawSignal.Pulses[i]  = PLUGIN_011_RFLOW/RawSignal.Multiply;
-               RawSignal.Pulses[i+1]= PLUGIN_011_RFHIGH/RawSignal.Multiply;
-            } else {                                  // Write 1
-               RawSignal.Pulses[i]  = PLUGIN_011_RFHIGH/RawSignal.Multiply;
-               RawSignal.Pulses[i+1]= PLUGIN_011_RFLOW/RawSignal.Multiply;
-            }  
-         } else {   
-            fdatabit = bitstream2 & fdatamask;        // Get most left bit
-            bitstream2 = (bitstream2 << 1);           // Shift left
+   for (byte i = 2; i < 103; i = i + 2)
+   {
+      if (i < 50)
+      {                                     // first 24 bits
+         fdatabit = bitstream1 & fdatamask; // Get most left bit
+         bitstream1 = (bitstream1 << 1);    // Shift left
 
-            if (fdatabit != fdatamask) {              // Write 0
-               RawSignal.Pulses[i]  = PLUGIN_011_RFLOW/RawSignal.Multiply;
-               RawSignal.Pulses[i+1]= PLUGIN_011_RFHIGH/RawSignal.Multiply;
-            } else {                                  // Write 1
-               RawSignal.Pulses[i]  = PLUGIN_011_RFHIGH/RawSignal.Multiply;
-               RawSignal.Pulses[i+1]= PLUGIN_011_RFLOW/RawSignal.Multiply;
-            }  
+         if (fdatabit != fdatamask)
+         { // Write 0
+            RawSignal.Pulses[i] = PLUGIN_011_RFLOW / RawSignal.Multiply;
+            RawSignal.Pulses[i + 1] = PLUGIN_011_RFHIGH / RawSignal.Multiply;
          }
-     }
-     RawSignal.Pulses[98]=300/RawSignal.Multiply;
-     RawSignal.Pulses[99]=175/RawSignal.Multiply;
-     
-     RawSendRF();
+         else
+         { // Write 1
+            RawSignal.Pulses[i] = PLUGIN_011_RFHIGH / RawSignal.Multiply;
+            RawSignal.Pulses[i + 1] = PLUGIN_011_RFLOW / RawSignal.Multiply;
+         }
+      }
+      else
+      {
+         fdatabit = bitstream2 & fdatamask; // Get most left bit
+         bitstream2 = (bitstream2 << 1);    // Shift left
+
+         if (fdatabit != fdatamask)
+         { // Write 0
+            RawSignal.Pulses[i] = PLUGIN_011_RFLOW / RawSignal.Multiply;
+            RawSignal.Pulses[i + 1] = PLUGIN_011_RFHIGH / RawSignal.Multiply;
+         }
+         else
+         { // Write 1
+            RawSignal.Pulses[i] = PLUGIN_011_RFHIGH / RawSignal.Multiply;
+            RawSignal.Pulses[i + 1] = PLUGIN_011_RFLOW / RawSignal.Multiply;
+         }
+      }
+   }
+   RawSignal.Pulses[98] = 300 / RawSignal.Multiply;
+   RawSignal.Pulses[99] = 175 / RawSignal.Multiply;
+
+   RawSendRF();
 }
 #endif // PLUGIN_TX_011
-

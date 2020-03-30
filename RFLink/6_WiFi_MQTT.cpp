@@ -1,6 +1,12 @@
+// ************************************* //
+// * Arduino Project RFLink-esp        * //
+// * https://github.com/couin3/RFLink  * //
+// * 2018..2020 Stormteam - Marc RIVES * //
+// * More details in RFLink.ino file   * //
+// ************************************* //
+
 #include <Arduino.h>
 #include "RFLink.h"
-//#include "1_Base.h"
 #include "6_WiFi_MQTT.h"
 
 #ifdef ESP32

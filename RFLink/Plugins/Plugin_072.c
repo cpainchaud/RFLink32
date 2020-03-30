@@ -5,8 +5,10 @@
 /*********************************************************************************************\
  * This Plugin takes care of reception And sending of the Byron SX doorbell
  *
- * Author             : Maurice Ruiter (Dodge)
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : Maurice Ruiter (Dodge) 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
@@ -30,110 +32,132 @@
 #define PLUGIN_ID 72
 #define BYRON_PULSECOUNT 26
 
-#define BYRONSTART                 3000
-#define BYRONSPACE                 250
-#define BYRONLOW                   350
-#define BYRONHIGH                  675
+#define BYRONSTART 3000
+#define BYRONSPACE 250
+#define BYRONLOW 350
+#define BYRONHIGH 675
 
 #ifdef PLUGIN_072
-boolean Plugin_072(byte function, char *string){
-      if (RawSignal.Number !=BYRON_PULSECOUNT) return false;
-      if (RawSignal.Pulses[0] != PLUGIN_ID) return false; // only accept plugin1 translated packets
-      if (RawSignal.Pulses[1]*RAWSIGNAL_SAMPLE_RATE > 425) return false; // first pulse is start bit and must be short
-      unsigned long bitstream=0L;                    
-      //==================================================================================
-      for(byte x=2;x < BYRON_PULSECOUNT-1;x=x+2) {
-         if (RawSignal.Pulses[x]*RAWSIGNAL_SAMPLE_RATE < 350) {                  // 200-275 (150-350 is accepted)
-            if (RawSignal.Pulses[x]*RAWSIGNAL_SAMPLE_RATE < 150) return false;   // pulse too short
-            if (RawSignal.Pulses[x+1]*RAWSIGNAL_SAMPLE_RATE < 350) return false; // bad manchester code
-            bitstream = (bitstream << 1);
-         } else {                                                             // 500-575 (450-650 is accepted)
-            if (RawSignal.Pulses[x+1]*RAWSIGNAL_SAMPLE_RATE > 450) return false; // bad manchester code
-            if (RawSignal.Pulses[x]*RAWSIGNAL_SAMPLE_RATE < 450) return false;   // pulse too short
-            if (RawSignal.Pulses[x]*RAWSIGNAL_SAMPLE_RATE > 650) return false;   // pulse too long
-            bitstream = (bitstream << 1) | 0x1;
-         }         
+boolean Plugin_072(byte function, char *string)
+{
+   if (RawSignal.Number != BYRON_PULSECOUNT)
+      return false;
+   if (RawSignal.Pulses[0] != PLUGIN_ID)
+      return false; // only accept plugin1 translated packets
+   if (RawSignal.Pulses[1] * RAWSIGNAL_SAMPLE_RATE > 425)
+      return false; // first pulse is start bit and must be short
+   unsigned long bitstream = 0L;
+   //==================================================================================
+   for (byte x = 2; x < BYRON_PULSECOUNT - 1; x = x + 2)
+   {
+      if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 350)
+      { // 200-275 (150-350 is accepted)
+         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 150)
+            return false; // pulse too short
+         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE < 350)
+            return false; // bad manchester code
+         bitstream = (bitstream << 1);
       }
-      //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer+1000<millis()) ){ 
-         // not seen the RF packet recently
-         if (bitstream == 0) return false;            // sanity check
-      } else {
-         // already seen the RF packet recently
-         return true;
+      else
+      { // 500-575 (450-650 is accepted)
+         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE > 450)
+            return false; // bad manchester code
+         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 450)
+            return false; // pulse too short
+         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 650)
+            return false; // pulse too long
+         bitstream = (bitstream << 1) | 0x1;
       }
-      //==================================================================================
-      // Output
-      // ----------------------------------
-      Serial.print("20;");
-      PrintHexByte(PKSequenceNumber++);
-      Serial.print(F(";Byron SX;"));                       // Label
-      // ----------------------------------
-      sprintf(pbuffer, "ID=%04x;", ((bitstream)>>4)&0xff);// ID      
-      Serial.print( pbuffer );
-      Serial.print(F("SWITCH=1;CMD=ON;"));  
-      sprintf(pbuffer, "CHIME=%02x;", (bitstream)&0xf);   // chime number
-      Serial.print( pbuffer );
-      Serial.println();
-      //==================================================================================
-      RawSignal.Repeats=true;                    // suppress repeats of the same RF packet         
-      RawSignal.Number=0;
+   }
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()))
+   {
+      // not seen the RF packet recently
+      if (bitstream == 0)
+         return false; // sanity check
+   }
+   else
+   {
+      // already seen the RF packet recently
       return true;
+   }
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   Serial.print("20;");
+   PrintHexByte(PKSequenceNumber++);
+   Serial.print(F(";Byron SX;")); // Label
+   // ----------------------------------
+   sprintf(pbuffer, "ID=%04x;", ((bitstream) >> 4) & 0xff); // ID
+   Serial.print(pbuffer);
+   Serial.print(F("SWITCH=1;CMD=ON;"));
+   sprintf(pbuffer, "CHIME=%02x;", (bitstream)&0xf); // chime number
+   Serial.print(pbuffer);
+   Serial.println();
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // PLUGIN_072
 
 #ifdef PLUGIN_TX_072
-boolean PluginTX_072(byte function, char *string) {
-       boolean success=false;
-       //10;BYRON;112233;01;OFF;
-       //01234567890123456789012
-       if (strncasecmp(InputBuffer_Serial+3,"BYRON;",5) == 0) { // KAKU Command eg. 
-          if (InputBuffer_Serial[15] != ';') return false;
-      
-          InputBuffer_Serial[9]='0';
-          InputBuffer_Serial[10]='x';
-          InputBuffer_Serial[15]=0;
-          unsigned int tempbyte1=0;
-          tempbyte1=str2int(InputBuffer_Serial+9);  // get parameter 1
-          
-          int tempbyte2=0;
-          InputBuffer_Serial[14]='0';
-          InputBuffer_Serial[15]='x';
-          InputBuffer_Serial[18]=0;
-          tempbyte2=str2int(InputBuffer_Serial+14);  // get parameter 2
-          //-----------------------------------------------
-          unsigned long bitstream1=tempbyte1;       // address
-          unsigned long bitstream=tempbyte2;        // ringtone
-        
-          RawSignal.Multiply=50;
-          RawSignal.Repeats=20;
-          RawSignal.Delay=3;  // 1 = 900 3=2825  5=  6= x
-          RawSignal.Pulses[1]=BYRONLOW/RawSignal.Multiply;
-          //RawSignal.Pulses[1]=BYRONSTART/RawSignal.Multiply;
-          for (byte x=17;x>=2;x=x-1) {
-              if ((bitstream1 & 1) == 1) 
-                 RawSignal.Pulses[x] = BYRONHIGH/RawSignal.Multiply;
-              else 
-                 RawSignal.Pulses[x] = BYRONLOW/RawSignal.Multiply;
-              bitstream1 = bitstream1 >> 1;
-          }
-          for (byte x=25;x>=18;x=x-1) {
-              if ((bitstream & 1) == 1) 
-                 RawSignal.Pulses[x] = BYRONHIGH/RawSignal.Multiply;
-              else 
-                 RawSignal.Pulses[x] = BYRONLOW/RawSignal.Multiply;
-              bitstream = bitstream >> 1;
-          }
-          //RawSignal.Pulses[26]=BYRONSTART/RawSignal.Multiply;
-          RawSignal.Pulses[26]=BYRONSPACE/RawSignal.Multiply;
-          RawSignal.Number=26;
-          RawSendRF();
-          RawSignal.Multiply=RAWSIGNAL_SAMPLE_RATE;
-          success=true;        
-          //-----------------------------------------------
-       }
-       return success;
+boolean PluginTX_072(byte function, char *string)
+{
+   boolean success = false;
+   //10;BYRON;112233;01;OFF;
+   //01234567890123456789012
+   if (strncasecmp(InputBuffer_Serial + 3, "BYRON;", 5) == 0)
+   { // KAKU Command eg.
+      if (InputBuffer_Serial[15] != ';')
+         return false;
+
+      InputBuffer_Serial[9] = '0';
+      InputBuffer_Serial[10] = 'x';
+      InputBuffer_Serial[15] = 0;
+      unsigned int tempbyte1 = 0;
+      tempbyte1 = str2int(InputBuffer_Serial + 9); // get parameter 1
+
+      int tempbyte2 = 0;
+      InputBuffer_Serial[14] = '0';
+      InputBuffer_Serial[15] = 'x';
+      InputBuffer_Serial[18] = 0;
+      tempbyte2 = str2int(InputBuffer_Serial + 14); // get parameter 2
+      //-----------------------------------------------
+      unsigned long bitstream1 = tempbyte1; // address
+      unsigned long bitstream = tempbyte2;  // ringtone
+
+      RawSignal.Multiply = 50;
+      RawSignal.Repeats = 20;
+      RawSignal.Delay = 3; // 1 = 900 3=2825  5=  6= x
+      RawSignal.Pulses[1] = BYRONLOW / RawSignal.Multiply;
+      //RawSignal.Pulses[1]=BYRONSTART/RawSignal.Multiply;
+      for (byte x = 17; x >= 2; x = x - 1)
+      {
+         if ((bitstream1 & 1) == 1)
+            RawSignal.Pulses[x] = BYRONHIGH / RawSignal.Multiply;
+         else
+            RawSignal.Pulses[x] = BYRONLOW / RawSignal.Multiply;
+         bitstream1 = bitstream1 >> 1;
+      }
+      for (byte x = 25; x >= 18; x = x - 1)
+      {
+         if ((bitstream & 1) == 1)
+            RawSignal.Pulses[x] = BYRONHIGH / RawSignal.Multiply;
+         else
+            RawSignal.Pulses[x] = BYRONLOW / RawSignal.Multiply;
+         bitstream = bitstream >> 1;
+      }
+      //RawSignal.Pulses[26]=BYRONSTART/RawSignal.Multiply;
+      RawSignal.Pulses[26] = BYRONSPACE / RawSignal.Multiply;
+      RawSignal.Number = 26;
+      RawSendRF();
+      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+      success = true;
+      //-----------------------------------------------
+   }
+   return success;
 }
 #endif // PLUGIN_TX_072

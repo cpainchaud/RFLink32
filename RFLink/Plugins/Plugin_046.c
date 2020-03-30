@@ -6,8 +6,10 @@
  * This plugin takes care of decoding the Auriol protocol for sensor type Z31055A-TX and Xiron 
  * Watshome YT6018-2 (From Fujian Youtong)
  * 
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
@@ -46,151 +48,186 @@
 #define AURIOLV2_PULSECOUNT 74
 
 #ifdef PLUGIN_046
-boolean Plugin_046(byte function, char *string) {
-	  //Serial.print("RawSignal.Number: ");
-	  //Serial.println(RawSignal.Number);
-      if ((RawSignal.Number) != AURIOLV2_PULSECOUNT) return false;
-      unsigned long bitstream1=0L;
-      unsigned long bitstream2=0L;
-      byte rc=0;
-      byte bat=0;
-      byte bat0=0;
-      int temperature=0;
-      int humidity=0;
-      byte channel=0;
-	  byte bitcounter=1; // 1st bit skipped! (hence forced to 0)
-      byte type=0;
-      //==================================================================================
-      // get all the bits we need (36 bits)
-      for(byte x=4; x < (AURIOLV2_PULSECOUNT);x+=2) {
-		 /*
+boolean Plugin_046(byte function, char *string)
+{
+   //Serial.print("RawSignal.Number: ");
+   //Serial.println(RawSignal.Number);
+   if ((RawSignal.Number) != AURIOLV2_PULSECOUNT)
+      return false;
+   unsigned long bitstream1 = 0L;
+   unsigned long bitstream2 = 0L;
+   byte rc = 0;
+   byte bat = 0;
+   byte bat0 = 0;
+   int temperature = 0;
+   int humidity = 0;
+   byte channel = 0;
+   byte bitcounter = 1; // 1st bit skipped! (hence forced to 0)
+   byte type = 0;
+   //==================================================================================
+   // get all the bits we need (36 bits)
+   for (byte x = 4; x < (AURIOLV2_PULSECOUNT); x += 2)
+   {
+      /*
   		   Serial.print(x/2);
 	       Serial.print("\t");
 	       Serial.print(RawSignal.Pulses[x+1]*RawSignal.Multiply);
 		   Serial.print("\t");
 	       Serial.println(RawSignal.Pulses[x]*RawSignal.Multiply);
 		 */
-		 if (RawSignal.Pulses[x+1]*RawSignal.Multiply > 700) return false;
-         if (RawSignal.Pulses[x]*RawSignal.Multiply > 1400) {
-            if (RawSignal.Pulses[x]*RawSignal.Multiply > 2100) return false;
-            if (bitcounter < 24) {
-               bitstream1 = (bitstream1 << 1) | 0x1;
-               bitcounter++;                        // only need to count the first 10 bits
-            } else {
-               bitstream2 = (bitstream2 << 1) | 0x1;
-            }
-         } else {
-            if (RawSignal.Pulses[x]*RawSignal.Multiply > 1100) return false;
-            if (RawSignal.Pulses[x]*RawSignal.Multiply < 500) return false;
-            if (bitcounter < 24) {
-               bitstream1 = (bitstream1 << 1); 
-               bitcounter++;                        // only need to count the first 10 bits
-            } else {
-               bitstream2 = (bitstream2 << 1); 
-            }
+      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
+         return false;
+      if (RawSignal.Pulses[x] * RawSignal.Multiply > 1400)
+      {
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2100)
+            return false;
+         if (bitcounter < 24)
+         {
+            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitcounter++; // only need to count the first 10 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1) | 0x1;
          }
       }
-	  
-	  //==================================================================================
-      // Prevent repeating signals from showing up
-      //==================================================================================
-      if(((RepeatingTimer+700)<millis() ) || SignalCRC != bitstream1)
-	  {
-	  	  /*
+      else
+      {
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 1100)
+            return false;
+         if (RawSignal.Pulses[x] * RawSignal.Multiply < 500)
+            return false;
+         if (bitcounter < 24)
+         {
+            bitstream1 = (bitstream1 << 1);
+            bitcounter++; // only need to count the first 10 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1);
+         }
+      }
+   }
+
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   if (((RepeatingTimer + 700) < millis()) || SignalCRC != bitstream1)
+   {
+      /*
 		  Serial.print("\nBitstream :");
 	  	  Serial.print(bitstream1, HEX);
 	  	  Serial.print("\t");
 	  	  Serial.println(bitstream2, HEX);
 		  */
       //==================================================================================
-      if (bitstream1==0) return false;              // Perform sanity check
-      if ((bitstream2 & 0xF00) != 0xF00) return false; // check if 'E' has all 4 bits set
-      if ((bitstream2 & 0xfff) != 0xF00) { 
-         type=1;                                    // Xiron
-         // if (RawSignal.Pulses[0] != PLUGIN_ID) {    
+      if (bitstream1 == 0)
+         return false; // Perform sanity check
+      if ((bitstream2 & 0xF00) != 0xF00)
+         return false; // check if 'E' has all 4 bits set
+      if ((bitstream2 & 0xfff) != 0xF00)
+      {
+         type = 1; // Xiron
+         // if (RawSignal.Pulses[0] != PLUGIN_ID) {
          //   return false;                         // only accept plugin_001 translated Xiron packets
          // }
-      } else {
-         type=0;                                    // Auriol
-         rc = (bitstream1 >> 12) & 0x07;            // get 3 bits
-         if (rc != 0) return false;                 // should always be '000'
+      }
+      else
+      {
+         type = 0;                       // Auriol
+         rc = (bitstream1 >> 12) & 0x07; // get 3 bits
+         if (rc != 0)
+            return false; // should always be '000'
       }
       //==================================================================================
-      bat= (bitstream1 >> 15) & 0x01;               // get battery strength indicator
-	  bat0= (bitstream1 >> 14) & 0x01;              // get blank battery strength indicator
-	  if (bat0 != 0) return false;                  // blank bat must be 0
-      rc = (bitstream1 >> 16) & 0xff;               // get rolling code
-      channel = ((bitstream1 >> 12) & 0x3)+1;       // channel indicator
-	  if (channel > 3) return false;                // channel out of range
-      temperature = (bitstream1) & 0xfff;           // get 12 temperature bits
-      if (temperature > 3000) {
-         temperature=4096-temperature;              // fix for minus temperatures
-         if (temperature > 0x258) return false;     // temperature out of range ( > -60.0 degrees) 
-         temperature=temperature | 0x8000;          // turn highest bit on for minus values
-      } else {      
-         if (temperature > 0x258) return false;     // temperature out of range ( > 60.0 degrees) 
+      bat = (bitstream1 >> 15) & 0x01;  // get battery strength indicator
+      bat0 = (bitstream1 >> 14) & 0x01; // get blank battery strength indicator
+      if (bat0 != 0)
+         return false;                          // blank bat must be 0
+      rc = (bitstream1 >> 16) & 0xff;           // get rolling code
+      channel = ((bitstream1 >> 12) & 0x3) + 1; // channel indicator
+      if (channel > 3)
+         return false;                  // channel out of range
+      temperature = (bitstream1)&0xfff; // get 12 temperature bits
+      if (temperature > 3000)
+      {
+         temperature = 4096 - temperature; // fix for minus temperatures
+         if (temperature > 0x258)
+            return false;                    // temperature out of range ( > -60.0 degrees)
+         temperature = temperature | 0x8000; // turn highest bit on for minus values
       }
-      if (type == 1) {
-         humidity = (bitstream2) & 0xff ;           // humidity
-		 if (humidity > 100) return false;         // humidity out of range ( > 100)
+      else
+      {
+         if (temperature > 0x258)
+            return false; // temperature out of range ( > 60.0 degrees)
+      }
+      if (type == 1)
+      {
+         humidity = (bitstream2)&0xff; // humidity
+         if (humidity > 100)
+            return false; // humidity out of range ( > 100)
       }
       //==================================================================================
       // Output
       // ----------------------------------
 
-
       //sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++);
       //Serial.print( pbuffer );
-	  //strcat(MQTTbuffer, pbuffer);
+      //strcat(MQTTbuffer, pbuffer);
 
-	  //Serial.print("20;");
-	  //PrintHexByte(PKSequenceNumber++);
-	  sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-      Serial.print( pbuffer );
-	  strcat(MQTTbuffer, pbuffer);
-	  
-      if (type == 0) {
-           //Serial.print(F(";Auriol V2;ID="));         // Label
-		   sprintf_P(pbuffer, PSTR("%S"), F(";Auriol V2;ID="));
-        } else {
-           //Serial.print(F(";Xiron;ID="));             // Label
-		   sprintf_P(pbuffer, PSTR("%S"), F(";Xiron;ID="));
-        }
-	  Serial.print( pbuffer );
-	  strcat(MQTTbuffer, pbuffer);
-		
-	  //PrintHexByte(rc);
-	  //PrintHexByte(channel);
-	  // ----------------------------------
-      //sprintf(pbuffer, ";TEMP=%04x;", temperature);  
-	  sprintf_P(pbuffer, PSTR("%02X%02X%S%04x"), rc, channel, F(";TEMP="), temperature);
-	  Serial.print( pbuffer );
-	  strcat(MQTTbuffer, pbuffer);
-	  
-	  if (type == 1) {
-         sprintf_P(pbuffer, PSTR("%S%02d"), F(";HUM="), humidity);     
-         Serial.print( pbuffer );
-		 strcat(MQTTbuffer, pbuffer);
+      //Serial.print("20;");
+      //PrintHexByte(PKSequenceNumber++);
+      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+
+      if (type == 0)
+      {
+         //Serial.print(F(";Auriol V2;ID="));         // Label
+         sprintf_P(pbuffer, PSTR("%S"), F(";Auriol V2;ID="));
       }
-      if (bat==0) {                                 // battery status
-         //Serial.print(F(";BAT=LOW;"));
-         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=LOW;"));     
+      else
+      {
+         //Serial.print(F(";Xiron;ID="));             // Label
+         sprintf_P(pbuffer, PSTR("%S"), F(";Xiron;ID="));
+      }
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
 
-      } else {
+      //PrintHexByte(rc);
+      //PrintHexByte(channel);
+      // ----------------------------------
+      //sprintf(pbuffer, ";TEMP=%04x;", temperature);
+      sprintf_P(pbuffer, PSTR("%02X%02X%S%04x"), rc, channel, F(";TEMP="), temperature);
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+
+      if (type == 1)
+      {
+         sprintf_P(pbuffer, PSTR("%S%02d"), F(";HUM="), humidity);
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
+      }
+      if (bat == 0)
+      { // battery status
+         //Serial.print(F(";BAT=LOW;"));
+         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=LOW;"));
+      }
+      else
+      {
          //Serial.print(F(";BAT=OK;"));
-         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=OK;"));     
+         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=OK;"));
       }
 
       strcat(pbuffer, "\r\n");
-      Serial.print( pbuffer );
+      Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
 
       SignalCRC = bitstream1;
-	 } 
-        //==================================================================================
-        RawSignal.Repeats=true;                       // suppress repeats of the same RF packet 
-        RawSignal.Number=0;
-        return true;
-
+   }
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // PLUGIN_046

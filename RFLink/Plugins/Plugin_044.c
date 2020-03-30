@@ -5,8 +5,10 @@
 /*********************************************************************************************\
  * This plugin takes care of decoding the Auriol protocol for sensor type Z32171A
  * 
- * Author             : StuntTeam
- * Support            : http://sourceforge.net/projects/rflink/
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
@@ -35,77 +37,102 @@
 #define AURIOLV3_PULSECOUNT 82
 
 #ifdef PLUGIN_044
-boolean Plugin_044(byte function, char *string) {
-      if (RawSignal.Number != AURIOLV3_PULSECOUNT) return false;
-      unsigned long bitstream1=0L;
-      unsigned long bitstream2=0L;
-      byte rc=0;
-      byte channel=0;
-	  byte bitcounter=0;
-      unsigned long temperature=0;
-      byte humidity=0;
-      //==================================================================================
-      // get all the bits we need (40 bits)
-      for(int x=2;x < AURIOLV3_PULSECOUNT;x+=2) {
-        if (RawSignal.Pulses[x+1]*RawSignal.Multiply > 650) return false;
-        if (RawSignal.Pulses[x]*RawSignal.Multiply > 3500) {
-            if (bitcounter < 16) {
-               bitstream1 = (bitstream1 << 1) | 0x1;
-               bitcounter++;                        // only need to count the first 10 bits
-            } else {
-               bitstream2 = (bitstream2 << 1) | 0x1;
-            }
-         } else {
-            if (RawSignal.Pulses[x]*RawSignal.Multiply > 2000) return false;
-            if (RawSignal.Pulses[x]*RawSignal.Multiply < 1500) return false;
-            if (bitcounter < 16) {
-               bitstream1 = (bitstream1 << 1); 
-               bitcounter++;                        // only need to count the first 10 bits
-            } else {
-               bitstream2 = (bitstream2 << 1); 
-            }
+boolean Plugin_044(byte function, char *string)
+{
+   if (RawSignal.Number != AURIOLV3_PULSECOUNT)
+      return false;
+   unsigned long bitstream1 = 0L;
+   unsigned long bitstream2 = 0L;
+   byte rc = 0;
+   byte channel = 0;
+   byte bitcounter = 0;
+   unsigned long temperature = 0;
+   byte humidity = 0;
+   //==================================================================================
+   // get all the bits we need (40 bits)
+   for (int x = 2; x < AURIOLV3_PULSECOUNT; x += 2)
+   {
+      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 650)
+         return false;
+      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3500)
+      {
+         if (bitcounter < 16)
+         {
+            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitcounter++; // only need to count the first 10 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1) | 0x1;
          }
       }
-      //==================================================================================
-      // Perform sanity checks and prevent repeating signals from showing up
-      //==================================================================================
-      if( (SignalHash!=SignalHashPrevious) || (RepeatingTimer<millis()) ) { 
-         if (bitstream1 == 0) return false;         // not seen the RF packet recently
-         if (bitstream2 == 0) return false;
-      } else {
-         return true;                               // already seen the RF packet recently
-      } 
-      //==================================================================================
-      rc = (bitstream1 >> 8) & 0xff ;               // get rolling code
-      temperature = ((bitstream2)>>12) & 0xfff;     // get 12 temperature bits
-      temperature = (temperature - 0x4c4) & 0xffff;
-      temperature = (((temperature) * 5) / 9) & 0xffff;
-      if (temperature > 3000) {
-         temperature=4096-temperature;              // fix for minus temperatures
-         if (temperature > 0x258) return false;     // temperature out of range ( > -60.0 degrees) 
-         temperature=temperature | 0x8000;          // turn highest bit on for minus values
-      } else {
-         if (temperature > 0x258) return false;     // temperature out of range ( > 60.0 degrees) 
+      else
+      {
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2000)
+            return false;
+         if (RawSignal.Pulses[x] * RawSignal.Multiply < 1500)
+            return false;
+         if (bitcounter < 16)
+         {
+            bitstream1 = (bitstream1 << 1);
+            bitcounter++; // only need to count the first 10 bits
+         }
+         else
+         {
+            bitstream2 = (bitstream2 << 1);
+         }
       }
-      humidity = (bitstream2 >> 4) & 0xff ;         // humidity
-      channel=(bitstream2) & 0x03;                  // channel number
-      //==================================================================================
-      // Output
-      // ----------------------------------
-      Serial.print("20;");
-      PrintHexByte(PKSequenceNumber++);
-      Serial.print(F(";Auriol V3;ID="));            // Label
-      PrintHexByte(rc);
-      PrintHexByte(channel);
-      // ----------------------------------
-      sprintf(pbuffer, ";TEMP=%04x;", temperature); // temp  
-      Serial.print( pbuffer );
-      sprintf(pbuffer, "HUM=%02x;", humidity);      // hum
-      Serial.print( pbuffer );
-      Serial.println();
-      //==================================================================================
-      RawSignal.Repeats=true;                       // suppress repeats of the same RF packet 
-      RawSignal.Number=0;
-      return true;
+   }
+   //==================================================================================
+   // Perform sanity checks and prevent repeating signals from showing up
+   //==================================================================================
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()))
+   {
+      if (bitstream1 == 0)
+         return false; // not seen the RF packet recently
+      if (bitstream2 == 0)
+         return false;
+   }
+   else
+   {
+      return true; // already seen the RF packet recently
+   }
+   //==================================================================================
+   rc = (bitstream1 >> 8) & 0xff;              // get rolling code
+   temperature = ((bitstream2) >> 12) & 0xfff; // get 12 temperature bits
+   temperature = (temperature - 0x4c4) & 0xffff;
+   temperature = (((temperature)*5) / 9) & 0xffff;
+   if (temperature > 3000)
+   {
+      temperature = 4096 - temperature; // fix for minus temperatures
+      if (temperature > 0x258)
+         return false;                    // temperature out of range ( > -60.0 degrees)
+      temperature = temperature | 0x8000; // turn highest bit on for minus values
+   }
+   else
+   {
+      if (temperature > 0x258)
+         return false; // temperature out of range ( > 60.0 degrees)
+   }
+   humidity = (bitstream2 >> 4) & 0xff; // humidity
+   channel = (bitstream2)&0x03;         // channel number
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   Serial.print("20;");
+   PrintHexByte(PKSequenceNumber++);
+   Serial.print(F(";Auriol V3;ID=")); // Label
+   PrintHexByte(rc);
+   PrintHexByte(channel);
+   // ----------------------------------
+   sprintf(pbuffer, ";TEMP=%04x;", temperature); // temp
+   Serial.print(pbuffer);
+   sprintf(pbuffer, "HUM=%02x;", humidity); // hum
+   Serial.print(pbuffer);
+   Serial.println();
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // PLUGIN_044
