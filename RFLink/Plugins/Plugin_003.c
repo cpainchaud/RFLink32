@@ -648,19 +648,16 @@ boolean Plugin_003(byte function, char *string)
    if (group == 1)
    {
       sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
-      Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
    }
    if (command == 1)
    {
       sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
-      Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
    }
    else
    {
       sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
-      Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
    }
    strcat(pbuffer, "\r\n");
