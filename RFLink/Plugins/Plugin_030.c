@@ -196,12 +196,12 @@ boolean Plugin_030(byte function, char *string)
    nibble2 = (nibble2)&B0110; // prepare nibble to contain only the needed bits
    nibble3 = (nibble3)&B0111; // prepare nibble to contain only the needed bits
    //==================================================================================
-   rc = bitstream & 0xFF;
+   rc = (nibble1 << 4) | nibble0;
 
    if ((nibble2) != B0110)
    { // nibble 2 needs to be set to something other than 'x11x' to be a temperature packet
       // Temperature packet
-      temperature = (bitstream >> 12) & 0xFFF;
+      temperature = (nibble5 << 8) | (nibble4 << 4) | nibble3;
       //fix 12 bit signed number conversion
       if ((temperature & 0x800) == 0x800)
       {
@@ -253,8 +253,8 @@ boolean Plugin_030(byte function, char *string)
    else
    {
       if ((nibble3) == B0011)
-         rain = ((bitstream >> 16) & (0xFFFF)); // 0.25mm step
       {                                                                      // Rain packet
+         rain = (nibble7 << 12) | (nibble6 << 8) | (nibble5 << 4) | nibble4; // 0.25mm step
          rain = (rain * 10) / 4;                                             // to get 10th of mm
          //==================================================================================
          // Output
@@ -282,8 +282,8 @@ boolean Plugin_030(byte function, char *string)
          return true;
       }
       if ((nibble3) == B0001)
-         windspeed = ((bitstream >> 24) & 0xFF);
       {                                        // Windspeed packet
+         windspeed = (nibble7 << 4) | nibble6; // 0.2m/s step
          windspeed = (windspeed * 72) / 10;    // to get 10th of kph
          //==================================================================================
          // Output
@@ -311,11 +311,11 @@ boolean Plugin_030(byte function, char *string)
          return true;
       }
       if ((nibble3) == B0111)
-      { // Winddir packet
-         winddirection = ((bitstream >> 15) & 0x1ff) / 45;
-         winddirection = winddirection & 0x0f;
-         windgust = ((bitstream >> 24) & 0xff);
-         windgust = (windgust * 72) / 10;     // to get 10th of kph
+      {                                                                                      // Winddir packet
+         winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
+         winddirection = (winddirection / 45) & 0x0f;                                        // Divided by 45
+         windgust = (nibble7 << 4) | nibble6;                                                // 0.2m/s step
+         windgust = (windgust * 72) / 10;                                                    // to get 10th of kph
          //==================================================================================
          // Output
          // ----------------------------------
