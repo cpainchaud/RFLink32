@@ -151,8 +151,10 @@ boolean Plugin_030(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000 < millis()) && (SignalCRC != bitstream)) || (SignalCRC != bitstream))
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || ((SignalCRC != bitstream) && (SignalCRC_1 != bitstream)))
    {
+      // for mixed message burst prevention
+      SignalCRC_1 = SignalCRC;
       // not seen the RF packet recently
       SignalCRC = bitstream;
    }
