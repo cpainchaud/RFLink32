@@ -284,7 +284,7 @@ boolean Plugin_030(byte function, char *string)
       if ((nibble3) == B0001)
       { // Windspeed packet
          windspeed = ((bitstream >> 24) & 0xFF);
-         windspeed = windspeed * 72;
+         windspeed = (windspeed * 72) / 10;    // to get 10th of kph
          //==================================================================================
          // Output
          // ----------------------------------
@@ -315,7 +315,7 @@ boolean Plugin_030(byte function, char *string)
          winddirection = ((bitstream >> 15) & 0x1ff) / 45;
          winddirection = winddirection & 0x0f;
          windgust = ((bitstream >> 24) & 0xff);
-         windgust = windgust * 72;
+         windgust = (windgust * 72) / 10;     // to get 10th of kph
          //==================================================================================
          // Output
          // ----------------------------------
