@@ -217,7 +217,7 @@ boolean Plugin_030(byte function, char *string)
          if (temperature > 0x258)
             return false; // temperature out of range ( > 60.0 degrees)
       }
-      humidity = (16 * nibble7) + nibble6;
+      humidity = (nibble7 << 4) | nibble6;
       if (humidity > 0x99)
          return false; // Humidity out of range, assume ALL data is bad?
       //==================================================================================
