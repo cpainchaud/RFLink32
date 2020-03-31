@@ -255,6 +255,7 @@ boolean Plugin_030(byte function, char *string)
       if ((nibble3) == B0011)
       {                                         // Rain packet
          rain = ((bitstream >> 16) & (0xFFFF)); // 0.25mm step
+         rain = (rain * 10) / 4;                // to get 10th of mm
          //==================================================================================
          // Output
          // ----------------------------------
