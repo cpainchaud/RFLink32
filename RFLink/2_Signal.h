@@ -18,7 +18,7 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
   byte Delay;                       // Delay in ms. after transmit of a single RF pulse packet
   byte Multiply;                    // Pulses[] * Multiply is the real pulse time in microseconds
   unsigned long Time;               // Timestamp indicating when the signal was received (millis())
-  byte Pulses[RAW_BUFFER_SIZE + 2]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (halves RAM usage)
+  byte Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (halves RAM usage)
   // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
 };
 

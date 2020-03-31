@@ -86,7 +86,7 @@ boolean FetchSignal()
   // ************************
   // ***   Message Loop   ***
   // ************************
-  while (RawCodeLength <= RAW_BUFFER_SIZE)
+  while (RawCodeLength < RAW_BUFFER_SIZE)
   {
 
     // ***   Time Pulse   ***
