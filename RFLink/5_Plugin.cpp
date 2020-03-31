@@ -21,7 +21,7 @@ boolean QRFDebug = false; // debug RF signals with plugin 254 but no multiplicat
 /**********************************************************************************************\
  * Load plugins
 \*********************************************************************************************/
-#include "5_Plugin_Config_01.h"
+#include "./Plugins/_Plugin_Config_01.h"
 
 #define SKETCH_PATH ./
 #define stringify(x) #x
