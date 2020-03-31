@@ -172,34 +172,34 @@ boolean Plugin_030(byte function, char *string)
 
    //==================================================================================
    // Perform checksum calculations, Alecto checksums are Rollover Checksums by design!
-   if ((nibble2 & 0x6) != 0x6)
-   { // temperature packet
+   if ((nibble2 & B0110) != B0110) // Keep in mind, reversed nibble order
+   {                               // Temperature packet
       checksumcalc = (0xF - nibble0 - nibble1 - nibble2 - nibble3 - nibble4 - nibble5 - nibble6 - nibble7) & 0xF;
    }
    else
    {
-      if ((nibble3 & 0x7) == 0x3)
-      { // Rain packet
+      if ((nibble3 & B0111) == B0011) // Keep in mind, reversed nibble order
+      {                               // Rain packet
          checksumcalc = (0x7 + nibble0 + nibble1 + nibble2 + nibble3 + nibble4 + nibble5 + nibble6 + nibble7) & 0xF;
       }
-      else
-      { // Wind packet
+      else //
+      {    // Wind packet
          checksumcalc = (0xF - nibble0 - nibble1 - nibble2 - nibble3 - nibble4 - nibble5 - nibble6 - nibble7) & 0xF;
       }
    }
    if (checksum != checksumcalc)
       return false;
    //==================================================================================
-   battery = (nibble2)&0x1; // get battery indicator
-   nibble2 = (nibble2)&0x6; // prepare nibble to contain only the needed bits
-   nibble3 = (nibble3)&0x7; // prepare nibble to contain only the needed bits
+   battery = (nibble2)&B0001; // get battery indicator
+   nibble2 = (nibble2)&B0110; // prepare nibble to contain only the needed bits
+   nibble3 = (nibble3)&B0111; // prepare nibble to contain only the needed bits
    //==================================================================================
-   rc = bitstream & 0xff;
+   rc = bitstream & 0xFF;
 
-   if ((nibble2) != 6)
+   if ((nibble2) != B0110)
    { // nibble 2 needs to be set to something other than 'x11x' to be a temperature packet
       // Temperature packet
-      temperature = (bitstream >> 12) & 0xfff;
+      temperature = (bitstream >> 12) & 0xFFF;
       //fix 12 bit signed number conversion
       if ((temperature & 0x800) == 0x800)
       {
@@ -250,9 +250,9 @@ boolean Plugin_030(byte function, char *string)
    }
    else
    {
-      if ((nibble3) == 3)
-      { // Rain packet
-         rain = ((bitstream >> 16) & 0xffff);
+      if ((nibble3) == B0011)
+      {                                         // Rain packet
+         rain = ((bitstream >> 16) & (0xFFFF)); // 0.25mm step
          //==================================================================================
          // Output
          // ----------------------------------
@@ -270,9 +270,9 @@ boolean Plugin_030(byte function, char *string)
          RawSignal.Number = 0;
          return true;
       }
-      if ((nibble3) == 1)
-      { // windspeed packet
-         windspeed = ((bitstream >> 24) & 0xff);
+      if ((nibble3) == B0001)
+      { // Windspeed packet
+         windspeed = ((bitstream >> 24) & 0xFF);
          windspeed = windspeed * 72;
          //==================================================================================
          // Output
@@ -291,9 +291,9 @@ boolean Plugin_030(byte function, char *string)
          RawSignal.Number = 0;
          return true;
       }
-      if ((nibble3) == 7)
-      {                                                    // winddir packet
-         winddirection = ((bitstream >> 15) & 0x1ff) / 45; // ???
+      if ((nibble3) == B0111)
+      { // Winddir packet
+         winddirection = ((bitstream >> 15) & 0x1ff) / 45;
          winddirection = winddirection & 0x0f;
          windgust = ((bitstream >> 24) & 0xff);
          windgust = windgust * 72;
