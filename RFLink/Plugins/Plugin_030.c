@@ -264,6 +264,14 @@ boolean Plugin_030(byte function, char *string)
          Serial.print(pbuffer);
          sprintf(pbuffer, "RAIN=%04x;", rain);
          Serial.print(pbuffer);
+         if (battery == 0)
+         {
+            Serial.print("BAT=OK;");
+         }
+         else
+         {
+            Serial.print("BAT=LOW;");
+         }
          Serial.println();
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
@@ -285,6 +293,14 @@ boolean Plugin_030(byte function, char *string)
          Serial.print(pbuffer);
          sprintf(pbuffer, "WINSP=%04x;", windspeed);
          Serial.print(pbuffer);
+         if (battery == 0)
+         {
+            Serial.print("BAT=OK;");
+         }
+         else
+         {
+            Serial.print("BAT=LOW;");
+         }
          Serial.println();
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
@@ -310,6 +326,14 @@ boolean Plugin_030(byte function, char *string)
          Serial.print(pbuffer);
          sprintf(pbuffer, "WINGS=%04x;", windgust);
          Serial.print(pbuffer);
+         if (battery == 0)
+         {
+            Serial.print("BAT=OK;");
+         }
+         else
+         {
+            Serial.print("BAT=LOW;");
+         }
          Serial.println();
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
