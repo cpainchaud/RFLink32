@@ -18,7 +18,7 @@
 #define SIGNAL_SEEK_TIMEOUT_MS 25       // After this time in mSec. RF signal will be considered absent.
 #define SIGNAL_MIN_PREAMBLE_US 3000     //
 #define MIN_PULSE_LENGTH_US 50          // 25         // Pulses shorter than this value in uSec. will be seen as garbage and not taken as actual pulses.
-#define SIGNAL_END_TIMEOUT_US 4200      // After this time in uSec. the RF signal will be considered to have stopped.
+#define SIGNAL_END_TIMEOUT_US 4500      // After this time in uSec. the RF signal will be considered to have stopped.
 #define SIGNAL_REPEAT_TIME_MS 250       // 500        // Time in mSec. in which the same RF signal should not be accepted again. Filters out retransmits.
 #define TRANSMITTER_STABLE_DELAY_US 500 // delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define SCAN_HIGH_TIME_MS 50            // time interval in ms. fast processing for background tasks
