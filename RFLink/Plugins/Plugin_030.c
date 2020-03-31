@@ -112,8 +112,8 @@ boolean Plugin_030(byte function, char *string)
    int temperature = 0;
    byte humidity = 0;
    unsigned int rain = 0;
-   byte windspeed = 0;
-   byte windgust = 0;
+   unsigned int windspeed = 0;
+   unsigned int windgust = 0;
    unsigned int winddirection = 0;
    byte checksumcalc = 0;
    byte rc = 0;
