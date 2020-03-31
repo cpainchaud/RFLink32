@@ -25,7 +25,7 @@ boolean QRFDebug = false; // debug RF signals with plugin 254 but no multiplicat
 
 #define SKETCH_PATH ./
 #define stringify(x) #x
-#define PLUGINFILE(a, b) stringify(a/Plugins/b)
+#define PLUGINFILE(a, b) stringify(a/Plugins/b) // no space in "stringify(a/Plugins/b)"
 
 #ifdef PLUGIN_001
 #include PLUGINFILE(SKETCH_PATH, Plugin_001.c)
@@ -1657,9 +1657,7 @@ byte PluginTXInitCall(byte Function, char *str) {
  \*********************************************************************************************/
 byte PluginRXCall(byte Function, char *str)
 {
-  int x;
-
-  for (x = 0; x < PLUGIN_MAX; x++)
+  for (byte x = 0; x < PLUGIN_MAX; x++)
   {
     if (Plugin_id[x] != 0)
     {
