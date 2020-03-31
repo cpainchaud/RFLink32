@@ -116,34 +116,56 @@ boolean Plugin_005(byte function, char *string)
    // ----------------------------------
    sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
    Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
    // ----------------------------------
-   Serial.print(F("Eurodomest;"));                    // Label
+   //Serial.print(F("Eurodomest;"));                    // Label
+   sprintf_P(pbuffer, PSTR("%S"), F("Eurodomest;"));
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
    sprintf(pbuffer, "ID=%06lx;", (address)&0xffffff); // ID
    Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
    sprintf(pbuffer, "SWITCH=%02x;", unitcode); // ID
    Serial.print(pbuffer);
-   Serial.print(F("CMD="));
+   strcat(MQTTbuffer, pbuffer);
+
+   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
    if (unitcode > 4)
    {
-      Serial.print(F("ALL"));
+      sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
+      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
       if (command == 0)
       {
-         Serial.print(F("OFF;"));
+         sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
       else
       {
-         Serial.print(F("ON;"));
+         sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
    }
    else
    {
       if (command == 1)
       {
-         Serial.print(F("OFF;"));
+         sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
       else
       {
-         Serial.print(F("ON;"));
+         sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
+         Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
    }
    Serial.println();

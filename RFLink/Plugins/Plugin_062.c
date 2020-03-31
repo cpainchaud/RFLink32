@@ -60,11 +60,13 @@ boolean Plugin_062(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 700) < millis()))
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 200) < millis()) || (SignalCRC != bitstream))
    {
       // not seen the RF packet recently
       if (bitstream == 0)
          return false;
+
+      SignalCRC = bitstream;
    }
    else
    {
@@ -78,13 +80,25 @@ boolean Plugin_062(byte function, char *string)
    // ----------------------------------
    sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
    Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
    // ----------------------------------
-   Serial.print(F("Chuango;"));                         // Label
+   // Serial.print(F("Chuango;"));                         // Label
+   sprintf_P(pbuffer, PSTR("%S"), F("Chuango;")); // Label
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
    sprintf(pbuffer, "ID=%06lx;", (bitstream)&0xffffff); // ID
    Serial.print(pbuffer);
-   Serial.print(F("SWITCH=02;"));
-   Serial.print(F("CMD=ON;")); // this device reports movement only
+   strcat(MQTTbuffer, pbuffer);
+
+   // Serial.print(F("SWITCH=02;"));
+   // Serial.print(F("CMD=ON;")); // this device reports movement only
+   sprintf_P(pbuffer, PSTR("%S"), F("SWITCH=02;CMD=ON;")); // this device reports movement only
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+
    Serial.println();
+
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
