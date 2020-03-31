@@ -77,7 +77,7 @@
  *  | N0 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | CS |
  *   IIII IIII BMMP 111D DDDD DDDD GGGG GGGG CCCC
  *   RC        Type STyp Winddir   Windgust  Checksum
- *   0111 0000 0000 1111 1011 0000 0000 0000 0101
+ *   0111 0000 0110 1111 1011 0000 0000 0000 0101
  *
  *   I =  8 bits Rolling Code (includes channel number on low 2 bits of nibble1 (10=ch1 01=ch2 11=ch3) )
  *   B =  1 bit  Battery status (0 normal, 1 voltage is below ~2.6 V)
@@ -253,9 +253,9 @@ boolean Plugin_030(byte function, char *string)
    else
    {
       if ((nibble3) == B0011)
-      {                                         // Rain packet
          rain = ((bitstream >> 16) & (0xFFFF)); // 0.25mm step
-         rain = (rain * 10) / 4;                // to get 10th of mm
+      {                                                                      // Rain packet
+         rain = (rain * 10) / 4;                                             // to get 10th of mm
          //==================================================================================
          // Output
          // ----------------------------------
@@ -282,8 +282,8 @@ boolean Plugin_030(byte function, char *string)
          return true;
       }
       if ((nibble3) == B0001)
-      { // Windspeed packet
          windspeed = ((bitstream >> 24) & 0xFF);
+      {                                        // Windspeed packet
          windspeed = (windspeed * 72) / 10;    // to get 10th of kph
          //==================================================================================
          // Output
