@@ -205,8 +205,8 @@ boolean Plugin_030(byte function, char *string)
       //fix 12 bit signed number conversion
       if ((temperature & 0x800) == 0x800)
       {
-         if ((nibble2 & 0x6) != 0)
-            return false;                  // reject alecto v4 on alecto v1... (causing high negative temperatures with valid checksums)
+         // if ((nibble2 & B0110) != 0)      // Will never happen, see line #201
+         //   return false;                // reject alecto v4 on alecto v1... (causing high negative temperatures with valid checksums)
          temperature = 4096 - temperature; // fix for minus temperatures
          if (temperature > 0x258)
             return false;                    // temperature out of range ( > -60.0 degrees)
