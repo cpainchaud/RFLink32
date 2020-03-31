@@ -125,6 +125,8 @@ boolean Plugin_030(byte function, char *string)
          return false; // in between pulses should be short
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 2560)
       {
+         // Reverses order, as number are in LSB 1st
+         // Imply all nibbles are reversed, especially N2 and N3 !
          bitstream = ((bitstream >> 1) | (0x1L << 31));
       }
       else
