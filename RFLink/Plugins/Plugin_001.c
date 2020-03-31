@@ -85,7 +85,7 @@
 #ifdef PLUGIN_001
 boolean Plugin_001(byte function, char *string)
 {
-   byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
+   // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
 
    int i, j;
    // ==========================================================================
@@ -204,11 +204,9 @@ boolean Plugin_001(byte function, char *string)
       Serial.print(F("DEBUG;Pulses=")); // debug data
       Serial.print(RawSignal.Number);
       Serial.print(F(";Pulses(uSec)="));
-      //for(i=1;i<RawSignal.Number;i++) {
       for (i = 1; i < RawSignal.Number + 1; i++)
       {
          Serial.print(RawSignal.Pulses[i] * RawSignal.Multiply);
-         //if (i < RawSignal.Number-1) Serial.write(',');
          if (i < RawSignal.Number)
             Serial.write(',');
       }
@@ -218,66 +216,66 @@ boolean Plugin_001(byte function, char *string)
    // Beginning of Signal translation for Impuls
    // ==========================================================================
    // 20;D7;DEBUG;Pulses=250;Pulses(uSec)=275,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,75,350,75,325,375,25,75,4700,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,350,75,350,75,325,375,25,75,4700,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,75,350,75,325,375,25,75,4700,75,325,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,75,325,75,350,375,25,75,4700,75,350,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,375,25,75,350,375,25,75,325,375,25,75,325,375,25,75,325,375,25,75,350,375,25,75,350,75,325,75,350,375,25,75;
-   if ((RawSignal.Number == 250) || (RawSignal.Number == RAW_BUFFER_SIZE - 1))
-   { // Impuls
-      if (RawSignal.Pulses[50] > PULSE4200)
-      {
-         if (RawSignal.Pulses[100] > PULSE4200)
-         {
-            if (RawSignal.Pulses[150] > PULSE4200)
-            {
-               RawSignal.Number = 50;    // New packet length
-               RawSignal.Pulses[0] = 33; // signal the plugin number that should process this packet
-               return false;             // packet detected, conversion done
-            }
-         }
-      }
-   }
+   // if ((RawSignal.Number == 250) || (RawSignal.Number == RAW_BUFFER_SIZE - 1))
+   // { // Impuls
+   //    if (RawSignal.Pulses[50] > PULSE4200)
+   //    {
+   //       if (RawSignal.Pulses[100] > PULSE4200)
+   //       {
+   //          if (RawSignal.Pulses[150] > PULSE4200)
+   //          {
+   //             RawSignal.Number = 50;    // New packet length
+   //             RawSignal.Pulses[0] = 61; // signal the plugin number that should process this packet
+   //             return false;             // packet detected, conversion done
+   //          }
+   //       }
+   //    }
+   // }
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
    // ==========================================================================
    // Beginning of Signal translation for Home Confort Switches/Remotes
    // ==========================================================================
-   if (RawSignal.Number == 200)
-   {
-      if (RawSignal.Pulses[1] > PULSE2000)
-      {
-         if (RawSignal.Pulses[100] > PULSE4000)
-         {
-            if (RawSignal.Pulses[101] > PULSE2000)
-            {
-               RawSignal.Number = 100;   // New packet length
-               RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
-               return false;             // packet detected, conversion done
-            }
-         }
-      }
-   }
+   // if (RawSignal.Number == 200)
+   // {
+   //    if (RawSignal.Pulses[1] > PULSE2000)
+   //    {
+   //       if (RawSignal.Pulses[100] > PULSE4000)
+   //       {
+   //          if (RawSignal.Pulses[101] > PULSE2000)
+   //          {
+   //             RawSignal.Number = 100;   // New packet length
+   //             RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
+   //             return false;             // packet detected, conversion done
+   //          }
+   //       }
+   //    }
+   // }
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
    // ==========================================================================
    // Beginning of Signal translation for Intertek Unitec Switches/Remotes
    // ==========================================================================
-   if (RawSignal.Number == 202)
-   {
-      if (RawSignal.Pulses[2] > PULSE2000)
-      {
-         if (RawSignal.Pulses[52] > PULSE2000)
-         {
-            if (RawSignal.Pulses[102] > PULSE2000)
-            {
-               if (RawSignal.Pulses[1] < PULSE500)
-               {
-                  RawSignal.Number = 50;    // New packet length
-                  RawSignal.Pulses[0] = 19; // signal the plugin number that should process this packet
-                  return false;             // packet detected, conversion done
-               }
-            }
-         }
-      }
-   }
+   // if (RawSignal.Number == 202)
+   // {
+   //    if (RawSignal.Pulses[2] > PULSE2000)
+   //    {
+   //       if (RawSignal.Pulses[52] > PULSE2000)
+   //       {
+   //          if (RawSignal.Pulses[102] > PULSE2000)
+   //          {
+   //             if (RawSignal.Pulses[1] < PULSE500)
+   //             {
+   //                RawSignal.Number = 50;   // New packet length
+   //                RawSignal.Pulses[0] = 5; // signal the plugin number that should process this packet
+   //                return false;            // packet detected, conversion done
+   //             }
+   //          }
+   //       }
+   //    }
+   // }
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
@@ -287,7 +285,7 @@ boolean Plugin_001(byte function, char *string)
    //if (RawSignal.Number == 234) {
    //   if (HEconversiontype==0) {                 // Reject the entire packet
    //      if ((RawSignal.Pulses[2] > PULSE4000) && (RawSignal.Pulses[2+58] > PULSE4000) && (RawSignal.Pulses[2+58+58] > PULSE4000) ){
-   //         RawSignal.Pulses[0]=15;                 // Instruct plugin 3 to skip any packets it might see after this
+   //         RawSignal.Pulses[0]=15;                 // signal the plugin number that should process this packet
    //         RawSignal.Number=0;                     // Kill packet
    //         return true;                            // abort processing
    //      }
@@ -311,21 +309,21 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // Beginning of Signal translation for Flamingo FA500R
    // ==========================================================================
-   if (RawSignal.Number > 330 && RawSignal.Number < 378)
-   {
-      int pos1 = RawSignal.Number - 130;
-      int pos2 = RawSignal.Number - 130 - 58;
-      if (RawSignal.Pulses[pos1] > PULSE2000 && RawSignal.Pulses[pos2] > PULSE4000)
-      {
-         for (i = 0; i < 58; i++)
-         {
-            RawSignal.Pulses[1 + i] = RawSignal.Pulses[pos2 + 1 + i];
-         }
-         RawSignal.Pulses[0] = 12; // Data will be processed by plugin 12
-         RawSignal.Number = 58;    // New packet length
-         return false;             // Conversion done, stop plugin 1 and continue with regular plugins
-      }
-   }
+   // if (RawSignal.Number > 330 && RawSignal.Number < 378)
+   // {
+   //    int pos1 = RawSignal.Number - 130;
+   //    int pos2 = RawSignal.Number - 130 - 58;
+   //    if (RawSignal.Pulses[pos1] > PULSE2000 && RawSignal.Pulses[pos2] > PULSE4000)
+   //    {
+   //       for (i = 0; i < 58; i++)
+   //       {
+   //          RawSignal.Pulses[1 + i] = RawSignal.Pulses[pos2 + 1 + i];
+   //       }
+   //       RawSignal.Pulses[0] = 12; // Data will be processed by plugin 12
+   //       RawSignal.Number = 58;    // New packet length
+   //       return false;             // Conversion done, stop plugin 1 and continue with regular plugins
+   //    }
+   // }
    // ==========================================================================
    // End of Signal Translation
    // ==========================================================================
@@ -334,46 +332,48 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    //Conrad RSL
    //20;87;DEBUG;Pulses=462;Pulses(uSec)=1260,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6930,1230,420,510,1140,1230,420,1230,420,510,1140,1230,420,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,510,1140,1230,420,1230,420,1230,420,1230,420,1230,420,510,1140,1230,420,510,1140,510,1140,510,1140,510,1140,510,1140,510,6990;
-   if (RawSignal.Number == 462)
-   {
-      if ((RawSignal.Pulses[66] > PULSE6500) && (RawSignal.Pulses[66 + 66] > PULSE6500) && (RawSignal.Pulses[66 + 66 + 66] > PULSE6500))
-      {
-         RawSignal.Number = 66; // New packet length
-         return false;          // Conversion done, terminate plugin 1 and continue with regular plugins
-      }
-   }
+   // if (RawSignal.Number == 462)
+   // {
+   //    if ((RawSignal.Pulses[66] > PULSE6500) && (RawSignal.Pulses[66 + 66] > PULSE6500) && (RawSignal.Pulses[66 + 66 + 66] > PULSE6500))
+   //    {
+   //       RawSignal.Number = 66;   // New packet length
+   //       RawSignal.Pulses[0] = 7; // signal the plugin number that should process this packet
+   //       return false;            // Conversion done, terminate plugin 1 and continue with regular plugins
+   //    }
+   // }
    // ==========================================================================
    // End of Signal Translation
    // ==========================================================================
    // ==========================================================================
    // Beginning of Signal translation for HomeEasy HE842/HE852/HE863
    // ==========================================================================
-   if (RawSignal.Number > 460)
-   { // && RawSignal.Number < 470) {
-      if (HEconversiontype == 0)
-      { // Reject the entire packet
-         if ((RawSignal.Pulses[2] > PULSE4000) && (RawSignal.Pulses[2 + 58] > PULSE4000) && (RawSignal.Pulses[2 + 58 + 58] > PULSE4000))
-         {
-            RawSignal.Pulses[0] = 15; // Instruct plugin 3 to skip any packets it might see after this
-            RawSignal.Number = 0;     // Kill packet
-            return true;              // abort processing
-         }
-      }
-      else
-      { // Convert to Elro Method 1 (same as FA500 Method 1)
-         int pos1 = RawSignal.Number - 58;
-         //if (RawSignal.Pulses[pos1]*RawSignal.Multiply > 4000) {
-         if (RawSignal.Pulses[pos1] > PULSE4000)
-         {
-            for (i = 0; i < 58; i++)
-            {
-               RawSignal.Pulses[1 + i] = RawSignal.Pulses[pos1 + 1 + i];
-            }
-            RawSignal.Number = 58; // New packet length
-            return false;          // Conversion done, stop plugin 1 and continue with regular plugins
-         }
-      }
-   }
+   // if (RawSignal.Number > 460)
+   // { // && RawSignal.Number < 470) {
+   //    if (HEconversiontype == 0)
+   //    { // Reject the entire packet
+   //       if ((RawSignal.Pulses[2] > PULSE4000) && (RawSignal.Pulses[2 + 58] > PULSE4000) && (RawSignal.Pulses[2 + 58 + 58] > PULSE4000))
+   //       {
+   //          RawSignal.Pulses[0] = 15; // Instruct plugin 3 to skip any packets it might see after this
+   //          RawSignal.Number = 0;     // Kill packet
+   //          return true;              // abort processing
+   //       }
+   //    }
+   //    else
+   //    { // Convert to Elro Method 1 (same as FA500 Method 1)
+   //       int pos1 = RawSignal.Number - 58;
+   //       //if (RawSignal.Pulses[pos1]*RawSignal.Multiply > 4000) {
+   //       if (RawSignal.Pulses[pos1] > PULSE4000)
+   //       {
+   //          for (i = 0; i < 58; i++)
+   //          {
+   //             RawSignal.Pulses[1 + i] = RawSignal.Pulses[pos1 + 1 + i];
+   //          }
+   //          RawSignal.Number = 58;   // New packet length
+   //          RawSignal.Pulses[0] = 7; // signal the plugin number that should process this packet
+   //          return false;            // Conversion done, stop plugin 1 and continue with regular plugins
+   //       }
+   //    }
+   // }
    // ==========================================================================
    // End of Signal translation HomeEasy HE842
    // ==========================================================================
@@ -385,116 +385,46 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // Beginning of Signal translation for Forrinx
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {
-      if ((RawSignal.Pulses[2] > PULSE6000) && (RawSignal.Pulses[2 + 50] > PULSE6000) && (RawSignal.Pulses[2 + 50 + 50] > PULSE6000))
-      {
-         for (i = 0; i < 50; i++)
-         {
-            RawSignal.Pulses[1 + i] = RawSignal.Pulses[3 + i]; // reorder pulse array
-         }
-         RawSignal.Number = 51;    // New packet length (report 51 and not 50 to avoid handling by other plugins
-         RawSignal.Pulses[0] = 76; // signal the plugin number that should process this packet
-         return false;             // packet detected, conversion done
-      }
-   }
+   // if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   // {
+   //    if ((RawSignal.Pulses[2] > PULSE6000) && (RawSignal.Pulses[2 + 50] > PULSE6000) && (RawSignal.Pulses[2 + 50 + 50] > PULSE6000))
+   //    {
+   //       for (i = 0; i < 50; i++)
+   //       {
+   //          RawSignal.Pulses[1 + i] = RawSignal.Pulses[3 + i]; // reorder pulse array
+   //       }
+   //       RawSignal.Number = 51;    // New packet length (report 51 and not 50 to avoid handling by other plugins
+   //       RawSignal.Pulses[0] = 76; // signal the plugin number that should process this packet
+   //       return false;             // packet detected, conversion done
+   //    }
+   // }
    // ==========================================================================
    // ==========================================================================
    // Beginning of Signal translation for bofu
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {
-      if ((RawSignal.Pulses[1] > PULSE4200) && (RawSignal.Pulses[2] > PULSE2000) && (RawSignal.Pulses[3] > PULSE1100))
-      {
-         if ((RawSignal.Pulses[1 + 86] > PULSE4200) && (RawSignal.Pulses[2 + 86] > PULSE2000) && (RawSignal.Pulses[3 + 86] > PULSE1100))
-         {
-            RawSignal.Number = 85; // New packet length
-            return false;          // Conversion done, stop plugin 1 and continue with regular plugins
-         }
-      }
-   }
+   // if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   // {
+   //    if ((RawSignal.Pulses[1] > PULSE4200) && (RawSignal.Pulses[2] > PULSE2000) && (RawSignal.Pulses[3] > PULSE1100))
+   //    {
+   //       if ((RawSignal.Pulses[1 + 86] > PULSE4200) && (RawSignal.Pulses[2 + 86] > PULSE2000) && (RawSignal.Pulses[3 + 86] > PULSE1100))
+   //       {
+   //          RawSignal.Number = 85; // New packet length
+   //          return false;          // Conversion done, stop plugin 1 and continue with regular plugins
+   //       }
+   //    }
+   // }
    // ==========================================================================
 
    // **************************************************************************
    // Full buffer size checks, >>>> SCANNING checks <<<<<  sorted by packet size
    // **************************************************************************
-
-   // ==========================================================================
-   // Beginning of Signal translation for Silvercrest Doorbell
-   // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {
-      for (j = 2; j < 114; j++)
-      { // Only check twice the total RF packet length we are looking for
-         if (RawSignal.Pulses[j] > PULSE1100)
-         { // input is going to fast skip to where new part is going to start
-            if (j + 114 > RAW_BUFFER_SIZE - 1)
-               break; // cant be the packet we look for
-            if ((RawSignal.Pulses[j + 114] > PULSE1100) && (RawSignal.Pulses[j + 114 + 114] > PULSE1100) && (RawSignal.Pulses[j + 114 + 114 + 114] > PULSE1100))
-            { // first long delay found, make sure we have another at the right position
-               for (i = 0; i < 114; i++)
-               {
-                  RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + 1 + i]; // reorder pulse array
-               }
-               RawSignal.Number = 114;   // New packet length
-               RawSignal.Pulses[0] = 75; // signal the plugin number that should process this packet
-               return false;             // Conversion done, stop plugin 1 and continue with regular plugins
-            }
-         }
-      }
-   }
-   // ==========================================================================
-   // ==========================================================================
-   // Beginning of Signal translation for Home Confort Switches/Remotes
-   // ==========================================================================
-   if (RawSignal.Number > 299)
-   { // Scan for corrupted/chained Home Confort RF packets
-      if (RawSignal.Pulses[1] > PULSE2000)
-      {
-         if (RawSignal.Pulses[100] > PULSE4000)
-         {
-            if (RawSignal.Pulses[101] > PULSE2000)
-            {
-               RawSignal.Number = 100;   // New packet length
-               RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
-               return false;             // packet detected, conversion done
-            }
-         }
-      }
-      for (j = 1; j < 104; j++)
-      {
-         //if (RawSignal.Pulses[j]*RawSignal.Multiply > 4000) {
-         if (RawSignal.Pulses[j] > PULSE4000)
-         {
-            //if (RawSignal.Pulses[j+1]*RawSignal.Multiply > 2000) {
-            if (RawSignal.Pulses[j + 1] > PULSE2000)
-            {
-               if ((j + 98) > RawSignal.Number)
-                  break; // cant be the packet we are looking for
-               //if ( (RawSignal.Pulses[j+100]*RawSignal.Multiply > 4000) && (RawSignal.Pulses[j+101]*RawSignal.Multiply > 2000) ) { // This could be a Home Confort packet
-               if ((RawSignal.Pulses[j + 100] > PULSE4000) && (RawSignal.Pulses[j + 101] > PULSE2000))
-               { // This could be a Home Confort packet
-                  for (i = 0; i < 100; i++)
-                  {
-                     RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + i]; // relocate/reorder pulse array
-                  }
-                  RawSignal.Number = 100;   // New packet length
-                  RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
-               }
-               return false; // Conversion done, stop plugin 1 and continue with regular plugins
-            }
-         }
-      }
-   }
-   // ==========================================================================
-   // ==========================================================================
+    // ==========================================================================
    // Beginning of Signal translation for Auriol & Xiron
    // ==========================================================================
    if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
    {
       for (int offset = 0; offset < 74; offset++)
       {
-         //if (RawSignal.Pulses[offset]*RawSignal.Multiply > 3300) {
          if (RawSignal.Pulses[offset + 74] > PULSE3300 && RawSignal.Pulses[offset + 74 * 2] > PULSE3300 && ((offset > 0 && RawSignal.Pulses[offset] > PULSE3300) || RawSignal.Pulses[offset + 74 * 3] > PULSE3300))
          {
             for (i = 0; i < 74; i++)
@@ -508,36 +438,106 @@ boolean Plugin_001(byte function, char *string)
       }
    }
    // ==========================================================================
+
+   // ==========================================================================
+   // Beginning of Signal translation for Silvercrest Doorbell
+   // ==========================================================================
+   // if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   // {
+   //    for (j = 2; j < 114; j++)
+   //    { // Only check twice the total RF packet length we are looking for
+   //       if (RawSignal.Pulses[j] > PULSE1100)
+   //       { // input is going to fast skip to where new part is going to start
+   //          if (j + 114 > RAW_BUFFER_SIZE - 1)
+   //             break; // cant be the packet we look for
+   //          if ((RawSignal.Pulses[j + 114] > PULSE1100) && (RawSignal.Pulses[j + 114 + 114] > PULSE1100) && (RawSignal.Pulses[j + 114 + 114 + 114] > PULSE1100))
+   //          { // first long delay found, make sure we have another at the right position
+   //             for (i = 0; i < 114; i++)
+   //             {
+   //                RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + 1 + i]; // reorder pulse array
+   //             }
+   //             RawSignal.Number = 114;   // New packet length
+   //             RawSignal.Pulses[0] = 75; // signal the plugin number that should process this packet
+   //             return false;             // Conversion done, stop plugin 1 and continue with regular plugins
+   //          }
+   //       }
+   //    }
+   // }
+   // ==========================================================================
+
+   // ==========================================================================
+   // Beginning of Signal translation for Home Confort Switches/Remotes
+   // ==========================================================================
+   // if (RawSignal.Number > 299)
+   // { // Scan for corrupted/chained Home Confort RF packets
+   //    if (RawSignal.Pulses[1] > PULSE2000)
+   //    {
+   //       if (RawSignal.Pulses[100] > PULSE4000)
+   //       {
+   //          if (RawSignal.Pulses[101] > PULSE2000)
+   //          {
+   //             RawSignal.Number = 100;   // New packet length
+   //             RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
+   //             return false;             // packet detected, conversion done
+   //          }
+   //       }
+   //    }
+   //    for (j = 1; j < 104; j++)
+   //    {
+   //       //if (RawSignal.Pulses[j]*RawSignal.Multiply > 4000) {
+   //       if (RawSignal.Pulses[j] > PULSE4000)
+   //       {
+   //          //if (RawSignal.Pulses[j+1]*RawSignal.Multiply > 2000) {
+   //          if (RawSignal.Pulses[j + 1] > PULSE2000)
+   //          {
+   //             if ((j + 98) > RawSignal.Number)
+   //                break; // cant be the packet we are looking for
+   //             //if ( (RawSignal.Pulses[j+100]*RawSignal.Multiply > 4000) && (RawSignal.Pulses[j+101]*RawSignal.Multiply > 2000) ) { // This could be a Home Confort packet
+   //             if ((RawSignal.Pulses[j + 100] > PULSE4000) && (RawSignal.Pulses[j + 101] > PULSE2000))
+   //             { // This could be a Home Confort packet
+   //                for (i = 0; i < 100; i++)
+   //                {
+   //                   RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + i]; // relocate/reorder pulse array
+   //                }
+   //                RawSignal.Number = 100;   // New packet length
+   //                RawSignal.Pulses[0] = 11; // signal the plugin number that should process this packet
+   //             }
+   //             return false; // Conversion done, stop plugin 1 and continue with regular plugins
+   //          }
+   //       }
+   //    }
+   // }
+   // ==========================================================================
+
    // ==========================================================================
    // Beginning of Signal translation for Oregon
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {
-      for (j = 50; j < 104; j++)
-      { // Only check the total RF packet length we are looking for
-         //if (RawSignal.Pulses[j]*RawSignal.Multiply > 2500) {  // input is going to fast skip to where new part is going to start
-         if (RawSignal.Pulses[j] > PULSE1600)
-         { // input is going to fast skip to where new part is going to start
-            if (j + 52 > RAW_BUFFER_SIZE - 1)
-               break; // check for overflow, cant be the packet we look for
-            byte x = 0;
-            if ((RawSignal.Pulses[j + 52] > PULSE1600) && (RawSignal.Pulses[j + 52 + 52] > PULSE1600) && (RawSignal.Pulses[j + 52 + 52 + 52] > PULSE1600))
-               x = 2;
-            if ((RawSignal.Pulses[j + 50] > PULSE1600) && (RawSignal.Pulses[j + 50 + 50] > PULSE1600) && (RawSignal.Pulses[j + 50 + 50 + 50] > PULSE1600))
-               x = 1;
-            if (x != 0)
-            {
-               for (i = 0; i < 52; i++)
-               {
-                  RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + 1 + i]; // reorder pulse array
-               }
-               RawSignal.Number = 52;    // New packet length
-               RawSignal.Pulses[0] = 63; // signal the plugin number that should process this packet
-               return false;             // Conversion done, stop plugin 1 and continue with regular plugins
-            }
-         }
-      }
-   }
+   // if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   // {
+   //    for (j = 50; j < 104; j++)
+   //    { // Only check the total RF packet length we are looking for
+   //       if (RawSignal.Pulses[j] > PULSE1600)
+   //       { // input is going to fast skip to where new part is going to start
+   //          if (j + 52 > RAW_BUFFER_SIZE - 1)
+   //             break; // check for overflow, cant be the packet we look for
+   //          byte x = 0;
+   //          if ((RawSignal.Pulses[j + 52] > PULSE1600) && (RawSignal.Pulses[j + 52 + 52] > PULSE1600) && (RawSignal.Pulses[j + 52 + 52 + 52] > PULSE1600))
+   //             x = 2;
+   //          if ((RawSignal.Pulses[j + 50] > PULSE1600) && (RawSignal.Pulses[j + 50 + 50] > PULSE1600) && (RawSignal.Pulses[j + 50 + 50 + 50] > PULSE1600))
+   //             x = 1;
+   //          if (x != 0)
+   //          {
+   //             for (i = 0; i < 52; i++)
+   //             {
+   //                RawSignal.Pulses[1 + i] = RawSignal.Pulses[j + 1 + i]; // reorder pulse array
+   //             }
+   //             RawSignal.Number = 52;    // New packet length
+   //             RawSignal.Pulses[0] = 63; // signal the plugin number that should process this packet
+   //             return false;             // Conversion done, stop plugin 1 and continue with regular plugins
+   //          }
+   //       }
+   //    }
+   // }
    // ==========================================================================
    // ==========================================================================
    // Beginning of Signal translation for SelectPlus
@@ -610,47 +610,6 @@ boolean Plugin_001(byte function, char *string)
 }
 #endif //PLUGIN_001
 /*********************************************************************************************\
-167 5010
-77  2310
-52  1560
-
-161 
-77
-52
-
-0137
-77
-52
-161
-77
-52
-169
-78
-52
-161
-77
-52
-0137
-77
-52
-161
-77
-52
-
-
-20;08;DEBUG;Pulses=511;Pulses(uSec)=
-
-5010,2340,1560,210,270,510,270,510,270,540, 9
-270,510,270,510,270,510,270,510,270,510, 20
-270,510,270,510,270,510,270,510,270,510, 30
-270,510,270,510,270,510,600,210,270,510, 4
-270,510,270,510,270,540,270,540,600,210, 5 
-600,210,600,210,270,510,270,540,270,540, 6
-270,510,270,510,270,510,270,510,600,210, 69
-600,210,600,210,600,210,600,210,600,210, 79
-270,510,270,510,600,210,4830,2310,1560,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,540,270,540,270,510,270,510,270,510,270,540,270,540,270,510,270,510,600,210,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,600,210,600,210,600,210,270,510,270,540,600,210,4830,2310,1560,210,270,510,270,510,270,510,270,540,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,600,210,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,270,540,270,540,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,600,210,600,210,600,210,270,510,270,510,600,210,4830,2310,1560,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,540,270,540,270,540,270,510,270,510,270,510,270,510,270,540,270,540,600,210,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,600,210,600,210,600,210,270,510,270,510,600,210,4830,2310,1560,210,270,540,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,600,210,270,510,270,510,270,510,270,510,270,540,600,210,600,210,600,210,270,510,270,510,270,510,270,540,270,540,270,510,270,510,600,210,600,210,600,210,600,210,600,210,600,210,270,510,270,510,600,210,4830,2310,1560,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,510,270,540,270,540,270,510,270,510,270,510,270,540,270,540,270,510,600,210,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,270,510,270,510,270,510,270,510,270,510,270,510,270,510,600,210,600,210,600,210,600,210,600,210,600,210,270;
-
-
 Plugin  Pulselength
 ------  -----------
 002     102-104
