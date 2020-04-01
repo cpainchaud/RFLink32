@@ -127,11 +127,6 @@ boolean Plugin_043(byte function, char *string)
          {
             if (x + 1 < RawSignal.Number)
             {
-               // Serial.println("\nTX3 #1");
-               // Serial.print("[x+1]\t");Serial.println(x+1);
-               // Serial.print("RawSignal.Pulses[x+1]\t");Serial.println(RawSignal.Pulses[x+1]);
-               // Serial.print("LACROSSE43_MIDLO\t");Serial.println(LACROSSE43_MIDLO);
-               // Serial.print("LACROSSE43_MIDHI\t");Serial.println(LACROSSE43_MIDHI);
                return false;
             } // in between pulse check
          }
@@ -140,11 +135,6 @@ boolean Plugin_043(byte function, char *string)
       {
          if ((RawSignal.Pulses[x] > LACROSSE43_PULSEMAX) && (x > 1))
          {
-            // Serial.print("\nTX3 #2\n");
-            // Serial.print("[x]\t");Serial.println(x);
-            // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
-            // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
-            // Serial.print("LACROSSE43_PULSEMAX\t");Serial.println(LACROSSE43_PULSEMAX);
             return false;
          }
          if (bitcounter < 16)
@@ -161,11 +151,6 @@ boolean Plugin_043(byte function, char *string)
       {
          if (RawSignal.Pulses[x] > LACROSSE43_PULSEMINMAX)
          {
-            // Serial.print("\nTX3 #3\n");
-            // Serial.print("[x]\t");Serial.println(x);
-            // Serial.print("RawSignal.Pulses[x]\t");Serial.println(RawSignal.Pulses[x]);
-            // Serial.print("LACROSSE43_PULSEMID\t");Serial.println(LACROSSE43_PULSEMID);
-            // Serial.print("LACROSSE43_PULSEMINMAX\t");Serial.println(LACROSSE43_PULSEMINMAX);
             return false;
          }
          if (bitcounter < 16)
@@ -184,19 +169,16 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    if ((bitstream1 == 0) && (bitstream2 == 0))
    {
-      // Serial.print("\nTX3 #4\n");
       return false;
    }
    data[0] = (bitstream1 >> 12) & 0x0f; // prepare nibbles from bit stream
    if (data[0] != 0x00)
    {
-      // Serial.print("\nTX3 #5\n");
       return false;
    }
    data[1] = (bitstream1 >> 8) & 0x0f;
    if (data[1] != 0x0a)
    {
-      // Serial.print("\nTX3 #6\n");
       return false;
    }
    data[2] = (bitstream1 >> 4) & 0x0f;
@@ -216,7 +198,6 @@ boolean Plugin_043(byte function, char *string)
    checksum = checksum & 0x0f;
    if (checksum != (bitstream2 & 0x0f))
    {
-      // Serial.print("\nTX3 #7\n");
       return false;
    }
    //==================================================================================
@@ -231,7 +212,6 @@ boolean Plugin_043(byte function, char *string)
    }
    else
    {
-      // Serial.print("\nTX3 #8\n");
       return true; // already seen the RF packet recently, but still want the humidity
    }
    //==================================================================================
@@ -247,14 +227,10 @@ boolean Plugin_043(byte function, char *string)
       temperature = temperature - 500;
       data[4] = (data[4]) >> 1;
 
-      //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
       sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
       Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
 
-      //Serial.print(F("LaCrosse;ID="));           // Label
-      //PrintHex8(data+3,2);
-      //sprintf(pbuffer, ";TEMP=%04x;", temperature);
       sprintf_P(pbuffer, PSTR("%S%02x%02x%S%04x;"), F(";LaCrosse;ID="), data[3], data[4], F(";TEMP="), temperature);
       strcat(pbuffer, "\r\n");
       Serial.print(pbuffer);
@@ -269,19 +245,14 @@ boolean Plugin_043(byte function, char *string)
       humidity = (data[5] * 16) + data[6];
       if (humidity == 0)
       {
-         // Serial.print("\nTX3 #9\n");
          return false;
       } // humidity should not be 0
       data[4] = (data[4]) >> 1;
 
-      //sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
       sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
       Serial.print(pbuffer);
       strcat(MQTTbuffer, pbuffer);
 
-      //Serial.print(F("LaCrosse;ID="));           // Label
-      //PrintHex8( data+3,2);
-      //sprintf(pbuffer, ";HUM=%02x;", (humidity)&0xff);
       sprintf_P(pbuffer, PSTR("%S%02x%02x%S%02x;"), F(";LaCrosse;ID="), data[3], data[4], F(";HUM="), (humidity)&0xff);
       strcat(pbuffer, "\r\n");
       Serial.print(pbuffer);
