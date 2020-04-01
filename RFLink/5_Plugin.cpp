@@ -1659,7 +1659,7 @@ byte PluginRXCall(byte Function, char *str)
 {
   for (byte x = 0; x < PLUGIN_MAX; x++)
   {
-    if ((Plugin_id[x] == 1) || ((Plugin_id[x] != 0) && (Plugin_id[x] >= RawSignal.Pulses[0])))
+    if (Plugin_id[x] != 0)
     {
       SignalHash = x; // store plugin number
       if (Plugin_ptr[x](Function, str))
