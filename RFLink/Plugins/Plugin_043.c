@@ -227,14 +227,11 @@ boolean Plugin_043(byte function, char *string)
       temperature = temperature - 500;
       data[4] = (data[4]) >> 1;
 
-      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-
-      sprintf_P(pbuffer, PSTR("%S%02x%02x%S%04x;"), F(";LaCrosse;ID="), data[3], data[4], F(";TEMP="), temperature);
-      strcat(pbuffer, "\r\n");
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      display_Header();
+      display_Name(PSTR("LaCrosse V2"));
+      display_ID(data[3], data[4]);
+      display_TEMP(temperature);
+      display_Footer();
 
       RawSignal.Repeats = false;
       RawSignal.Number = 0;
@@ -249,14 +246,11 @@ boolean Plugin_043(byte function, char *string)
       } // humidity should not be 0
       data[4] = (data[4]) >> 1;
 
-      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-
-      sprintf_P(pbuffer, PSTR("%S%02x%02x%S%02x;"), F(";LaCrosse;ID="), data[3], data[4], F(";HUM="), (humidity)&0xff);
-      strcat(pbuffer, "\r\n");
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      display_Header();
+      display_Name(PSTR("LaCrosse V2"));
+      display_ID(data[3], data[4]);
+      display_HUM((humidity & 0xff));
+      display_Footer();
 
       RawSignal.Repeats = true;
       RawSignal.Number = 0;
