@@ -95,6 +95,10 @@
 #define WS3500_PULSECOUNT 74
 
 #ifdef PLUGIN_030
+
+void print_header(byte);
+void print_battery_status(byte);
+
 boolean Plugin_030(byte function, char *string)
 {
    if (RawSignal.Number != WS3500_PULSECOUNT)
@@ -225,28 +229,19 @@ boolean Plugin_030(byte function, char *string)
       //==================================================================================
       // Output
       // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+      print_header(rc);
+
+      sprintf_P(pbuffer, PSTR("%S%04x"), F(";TEMP="), temperature);
       Serial.print(pbuffer);
-      // ----------------------------------
-      Serial.print(F("Alecto V1;"));                              // Label
-      sprintf(pbuffer, "ID=%02x%02x;", (rc & 0x03), (rc & 0xfc)); // ID is split into channel number and rolling code
-      Serial.print(pbuffer);
-      sprintf(pbuffer, "TEMP=%04x;", temperature);
-      Serial.print(pbuffer);
+      strcat(MQTTbuffer, pbuffer);
+
       if (humidity < 0x99)
-      {                                           // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
-         sprintf(pbuffer, "HUM=%02x;", humidity); // Only report humidity when it is below 99%
+      {                                                            // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
+         sprintf_P(pbuffer, PSTR("%S%02x"), F(";HUM="), humidity); // Only report humidity when it is below 99%
          Serial.print(pbuffer);
+         strcat(MQTTbuffer, pbuffer);
       }
-      if (battery == 0)
-      {
-         Serial.print("BAT=OK;");
-      }
-      else
-      {
-         Serial.print("BAT=LOW;");
-      }
-      Serial.println();
+      print_battery_status(battery);
       //==================================================================================
       RawSignal.Repeats = true; // suppress repeats of the same RF packet
       RawSignal.Number = 0;
@@ -261,23 +256,13 @@ boolean Plugin_030(byte function, char *string)
          //==================================================================================
          // Output
          // ----------------------------------
-         sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+         print_header(rc);
+
+         sprintf_P(pbuffer, PSTR("%S%04x"), F(";RAIN="), rain);
          Serial.print(pbuffer);
-         // ----------------------------------
-         Serial.print(F("Alecto V1;"));      // Label
-         sprintf(pbuffer, "ID=00%02x;", rc); // ID
-         Serial.print(pbuffer);
-         sprintf(pbuffer, "RAIN=%04x;", rain);
-         Serial.print(pbuffer);
-         if (battery == 0)
-         {
-            Serial.print("BAT=OK;");
-         }
-         else
-         {
-            Serial.print("BAT=LOW;");
-         }
-         Serial.println();
+         strcat(MQTTbuffer, pbuffer);
+
+         print_battery_status(battery);
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
          RawSignal.Number = 0;
@@ -290,23 +275,13 @@ boolean Plugin_030(byte function, char *string)
          //==================================================================================
          // Output
          // ----------------------------------
-         sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+         print_header(rc);
+
+         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINSP="), windspeed);
          Serial.print(pbuffer);
-         // ----------------------------------
-         Serial.print(F("Alecto V1;"));      // Label
-         sprintf(pbuffer, "ID=00%02x;", rc); // ID
-         Serial.print(pbuffer);
-         sprintf(pbuffer, "WINSP=%04x;", windspeed);
-         Serial.print(pbuffer);
-         if (battery == 0)
-         {
-            Serial.print("BAT=OK;");
-         }
-         else
-         {
-            Serial.print("BAT=LOW;");
-         }
-         Serial.println();
+         strcat(MQTTbuffer, pbuffer);
+
+         print_battery_status(battery);
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
          RawSignal.Number = 0;
@@ -316,30 +291,22 @@ boolean Plugin_030(byte function, char *string)
       {                                                                                      // Winddir packet
          winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
          //winddirection = ((winddirection * 2) / 45) & 0x0f;                                // Divided by 22.5
-         windgust = (nibble7 << 4) | nibble6;                                                // 0.2m/s step
-         windgust = (windgust * 72) / 10;                                                    // to get 10th of kph
+         windgust = (nibble7 << 4) | nibble6; // 0.2m/s step
+         windgust = (windgust * 72) / 10;     // to get 10th of kph
          //==================================================================================
          // Output
          // ----------------------------------
-         sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
+         print_header(rc);
+
+         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINDIR="), winddirection);
          Serial.print(pbuffer);
-         // ----------------------------------
-         Serial.print(F("Alecto V1;"));      // Label
-         sprintf(pbuffer, "ID=00%02x;", rc); // ID
+         strcat(MQTTbuffer, pbuffer);
+
+         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINGS="), windgust);
          Serial.print(pbuffer);
-         sprintf(pbuffer, "WINDIR=%04x;", winddirection);
-         Serial.print(pbuffer);
-         sprintf(pbuffer, "WINGS=%04x;", windgust);
-         Serial.print(pbuffer);
-         if (battery == 0)
-         {
-            Serial.print("BAT=OK;");
-         }
-         else
-         {
-            Serial.print("BAT=LOW;");
-         }
-         Serial.println();
+         strcat(MQTTbuffer, pbuffer);
+
+         print_battery_status(battery);
          //==================================================================================
          RawSignal.Repeats = true; // suppress repeats of the same RF packet
          RawSignal.Number = 0;
@@ -348,4 +315,40 @@ boolean Plugin_030(byte function, char *string)
    }
    return false;
 }
+
+// Shared header display
+void print_header(byte rc)
+{
+   sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++); // Seq
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+   // ----------------------------------
+   sprintf_P(pbuffer, PSTR("%S"), F(";Alecto V1")); // Label
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+   // ----------------------------------
+   sprintf_P(pbuffer, PSTR("%S%02x%02x"), F(";ID="), (rc & 0x03), (rc & 0xfc)); // ID is split into channel number and rolling code
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+}
+
+// Shared battery status display
+void print_battery_status(byte bat)
+{
+   if (bat == 0)
+   { // battery status
+      sprintf_P(pbuffer, PSTR("%S"), F(";BAT=OK"));
+   }
+   else
+   {
+      sprintf_P(pbuffer, PSTR("%S"), F(";BAT=LOW"));
+   }
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+   // ----------------------------------
+   sprintf_P(pbuffer, PSTR("%S"), F(";\r\n"));
+   Serial.print(pbuffer);
+   strcat(MQTTbuffer, pbuffer);
+}
+
 #endif // PLUGIN_030
