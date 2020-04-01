@@ -315,7 +315,7 @@ boolean Plugin_030(byte function, char *string)
       if ((nibble3) == B0111)
       {                                                                                      // Winddir packet
          winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
-         winddirection = (winddirection / 45) & 0x0f;                                        // Divided by 45
+         winddirection = ((winddirection * 2) / 45) & 0x0f;                                  // Divided by 22.5
          windgust = (nibble7 << 4) | nibble6;                                                // 0.2m/s step
          windgust = (windgust * 72) / 10;                                                    // to get 10th of kph
          //==================================================================================
@@ -327,7 +327,7 @@ boolean Plugin_030(byte function, char *string)
          Serial.print(F("Alecto V1;"));      // Label
          sprintf(pbuffer, "ID=00%02x;", rc); // ID
          Serial.print(pbuffer);
-         sprintf(pbuffer, "WINDIR=%04d;", winddirection);
+         sprintf(pbuffer, "WINDIR=%02x;", winddirection);
          Serial.print(pbuffer);
          sprintf(pbuffer, "WINGS=%04x;", windgust);
          Serial.print(pbuffer);
