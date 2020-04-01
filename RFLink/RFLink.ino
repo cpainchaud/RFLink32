@@ -19,7 +19,7 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "2_Signal.h"
-#include "3_Serial.h"
+#include "4_Misc.h"
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 //****************************************************************************************************************************************
@@ -49,24 +49,8 @@ void setup()
 #else
   setup_WIFI_OFF();
 #endif
-
-  sprintf_P(pbuffer, PSTR("%S"), F("20;00;Nodo RadioFrequencyLink - RFLink Gateway V3.0 - "));
-  Serial.print(pbuffer);
-
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
-  strcpy(MQTTbuffer, pbuffer);
-#endif
-
-  sprintf_P(pbuffer, PSTR("R%02x;"), REVNR);
-  Serial.println(pbuffer);
-
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
-  strcat(MQTTbuffer, pbuffer);
-  strcat(MQTTbuffer, "\r\n");
-#endif
-
-  PKSequenceNumber++;
-
+  display_Start();
+  display_Footer();
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
   publishMsg();
 #endif
