@@ -290,15 +290,15 @@ boolean Plugin_030(byte function, char *string)
       if ((nibble3) == B0111)
       {                                                                                      // Winddir packet
          winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
-         //winddirection = ((winddirection * 2) / 45) & 0x0f;                                // Divided by 22.5
+         winddirection = ((winddirection * 2) / 45) & 0x0f;                                // Divided by 22.5
          windgust = (nibble7 << 4) | nibble6; // 0.2m/s step
-         windgust = (windgust * 72) / 10;     // to get 10th of kph
+         windgust = (windgust * 72) / 100;    // to get kph
          //==================================================================================
          // Output
          // ----------------------------------
          print_header(rc);
 
-         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINDIR="), winddirection);
+         sprintf_P(pbuffer, PSTR("%S%03d"), F(";WINDIR="), winddirection);
          Serial.print(pbuffer);
          strcat(MQTTbuffer, pbuffer);
 
