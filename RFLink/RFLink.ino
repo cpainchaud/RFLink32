@@ -45,6 +45,7 @@ void setup()
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
   setup_WIFI();
   setup_MQTT();
+  reconnect();
 #else
   setup_WIFI_OFF();
 #endif
