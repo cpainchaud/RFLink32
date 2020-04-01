@@ -154,7 +154,7 @@ void display_Start(void)
 // ID=9999 => device ID (often a rolling code and/or device channel number) (Hexadecimal)
 void display_ID(unsigned int input)
 {
-  sprintf_P(pbuffer, PSTR("%S%04x"), F(";ID="), input);
+  sprintf_P(pbuffer, PSTR("%S%04X"), F(";ID="), input);
   display_Print();
 }
 
@@ -198,11 +198,19 @@ void display_TEMP(unsigned int input)
   display_Print();
 }
 
-// HUM=99 => Humidity (BCD value: 0-100 to indicate relative humidity in %)
+// HUM=99 => Humidity (decimal value: 0-100 to indicate relative humidity in %)
+void display_HUM(byte input, boolean bcd)
+{
+  if (bcd == false)
+    sprintf_P(pbuffer, PSTR("%S%02d"), F(";HUM="), input);
+  else
+    sprintf_P(pbuffer, PSTR("%S%02x"), F(";HUM="), input);
+  display_Print();
+}
+
 void display_HUM(byte input)
 {
-  sprintf_P(pbuffer, PSTR("%S%02x"), F(";HUM="), input);
-  display_Print();
+  display_HUM(input, false);
 }
 
 // BARO=9999 => Barometric pressure (hexadecimal)

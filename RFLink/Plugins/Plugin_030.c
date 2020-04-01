@@ -234,8 +234,8 @@ boolean Plugin_030(byte function, char *string)
       display_ID(id);
       display_TEMP(temperature);
       if (humidity < 0x99)
-      {                         // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
-         display_HUM(humidity); // Only report humidity when it is below 99%
+      {                               // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
+         display_HUM(humidity, true); // Only report humidity when it is below 99%
       }
       display_BAT(battery);
       display_Footer();
