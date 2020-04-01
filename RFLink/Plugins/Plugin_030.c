@@ -95,7 +95,7 @@
 #define WS3500_PULSECOUNT 74
 
 #ifdef PLUGIN_030
-#include "4_Misc.h"
+#include "../4_Misc.h"
 
 boolean Plugin_030(byte function, char *string)
 {

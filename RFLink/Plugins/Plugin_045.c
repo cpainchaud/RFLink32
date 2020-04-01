@@ -35,7 +35,6 @@
 #define AURIOL_PULSECOUNT 66
 
 #ifdef PLUGIN_045
-#include "../4_Misc.h"
 boolean Plugin_045(byte function, char *string)
 {
    if (RawSignal.Number != AURIOL_PULSECOUNT)
