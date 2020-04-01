@@ -21,6 +21,7 @@ void display_Name(const char *);
 void display_Footer(void);
 void display_Start(void);
 void display_ID(unsigned int);
+void display_ID(byte, byte);
 void display_SWITCH(const char *);
 void display_CMD(boolean, boolean);
 void display_SET_LEVEL(byte);

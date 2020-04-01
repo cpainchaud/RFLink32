@@ -158,6 +158,11 @@ void display_ID(unsigned int input)
   display_Print();
 }
 
+void display_ID(byte b1, byte b0)
+{
+  display_ID(((b1 << 8) | b0));
+}
+
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCH(const char *input)
 {
