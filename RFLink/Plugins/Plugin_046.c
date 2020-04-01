@@ -164,7 +164,7 @@ boolean Plugin_046(byte function, char *string)
       else
          display_Name(PSTR("Xiron"));
 
-      display_ID((rc << 8) | channel);
+      display_ID(rc, channel);
       display_TEMP(temperature);
 
       if (type == 1)
