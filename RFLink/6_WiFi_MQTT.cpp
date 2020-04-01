@@ -130,9 +130,9 @@ void checkMQTTloop()
     {
       reconnect();
     }
-    Serial.print(F("Calling MQTT loop()..."));
+    // Serial.print(F("Calling MQTT loop()..."));
     MQTTClient.loop();
-    Serial.println(F("Done"));
+    // Serial.println(F("Done"));
     lastCheck = millis();
   }
 }
