@@ -50,8 +50,6 @@
 #ifdef PLUGIN_046
 boolean Plugin_046(byte function, char *string)
 {
-   //Serial.print("RawSignal.Number: ");
-   //Serial.println(RawSignal.Number);
    if ((RawSignal.Number) != AURIOLV2_PULSECOUNT)
       return false;
    unsigned long bitstream1 = 0L;
@@ -68,13 +66,6 @@ boolean Plugin_046(byte function, char *string)
    // get all the bits we need (36 bits)
    for (byte x = 4; x < (AURIOLV2_PULSECOUNT); x += 2)
    {
-      /*
-  		   Serial.print(x/2);
-	       Serial.print("\t");
-	       Serial.print(RawSignal.Pulses[x+1]*RawSignal.Multiply);
-		   Serial.print("\t");
-	       Serial.println(RawSignal.Pulses[x]*RawSignal.Multiply);
-		 */
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
          return false;
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 1400)
@@ -114,13 +105,6 @@ boolean Plugin_046(byte function, char *string)
    //==================================================================================
    if (((RepeatingTimer + 700) < millis()) || SignalCRC != bitstream1)
    {
-      /*
-		  Serial.print("\nBitstream :");
-	  	  Serial.print(bitstream1, HEX);
-	  	  Serial.print("\t");
-	  	  Serial.println(bitstream2, HEX);
-		  */
-      //==================================================================================
       if (bitstream1 == 0)
          return false; // Perform sanity check
       if ((bitstream2 & 0xF00) != 0xF00)
@@ -171,57 +155,20 @@ boolean Plugin_046(byte function, char *string)
       // Output
       // ----------------------------------
 
-      //sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++);
-      //Serial.print( pbuffer );
-      //strcat(MQTTbuffer, pbuffer);
-
-      //Serial.print("20;");
-      //PrintHexByte(PKSequenceNumber++);
-      sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      display_Header();
 
       if (type == 0)
-      {
-         //Serial.print(F(";Auriol V2;ID="));         // Label
-         sprintf_P(pbuffer, PSTR("%S"), F(";Auriol V2;ID="));
-      }
+         display_Name(PSTR("Auriol V2"));
       else
-      {
-         //Serial.print(F(";Xiron;ID="));             // Label
-         sprintf_P(pbuffer, PSTR("%S"), F(";Xiron;ID="));
-      }
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+         display_Name(PSTR("Xiron"));
 
-      //PrintHexByte(rc);
-      //PrintHexByte(channel);
-      // ----------------------------------
-      //sprintf(pbuffer, ";TEMP=%04x;", temperature);
-      sprintf_P(pbuffer, PSTR("%02X%02X%S%04x"), rc, channel, F(";TEMP="), temperature);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+      display_ID((rc << 8) | channel);
+      display_TEMP(temperature);
 
       if (type == 1)
-      {
-         sprintf_P(pbuffer, PSTR("%S%02d"), F(";HUM="), humidity);
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
-      if (bat == 0)
-      { // battery status
-         //Serial.print(F(";BAT=LOW;"));
-         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=LOW;"));
-      }
-      else
-      {
-         //Serial.print(F(";BAT=OK;"));
-         sprintf_P(pbuffer, PSTR("%S"), F(";BAT=OK;"));
-      }
-
-      strcat(pbuffer, "\r\n");
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
+         display_HUM(humidity);
+      display_BAT(bat);
+      display_Footer();
 
       SignalCRC = bitstream1;
    }
