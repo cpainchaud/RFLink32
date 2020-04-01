@@ -95,9 +95,7 @@
 #define WS3500_PULSECOUNT 74
 
 #ifdef PLUGIN_030
-
-void print_header(byte);
-void print_battery_status(byte);
+#include "4_Misc.h"
 
 boolean Plugin_030(byte function, char *string)
 {
@@ -121,6 +119,7 @@ boolean Plugin_030(byte function, char *string)
    unsigned int winddirection = 0;
    byte checksumcalc = 0;
    byte rc = 0;
+   unsigned int id = 0;
    byte battery = 0;
    //==================================================================================
    for (byte x = 2; x <= 64; x = x + 2)
@@ -198,11 +197,12 @@ boolean Plugin_030(byte function, char *string)
    if (checksum != checksumcalc)
       return false;
    //==================================================================================
-   battery = (nibble2)&B0001; // get battery indicator
-   nibble2 = (nibble2)&B0110; // prepare nibble to contain only the needed bits
-   nibble3 = (nibble3)&B0111; // prepare nibble to contain only the needed bits
+   battery = !((nibble2)&B0001); // get battery indicator
+   nibble2 = (nibble2)&B0110;    // prepare nibble to contain only the needed bits
+   nibble3 = (nibble3)&B0111;    // prepare nibble to contain only the needed bits
    //==================================================================================
    rc = (nibble1 << 4) | nibble0;
+   id = (rc & 0x03) << 2 | (rc & 0xfc);
 
    if ((nibble2) != B0110)
    { // nibble 2 needs to be set to something other than 'x11x' to be a temperature packet
@@ -211,7 +211,7 @@ boolean Plugin_030(byte function, char *string)
       //fix 12 bit signed number conversion
       if ((temperature & 0x800) == 0x800)
       {
-         // if ((nibble2 & B0110) != 0)      // Will never happen, see line #201
+         // if ((nibble2 & B0110) != 0)    // Will never happen, see line #201
          //   return false;                // reject alecto v4 on alecto v1... (causing high negative temperatures with valid checksums)
          temperature = 4096 - temperature; // fix for minus temperatures
          if (temperature > 0x258)
@@ -229,19 +229,16 @@ boolean Plugin_030(byte function, char *string)
       //==================================================================================
       // Output
       // ----------------------------------
-      print_header(rc);
-
-      sprintf_P(pbuffer, PSTR("%S%04x"), F(";TEMP="), temperature);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-
+      display_Header();
+      display_Name(PSTR("Alecto V1"));
+      display_ID(id);
+      display_TEMP(temperature);
       if (humidity < 0x99)
-      {                                                            // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
-         sprintf_P(pbuffer, PSTR("%S%02x"), F(";HUM="), humidity); // Only report humidity when it is below 99%
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
+      {                         // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
+         display_HUM(humidity); // Only report humidity when it is below 99%
       }
-      print_battery_status(battery);
+      display_BAT(battery);
+      display_Footer();
       //==================================================================================
       RawSignal.Repeats = true; // suppress repeats of the same RF packet
       RawSignal.Number = 0;
@@ -249,6 +246,9 @@ boolean Plugin_030(byte function, char *string)
    }
    else
    {
+      display_Header();
+      display_Name(PSTR("Alecto V1"));
+      display_ID(id);
       if ((nibble3) == B0011)
       {                                                                      // Rain packet
          rain = (nibble7 << 12) | (nibble6 << 8) | (nibble5 << 4) | nibble4; // 0.25mm step
@@ -256,17 +256,7 @@ boolean Plugin_030(byte function, char *string)
          //==================================================================================
          // Output
          // ----------------------------------
-         print_header(rc);
-
-         sprintf_P(pbuffer, PSTR("%S%04x"), F(";RAIN="), rain);
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-
-         print_battery_status(battery);
-         //==================================================================================
-         RawSignal.Repeats = true; // suppress repeats of the same RF packet
-         RawSignal.Number = 0;
-         return true;
+         display_RAIN(rain);
       }
       if ((nibble3) == B0001)
       {                                        // Windspeed packet
@@ -275,80 +265,28 @@ boolean Plugin_030(byte function, char *string)
          //==================================================================================
          // Output
          // ----------------------------------
-         print_header(rc);
-
-         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINSP="), windspeed);
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-
-         print_battery_status(battery);
-         //==================================================================================
-         RawSignal.Repeats = true; // suppress repeats of the same RF packet
-         RawSignal.Number = 0;
-         return true;
+         display_WINSP(windspeed);
       }
       if ((nibble3) == B0111)
       {                                                                                      // Winddir packet
          winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
-         winddirection = ((winddirection * 2) / 45) & 0x0f;                                // Divided by 22.5
-         windgust = (nibble7 << 4) | nibble6; // 0.2m/s step
-         windgust = (windgust * 72) / 100;    // to get kph
+         winddirection = ((winddirection * 2) / 45) & 0x0f;                                  // Divided by 22.5
+         windgust = (nibble7 << 4) | nibble6;                                                // 0.2m/s step
+         windgust = (windgust * 72) / 100;                                                   // to get kph
          //==================================================================================
          // Output
          // ----------------------------------
-         print_header(rc);
-
-         sprintf_P(pbuffer, PSTR("%S%03d"), F(";WINDIR="), winddirection);
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-
-         sprintf_P(pbuffer, PSTR("%S%04x"), F(";WINGS="), windgust);
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-
-         print_battery_status(battery);
-         //==================================================================================
-         RawSignal.Repeats = true; // suppress repeats of the same RF packet
-         RawSignal.Number = 0;
-         return true;
+         display_WINDIR(winddirection);
+         display_WINGS(windgust);
       }
+      display_BAT(battery);
+      display_Footer();
+      //==================================================================================
+      RawSignal.Repeats = true; // suppress repeats of the same RF packet
+      RawSignal.Number = 0;
+      return true;
    }
    return false;
-}
-
-// Shared header display
-void print_header(byte rc)
-{
-   sprintf_P(pbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++); // Seq
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-   // ----------------------------------
-   sprintf_P(pbuffer, PSTR("%S"), F(";Alecto V1")); // Label
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-   // ----------------------------------
-   sprintf_P(pbuffer, PSTR("%S%02x%02x"), F(";ID="), (rc & 0x03), (rc & 0xfc)); // ID is split into channel number and rolling code
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-}
-
-// Shared battery status display
-void print_battery_status(byte bat)
-{
-   if (bat == 0)
-   { // battery status
-      sprintf_P(pbuffer, PSTR("%S"), F(";BAT=OK"));
-   }
-   else
-   {
-      sprintf_P(pbuffer, PSTR("%S"), F(";BAT=LOW"));
-   }
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-   // ----------------------------------
-   sprintf_P(pbuffer, PSTR("%S"), F(";\r\n"));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
 }
 
 #endif // PLUGIN_030
