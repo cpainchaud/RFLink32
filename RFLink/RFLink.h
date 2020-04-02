@@ -59,5 +59,6 @@
 // MQTT messages
 #define MQTT_ACTIVATED
 #define MQTT_LOOP_MS 10000 // MQTTClient.loop(); call period (in mSec)
+#define MQTT_RETAINED false
 
 #endif

@@ -116,7 +116,7 @@ void publishMsg()
     {
       reconnect();
     }
-    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer);
+    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, MQTT_RETAINED);
     MQTTbuffer[0] = 0;
   }
 }
