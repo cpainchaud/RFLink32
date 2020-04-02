@@ -45,7 +45,7 @@
 
 // PIN Definition
 
-// NodeMCUv2
+// ESP8266 D1 Mini
 #define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
 #define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
