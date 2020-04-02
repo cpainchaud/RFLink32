@@ -116,7 +116,11 @@ void publishMsg()
     {
       reconnect();
     }
-    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, MQTT_RETAINED);
+#ifdef MQTT_RETAINED
+    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, true);
+#else
+    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, false);
+#endif
     MQTTbuffer[0] = 0;
   }
 }
