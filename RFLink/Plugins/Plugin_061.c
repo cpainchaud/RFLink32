@@ -98,26 +98,12 @@ boolean Plugin_061(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-   // ----------------------------------
-   // Serial.print(F("X10;"));
-   sprintf_P(pbuffer, PSTR("%S"), F("X10;")); // Label
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf(pbuffer, "ID=%06lx;", (bitstream)&0xffffff); // ID
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   // Serial.print(F("SWITCH=01;"));
-   // Serial.print(F("CMD=ON;"));
-   sprintf_P(pbuffer, PSTR("%S"), F("SWITCH=01;CMD=ON;")); // this device reports movement only
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   Serial.println();
+   display_Header();
+   display_Name(PSTR("X10"));
+   display_long_ID((bitstream & 0xFFFFFF), 6); //"%S%06lx"
+   display_SWITCH(1U);
+   display_CMD(false, true); // #ALL , #ON
+   display_Footer();
 
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
