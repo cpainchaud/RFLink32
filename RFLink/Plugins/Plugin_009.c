@@ -272,7 +272,6 @@ boolean Plugin_009(byte function, char *string)
    case 0x05:
       display_CMD(((command >> 3) & B01), (command & B01));
       break;
-
    case 0x02:
    case 0x03:
       display_Name(PSTR(";CMD="));
