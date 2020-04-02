@@ -53,6 +53,9 @@
 #define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
 #define PIN_RF_RX_DATA D1        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 
+// WIFI
+#define WIFI_PWR 10 // 0~20.5dBm
+
 // MQTT messages
 #define MQTT_ACTIVATED
 #define MQTT_LOOP_MS 10000 // MQTTClient.loop(); call period (in mSec)

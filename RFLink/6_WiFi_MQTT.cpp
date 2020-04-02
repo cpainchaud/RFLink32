@@ -38,6 +38,7 @@ void setup_WIFI()
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  WiFi.setOutputPower(WIFI_PWR);
   WiFi.mode(WIFI_STA);
 
   // Comment out for Dynamic IP
