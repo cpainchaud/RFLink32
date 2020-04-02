@@ -51,10 +51,11 @@ boolean Plugin_005(byte function, char *string)
       return false;
    if (RawSignal.Pulses[0] == 63)
       return false; // No need to test, packet for plugin 63
+
    unsigned long bitstream = 0;
    byte unitcode = 0;
    byte command = 0;
-   unsigned long address = 0;
+   unsigned int address = 0;
    // ==========================================================================
    if (RawSignal.Pulses[49] > EURODOMEST_PULSEMID)
       return false; // last pulse needs to be short, otherwise no Eurodomest protocol
@@ -95,80 +96,36 @@ boolean Plugin_005(byte function, char *string)
    //==================================================================================
    // perform sanity checks to prevent false positives
    //==================================================================================
-   address = bitstream;
-   address = (address >> 4) & 0xfffff;
+   address = ((bitstream >> 4) & 0xFFFFF);
    if (address == 0)
       return false; // Address would never be 0
-   if (address == 0xfffff)
+   if (address == 0xFFFFF)
       return false; // Address would never be FFFFF
    // ----------------------------------
    unitcode = ((bitstream >> 1) & 0x7);
-   command = ((bitstream)&0x01);
-   if (unitcode == 3)
+   command = (bitstream & 0x01);
+   if (unitcode == 0x3)
       return false; // invalid button code?
-   if (unitcode == 4)
+   if (unitcode == 0x4)
       unitcode--;
-   //      if (unitcode == 5) return false;              // Note: unitcode 5 is present on the PCB and working but not used on any remotes.
-   if (unitcode > 7)
-      return false; // invalid button code?
+   // if (unitcode == 5) return false;
+   // Note: unitcode 5 is present on the PCB
+   // and working but not used on any remotes.
+   // if (unitcode > 0x7) // Impossible by code design
+   // return false; // invalid button code?
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-   // ----------------------------------
-   //Serial.print(F("Eurodomest;"));                    // Label
-   sprintf_P(pbuffer, PSTR("%S"), F("Eurodomest;"));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf(pbuffer, "ID=%06lx;", (address)&0xffffff); // ID
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf(pbuffer, "SWITCH=%02x;", unitcode); // ID
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
+   display_Header();
+   display_Name(PSTR("Eurodomest"));
+   display_IDn(address, 6);  //"%S%06lx"
+   display_SWITCH(unitcode); // %02d, not %02x
    if (unitcode > 4)
-   {
-      sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-      if (command == 0)
-      {
-         sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
-      else
-      {
-         sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
-   }
+      display_CMD(true, (command != 0x0)); // #ALL #ON
    else
-   {
-      if (command == 1)
-      {
-         sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
-      else
-      {
-         sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
-   }
-   Serial.println();
+      display_CMD(false, (command != 0X1)); // #ALL #ON
+   display_Footer();
+
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
