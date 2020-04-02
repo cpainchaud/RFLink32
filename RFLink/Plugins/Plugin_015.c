@@ -121,29 +121,12 @@ boolean Plugin_015(byte function, char *string)
    // ----------------------------------
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print("HomeEasy;");                // Label
-   sprintf(pbuffer, "ID=%08lx;", (address)); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", channel);
-   Serial.print(pbuffer);
-   strcpy(pbuffer, "CMD=");
-   if (group == 1)
-   {
-      strcat(pbuffer, "ALL");
-   }
-   if (command == 1)
-   {
-      strcat(pbuffer, "OFF;");
-   }
-   else
-   {
-      strcat(pbuffer, "ON;");
-   }
-   Serial.print(pbuffer);
-   Serial.println();
+   display_Header();
+   display_Name(PSTR("HomeEasy"));
+   display_IDn(address, 8);                        //"%S%08lx"
+   display_SWITCH(channel);                        // "%02x"
+   display_CMD((group & B01), (!(command & B01))); // #All #On
+   display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true;
    RawSignal.Number = 0;
