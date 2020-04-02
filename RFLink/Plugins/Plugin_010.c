@@ -178,7 +178,7 @@ boolean Plugin_010(byte function, char *string)
    {
    case 0x00:
    case 0x01:
-      display_CMD(false, (command & B01));
+      display_CMD(false, (command & B01)); // #ALL , #ON
       break;
    case 0x02:
    case 0x03:
