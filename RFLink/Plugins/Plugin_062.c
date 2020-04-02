@@ -23,16 +23,16 @@
  * 101010011010011010010101100110101001010101101010 0
  * 00010010 01110100 01111000   = 0x 12 74 78
  \*********************************************************************************************/
-#define ALARMPIRV1_PULSECOUNT 50
+#define ALARMPIRV2_PULSECOUNT 50
 
-#define ALARMPIRV1_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV1_PULSEMAX 2000 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV1_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV2_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV2_PULSEMAX 2000 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV2_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_062
 boolean Plugin_062(byte function, char *string)
 {
-   if (RawSignal.Number != ALARMPIRV1_PULSECOUNT)
+   if (RawSignal.Number != ALARMPIRV2_PULSECOUNT)
       return false;
    if (RawSignal.Pulses[0] == 63)
       return false; // No need to test, packet for plugin 63
@@ -40,19 +40,19 @@ boolean Plugin_062(byte function, char *string)
    //==================================================================================
    for (byte x = 2; x <= 48; x = x + 2)
    {
-      if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMID)
+      if (RawSignal.Pulses[x] > ALARMPIRV2_PULSEMID)
       {
-         if (RawSignal.Pulses[x] > ALARMPIRV1_PULSEMAX)
+         if (RawSignal.Pulses[x] > ALARMPIRV2_PULSEMAX)
             return false; // pulse too long
-         if (RawSignal.Pulses[x - 1] > ALARMPIRV1_PULSEMID)
+         if (RawSignal.Pulses[x - 1] > ALARMPIRV2_PULSEMID)
             return false; // invalid pulse sequence 10/01
          bitstream = (bitstream << 1) | 0x1;
       }
       else
       {
-         if (RawSignal.Pulses[x] < ALARMPIRV1_PULSEMIN)
+         if (RawSignal.Pulses[x] < ALARMPIRV2_PULSEMIN)
             return false; // pulse too short
-         if (RawSignal.Pulses[x - 1] < ALARMPIRV1_PULSEMID)
+         if (RawSignal.Pulses[x - 1] < ALARMPIRV2_PULSEMID)
             return false; // invalid pulse sequence 10/01
          bitstream = bitstream << 1;
       }
