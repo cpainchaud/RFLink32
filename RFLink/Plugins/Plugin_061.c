@@ -100,7 +100,7 @@ boolean Plugin_061(byte function, char *string)
    // ----------------------------------
    display_Header();
    display_Name(PSTR("X10"));
-   display_long_ID((bitstream & 0xFFFFFF), 6); //"%S%06lx"
+   display_IDn((bitstream & 0xFFFFFF), 6); // "%S%06lx"
    display_SWITCH(1U);
    display_CMD(false, true); // #ALL , #ON
    display_Footer();

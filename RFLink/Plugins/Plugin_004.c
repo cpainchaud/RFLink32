@@ -135,7 +135,7 @@ boolean Plugin_004(byte function, char *string)
 
    display_Header();
    display_Name(PSTR("NewKaku"));
-   display_long_ID(((bitstream >> 6) & 0xFFFFFFFF));     //"%S%08lx"
+   display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8);      //"%S%08lx"
    display_SWITCH((unsigned int)(bitstream & 0x0f) + 1); // MRI cast UL
 
    if (i > 140 && dimbitpresent == 1)

@@ -163,32 +163,30 @@ void display_ID(byte b1, byte b0)
   display_ID(((b1 << 8) | b0));
 }
 
-void display_long_ID(unsigned int input, byte n)
+void display_IDn(unsigned int input, byte n)
 {
   switch (n)
-    {
-    case 4:
-      sprintf_P(pbuffer, PSTR("%S%04x"), F(";ID="), input);
-      break;
-    case 6:
-      sprintf_P(pbuffer, PSTR("%S%06x"), F(";ID="), input);
-      break;
-    case 8:
-    default:
-      sprintf_P(pbuffer, PSTR("%S%08x"), F(";ID="), input);
-    }
+  {
+  case 2:
+    sprintf_P(pbuffer, PSTR("%S%02x"), F(";ID="), input);
+    break;
+  case 4:
+    sprintf_P(pbuffer, PSTR("%S%04x"), F(";ID="), input);
+    break;
+  case 6:
+    sprintf_P(pbuffer, PSTR("%S%06x"), F(";ID="), input);
+    break;
+  case 8:
+  default:
+    sprintf_P(pbuffer, PSTR("%S%08x"), F(";ID="), input);
+  }
   display_Print();
-}
-
-void display_long_ID(unsigned int input)
-{
-  display_long_ID(input, 8);
 }
 
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCH(unsigned int input)
 {
-  sprintf_P(pbuffer, PSTR("%S%x"), F(";SWITCH="), input);
+  sprintf_P(pbuffer, PSTR("%S%d"), F(";SWITCH="), input);
   display_Print();
 }
 
