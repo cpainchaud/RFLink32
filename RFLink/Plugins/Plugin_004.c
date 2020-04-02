@@ -132,7 +132,6 @@ boolean Plugin_004(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-
    display_Header();
    display_Name(PSTR("NewKaku"));
    display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8);      //"%S%08lx"
@@ -143,7 +142,6 @@ boolean Plugin_004(byte function, char *string)
    else
       display_CMD((bitstream >> 5) & B01, (bitstream >> 4) & B01); // #ALL , #ON
    display_Footer();
-
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
