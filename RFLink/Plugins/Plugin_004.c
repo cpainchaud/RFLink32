@@ -133,50 +133,16 @@ boolean Plugin_004(byte function, char *string)
    // Output
    // ----------------------------------
 
-   sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
+   display_Header();
+   display_Name(PSTR("NewKaku"));
+   display_long_ID(((bitstream >> 6) & 0xFFFFFFFF));     //"%S%08lx"
+   display_SWITCH((unsigned int)(bitstream & 0x0f) + 1); // MRI cast UL
 
-   // ----------------------------------
-   sprintf_P(pbuffer, PSTR("%S"), F("NewKaku;"));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf_P(pbuffer, PSTR("%S%08lx;"), F("ID="), ((bitstream) >> 6)); // ID
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf_P(pbuffer, PSTR("%S%x;"), F("SWITCH="), (unsigned int)((bitstream)&0x0f) + 1); // MRI cast UL
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   int command = (bitstream >> 4) & 0x03;
-   if (command > 1)
-      command++;
    if (i > 140 && dimbitpresent == 1)
-   { // Command and Dim part
-      sprintf_P(pbuffer, PSTR("%S%d;"), F("SET_LEVEL="), dim);
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-   }
+      display_SET_LEVEL(dim); // Command and Dim part
    else
-   {
-      if (command == 0)
-         sprintf_P(pbuffer, PSTR("%S"), F("OFF;")); //Serial.print(F("OFF;"));
-      if (command == 1)
-         sprintf_P(pbuffer, PSTR("%S"), F("ON;")); //Serial.print(F("ON;"));
-      if (command == 3)
-         sprintf_P(pbuffer, PSTR("%S"), F("ALLOFF;")); //Serial.print(F("ALLOFF;"));
-      if (command == 4)
-         sprintf_P(pbuffer, PSTR("%S"), F("ALLON;")); //Serial.print(F("ALLON;"));
-   }
-   strcat(pbuffer, "\r\n");
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
+      display_CMD((bitstream >> 5) & B01, (bitstream >> 4) & B01); // #ALL , #ON
+   display_Footer();
 
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
