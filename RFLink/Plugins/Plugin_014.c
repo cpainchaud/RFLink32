@@ -40,6 +40,8 @@
 #define KOPPLA_PULSEMIN 650 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_014
+#include "../4_Misc.h"
+
 boolean Plugin_014(byte function, char *string)
 {
    if ((RawSignal.Number < KOPPLA_PulseLength_MIN) || (RawSignal.Number > KOPPLA_PulseLength_MAX))

@@ -57,6 +57,8 @@
 #define HC_PULSECOUNT 100
 
 #ifdef PLUGIN_011
+#include "../4_Misc.h"
+
 boolean Plugin_011(byte function, char *string)
 {
    if (RawSignal.Number != HC_PULSECOUNT)

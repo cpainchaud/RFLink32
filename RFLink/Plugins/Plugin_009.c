@@ -47,6 +47,8 @@
 #define X10_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_009
+#include "../4_Misc.h"
+
 boolean Plugin_009(byte function, char *string)
 {
    if ((RawSignal.Number != (X10_PulseLength)) && (RawSignal.Number != (X10_PulseLength + 2)))
