@@ -259,40 +259,35 @@ boolean Plugin_009(byte function, char *string)
    // ----------------------------------
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("X10;"));                        // Label
-   sprintf(pbuffer, "ID=%02x;", 0x41 + housecode); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%d;", unitcode);
-   Serial.print(pbuffer);
-   Serial.print(F("CMD="));
-   if (command == 0)
+   display_Header();
+   display_Name(PSTR("X10"));
+   display_IDn((0x41 + housecode), 2); //"%S%02x"
+   display_SWITCH(unitcode);
+
+   switch (command)
    {
-      Serial.print(F("OFF;"));
+   case 0x00:
+   case 0x01:
+   case 0x04:
+   case 0x05:
+      display_CMD(((command >> 3) & B01), (command & B01));
+      break;
+
+   case 0x02:
+   case 0x03:
+      display_Name(PSTR(";CMD="));
+      switch (command)
+      {
+      case 0x02:
+         display_Name(PSTR("BRIGHT"));
+         break;
+      case 0x03:
+         display_Name(PSTR("DIM"));
+         break;
+      }
+      break;
    }
-   else if (command == 1)
-   {
-      Serial.print(F("ON;"));
-   }
-   else if (command == 2)
-   {
-      Serial.print(F("BRIGHT;"));
-   }
-   else if (command == 3)
-   {
-      Serial.print(F("DIM;"));
-   }
-   else if (command == 4)
-   {
-      Serial.print(F("ALLOFF;"));
-   }
-   else if (command == 5)
-   {
-      Serial.print(F("ALLON;"));
-   }
-   Serial.println();
+   display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
