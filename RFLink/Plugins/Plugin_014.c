@@ -48,7 +48,7 @@ boolean Plugin_014(byte function, char *string)
       return false;
    unsigned long bitstream = 0L;
 
-   byte preamble = 0;
+   // byte preamble = 0; // unused?
    unsigned int sysunit = 0;
    byte levelfade = 0;
    byte command = 0;
@@ -132,45 +132,43 @@ boolean Plugin_014(byte function, char *string)
       for (i = 2; i < 6; i++)
       {
          level = level << 1;
-         level = level | ((levelfade) >> i) & 0x01;
+         level = level | ((levelfade >> i) & 0x01);
       }
    }
    //==================================================================================
    // ----------------------------------
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("Ikea Koppla;"));       // Label
-   sprintf(pbuffer, "ID=%04x;", sysunit); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", levelfade); // ID
-   Serial.print(pbuffer);
-   Serial.print(F("CMD="));
+   display_Header();
+   display_Name(PSTR("Ikea Koppla"));
+   display_IDn(sysunit, 4);   //"%S%04x"
+   display_SWITCH(levelfade); // "%02x"
 
-   if (command == 0)
+   switch (command)
    {
-      Serial.print(F("OFF;"));
+   case 0x00:
+   case 0x01:
+   case 0x04:
+   case 0x05:
+      display_CMD(((command >> 3) & B01), (command & B01));
+      break;
+   case 0x02:
+   case 0x03:
+      display_Name(PSTR(";CMD="));
+      switch (command)
+      {
+      case 0x02:
+         display_Name(PSTR("BRIGHT"));
+         break;
+      case 0x03:
+         display_Name(PSTR("DIM"));
+         break;
+      }
+      break;
+   default:
+      display_SET_LEVEL(level);
    }
-   else if (command == 1)
-   {
-      Serial.print(F("ON;"));
-   }
-   else if (command == 2)
-   {
-      Serial.print(F("BRIGHT;"));
-   }
-   else if (command == 3)
-   {
-      Serial.print(F("DIM;"));
-   }
-   else
-   {
-      sprintf(pbuffer, "SET_LEVEL=%d;", level);
-      Serial.print(pbuffer);
-   }
-   Serial.println();
+   display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
