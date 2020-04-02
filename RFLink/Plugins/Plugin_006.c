@@ -128,31 +128,20 @@ boolean Plugin_006(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
+   display_Header();
    if (type == 0)
-   {
-      Serial.print(F("Blyss;")); // Label
-   }
+      display_Name(PSTR("Blyss"));
    else
-   {
-      Serial.print(F("Avidsen;")); // Label
-   }
-   sprintf(pbuffer, "ID=%04x;", address); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%c%d;", channel, subchan);
-   Serial.print(pbuffer);
-   Serial.print(F("CMD=")); // command
-   if (status == 0)
-      Serial.print(F("ON;"));
-   if (status == 1)
-      Serial.print(F("OFF;"));
-   if (status == 2)
-      Serial.print(F("ALLON;"));
-   if (status == 3)
-      Serial.print(F("ALLOFF;"));
-   Serial.println();
+      display_Name(PSTR("Avidsen"));
+
+   display_IDn(address, 4); //"%04x"
+
+   char c_SWITCH[4];
+   sprintf(c_SWITCH, "%c%d;", channel, subchan);
+   display_SWITCH(c_SWITCH);
+
+   display_CMD((status >> 1) & B01, !(status & B01)); // #ALL #ON Serial.print(F("ON;"));
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
