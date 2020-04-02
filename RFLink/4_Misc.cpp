@@ -112,6 +112,7 @@ byte reverseBits(byte data)
 // Internal Print subpart
 void display_Print()
 {
+#ifdef SERIAL_ENABLED
   Serial.print(pbuffer);
 #if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
   strcat(MQTTbuffer, pbuffer);
