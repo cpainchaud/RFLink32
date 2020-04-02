@@ -211,111 +211,112 @@ boolean Plugin_013(byte function, char *string)
       RawSignal.Number = 0;
       return true;
    }
+}
 #endif //PLUGIN_013
 
 #ifdef PLUGIN_TX_013
-   void Powerfix_Send(unsigned long bitstream);
+void Powerfix_Send(unsigned long bitstream);
 
-   boolean PluginTX_013(byte function, char *string)
+boolean PluginTX_013(byte function, char *string)
+{
+   boolean success = false;
+   //10;POWERFIX;000080;0;ON;
+   //012345678901234567890123
+   if (strncasecmp(InputBuffer_Serial + 3, "POWERFIX;", 9) == 0)
    {
-      boolean success = false;
-      //10;POWERFIX;000080;0;ON;
-      //012345678901234567890123
-      if (strncasecmp(InputBuffer_Serial + 3, "POWERFIX;", 9) == 0)
+      if (InputBuffer_Serial[18] != ';')
+         return success;
+
+      InputBuffer_Serial[10] = 0x30;
+      InputBuffer_Serial[11] = 0x78;
+      InputBuffer_Serial[18] = 0x00; // Get address from hexadecimal value
+
+      unsigned long bitstream = 0L; // Main placeholder
+      byte command = 0;
+      byte c;
+      // -------------------------------
+      bitstream = str2int(InputBuffer_Serial + 10); // Address, first 12 bits of the 20 bits in total
+      bitstream = (bitstream) << 8;                 // shift left so that we can add the 8 command bits
+      // -------------------------------
+      byte temp = str2int(InputBuffer_Serial + 19); // button/unit number (0..3)
+      if (temp == 1)
+         command = 0x82;
+      if (temp == 2)
+         command = 0x40;
+      if (temp == 3)
+         command = 0xc2;
+      // -------------------------------
+      c = 0;
+      c = str2cmd(InputBuffer_Serial + 21); // ON/OFF command
+      if (c == VALUE_ON)
       {
-         if (InputBuffer_Serial[18] != ';')
-            return success;
-
-         InputBuffer_Serial[10] = 0x30;
-         InputBuffer_Serial[11] = 0x78;
-         InputBuffer_Serial[18] = 0x00; // Get address from hexadecimal value
-
-         unsigned long bitstream = 0L; // Main placeholder
-         byte command = 0;
-         byte c;
-         // -------------------------------
-         bitstream = str2int(InputBuffer_Serial + 10); // Address, first 12 bits of the 20 bits in total
-         bitstream = (bitstream) << 8;                 // shift left so that we can add the 8 command bits
-         // -------------------------------
-         byte temp = str2int(InputBuffer_Serial + 19); // button/unit number (0..3)
-         if (temp == 1)
-            command = 0x82;
-         if (temp == 2)
-            command = 0x40;
-         if (temp == 3)
-            command = 0xc2;
-         // -------------------------------
-         c = 0;
-         c = str2cmd(InputBuffer_Serial + 21); // ON/OFF command
-         if (c == VALUE_ON)
-         {
-            command = command | 0x10; // turn "on" bit for on command
-         }
-         else
-         {
-            if (c == VALUE_ALLOFF)
-            { // set "all off" bits
-               command = 0xe0;
-            }
-            else if (c == VALUE_ALLON)
-            {
-               command = 0xf0; // set "all on" bits
-            }
-         }
-         // not supported yet..
-         // dim: command=0xfa
-         // bright: command=0xea;
-         // -------------------------------
-         bitstream = bitstream + command;
-         // -------------------------------
-         Powerfix_Send(bitstream); // bitstream to send
-         success = true;
+         command = command | 0x10; // turn "on" bit for on command
       }
-      return success;
+      else
+      {
+         if (c == VALUE_ALLOFF)
+         { // set "all off" bits
+            command = 0xe0;
+         }
+         else if (c == VALUE_ALLON)
+         {
+            command = 0xf0; // set "all on" bits
+         }
+      }
+      // not supported yet..
+      // dim: command=0xfa
+      // bright: command=0xea;
+      // -------------------------------
+      bitstream = bitstream + command;
+      // -------------------------------
+      Powerfix_Send(bitstream); // bitstream to send
+      success = true;
    }
+   return success;
+}
 
 #define PLUGIN_013_RFLOW 650
 #define PLUGIN_013_RFHIGH 1300
 
-   void Powerfix_Send(unsigned long bitstream)
-   {
-      RawSignal.Repeats = 7; // Number of RF packet retransmits
-      RawSignal.Delay = 20;  // Delay between RF packets
-      RawSignal.Number = 42; // Length
+void Powerfix_Send(unsigned long bitstream)
+{
+   RawSignal.Repeats = 7; // Number of RF packet retransmits
+   RawSignal.Delay = 20;  // Delay between RF packets
+   RawSignal.Number = 42; // Length
 
-      uint32_t fdatabit;
-      uint32_t fdatamask = 0x80000;
-      byte parity = 1; // to calculate the parity bit
-      // -------------------------------
-      RawSignal.Pulses[1] = PLUGIN_013_RFLOW / RawSignal.Multiply; // start pulse
-      for (byte i = 2; i < 40; i = i + 2)
-      {                                    // address and command bits
-         fdatabit = bitstream & fdatamask; // Get most left bit
-         bitstream = (bitstream << 1);     // Shift left
+   uint32_t fdatabit;
+   uint32_t fdatamask = 0x80000;
+   byte parity = 1; // to calculate the parity bit
+   // -------------------------------
+   RawSignal.Pulses[1] = PLUGIN_013_RFLOW / RawSignal.Multiply; // start pulse
+   for (byte i = 2; i < 40; i = i + 2)
+   {                                    // address and command bits
+      fdatabit = bitstream & fdatamask; // Get most left bit
+      bitstream = (bitstream << 1);     // Shift left
 
-         if (fdatabit != fdatamask)
-         { // Write 0
-            RawSignal.Pulses[i] = PLUGIN_013_RFLOW / RawSignal.Multiply;
-            RawSignal.Pulses[i + 1] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
-         }
-         else
-         { // Write 1
-            parity = parity ^ 1;
-            RawSignal.Pulses[i] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
-            RawSignal.Pulses[i + 1] = PLUGIN_013_RFLOW / RawSignal.Multiply;
-         }
-      }
-      // parity
-      if (parity == 0)
+      if (fdatabit != fdatamask)
       { // Write 0
-         RawSignal.Pulses[40] = PLUGIN_013_RFLOW / RawSignal.Multiply;
-         RawSignal.Pulses[41] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
+         RawSignal.Pulses[i] = PLUGIN_013_RFLOW / RawSignal.Multiply;
+         RawSignal.Pulses[i + 1] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
       }
       else
       { // Write 1
-         RawSignal.Pulses[40] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
-         RawSignal.Pulses[41] = PLUGIN_013_RFLOW / RawSignal.Multiply;
+         parity = parity ^ 1;
+         RawSignal.Pulses[i] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
+         RawSignal.Pulses[i + 1] = PLUGIN_013_RFLOW / RawSignal.Multiply;
       }
-      RawSendRF();
    }
+   // parity
+   if (parity == 0)
+   { // Write 0
+      RawSignal.Pulses[40] = PLUGIN_013_RFLOW / RawSignal.Multiply;
+      RawSignal.Pulses[41] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
+   }
+   else
+   { // Write 1
+      RawSignal.Pulses[40] = PLUGIN_013_RFHIGH / RawSignal.Multiply;
+      RawSignal.Pulses[41] = PLUGIN_013_RFLOW / RawSignal.Multiply;
+   }
+   RawSendRF();
+}
 #endif // PLUGIN_TX_013
