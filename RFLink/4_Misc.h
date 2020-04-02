@@ -22,6 +22,7 @@ void display_Footer(void);
 void display_Start(void);
 void display_ID(unsigned int);
 void display_ID(byte, byte);
+void display_long_ID(unsigned int, byte);
 void display_long_ID(unsigned int);
 void display_SWITCH(unsigned int);
 void display_SWITCH(const char *);
