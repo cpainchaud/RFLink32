@@ -48,10 +48,10 @@
 #define NewKAKU_mT 650 / RAWSIGNAL_SAMPLE_RATE // us, approx. in between 1T and 4T
 
 #ifdef PLUGIN_004
+#include "../4_Misc.h"
+
 boolean Plugin_004(byte function, char *string)
 {
-   // Serial.print("RawSignal.Number: ");
-   // Serial.println(RawSignal.Number);
    // nieuwe KAKU bestaat altijd uit start bit + 32 bits + evt 4 dim bits. Ongelijk, dan geen NewKAKU
    if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength))
       return false;
@@ -64,24 +64,6 @@ boolean Plugin_004(byte function, char *string)
    byte dim = 0;
    byte dimbitpresent = 0;
    unsigned long bitstream = 0L;
-
-   /*
-	  Serial.println("KAKU!");
-	  Serial.print("RawSignal.Pulses[0]\t");
-	  Serial.println(RawSignal.Pulses[0]);
-	  Serial.print("RawSignal.Pulses[1]\t");
-	  Serial.println(RawSignal.Pulses[1]);
-	  Serial.print("RawSignal.Pulses[2]\t");
-	  Serial.println(RawSignal.Pulses[2]);
-	  Serial.print("RawSignal.Pulses[3]\t");
-	  Serial.println(RawSignal.Pulses[3]);
-	  Serial.print("RawSignal.Pulses[4]\t");
-	  Serial.println(RawSignal.Pulses[4]);
-	  Serial.print("RawSignal.Pulses[5]\t");
-	  Serial.println(RawSignal.Pulses[5]);
-      Serial.print("RawSignal.Pulses[6]\t");
-	  Serial.println(RawSignal.Pulses[6]);
-      */
 
    // RawSignal.Pulses[1] startbit with duration of 1T => ignore
    // RawSignal.Pulses[2] long space after startbit with duration of 8T => ignore
@@ -112,7 +94,6 @@ boolean Plugin_004(byte function, char *string)
       }
       else
       {
-         //Serial.println("Unknown pattern");
          return false; // Other pulse patterns are invalid within the AC KAKU signal.
       }
       if (i < 130)
@@ -131,8 +112,6 @@ boolean Plugin_004(byte function, char *string)
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 700) < millis()) || (SignalCRC != bitstream))
    { // 1000
       // not seen the RF packet recently
-      //Serial.print("NKAKU PREV:");
-      //Serial.println(SignalHashPrevious);
       //if ((SignalHashPrevious==14) && ((RepeatingTimer+2000)>millis()) ) {
       //   SignalHash=14;
       //   return true;                            // SignalHash 14 = HomeEasy, eg. cant switch KAKU after HE for 2 seconds
@@ -148,7 +127,6 @@ boolean Plugin_004(byte function, char *string)
    else
    {
       // already seen the RF packet recently
-      //Serial.println("Skip");
       return true;
    }
    //==================================================================================
@@ -160,7 +138,6 @@ boolean Plugin_004(byte function, char *string)
    strcat(MQTTbuffer, pbuffer);
 
    // ----------------------------------
-   //Serial.print(F("NewKaku;"));                         // Label
    sprintf_P(pbuffer, PSTR("%S"), F("NewKaku;"));
    Serial.print(pbuffer);
    strcat(MQTTbuffer, pbuffer);
@@ -173,7 +150,6 @@ boolean Plugin_004(byte function, char *string)
    Serial.print(pbuffer);
    strcat(MQTTbuffer, pbuffer);
 
-   //Serial.print(F("CMD="));
    sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
    Serial.print(pbuffer);
    strcat(MQTTbuffer, pbuffer);
