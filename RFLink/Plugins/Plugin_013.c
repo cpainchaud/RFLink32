@@ -205,13 +205,14 @@ boolean Plugin_013(byte function, char *string)
          break;
       }
       break;
-      display_Footer();
-      // ----------------------------------
-      RawSignal.Repeats = true; // suppress repeats of the same RF packet
-      RawSignal.Number = 0;
-      return true;
    }
+   display_Footer();
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
 }
+
 #endif //PLUGIN_013
 
 #ifdef PLUGIN_TX_013
