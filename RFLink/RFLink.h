@@ -23,7 +23,7 @@
 #define TRANSMITTER_STABLE_DELAY_US 500 // delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define SCAN_HIGH_TIME_MS 50            // time interval in ms. fast processing for background tasks
 #define FOCUS_TIME_MS 50                // Duration in mSec. that, after receiving serial data from USB only the serial port is checked.
-#define PLUGIN_MAX 10                   // 55         // Maximum number of Receive plugins
+#define PLUGIN_MAX 30                   // 55         // Maximum number of Receive plugins
 #define PLUGIN_TX_MAX 0                 // 26         // Maximum number of Transmit plugins
 #define INPUT_COMMAND_SIZE 60           // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE 60            // Maximum number of characters that a command should print in one go via the print buffer.
