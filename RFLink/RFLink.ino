@@ -42,7 +42,7 @@ void setup()
 
   PluginInit();
 
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   setup_WIFI();
   setup_MQTT();
   reconnect();
@@ -51,20 +51,20 @@ void setup()
 #endif
   display_Start();
   display_Footer();
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   publishMsg();
 #endif
 }
 
 void loop()
 {
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   checkMQTTloop();
 #endif
 
   if (ScanEvent())
   {
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
 #else
     MQTTbuffer[0] = 0;

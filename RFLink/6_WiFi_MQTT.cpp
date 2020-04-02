@@ -17,7 +17,7 @@
 
 char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 60

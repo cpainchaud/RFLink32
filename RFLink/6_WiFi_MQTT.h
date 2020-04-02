@@ -12,7 +12,7 @@
 
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#if defined(MQTT_ACTIVATED) && (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
 void setup_WIFI();
 void setup_MQTT();
 void reconnect();
