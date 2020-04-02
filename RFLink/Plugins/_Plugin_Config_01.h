@@ -22,7 +22,7 @@
 // #define PLUGIN_002              // Lacrosse v2 2300/3600
 #define PLUGIN_003 // Kaku : Klik-Aan-Klik-Uit (with code wheel) aka ARC
 #define PLUGIN_004 // NewKAKU : Klik-Aan-Klik-Uit with automatic coding aka Intertechno.
-// #define PLUGIN_005              // Eurodomest
+#define PLUGIN_005 // Eurodomest
 // #define PLUGIN_006              // Blyss
 // #define PLUGIN_007              // Conrad RSL2
 // #define PLUGIN_008              // Kambrook
