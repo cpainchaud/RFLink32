@@ -221,28 +221,12 @@ boolean Plugin_007(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("Conrad;"));                            // Label
-   sprintf(pbuffer, "ID=%06lx;", ((bitstream)&0xffffff)); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", button); // Button number
-   Serial.print(pbuffer);
-   Serial.print(F("CMD=")); // command
-   if (group == 3)
-   {
-      Serial.print(F("ALL"));
-   }
-   if (action == 1)
-   {
-      Serial.print(F("ON;"));
-   }
-   else
-   { // 0 normal off, 2  group off
-      Serial.print(F("OFF;"));
-   }
-   Serial.println();
+   display_Header();
+   display_Name(PSTR("Conrad"));
+   display_IDn((bitstream & 0xFFFFFF), 6);     //"%S%06lx"
+   display_SWITCH(button);                     // %02x to %02d
+   display_CMD((group == 0x3), (action == 1)); // #ALL , #ON
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
