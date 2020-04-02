@@ -81,6 +81,8 @@
 #define FA500_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_012
+#include "../4_Misc.h"
+
 boolean Plugin_012(byte function, char *string)
 {
    if (RawSignal.Number != (FA500RM3_PulseLength) && RawSignal.Number != (FA500RM1_PulseLength))
@@ -200,42 +202,31 @@ boolean Plugin_012(byte function, char *string)
    // ----------------------------------
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("FA500;")); // Label
+
+   display_Header();
+   display_Name(PSTR("FA500"));
+
    if (type == 0)
    {
-      sprintf(pbuffer, "ID=%02x%02x;", unitcode, housecode); // ID
+      display_IDn(((unitcode << 8) | housecode), 8); // "%02x%02x"
+      display_SWITCH(((unitcode << 8) | housecode)); // "%02x%02x"
    }
    else
    {
-      sprintf(pbuffer, "ID=%08lx;", (address)); // ID
+      display_IDn(address, 8);   // "%S%08lx"
+      display_SWITCH(housecode); // "%02x"
    }
-   Serial.print(pbuffer);
-   if (type == 0)
+
+   switch (command)
    {
-      sprintf(pbuffer, "SWITCH=%02x%02x;", unitcode, housecode); // ID
+   case 0x00:
+   case 0x01:
+      display_CMD(false, (command & B01)); // #ALL , #ON
+      break;
+   default:
+      display_Name(PSTR(";CMD=UNKOWN"));
    }
-   else
-   {
-      sprintf(pbuffer, "SWITCH=%02x;", housecode); // ID
-   }
-   Serial.print(pbuffer);
-   Serial.print(F("CMD="));
-   if (command == 1)
-   {
-      Serial.print(F("ON;"));
-   }
-   else if (command == 0)
-   {
-      Serial.print(F("OFF;"));
-   }
-   else
-   {
-      Serial.print(F("UNKOWN;"));
-   }
-   Serial.println();
+   display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    return true;
