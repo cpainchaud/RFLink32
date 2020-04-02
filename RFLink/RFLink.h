@@ -11,7 +11,7 @@
 //
 #define BUILDNR 0x07                    // shown in version
 #define REVNR 0x42                      // shown in version and startup string
-#define BAUD 115200                     // Baudrate for serial communication.
+#define BAUD 57600                      // Baudrate for serial communication.
 #define MIN_RAW_PULSES 50               // Minimal number of bits that need to have been received before we spend CPU time on decoding the signal.
 #define RAW_BUFFER_SIZE 512             // 148        // Maximum number of pulses that is received in one go.
 #define RAWSIGNAL_SAMPLE_RATE 32        // =8 bits. Sample width / resolution in uSec for raw RF pulses.
