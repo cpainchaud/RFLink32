@@ -56,6 +56,8 @@
 #define RGB_PULSE_LOLO 400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_010
+#include "../4_Misc.h"
+
 boolean Plugin_010(byte function, char *string)
 {
    if (RawSignal.Number < RGB_MIN_PULSECOUNT || RawSignal.Number > RGB_MAX_PULSECOUNT)
@@ -67,7 +69,7 @@ boolean Plugin_010(byte function, char *string)
    byte bitcounter = 0; // counts number of received bits (converted from pulses)
    byte halfbit = 0;    // high pulse = 1, 2 low pulses = 0, halfbit keeps track of low pulses
    byte bitmask = 0;
-   int command = 0;
+   byte command = 0;
    byte start_stop = 0;
    byte x = 1;
    //==================================================================================
@@ -162,48 +164,63 @@ boolean Plugin_010(byte function, char *string)
    //==================================================================================
    // now process the command
    //==================================================================================
-   command = (bitstream)&0xff; // command
-   int id3 = (bitstream >> 8) & 0xff;
-   bitstream = (bitstream >> 16) & 0xffff; // rolling code
+   command = (bitstream & 0xFF);
+   unsigned int id = ((bitstream >> 8) & 0xFFFFFF); // rolling code + ID
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   Serial.print(F("TRC02RGB;"));           // Label
-   sprintf(pbuffer, "ID=%04x", bitstream); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "%02x;", id3);
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", command);
-   Serial.print(pbuffer);
-   Serial.print(F("CMD="));
-   if (command == 0x00)
-      Serial.print("ON;");
-   else if (command == 0x01)
-      Serial.print(F("OFF;"));
-   else if (command == 0x02)
-      Serial.print(F("DIM DOWN;"));
-   else if (command == 0x03)
-      Serial.print(F("DIM UP;"));
-   else if (command == 0x05)
-      Serial.print(F("COLORMIX UP;"));
-   else if (command == 0x04)
-      Serial.print(F("COLORMIX DOWN;"));
-   else if (command == 0x87)
-      Serial.print(F("COLOR RED;"));
-   else if (command == 0x34)
-      Serial.print(F("COLOR BLUE;"));
-   else if (command == 0x78)
-      Serial.print(F("COLOR YELLOW;"));
-   else if (command == 0x5D)
-      Serial.print(F("COLOR GREEN;"));
-   else
+   display_Header();
+   display_Name(PSTR("TRC02RGB"));
+   display_IDn(id, 6); //"%S%06lx"
+   display_SWITCH(1U); // command was displayed, but this makes no sense
+
+   switch (command)
    {
-      sprintf(pbuffer, "SET_LEVEL=%d;", command);
-      Serial.print(pbuffer);
+   case 0x00:
+   case 0x01:
+      display_CMD(false, (command & B01));
+      break;
+   case 0x02:
+   case 0x03:
+   case 0x04:
+   case 0x05:
+   case 0x34:
+   case 0x5D:
+   case 0x78:
+   case 0x87:
+      display_Name(PSTR(";CMD="));
+      switch (command)
+      {
+      case 0x02:
+         display_Name(PSTR("DIM DOWN"));
+         break;
+      case 0x03:
+         display_Name(PSTR("DIM UP"));
+         break;
+      case 0x04:
+         display_Name(PSTR("COLORMIX DOWN"));
+         break;
+      case 0x05:
+         display_Name(PSTR("COLORMIX UP"));
+         break;
+      case 0x34:
+         display_Name(PSTR("COLOR BLUE"));
+         break;
+      case 0x5D:
+         display_Name(PSTR("COLOR GREEN"));
+         break;
+      case 0x78:
+         display_Name(PSTR("COLOR YELLOW"));
+         break;
+      case 0x87:
+         display_Name(PSTR("COLOR RED"));
+         break;
+      }
+      break;
+   default:
+      display_SET_LEVEL(command);
    }
-   Serial.println();
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
