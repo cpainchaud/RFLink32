@@ -54,6 +54,7 @@ boolean Plugin_007(byte function, char *string)
       return false;
    unsigned long bitstream = 0L;
    byte checksum = 0;
+   byte command = 0;
    byte button = 0;
    byte group = 0;
    byte action = 0;
@@ -96,33 +97,33 @@ boolean Plugin_007(byte function, char *string)
    //==================================================================================
    // all bits received, make sure checksum is okay
    //==================================================================================
-   checksum = (((bitstream) >> 30) & 0x0f); // first two bits should always be '10'
-   if (checksum != 2)
+   checksum = ((bitstream >> 30) & B11); // first two bits should always be '10'
+   if (checksum != B10)
       return false;
    //==================================================================================
-   button = (((bitstream) >> 24) & 0xff); // 10100011
+   command = ((bitstream >> 24) & 0xFF); // 10100011
    // ----- check for possible valid values
-   if (button < 0x81)
+   if (command < 0x81)
       return false;
-   if (button > 0xbe)
+   if (command > 0xBE)
       return false;
-   byte temp = (button)&0xf;
+   byte temp = (command & 0xF);
    if (temp == 0x07 || temp == 0x0b || temp == 0x0f)
       return false;
-   if (button == 0x83 || button == 0x86 || button == 0x89 || button == 0x8c || button == 0x91)
+   if (command == 0x83 || command == 0x86 || command == 0x89 || command == 0x8c)
       return false;
-   if (button == 0x94 || button == 0x9a || button == 0x9d || button == 0xa1 || button == 0xa4)
+   if (command == 0x91 || command == 0x94 || command == 0x9a || command == 0x9d)
       return false;
-   if (button == 0xaa || button == 0xad || button == 0xb1 || button == 0xb3 || button == 0xb4)
+   if (command == 0xa1 || command == 0xa4 || command == 0xaa || command == 0xad)
       return false;
-   if (button == 0xba || button == 0xbd)
+   if (command == 0xb1 || command == 0xb3 || command == 0xb4 || command == 0xba || command == 0xbd)
       return false;
    // -----
-   group = (button)&0x7;           // --   111
-   action = ((button) >> 3) & 0x1; // --  a
-   button = ((button) >> 4) & 0x3; // --bb
+   group = (command & 0x7);         // --   111
+   action = ((command >> 3) & 0x1); // --  a
+   button = ((command >> 4) & 0x3); // --bb
    // -----
-   if (group == 3)
+   if (group == 0x3)
    {
       action = button;
       button = 0;
@@ -131,41 +132,41 @@ boolean Plugin_007(byte function, char *string)
    {
       if (button == 3)
       {
-         if (group == 6)
+         if (group == 0x6)
          { // toggle command bit
             button = 0;
             action = (~action) & 1;
          }
-         if (group == 1 || group == 5)
+         if (group == 0x1 || group == 0x5)
          { // no toggle
             button = 4;
          }
-         if (group == 0)
+         if (group == 0x0)
          {
             action = (~action) & 1; // toggle command bit
             button = 8;
          }
-         if (group == 2 || group == 4)
+         if (group == 0x2 || group == 0x4)
          { // no toggle
             button = 12;
          }
       }
       else if (button == 0)
       {
-         if (group == 6 || group == 1)
+         if (group == 0x6 || group == 0x1)
          { // no toggle
             button = 1;
          }
-         if (group == 5)
+         if (group == 0x5)
          { // toggle command bit
             button = 5;
             action = (~action) & 1;
          }
-         if (group == 0 || group == 4)
+         if (group == 0x0 || group == 0x4)
          { // no toggle
             button = 9;
          }
-         if (group == 2)
+         if (group == 0x2)
          { // toggle command bit
             button = 13;
             action = (~action) & 1;
@@ -173,21 +174,21 @@ boolean Plugin_007(byte function, char *string)
       }
       else if (button == 2)
       {
-         if (group == 6)
+         if (group == 0x6)
          { // toggle command bit
             button = 2;
             action = (~action) & 1;
          }
-         if (group == 1 || group == 5)
+         if (group == 0x1 || group == 0x5)
             button = 6; //
 
-         if (group == 0)
+         if (group == 0x0)
          { // toggle command bit
             button = 10;
             action = (~action) & 1;
          }
 
-         if (group == 2 || group == 4)
+         if (group == 0x2 || group == 0x4)
          { // no toggle
             button = 14;
             //action=(~action)&1;
@@ -195,22 +196,22 @@ boolean Plugin_007(byte function, char *string)
       }
       else if (button == 1)
       {
-         if (group == 6)
+         if (group == 0x6)
          { // toggle command bit
             button = 3;
             action = (~action) & 1;
          }
-         if (group == 1 || group == 5)
+         if (group == 0x1 || group == 0x5)
          { // no toggle
             button = 7;
             //action=(~action)&1;
          }
-         if (group == 0)
+         if (group == 0x0)
          { // toggle command bit
             button = 11;
             action = (~action) & 1;
          }
-         if (group == 2 || group == 4)
+         if (group == 0x2 || group == 0x4)
          { // no toggle
             button = 15;
             //action=(~action)&1;
