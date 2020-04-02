@@ -221,6 +221,8 @@
 #define KAKU_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE // (17)  510 = KAKU_R*2 not sufficient!
 
 #ifdef PLUGIN_003
+#include "../4_Misc.h"
+
 boolean Plugin_003(byte function, char *string)
 {
    if (RawSignal.Number != (KAKU_CodeLength * 4) + 2)
@@ -561,108 +563,52 @@ boolean Plugin_003(byte function, char *string)
    // ==========================================================================
    // Output
    // ----------------------------------
-   sprintf_P(pbuffer, PSTR("%S%02X;"), F("20;"), PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
+   display_Header();
 
    // ----------------------------------
    if (signaltype == 0x03)
    { // '0011' bits indicate bits 0 and f are used in the signal
       if (devicetype < 4)
-      {                                              // KAKU (and some compatibles for now)
-         sprintf_P(pbuffer, PSTR("%S"), F("Kaku;")); // Label
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
+         display_Name(PSTR("Kaku")); // KAKU (and some compatibles for now) label
       else
       {
          if (devicetype == 4)
-         {                                                // AB440R and Sartano
-            sprintf_P(pbuffer, PSTR("%S"), F("AB400D;")); // Label
-            Serial.print(pbuffer);
-            strcat(MQTTbuffer, pbuffer);
-         }
+            display_Name(PSTR("AB400D")); // AB440R and Sartano label
          else if (devicetype == 5)
-         {                                                // Impuls
-            sprintf_P(pbuffer, PSTR("%S"), F("Impuls;")); // Label
-            Serial.print(pbuffer);
-            strcat(MQTTbuffer, pbuffer);
-         }
+            display_Name(PSTR("Impuls")); // Impuls label
          else
-         {
-            sprintf_P(pbuffer, PSTR("%S"), F("Sartano;")); // Others
-            Serial.print(pbuffer);
-            strcat(MQTTbuffer, pbuffer);
-         }
+            display_Name(PSTR("Sartano")); // Others
       }
    }
    else if (signaltype == 0x05)
    { // '0101' bits indicate bits 0 and 1 are used in the signal
       if (devicetype == 5)
-      {                                                // KAKU (and some compatibles for now)
-         sprintf_P(pbuffer, PSTR("%S"), F("Impuls;")); // Label
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
+         display_Name(PSTR("Impuls")); // Impuls label
       else
-      {
-         sprintf_P(pbuffer, PSTR("%S"), F("PT2262;")); // Label
-         Serial.print(pbuffer);
-         strcat(MQTTbuffer, pbuffer);
-      }
+         display_Name(PSTR("PT2262")); // Others
    }
    else if (signaltype == 0x07)
-   {                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
-      sprintf_P(pbuffer, PSTR("%S"), F("TriState;")); // Label
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-   }
+      display_Name(PSTR("TriState")); // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
    // ----------------------------------
+
    if (signaltype == 0x07)
-   {                                                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
-      sprintf_P(pbuffer, PSTR("%S%06lx;"), F("ID="), ((bitstream2) >> 4) & 0xffffff); // ID
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-      housecode = (bitstream2)&0x03;
-      unitcode = ((((bitstream2) >> 2) & 0x03) ^ 0x03) ^ housecode;
-      //command=((bitstream2)&1)^1;   << ^1 reverses lidl light
-      command = ((bitstream2)&3); // 00 01 10  0 1 f
+   {                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
+      display_IDn(((bitstream2 >> 4) & 0xFFFFFF), 6); // "%S%06lx
+      
+      housecode = (bitstream2 & 0x03);
+      unitcode = ((((bitstream2 >> 2) & 0x03) ^ 0x03) ^ housecode);
+      
+      //command=((bitstream2 & 0x01)^ 0x01);   << ^1 reverses lidl light
+      command = (bitstream2 & 0x03); // 00 01 10  0 1 f
       if (command > 1)
          command = 1; // 0 stays 0 (OFF), 1 and f become 1 (ON)
    }
    else
-   {
-      sprintf_P(pbuffer, PSTR("%S%02x;"), F("ID="), housecode); // ID
-      Serial.print(pbuffer);
-      strcat(MQTTbuffer, pbuffer);
-   }
+      display_IDn(housecode, 2);
 
-   sprintf_P(pbuffer, PSTR("%S%d;"), F("SWITCH="), unitcode);
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   sprintf_P(pbuffer, PSTR("%S"), F("CMD="));
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
-
-   if (group == 1)
-   {
-      sprintf_P(pbuffer, PSTR("%S"), F("ALL"));
-      strcat(MQTTbuffer, pbuffer);
-   }
-   if (command == 1)
-   {
-      sprintf_P(pbuffer, PSTR("%S"), F("ON;"));
-      strcat(MQTTbuffer, pbuffer);
-   }
-   else
-   {
-      sprintf_P(pbuffer, PSTR("%S"), F("OFF;"));
-      strcat(MQTTbuffer, pbuffer);
-   }
-   strcat(pbuffer, "\r\n");
-   Serial.print(pbuffer);
-   strcat(MQTTbuffer, pbuffer);
+   display_SWITCH(unitcode);
+   display_CMD(group, command); // #ALL, #ON
+   display_Footer();
 
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
