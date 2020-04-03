@@ -239,7 +239,7 @@ boolean Plugin_043(byte function, char *string)
    }
    else if (data[2] == 0x0e)
    {
-      humidity = (data[5] * 16) + data[6];
+      humidity = (data[5] * 10) + data[6];
       if (humidity == 0)
       {
          return false;
