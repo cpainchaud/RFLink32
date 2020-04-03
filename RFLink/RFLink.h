@@ -59,7 +59,7 @@
 // MQTT messages
 #define SERIAL_ENABLED     // Send RFLink messages over Serial
 #define MQTT_ENABLED       // Send RFLink messages over MQTT
-#define MQTT_LOOP_MS 10000 // MQTTClient.loop(); call period (in mSec)
+#define MQTT_LOOP_MS 7500 // MQTTClient.loop(); call period (in mSec)
 // #define MQTT_RETAINED   // Retained option
 
 #endif
