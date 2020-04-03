@@ -22,6 +22,8 @@
 #define OREGON_PLA_PULSECOUNT 52
 
 #ifdef PLUGIN_063
+#include "../4_Misc.h"
+
 boolean Plugin_063(byte function, char *string)
 {
    if (RawSignal.Pulses[0] != 63)
@@ -85,16 +87,12 @@ boolean Plugin_063(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("X10;"));                             // Label
-   sprintf(pbuffer, "ID=%06lx;", (bitstream)&0xffffff); // ID + channel number
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", bits); // channel number
-   Serial.print(pbuffer);
-   Serial.print(F("CMD=ON;")); // this device reports movement only
-   Serial.println();
+   display_Header();
+   display_Name(PSTR("X10"));
+   display_IDn((bitstream & 0xFFFFFF), 6); // "%S%06lx"
+   display_SWITCH(bits);                   // "%02x"
+   display_CMD(false, true);               // #ALL , #ON
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
