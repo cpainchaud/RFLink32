@@ -53,10 +53,10 @@
 // -------------------
 // Motion Sensors, include when needed
 // -------------------
-// #define PLUGIN_060              // Ajax Chubb Varel 433 MHz. motion sensors
+#define PLUGIN_060 // Ajax Chubb Varel 433 MHz. motion sensors
 #define PLUGIN_061 // Chinese PIR motion door and window sensors
 #define PLUGIN_062 // Chuango Alarm Devices
-// #define PLUGIN_063              // Oregon PIR/ALARM/LIGHT
+#define PLUGIN_063 // Oregon PIR/ALARM/LIGHT
 // -------------------
 // Doorbells
 // -------------------
