@@ -30,6 +30,8 @@
 #define ALARMPIRV2_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_062
+#include "../4_Misc.h"
+
 boolean Plugin_062(byte function, char *string)
 {
    if (RawSignal.Number != ALARMPIRV2_PULSECOUNT)
