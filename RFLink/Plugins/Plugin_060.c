@@ -26,37 +26,38 @@
  * 1001101010101010 01100110
  * 10000000 1010
  \*********************************************************************************************/
-#define ALARMPIRV2_PULSECOUNT 26
+#define ALARMPIRV0_PULSECOUNT 26
 
-#define ALARMPIRV2_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV2_PULSEMAX 1000 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV2_PULSESHORT 550 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV2_PULSEMIN 250 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV0_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV0_PULSEMAX 1000 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV0_PULSESHORT 550 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV0_PULSEMIN 250 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_060
+#include "../4_Misc.h"
+
 boolean Plugin_060(byte function, char *string)
 {
-   if (RawSignal.Number != ALARMPIRV2_PULSECOUNT)
+   if (RawSignal.Number != ALARMPIRV0_PULSECOUNT)
       return false;
    unsigned long bitstream = 0L;
-   byte data[3];
-   if (RawSignal.Pulses[1] > ALARMPIRV2_PULSESHORT)
+   if (RawSignal.Pulses[1] > ALARMPIRV0_PULSESHORT)
       return false; // First pulse is start bit and should be short!
-   for (byte x = 2; x < ALARMPIRV2_PULSECOUNT; x = x + 2)
+   for (byte x = 2; x < ALARMPIRV0_PULSECOUNT; x = x + 2)
    {
-      if (RawSignal.Pulses[x] > ALARMPIRV2_PULSEMID)
+      if (RawSignal.Pulses[x] > ALARMPIRV0_PULSEMID)
       { // long pulse 800-875 (700-1000 accepted)
-         if (RawSignal.Pulses[x] > ALARMPIRV2_PULSEMAX)
+         if (RawSignal.Pulses[x] > ALARMPIRV0_PULSEMAX)
             return false; // pulse too long
-         if (RawSignal.Pulses[x + 1] > ALARMPIRV2_PULSEMID)
+         if (RawSignal.Pulses[x + 1] > ALARMPIRV0_PULSEMID)
             return false; // invalid manchester code
          bitstream = bitstream << 1;
       }
       else
       { // short pulse 350-425 (250-550 accepted)
-         if (RawSignal.Pulses[x] < ALARMPIRV2_PULSEMIN)
+         if (RawSignal.Pulses[x] < ALARMPIRV0_PULSEMIN)
             return false; // pulse too short
-         if (RawSignal.Pulses[x + 1] < ALARMPIRV2_PULSEMID)
+         if (RawSignal.Pulses[x + 1] < ALARMPIRV0_PULSEMID)
             return false; // invalid manchester code
          bitstream = (bitstream << 1) | 0x1;
       }
@@ -78,15 +79,12 @@ boolean Plugin_060(byte function, char *string)
    //==================================================================================
    // Output
    // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("X10;")); // Label
-   sprintf(pbuffer, "ID=%04x;", (bitstream)&0xffff);
-   Serial.print(pbuffer);
-   Serial.print(F("SWITCH=01;"));
-   Serial.print(F("CMD=ON;")); // this device does report movement only
-   Serial.println();
+   display_Header();
+   display_Name(PSTR("X10"));
+   display_IDn((bitstream & 0xFFFF), 4); // "%S%04x"
+   display_SWITCH(1U);
+   display_CMD(false, true); // #ALL , #ON
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
