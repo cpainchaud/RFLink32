@@ -102,22 +102,16 @@ boolean Plugin_030(byte function, char *string)
    if (RawSignal.Number != WS3500_PULSECOUNT)
       return false;
    unsigned long bitstream = 0L;
-   byte nibble0 = 0;
-   byte nibble1 = 0;
-   byte nibble2 = 0;
-   byte nibble3 = 0;
-   byte nibble4 = 0;
-   byte nibble5 = 0;
-   byte nibble6 = 0;
-   byte nibble7 = 0;
+   byte data[8];
    byte checksum = 0;
+   byte checksumcalc = 0;
    int temperature = 0;
    byte humidity = 0;
    unsigned int rain = 0;
    unsigned int windspeed = 0;
    unsigned int windgust = 0;
    unsigned int winddirection = 0;
-   byte checksumcalc = 0;
+
    byte rc = 0;
    unsigned int id = 0;
    byte battery = 0;
@@ -127,26 +121,16 @@ boolean Plugin_030(byte function, char *string)
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
          return false; // in between pulses should be short
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 2560)
-      {
-         // Reverses order, as number are in LSB 1st
-         // Imply all nibbles are reversed, especially N2 and N3 !
-         bitstream = ((bitstream >> 1) | (0x1L << 31));
-      }
+         bitstream = ((bitstream >> 1) | (0x1L << 31)); // Reverses order, as number are in LSB 1st, beware N2 and N3 !
       else
-      {
          bitstream = (bitstream >> 1);
-      }
    }
    for (byte x = 66; x <= 72; x = x + 2)
    {
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 2560)
-      {
          checksum = ((checksum >> 1) | (0x1L << 3));
-      }
       else
-      {
          checksum = (checksum >> 1);
-      }
    }
    //==================================================================================
    if (bitstream == 0)
@@ -156,62 +140,47 @@ boolean Plugin_030(byte function, char *string)
    //==================================================================================
    if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || ((SignalCRC != bitstream) && (SignalCRC_1 != bitstream)))
    {
-      // for mixed message burst prevention
-      SignalCRC_1 = SignalCRC;
-      // not seen the RF packet recently
-      SignalCRC = bitstream;
+      SignalCRC_1 = SignalCRC; // for mixed message burst prevention
+      SignalCRC = bitstream;   // not seen the RF packet recently
    }
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Sort nibbles
-   nibble0 = (bitstream >> 0) & 0xf;
-   nibble1 = (bitstream >> 4) & 0xF;
-   nibble2 = (bitstream >> 8) & 0xF;
-   nibble3 = (bitstream >> 12) & 0xF;
-   nibble4 = (bitstream >> 16) & 0xF;
-   nibble5 = (bitstream >> 20) & 0xF;
-   nibble6 = (bitstream >> 24) & 0xF;
-   nibble7 = (bitstream >> 28) & 0xF;
-
+   for (byte i = 0; i < 8; i++)
+   {
+      data[i] = ((bitstream >> (4 * i)) & 0xF);
+      checksumcalc += data[i];
+   }
    //==================================================================================
    // Perform checksum calculations, Alecto checksums are Rollover Checksums by design!
-   if ((nibble2 & B0110) != B0110) // Keep in mind, reversed nibble order
-   {                               // Temperature packet
-      checksumcalc = (0xF - nibble0 - nibble1 - nibble2 - nibble3 - nibble4 - nibble5 - nibble6 - nibble7) & 0xF;
-   }
+   if ((data[2] & B0110) != B0110)               // Keep in mind, reversed nibble order
+      checksumcalc = (0xF - checksumcalc) & 0xF; // Temperature packet
    else
    {
-      if ((nibble3 & B0111) == B0011) // Keep in mind, reversed nibble order
-      {                               // Rain packet
-         checksumcalc = (0x7 + nibble0 + nibble1 + nibble2 + nibble3 + nibble4 + nibble5 + nibble6 + nibble7) & 0xF;
-      }
-      else //
-      {    // Wind packet
-         checksumcalc = (0xF - nibble0 - nibble1 - nibble2 - nibble3 - nibble4 - nibble5 - nibble6 - nibble7) & 0xF;
-      }
+      if ((data[3] & B0111) == B0011)               // Keep in mind, reversed nibble order
+         checksumcalc = (0x7 + checksumcalc) & 0xF; // Rain packet
+      else
+         checksumcalc = (0xF - checksumcalc) & 0xF; // Wind packet
    }
    if (checksum != checksumcalc)
       return false;
    //==================================================================================
-   battery = !((nibble2)&B0001); // get battery indicator
-   nibble2 = (nibble2)&B0110;    // prepare nibble to contain only the needed bits
-   nibble3 = (nibble3)&B0111;    // prepare nibble to contain only the needed bits
+   battery = !((data[2]) & B0001); // get battery indicator
+   data[2] = (data[2]) & B0110;    // prepare nibble to contain only the needed bits
+   data[3] = (data[3]) & B0111;    // prepare nibble to contain only the needed bits
    //==================================================================================
-   rc = (nibble1 << 4) | nibble0;
+   rc = (data[1] << 4) | data[0];
    id = (rc & 0x03) << 2 | (rc & 0xfc);
 
-   if ((nibble2) != B0110)
+   if ((data[2]) != B0110)
    { // nibble 2 needs to be set to something other than 'x11x' to be a temperature packet
       // Temperature packet
-      temperature = (nibble5 << 8) | (nibble4 << 4) | nibble3;
+      temperature = (data[5] << 8) | (data[4] << 4) | data[3];
       //fix 12 bit signed number conversion
       if ((temperature & 0x800) == 0x800)
       {
-         // if ((nibble2 & B0110) != 0)    // Will never happen, see line #201
+         // if ((data[2 & B0110) != 0)    // Will never happen, see line #201
          //   return false;                // reject alecto v4 on alecto v1... (causing high negative temperatures with valid checksums)
          temperature = 4096 - temperature; // fix for minus temperatures
          if (temperature > 0x258)
@@ -223,7 +192,7 @@ boolean Plugin_030(byte function, char *string)
          if (temperature > 0x258)
             return false; // temperature out of range ( > 60.0 degrees)
       }
-      humidity = (nibble7 << 4) | nibble6;
+      humidity = (data[7] << 4) | data[6];
       if (humidity > 0x99)
          return false; // Humidity out of range, assume ALL data is bad?
       //==================================================================================
@@ -233,10 +202,8 @@ boolean Plugin_030(byte function, char *string)
       display_Name(PSTR("Alecto V1"));
       display_ID(id);
       display_TEMP(temperature);
-      if (humidity < 0x99)
-      {                               // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
+      if (humidity < 0x99)            // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
          display_HUM(humidity, true); // Only report humidity when it is below 99%
-      }
       display_BAT(battery);
       display_Footer();
       //==================================================================================
@@ -249,29 +216,29 @@ boolean Plugin_030(byte function, char *string)
       display_Header();
       display_Name(PSTR("Alecto V1"));
       display_ID(id);
-      if ((nibble3) == B0011)
+      if ((data[3]) == B0011)
       {                                                                      // Rain packet
-         rain = (nibble7 << 12) | (nibble6 << 8) | (nibble5 << 4) | nibble4; // 0.25mm step
+         rain = (data[7] << 12) | (data[6] << 8) | (data[5] << 4) | data[4]; // 0.25mm step
          rain = (rain * 10) / 4;                                             // to get 10th of mm
          //==================================================================================
          // Output
          // ----------------------------------
          display_RAIN(rain);
       }
-      if ((nibble3) == B0001)
+      if ((data[3]) == B0001)
       {                                        // Windspeed packet
-         windspeed = (nibble7 << 4) | nibble6; // 0.2m/s step
+         windspeed = (data[7] << 4) | data[6]; // 0.2m/s step
          windspeed = (windspeed * 72) / 10;    // to get 10th of kph
          //==================================================================================
          // Output
          // ----------------------------------
          display_WINSP(windspeed);
       }
-      if ((nibble3) == B0111)
+      if ((data[3]) == B0111)
       {                                                                                      // Winddir packet
-         winddirection = (nibble5 << (4 + 1)) | (nibble4 << (0 + 1)) | (nibble3 >> (4 - 1)); // In degree, only 8 cardinal points
+         winddirection = (data[5] << (4 + 1)) | (data[4] << (0 + 1)) | (data[3] >> (4 - 1)); // In degree, only 8 cardinal points
          winddirection = ((winddirection * 2) / 45) & 0x0f;                                  // Divided by 22.5
-         windgust = (nibble7 << 4) | nibble6;                                                // 0.2m/s step
+         windgust = (data[7] << 4) | data[6];                                                // 0.2m/s step
          windgust = (windgust * 72) / 100;                                                   // to get kph
          //==================================================================================
          // Output
