@@ -24,47 +24,37 @@
 
 boolean Plugin_254(byte function, char *string)
 {
-   if (QRFDebug == true)
-   { // debug is on?
-      if (RawSignal.Number < 26)
-         return false; // make sure the packet is long enough to have a meaning
-      // ----------------------------------
-      // Output
-      // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      // ----------------------------------
-      Serial.print(F("DEBUG;Pulses="));  // debug data
-      Serial.print(RawSignal.Number);    // print number of pulses
-      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
-      //PrintHex8(RawSignal.Pulses+1,RawSignal.Number-1);
+   int i;
+
+   if ((RFUDebug == false) && (QRFUDebug == false)) // debug is on?
+      return false;
+
+   if (RawSignal.Number < 24) // make sure the packet is long enough to have a meaning
+      return false;
+
+   // ----------------------------------
+   // Output
+   // ----------------------------------
+   display_Header();
+   display_Name(PSTR("DEBUG"));
+   Serial.print(F(";Pulses="));       // debug data
+   Serial.print(RawSignal.Number);    // print number of pulses
+   Serial.print(F(";Pulses(uSec)=")); // print pulse durations
+   // ----------------------------------
+   if (QRFUDebug == true)
       PrintHex8(RawSignal.Pulses + 1, RawSignal.Number);
-   }
    else
    {
-      if (RFUDebug == false)
-         return false; // debug is on?
-      if (RawSignal.Number < 26)
-         return false; // make sure the packet is long enough to have a meaning
-      // ----------------------------------
-      // Output
-      // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      // ----------------------------------
-      Serial.print(F("DEBUG;Pulses="));  // debug data
-      Serial.print(RawSignal.Number);    // print number of pulses
-      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
-      //for(int x=1;x<RawSignal.Number;x++) {
-      for (int x = 1; x < RawSignal.Number + 1; x++)
+      for (i = 1; i < RawSignal.Number + 1; i++)
       {
-         Serial.print(RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE);
-         //if (x < RawSignal.Number-1) Serial.write(',');
-         if (x < RawSignal.Number)
+         Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);
+         if (i < RawSignal.Number)
             Serial.write(',');
       }
    }
-   Serial.println(";");
+   // ----------------------------------
+   display_Footer();
+   // ----------------------------------
    RawSignal.Number = 0; // Last plugin, kill packet
    return true;          // stop processing
 }

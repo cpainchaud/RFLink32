@@ -83,6 +83,8 @@
 #define PULSE6500 6500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_001
+#include "../4_Misc.h"
+
 boolean Plugin_001(byte function, char *string)
 {
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
@@ -186,31 +188,45 @@ boolean Plugin_001(byte function, char *string)
    // Kill ALL Short RF packets
    // ==========================================================================
    if (RawSignal.Number < 24)
-   {                        // Less than 24 pulses?
-      RawSignal.Number = 0; // Kill packet
-      return true;          // abort processing
+   { // Less than 24 pulses?
+      if ((RFDebug == true) || (QRFDebug == true))
+      {
+         RawSignal.Number = 0; // Kill packet
+         return true;          // abort further processing
+      }
+      else
+         return false; // abort this processing only
    }
    // ==========================================================================
    // DEBUG
    // ==========================================================================
-   if (RFDebug == true)
+   if ((RFDebug == true) || (QRFDebug == true))
    {
       // ----------------------------------
       // Output
       // ----------------------------------
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      // ----------------------------------
-      Serial.print(F("DEBUG;Pulses=")); // debug data
-      Serial.print(RawSignal.Number);
-      Serial.print(F(";Pulses(uSec)="));
-      for (i = 1; i < RawSignal.Number + 1; i++)
+      display_Header();
+      display_Name(PSTR("DEBUG"));
+      Serial.print(F(";Pulses="));       // debug data
+      Serial.print(RawSignal.Number);    // print number of pulses
+      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
+                                         // ----------------------------------
+      if (QRFDebug == true)
+         PrintHex8(RawSignal.Pulses + 1, RawSignal.Number);
+      else
       {
-         Serial.print(RawSignal.Pulses[i] * RawSignal.Multiply);
-         if (i < RawSignal.Number)
-            Serial.write(',');
+         for (i = 1; i < RawSignal.Number + 1; i++)
+         {
+            Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);
+            if (i < RawSignal.Number)
+               Serial.write(',');
+         }
+         // ----------------------------------
+         display_Footer();
+         // ----------------------------------
+         RawSignal.Number = 0; // Last plugin, kill packet
+         return true;          // stop processing
       }
-      Serial.println(";");
    }
    // ==========================================================================
    // Beginning of Signal translation for Impuls
@@ -418,7 +434,7 @@ boolean Plugin_001(byte function, char *string)
    // **************************************************************************
    // Full buffer size checks, >>>> SCANNING checks <<<<<  sorted by packet size
    // **************************************************************************
-    // ==========================================================================
+   // ==========================================================================
    // Beginning of Signal translation for Auriol & Xiron
    // ==========================================================================
    if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
