@@ -107,10 +107,12 @@ boolean Plugin_043(byte function, char *string)
 
    unsigned long bitstream1 = 0L; // holds first 5x4=20 bits
    unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
-   int humidity = 0;
-   byte checksum = 0;
-   byte bitcounter = 0; // counts number of received bits (converted from pulses)
+   byte bitcounter = 0;           // counts number of received bits (converted from pulses)
    byte data[11];
+   byte checksum = 0;
+   int temperature = 0;
+   byte humidity = 0;
+   //unsigned int rain = 0; // Not implemented
    //==================================================================================
    // get bytes
    for (byte x = 1; x < RawSignal.Number; x += 2)
@@ -159,32 +161,31 @@ boolean Plugin_043(byte function, char *string)
       return false;
 
    // prepare nibbles from bit stream
-   data[0] = (bitstream1 >> 16) & 0x0F;
-   if (data[0] != 0x00)
+   data[0] = (bitstream1 >> 16) & 0xF;
+   if (data[0] != 0x0)
       return false;
 
-   data[1] = (bitstream1 >> 12) & 0x0F;
-   if (data[1] != 0x0A)
+   data[1] = (bitstream1 >> 12) & 0xF;
+   if (data[1] != 0xA)
       return false;
 
-   data[2] = (bitstream1 >> 8) & 0x0F;
-   data[3] = (bitstream1 >> 4) & 0x0F;
-   data[4] = (bitstream1 >> 0) & 0x0F;
-   data[5] = (bitstream2 >> 20) & 0x0F;
-   data[6] = (bitstream2 >> 16) & 0x0F;
-   data[7] = (bitstream2 >> 12) & 0x0F;
-   data[8] = (bitstream2 >> 8) & 0x0F;
-   data[9] = (bitstream2 >> 4) & 0x0F;
-   data[10] = (bitstream2 >> 0) & 0x0F;
+   data[2] = (bitstream1 >> 8) & 0xF;
+   data[3] = (bitstream1 >> 4) & 0xF;
+   data[4] = (bitstream1 >> 0) & 0xF;
+   data[5] = (bitstream2 >> 20) & 0xF;
+   data[6] = (bitstream2 >> 16) & 0xF;
+   data[7] = (bitstream2 >> 12) & 0xF;
+   data[8] = (bitstream2 >> 8) & 0xF;
+   data[9] = (bitstream2 >> 4) & 0xF;
+   data[10] = (bitstream2 >> 0) & 0xF; // CRC
    //==================================================================================
    // first perform a checksum check to make sure the packet is a valid LaCrosse packet
-   for (byte i = 0; i < 10; i++)
-      checksum = checksum + data[i];
+   for (byte i = 0; i < 10; i++)     // max. value = 10*0xF 0x96
+      checksum = checksum + data[i]; // less with real values
 
-   checksum = checksum & 0x0F;
+   checksum = checksum & 0xF;
    if (checksum != data[10])
       return false;
-
    //==================================================================================
    // Prevent repeating signals from showing up, skips every second packet!
    //==================================================================================
@@ -195,19 +196,18 @@ boolean Plugin_043(byte function, char *string)
       SignalCRC = tmpval; // not seen this RF packet recently
    else
       return true; // already seen the RF packet recently, but still want the humidity
-
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
    // Output
    // ----------------------------------
-   if (data[2] == 0x00)
    data[4] = (data[4]) >> 1; // ID
+   if (data[2] == 0x0)
    {
-      temperature = data[5] * 100;
-      temperature = temperature + data[6] * 10;
-      temperature = temperature + data[7];
-      temperature = temperature - 500;
+      temperature = (data[5] * 100);
+      temperature += (data[6] * 10);
+      temperature += (data[7]);
+      temperature -= 500;
 
       display_Header();
       display_Name(PSTR("LaCrosse V2"));
@@ -219,7 +219,7 @@ boolean Plugin_043(byte function, char *string)
       RawSignal.Number = 0;
       return true;
    }
-   else if (data[2] == 0x0E)
+   else if (data[2] == 0xE)
    {
       humidity = (data[5] * 10) + data[6];
       if (humidity == 0) // humidity should not be 0
@@ -228,7 +228,7 @@ boolean Plugin_043(byte function, char *string)
       display_Header();
       display_Name(PSTR("LaCrosse V2"));
       display_ID(data[3], data[4]);
-      display_HUM((humidity & 0xFF));
+      display_HUM(humidity);
       display_Footer();
 
       RawSignal.Repeats = true;
