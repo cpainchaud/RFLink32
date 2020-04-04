@@ -101,12 +101,11 @@ boolean Plugin_061(byte function, char *string)
    // Output
    // ----------------------------------
    display_Header();
-   display_Name(PSTR("X10"));
-   display_IDn((bitstream & 0xFFFFFF), 6); // "%S%06lx"
-   display_SWITCH(1U);
+   display_Name(PSTR("EV1527"));
+   display_IDn(((bitstream >> 1) & 0x0FFFFF), 6); // "%S%06lx"
+   display_SWITCH((bitstream & 0x0F), true);
    display_CMD(false, true); // #ALL , #ON
    display_Footer();
-
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
