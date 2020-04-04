@@ -210,7 +210,7 @@ boolean Plugin_043(byte function, char *string)
       temperature -= 500;
 
       display_Header();
-      display_Name(PSTR("LaCrosse V2"));
+      display_Name(PSTR("LaCrosse"));
       display_ID(data[3], data[4]);
       display_TEMP(temperature);
       display_Footer();
@@ -226,7 +226,7 @@ boolean Plugin_043(byte function, char *string)
          return false;
 
       display_Header();
-      display_Name(PSTR("LaCrosse V2"));
+      display_Name(PSTR("LaCrosse"));
       display_ID(data[3], data[4]);
       display_HUM(humidity);
       display_Footer();
