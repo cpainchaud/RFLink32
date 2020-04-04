@@ -81,7 +81,6 @@
  * 0000 0000 0010 1111 1011 0010 1011 1111 1101
  *           aaaa bbbb ccc1 ccc2 ccc3 dddd eeee
  *           2    F    B    2    B    F    D
- *
  * a = sensor type (2=Rain meter)
  * b = sensor address
  * c = rain data (LSB thus the right order is c3 c2 c1)
@@ -89,6 +88,7 @@
  * e = Check Sum : (const5 + 2 + F + B + 2 + B + F) and F = D
   \*********************************************************************************************/
 #define LACROSSE43_PULSECOUNT 88
+#define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
 #define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE  //900 //630
 #define LACROSSE43_MIDHI 1120 / RAWSIGNAL_SAMPLE_RATE //1500 //1050
@@ -107,7 +107,6 @@ boolean Plugin_043(byte function, char *string)
 
    unsigned long bitstream1 = 0L; // holds first 5x4=20 bits
    unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
-   int temperature = 0;
    int humidity = 0;
    byte checksum = 0;
    byte bitcounter = 0; // counts number of received bits (converted from pulses)
@@ -192,6 +191,8 @@ boolean Plugin_043(byte function, char *string)
    if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
       SignalCRC = bitstream1; // not seen this RF packet recently
 
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
+      SignalCRC = tmpval; // not seen this RF packet recently
    else
       return true; // already seen the RF packet recently, but still want the humidity
 
@@ -201,12 +202,12 @@ boolean Plugin_043(byte function, char *string)
    // Output
    // ----------------------------------
    if (data[2] == 0x00)
+   data[4] = (data[4]) >> 1; // ID
    {
       temperature = data[5] * 100;
       temperature = temperature + data[6] * 10;
       temperature = temperature + data[7];
       temperature = temperature - 500;
-      data[4] = (data[4]) >> 1;
 
       display_Header();
       display_Name(PSTR("LaCrosse V2"));
@@ -223,8 +224,6 @@ boolean Plugin_043(byte function, char *string)
       humidity = (data[5] * 10) + data[6];
       if (humidity == 0) // humidity should not be 0
          return false;
-
-      data[4] = (data[4]) >> 1;
 
       display_Header();
       display_Name(PSTR("LaCrosse V2"));
