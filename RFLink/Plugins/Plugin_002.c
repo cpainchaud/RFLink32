@@ -251,7 +251,7 @@ boolean Plugin_002(byte function, char *string)
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
       display_ID(data[3], data[4]);
-      display_Name(PSTR(";DEBUG neede"));
+      display_Name(PSTR(";DEBUG"));
       PrintHex8(data, 12);
       display_Footer();
       //return false;
