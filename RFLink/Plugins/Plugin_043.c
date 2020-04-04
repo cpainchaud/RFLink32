@@ -87,7 +87,6 @@
  * d = Check Xor : (2 ^ F ^ B ^ 2 ^ B ^ F) = 0
  * e = Check Sum : (const5 + 2 + F + B + 2 + B + F) and F = D
   \*********************************************************************************************/
-#define LACROSSE43_PULSECOUNT 88
 #define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
 #define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE  //900 //630
@@ -154,6 +153,10 @@ boolean Plugin_043(byte function, char *string)
             bitstream2 = (bitstream2 << 1) | 0x1;
       }
    }
+   if (RawSignal.Number == (LACROSSE43_PULSECOUNT - 4))
+      bitstream2 = (bitstream2 << 2); // add missing zero bit
+   if (RawSignal.Number == (LACROSSE43_PULSECOUNT - 2))
+      bitstream2 = (bitstream2 << 1); // add missing zero bit
    //==================================================================================
    // all bytes received, make sure checksum is okay
    //==================================================================================
