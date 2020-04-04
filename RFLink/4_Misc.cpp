@@ -186,10 +186,18 @@ void display_IDn(unsigned int input, byte n)
 }
 
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
+void display_SWITCH(unsigned int input, boolean hex)
+{
+  if (hex == true)
+    sprintf_P(pbuffer, PSTR("%S%2x"), F(";SWITCH="), input);
+  else
+    sprintf_P(pbuffer, PSTR("%S%d"), F(";SWITCH="), input);
+  display_Print();
+}
+
 void display_SWITCH(unsigned int input)
 {
-  sprintf_P(pbuffer, PSTR("%S%d"), F(";SWITCH="), input);
-  display_Print();
+  display_SWITCH(input, false);
 }
 
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
