@@ -102,118 +102,99 @@
 
 boolean Plugin_043(byte function, char *string)
 {
-   boolean success = false;
    if ((RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4))
       return false;
-   unsigned long bitstream1 = 0L; // holds first 16 bits
-   unsigned long bitstream2 = 0L; // holds last 28 bits
 
+   unsigned long bitstream1 = 0L; // holds first 5x4=20 bits
+   unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
    int temperature = 0;
    int humidity = 0;
    byte checksum = 0;
    byte bitcounter = 0; // counts number of received bits (converted from pulses)
-   byte data[10];
+   byte data[11];
    //==================================================================================
    // get bytes
-   for (int x = 1; x < RawSignal.Number; x += 2)
+   for (byte x = 1; x < RawSignal.Number; x += 2)
    {
       if ((RawSignal.Pulses[x + 1] < LACROSSE43_MIDLO) || (RawSignal.Pulses[x + 1] > LACROSSE43_MIDHI))
       {
-         if (x < 2)
-         { // Make sure the first bit is correct..
-            RawSignal.Pulses[1] = 1200 / RAWSIGNAL_SAMPLE_RATE;
-         }
+         if (x == 1) // Make sure the first bit is correct..
+            RawSignal.Pulses[1] = LACROSSE43_PULSEMAX - 1;
          else
          {
-            if (x + 1 < RawSignal.Number)
-            {
+            if (x + 1 < RawSignal.Number) // in between pulse check
                return false;
-            } // in between pulse check
          }
       }
       if (RawSignal.Pulses[x] > LACROSSE43_PULSEMID)
       {
          if ((RawSignal.Pulses[x] > LACROSSE43_PULSEMAX) && (x > 1))
-         {
             return false;
-         }
-         if (bitcounter < 16)
+
+         if (bitcounter < 20)
          {
             bitstream1 = (bitstream1 << 1);
             bitcounter++; // only need to count the first 16 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1);
-         }
       }
       else
       {
          if (RawSignal.Pulses[x] > LACROSSE43_PULSEMINMAX)
-         {
             return false;
-         }
-         if (bitcounter < 16)
+
+         if (bitcounter < 20)
          {
             bitstream1 = (bitstream1 << 1) | 0x1;
-            bitcounter++; // only need to count the first 16 bits
+            bitcounter++; // only need to count the first 20 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1) | 0x1;
-         }
       }
    }
    //==================================================================================
    // all bytes received, make sure checksum is okay
    //==================================================================================
    if ((bitstream1 == 0) && (bitstream2 == 0))
-   {
       return false;
-   }
-   data[0] = (bitstream1 >> 12) & 0x0f; // prepare nibbles from bit stream
+
+   // prepare nibbles from bit stream
+   data[0] = (bitstream1 >> 16) & 0x0F;
    if (data[0] != 0x00)
-   {
       return false;
-   }
-   data[1] = (bitstream1 >> 8) & 0x0f;
-   if (data[1] != 0x0a)
-   {
+
+   data[1] = (bitstream1 >> 12) & 0x0F;
+   if (data[1] != 0x0A)
       return false;
-   }
-   data[2] = (bitstream1 >> 4) & 0x0f;
-   data[3] = (bitstream1 >> 0) & 0x0f;
-   data[4] = (bitstream2 >> 24) & 0x0f;
-   data[5] = (bitstream2 >> 20) & 0x0f;
-   data[6] = (bitstream2 >> 16) & 0x0f;
-   data[7] = (bitstream2 >> 12) & 0x0f;
-   data[8] = (bitstream2 >> 8) & 0x0f;
-   data[9] = (bitstream2 >> 4) & 0x0f;
+
+   data[2] = (bitstream1 >> 8) & 0x0F;
+   data[3] = (bitstream1 >> 4) & 0x0F;
+   data[4] = (bitstream1 >> 0) & 0x0F;
+   data[5] = (bitstream2 >> 20) & 0x0F;
+   data[6] = (bitstream2 >> 16) & 0x0F;
+   data[7] = (bitstream2 >> 12) & 0x0F;
+   data[8] = (bitstream2 >> 8) & 0x0F;
+   data[9] = (bitstream2 >> 4) & 0x0F;
+   data[10] = (bitstream2 >> 0) & 0x0F;
    //==================================================================================
    // first perform a checksum check to make sure the packet is a valid LaCrosse packet
    for (byte i = 0; i < 10; i++)
-   {
       checksum = checksum + data[i];
-   }
-   checksum = checksum & 0x0f;
-   if (checksum != (bitstream2 & 0x0f))
-   {
+
+   checksum = checksum & 0x0F;
+   if (checksum != data[10])
       return false;
-   }
+
    //==================================================================================
    // Prevent repeating signals from showing up, skips every second packet!
    //==================================================================================
-   unsigned long tempval = (data[4]) >> 1;
-   tempval = ((tempval) << 16) + ((data[3]) << 8) + data[2];
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != tempval))
-   {
-      // not seen this RF packet recently
-      SignalCRC = tempval;
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
+      SignalCRC = bitstream1; // not seen this RF packet recently
+
    else
-   {
       return true; // already seen the RF packet recently, but still want the humidity
-   }
+
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
@@ -235,28 +216,28 @@ boolean Plugin_043(byte function, char *string)
 
       RawSignal.Repeats = false;
       RawSignal.Number = 0;
-      success = true;
+      return true;
    }
-   else if (data[2] == 0x0e)
+   else if (data[2] == 0x0E)
    {
       humidity = (data[5] * 10) + data[6];
-      if (humidity == 0)
-      {
+      if (humidity == 0) // humidity should not be 0
          return false;
-      } // humidity should not be 0
+
       data[4] = (data[4]) >> 1;
 
       display_Header();
       display_Name(PSTR("LaCrosse V2"));
       display_ID(data[3], data[4]);
-      display_HUM((humidity & 0xff));
+      display_HUM((humidity & 0xFF));
       display_Footer();
 
       RawSignal.Repeats = true;
       RawSignal.Number = 0;
-      success = true;
+      return true;
    }
+   else
+      return false;
    //==================================================================================
-   return success;
 }
 #endif // PLUGIN_043
