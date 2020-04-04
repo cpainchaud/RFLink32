@@ -157,7 +157,7 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    // all bytes received, make sure checksum is okay
    //==================================================================================
-   if ((bitstream1 == 0) && (bitstream2 == 0))
+   if (bitstream1 == 0) // && (bitstream2 == 0)
       return false;
 
    // prepare nibbles from bit stream
@@ -189,8 +189,7 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up, skips every second packet!
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
-      SignalCRC = bitstream1; // not seen this RF packet recently
+   unsigned long tmpval = (bitstream1 << 4) | (data[10]); // sensor type + ID + checksum
 
    if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
       SignalCRC = tmpval; // not seen this RF packet recently
