@@ -24,7 +24,7 @@ boolean ScanEvent(void)
 
   while (Timer > millis() || RepeatingTimer > millis())
   {
-    delay(1); // For Modem Sleep
+    // delay(1); // For Modem Sleep
 #ifdef LA_ENABLED
     digitalWrite(LA_PROBE2, HIGH);
 #endif
