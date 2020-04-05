@@ -197,7 +197,7 @@ void display_SWITCH(unsigned int input, boolean hex)
   if (hex == true)
     sprintf_P(pbuffer, PSTR("%S%2x"), F(";SWITCH="), input);
   else
-    sprintf_P(pbuffer, PSTR("%S%d"), F(";SWITCH="), input);
+    sprintf_P(pbuffer, PSTR("%S%2d"), F(";SWITCH="), input);
   display_Print();
 }
 
