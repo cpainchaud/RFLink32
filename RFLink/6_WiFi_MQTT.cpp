@@ -85,7 +85,7 @@ void setup_MQTT()
 void reconnect()
 {
   // Loop until we're reconnected
-  delay(1);
+  // delay(1);
   while (!MQTTClient.connected())
   {
     Serial.print(F("Attempting MQTT connection..."));
