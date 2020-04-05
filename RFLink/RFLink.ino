@@ -39,6 +39,20 @@ void setup()
   digitalWrite(PIN_RF_RX_GND, LOW);           // turn GND to RF receiver ON
   digitalWrite(PIN_RF_RX_VCC, HIGH);          // turn VCC to RF receiver ON
   digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP); // pull-up resister on (to prevent garbage)
+#ifdef LA_ENABLED
+  pinMode(LA_PROBE1, OUTPUT);
+  pinMode(LA_PROBE2, OUTPUT);
+  pinMode(LA_PROBE3, OUTPUT);
+  pinMode(LA_PROBE4, OUTPUT);
+  pinMode(LA_PROBE5, OUTPUT);
+  pinMode(LA_PROBE6, OUTPUT);
+  digitalWrite(LA_PROBE1, LOW);
+  digitalWrite(LA_PROBE2, LOW);
+  digitalWrite(LA_PROBE3, LOW);
+  digitalWrite(LA_PROBE4, LOW);
+  digitalWrite(LA_PROBE5, LOW);
+  digitalWrite(LA_PROBE6, LOW);
+#endif
 
   PluginInit();
 
@@ -52,23 +66,49 @@ void setup()
   display_Start();
   display_Footer();
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE5, HIGH);
+#endif
   publishMsg();
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE5, LOW);
+#endif
 #endif
 }
 
 void loop()
 {
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE1, HIGH);
+#endif
+
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE6, HIGH);
+#endif
   checkMQTTloop();
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE6, LOW);
+#endif
 #endif
 
   if (ScanEvent())
   {
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE5, HIGH);
+#endif
     publishMsg();
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE5, LOW);
+#endif
 #else
     MQTTbuffer[0] = 0;
 #endif
   }
+
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE1, LOW);
+#endif
 }
 /*********************************************************************************************/

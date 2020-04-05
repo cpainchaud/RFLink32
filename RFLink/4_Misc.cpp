@@ -113,7 +113,13 @@ byte reverseBits(byte data)
 void display_Print()
 {
 #ifdef SERIAL_ENABLED
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE4, HIGH);
+#endif
   Serial.print(pbuffer);
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE4, LOW);
+#endif
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   strcat(MQTTbuffer, pbuffer);

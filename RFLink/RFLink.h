@@ -62,4 +62,12 @@
 #define MQTT_LOOP_MS 7500 // MQTTClient.loop(); call period (in mSec)
 // #define MQTT_RETAINED   // Retained option
 
+// Logic Analyser
+// #define LA_ENABLED
+#define LA_PROBE1 D0 // Loop start
+#define LA_PROBE2 D5 // FetchSignal
+#define LA_PROBE3 D6 // PluginRXCall
+#define LA_PROBE4 D7 // Msg chunk Serial print
+#define LA_PROBE5 D8 // publishMsg
+#define LA_PROBE6 D2 // MQTTClient.loop()
 #endif
