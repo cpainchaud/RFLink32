@@ -21,7 +21,7 @@ boolean ScanEvent(void)
 { // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
   unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
 
-  while (Timer > millis() || RepeatingTimer > millis())
+  while (Timer > millis()) // || RepeatingTimer > millis())
   {
     // delay(1); // For Modem Sleep
 #ifdef LA_ENABLED
