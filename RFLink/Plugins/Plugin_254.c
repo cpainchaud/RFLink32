@@ -37,8 +37,10 @@ boolean Plugin_254(byte function, char *string)
    // ----------------------------------
    display_Header();
    display_Name(PSTR("DEBUG"));
-   Serial.print(F(";Pulses="));       // debug data
-   Serial.print(RawSignal.Number);    // print number of pulses
+   display_Footer();
+   // ----------------------------------
+   Serial.print(F("20;XX;DEBUG;Pulses="));    // debug data
+   Serial.print(RawSignal.Number); // print number of pulses
    Serial.print(F(";Pulses(uSec)=")); // print pulse durations
    // ----------------------------------
    if (QRFUDebug == true)
@@ -52,8 +54,7 @@ boolean Plugin_254(byte function, char *string)
             Serial.write(',');
       }
    }
-   // ----------------------------------
-   display_Footer();
+   Serial.print(F(";\r\n"));
    // ----------------------------------
    RawSignal.Number = 0; // Last plugin, kill packet
    return true;          // stop processing

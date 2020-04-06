@@ -213,7 +213,9 @@ boolean Plugin_043(byte function, char *string)
 
       display_Header();
       display_Name(PSTR("LaCrosse"));
-      display_ID(data[3], data[4]);
+      char c_ID[4];
+      sprintf(c_ID, "%02X%02X", data[3], data[4]);
+      display_IDc(c_ID);
       display_TEMP(temperature);
       display_Footer();
 
@@ -229,7 +231,9 @@ boolean Plugin_043(byte function, char *string)
 
       display_Header();
       display_Name(PSTR("LaCrosse"));
-      display_ID(data[3], data[4]);
+      char c_ID[4];
+      sprintf(c_ID, "%02X%02X", data[3], data[4]);
+      display_IDc(c_ID);
       display_HUM(humidity);
       display_Footer();
 

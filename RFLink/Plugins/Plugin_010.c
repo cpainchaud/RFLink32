@@ -172,7 +172,7 @@ boolean Plugin_010(byte function, char *string)
    display_Header();
    display_Name(PSTR("TRC02RGB"));
    display_IDn(id, 6); //"%S%06lx"
-   display_SWITCH(1U); // command was displayed, but this makes no sense
+   display_SWITCH(1);  // command was displayed, but this makes no sense
 
    switch (command)
    {

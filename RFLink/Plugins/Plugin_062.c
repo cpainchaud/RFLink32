@@ -83,7 +83,7 @@ boolean Plugin_062(byte function, char *string)
    display_Header();
    display_Name(PSTR("Chuango"));
    display_IDn((bitstream & 0xFFFFFF), 6); // "%S%06lx"
-   display_SWITCH(2U);
+   display_SWITCH(2);
    display_CMD(false, true); // #ALL , #ON
    display_Footer();
 

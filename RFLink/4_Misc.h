@@ -9,23 +9,19 @@
 #define Misc_h
 
 #include <Arduino.h>
+#include "RFLink.h"
 
-unsigned long str2int(char *string);
-float ul2float(unsigned long ul);
-void PrintHex8(uint8_t *data, uint8_t length);
-void PrintHexByte(uint8_t data);
-byte reverseBits(byte data);
+// extern byte PKSequenceNumber;     // 1 byte packet counter
+extern char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
 
 void display_Header(void);
 void display_Name(const char *);
 void display_Footer(void);
 void display_Start(void);
-void display_ID(unsigned int);
-void display_ID(byte, byte);
 void display_IDn(unsigned int, byte);
-void display_SWITCH(unsigned int, boolean);
-void display_SWITCH(unsigned int);
-void display_SWITCH(const char *);
+void display_IDc(const char *);
+void display_SWITCH(byte);
+void display_SWITCHc(const char *);
 void display_CMD(boolean, boolean);
 void display_SET_LEVEL(byte);
 void display_TEMP(unsigned int);
@@ -53,11 +49,15 @@ void display_SOUND(unsigned int);
 void display_KWATT(unsigned int);
 void display_WATT(unsigned int);
 void display_CURRENT(unsigned int);
-void display_CURRENT2(unsigned int);
-void display_CURRENT3(unsigned int);
 void display_DIST(unsigned int);
 void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
+
+unsigned long str2int(char *string);
+float ul2float(unsigned long ul);
+void PrintHex8(uint8_t *data, uint8_t length);
+void PrintHexByte(uint8_t data);
+byte reverseBits(byte data);
 
 #endif

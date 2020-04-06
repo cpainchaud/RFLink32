@@ -119,7 +119,7 @@ boolean Plugin_005(byte function, char *string)
    display_Header();
    display_Name(PSTR("Eurodomest"));
    display_IDn(address, 6);  //"%S%06lx"
-   display_SWITCH(unitcode); // %02d, not %02x
+   display_SWITCH(unitcode); // %02x
    if (unitcode > 4)
       display_CMD(true, (command != 0x0)); // #ALL #ON
    else

@@ -113,7 +113,6 @@ boolean Plugin_030(byte function, char *string)
    unsigned int winddirection = 0;
 
    byte rc = 0;
-   unsigned int id = 0;
    byte battery = 0;
    //==================================================================================
    for (byte x = 2; x <= 64; x = x + 2)
@@ -171,7 +170,8 @@ boolean Plugin_030(byte function, char *string)
    data[3] = (data[3]) & B0111;    // prepare nibble to contain only the needed bits
    //==================================================================================
    rc = (data[1] << 4) | data[0];
-   id = (rc & 0x03) << 2 | (rc & 0xfc);
+   char c_ID[4];
+   sprintf(c_ID, "%04X", (rc & 0x03) << 2 | (rc & 0xfc));
 
    if ((data[2]) != B0110)
    { // nibble 2 needs to be set to something other than 'x11x' to be a temperature packet
@@ -200,7 +200,7 @@ boolean Plugin_030(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("Alecto V1"));
-      display_ID(id);
+      display_IDc(c_ID);
       display_TEMP(temperature);
       if (humidity < 0x99)            // Some AlectoV1 devices actually lack the humidity sensor and always report 99%
          display_HUM(humidity, true); // Only report humidity when it is below 99%
@@ -215,7 +215,7 @@ boolean Plugin_030(byte function, char *string)
    {
       display_Header();
       display_Name(PSTR("Alecto V1"));
-      display_ID(id);
+      display_IDc(c_ID);
       if ((data[3]) == B0011)
       {                                                                      // Rain packet
          rain = (data[7] << 12) | (data[6] << 8) | (data[5] << 4) | data[4]; // 0.25mm step

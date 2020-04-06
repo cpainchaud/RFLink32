@@ -82,7 +82,7 @@ boolean Plugin_060(byte function, char *string)
    display_Header();
    display_Name(PSTR("X10"));
    display_IDn((bitstream & 0xFFFF), 4); // "%S%04x"
-   display_SWITCH(1U);
+   display_SWITCH(1);
    display_CMD(false, true); // #ALL , #ON
    display_Footer();
    //==================================================================================

@@ -164,7 +164,10 @@ boolean Plugin_002(byte function, char *string)
    // Output
    // ----------------------------------
    data[2] = (data[2] & B1011); // get sensor type from bitstream
-   if (data[2] == B0000)        // Temperature
+   char c_ID[4];
+   sprintf(c_ID, "%02X%02X", data[3], data[4]);
+
+   if (data[2] == B0000) // Temperature
    {
       temperature = (data[7] * 100);
       temperature += (data[8] * 10);
@@ -177,7 +180,7 @@ boolean Plugin_002(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_TEMP(temperature);
       display_Footer();
    }
@@ -189,7 +192,7 @@ boolean Plugin_002(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_HUM(humidity);
       display_Footer();
    }
@@ -209,7 +212,7 @@ boolean Plugin_002(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_RAIN(rain);
       display_Footer();
    }
@@ -225,7 +228,7 @@ boolean Plugin_002(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_WINDIR(winddirection);
       display_WINSP(windspeed);
       display_Footer();
@@ -241,7 +244,7 @@ boolean Plugin_002(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_WINDIR(winddirection);
       display_WINGS(windgust);
       display_Footer();
@@ -250,7 +253,7 @@ boolean Plugin_002(byte function, char *string)
    {
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
-      display_ID(data[3], data[4]);
+      display_IDc(c_ID);
       display_Name(PSTR(";DEBUG"));
       PrintHex8(data, 12);
       display_Footer();

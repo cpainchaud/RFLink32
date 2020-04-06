@@ -134,8 +134,10 @@ boolean Plugin_004(byte function, char *string)
    // ----------------------------------
    display_Header();
    display_Name(PSTR("NewKaku"));
-   display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8);      //"%S%08lx"
-   display_SWITCH((unsigned int)(bitstream & 0x0f) + 1); // MRI cast UL
+   display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8); //"%S%08lx"
+   char c_SWITCH[4];
+   sprintf(c_SWITCH, "%1x", ((byte)(bitstream & 0x0f) + 1)); // No leading 0
+   display_SWITCHc(c_SWITCH);
 
    if (i > 140 && dimbitpresent == 1)
       display_SET_LEVEL(dim); // Command and Dim part

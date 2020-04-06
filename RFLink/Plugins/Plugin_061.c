@@ -103,7 +103,7 @@ boolean Plugin_061(byte function, char *string)
    display_Header();
    display_Name(PSTR("EV1527"));
    display_IDn(((bitstream >> 4) & 0x0FFFFF), 6); // "%S%06lx"
-   display_SWITCH((bitstream & 0x0F), true);
+   display_SWITCH((bitstream & 0x0F));
    display_CMD(false, true); // #ALL , #ON
    display_Footer();
    //==================================================================================

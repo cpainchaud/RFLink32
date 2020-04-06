@@ -207,10 +207,12 @@ boolean Plugin_001(byte function, char *string)
       // ----------------------------------
       display_Header();
       display_Name(PSTR("DEBUG"));
-      Serial.print(F(";Pulses="));       // debug data
+      display_Footer();
+      // ----------------------------------
+      Serial.print(F("20;XX;DEBUG;Pulses="));  // debug data
       Serial.print(RawSignal.Number);    // print number of pulses
       Serial.print(F(";Pulses(uSec)=")); // print pulse durations
-                                         // ----------------------------------
+      // ----------------------------------
       if (QRFDebug == true)
          PrintHex8(RawSignal.Pulses + 1, RawSignal.Number);
       else
@@ -221,12 +223,11 @@ boolean Plugin_001(byte function, char *string)
             if (i < RawSignal.Number)
                Serial.write(',');
          }
-         // ----------------------------------
-         display_Footer();
-         // ----------------------------------
-         RawSignal.Number = 0; // Last plugin, kill packet
-         return true;          // stop processing
       }
+      Serial.print(F(";\r\n"));
+      // ----------------------------------
+      RawSignal.Number = 0; // Last plugin, kill packet
+      return true;          // stop processing
    }
    // ==========================================================================
    // Beginning of Signal translation for Impuls
