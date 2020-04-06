@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+#include "4_Misc.h"
 #include "6_WiFi_MQTT.h"
 
 #ifdef ESP32
@@ -14,8 +15,6 @@
 #elif ESP8266
 #include <ESP8266WiFi.h>
 #endif
-
-char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
 
@@ -110,19 +109,15 @@ void reconnect()
 
 void publishMsg()
 {
-  if (MQTTbuffer[0] != 0)
-  {
     if (!MQTTClient.connected())
     {
       reconnect();
     }
 #ifdef MQTT_RETAINED
-    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, true);
+    MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
 #else
-    MQTTClient.publish(MQTT_TOPIC_OUT, MQTTbuffer, false);
+    MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
 #endif
-    MQTTbuffer[0] = 0;
-  }
 }
 
 void checkMQTTloop()

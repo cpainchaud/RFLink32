@@ -24,6 +24,8 @@
 #include "6_WiFi_MQTT.h"
 //****************************************************************************************************************************************
 
+void sendMsg(); // See at bottom
+
 void setup()
 {
   Serial.begin(BAUD); // Initialise the serial port
@@ -63,8 +65,18 @@ void setup()
 #else
   setup_WIFI_OFF();
 #endif
+  display_Header();
   display_Start();
   display_Footer();
+#ifdef SERIAL_ENABLED
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE4, HIGH);
+#endif
+  Serial.print(pbuffer);
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE4, LOW);
+#endif
+#endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
 #ifdef LA_ENABLED
   digitalWrite(LA_PROBE5, HIGH);
@@ -74,6 +86,7 @@ void setup()
   digitalWrite(LA_PROBE5, LOW);
 #endif
 #endif
+  pbuffer[0] = 0;
 }
 
 void loop()
@@ -93,7 +106,26 @@ void loop()
 #endif
 
   if (ScanEvent())
+    sendMsg();
+
+#ifdef LA_ENABLED
+  digitalWrite(LA_PROBE1, LOW);
+#endif
+}
+
+void sendMsg()
+{
+  if (pbuffer[0] != 0)
   {
+#ifdef SERIAL_ENABLED
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE4, HIGH);
+#endif
+    Serial.print(pbuffer);
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE4, LOW);
+#endif
+#endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
 #ifdef LA_ENABLED
     digitalWrite(LA_PROBE5, HIGH);
@@ -102,13 +134,8 @@ void loop()
 #ifdef LA_ENABLED
     digitalWrite(LA_PROBE5, LOW);
 #endif
-#else
-    MQTTbuffer[0] = 0;
 #endif
+    pbuffer[0] = 0;
   }
-
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE1, LOW);
-#endif
 }
 /*********************************************************************************************/

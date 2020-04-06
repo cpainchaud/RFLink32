@@ -10,7 +10,6 @@
 #include "5_Plugin.h"
 
 RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
-byte PKSequenceNumber = 0;      // 1 byte packet counter
 unsigned long SignalCRC = 0L;   // holds the bitstream value for some plugins to identify RF repeats
 unsigned long SignalCRC_1 = 0L; // holds the previous SignalCRC (for mixed burst protocols)
 byte SignalHash = 0L;           // holds the processed plugin number

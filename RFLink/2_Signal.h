@@ -23,7 +23,6 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
 };
 
 extern RawSignalStruct RawSignal;
-extern byte PKSequenceNumber;     // 1 byte packet counterextern unsigned long RepeatingTimer;
 extern unsigned long SignalCRC;   // holds the bitstream value for some plugins to identify RF repeats
 extern unsigned long SignalCRC_1; // holds the previous SignalCRC (for mixed burst protocols)
 extern byte SignalHash;           // holds the processed plugin number

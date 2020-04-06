@@ -6,9 +6,8 @@
 // ************************************* //
 
 #include <Arduino.h>
-#include "RFLink.h"
+// #include "3_Serial.h"
 
-char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
 //char InputBuffer_Serial[INPUT_COMMAND_SIZE];
 
 /*********************************************************************************************/
