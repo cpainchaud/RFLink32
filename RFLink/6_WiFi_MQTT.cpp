@@ -109,14 +109,14 @@ void reconnect()
 
 void publishMsg()
 {
-    if (!MQTTClient.connected())
-    {
-      reconnect();
-    }
+  if (!MQTTClient.connected())
+  {
+    reconnect();
+  }
 #ifdef MQTT_RETAINED
-    MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
+  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
 #else
-    MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
+  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
 #endif
 }
 
@@ -126,6 +126,9 @@ void checkMQTTloop()
 
   if (millis() > lastCheck + MQTT_LOOP_MS)
   {
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE6, HIGH);
+#endif
     if (!MQTTClient.connected())
     {
       reconnect();
@@ -134,6 +137,9 @@ void checkMQTTloop()
     MQTTClient.loop();
     // Serial.println(F("Done"));
     lastCheck = millis();
+#ifdef LA_ENABLED
+    digitalWrite(LA_PROBE6, LOW);
+#endif
   }
 }
 

@@ -96,13 +96,7 @@ void loop()
 #endif
 
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE6, HIGH);
-#endif
   checkMQTTloop();
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE6, LOW);
-#endif
 #endif
 
   if (ScanEvent())
