@@ -70,10 +70,10 @@ void display_IDn(unsigned int input, byte n)
 
 void display_IDc(const char *input)
 {
-  sprintf_P(dbuffer, PSTR("%S%S"), F(";ID="), input);
+  sprintf_P(dbuffer, PSTR("%S"), F(";ID="));
   strcat(pbuffer, dbuffer);
+  strcat(pbuffer, input);
 }
-
 
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCH(byte input)
@@ -85,8 +85,9 @@ void display_SWITCH(byte input)
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCHc(const char *input)
 {
-  sprintf_P(dbuffer, PSTR("%S%S"), F(";SWITCH="), input);
+  sprintf_P(dbuffer, PSTR("%S"), F(";SWITCH="));
   strcat(pbuffer, dbuffer);
+  strcat(pbuffer, input);
 }
 
 // CMD=ON => Command (ON/OFF/ALLON/ALLOFF) Additional for Milight: DISCO+/DISCO-/MODE0 - MODE8
