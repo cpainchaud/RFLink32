@@ -103,7 +103,7 @@ boolean Plugin_046(byte function, char *string)
    //==================================================================================
    unsigned long tmpval = (bitstream1 << 8) | (bitstream2 & 0xFF); // All but "1111" padded section
 
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 100) < millis()) || (SignalCRC != tmpval))
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 150) < millis()) || (SignalCRC != tmpval))
    {
       if (bitstream1 == 0)
          return false; // Perform sanity check
