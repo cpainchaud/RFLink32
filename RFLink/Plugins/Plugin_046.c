@@ -60,12 +60,13 @@ boolean Plugin_046(byte function, char *string)
    byte bat = 0;
    byte bat0 = 0;
    int temperature = 0;
-   int humidity = 0;
+   byte humidity = 0;
    byte channel = 0;
    byte bitcounter = 1; // 1st bit skipped! (hence forced to 0)
    byte type = 0;
    //==================================================================================
    // get all the bits we need (36 bits)
+   //==================================================================================
    for (byte x = 4; x < (AURIOLV2_PULSECOUNT); x += 2)
    {
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
@@ -77,12 +78,10 @@ boolean Plugin_046(byte function, char *string)
          if (bitcounter < 24)
          {
             bitstream1 = (bitstream1 << 1) | 0x1;
-            bitcounter++; // only need to count the first 10 bits
+            bitcounter++; // only need to count the first 24 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1) | 0x1;
-         }
       }
       else
       {
@@ -96,86 +95,85 @@ boolean Plugin_046(byte function, char *string)
             bitcounter++; // only need to count the first 10 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1);
-         }
       }
    }
+   //==================================================================================
+   // Perform sanity checks and prevent repeating signals from showing up
+   //==================================================================================
+   unsigned long tmpval = (bitstream1 << 8) | (bitstream2 & 0xFF); // All but "1111" padded section
 
-   //==================================================================================
-   // Prevent repeating signals from showing up
-   //==================================================================================
-   if (((RepeatingTimer + 700) < millis()) || SignalCRC != bitstream1)
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 100) < millis()) || (SignalCRC != tmpval))
    {
       if (bitstream1 == 0)
          return false; // Perform sanity check
       if ((bitstream2 & 0xF00) != 0xF00)
-         return false; // check if 'E' has all 4 bits set
-      if ((bitstream2 & 0xfff) != 0xF00)
-      {
-         type = 1; // Xiron
-         // if (RawSignal.Pulses[0] != PLUGIN_ID) {
-         //   return false;                         // only accept plugin_001 translated Xiron packets
-         // }
-      }
-      else
-      {
-         type = 0;                       // Auriol
-         rc = (bitstream1 >> 12) & 0x07; // get 3 bits
-         if (rc != 0)
-            return false; // should always be '000'
-      }
-      //==================================================================================
-      bat = (bitstream1 >> 15) & 0x01;  // get battery strength indicator
-      bat0 = (bitstream1 >> 14) & 0x01; // get blank battery strength indicator
-      if (bat0 != 0)
-         return false;                          // blank bat must be 0
-      rc = (bitstream1 >> 16) & 0xff;           // get rolling code
-      channel = ((bitstream1 >> 12) & 0x3) + 1; // channel indicator
-      if (channel > 3)
-         return false;                  // channel out of range
-      temperature = (bitstream1)&0xfff; // get 12 temperature bits
-      if (temperature > 3000)
-      {
-         temperature = 4096 - temperature; // fix for minus temperatures
-         if (temperature > 0x258)
-            return false;                    // temperature out of range ( > -60.0 degrees)
-         temperature = temperature | 0x8000; // turn highest bit on for minus values
-      }
-      else
-      {
-         if (temperature > 0x258)
-            return false; // temperature out of range ( > 60.0 degrees)
-      }
-      if (type == 1)
-      {
-         humidity = (bitstream2)&0xff; // humidity
-         if (humidity > 100)
-            return false; // humidity out of range ( > 100)
-      }
-      //==================================================================================
-      // Output
-      // ----------------------------------
+         return false; // check if 'E' area has all 4 bits set
 
-      display_Header();
-
-      if (type == 0)
-         display_Name(PSTR("Auriol V2"));
-      else
-         display_Name(PSTR("Xiron"));
-
-      char c_ID[4];
-      sprintf(c_ID, "%02X%02X", rc, channel);
-      display_IDc(c_ID);
-      display_TEMP(temperature);
-
-      if (type == 1)
-         display_HUM(humidity);
-      display_BAT(bat);
-      display_Footer();
-
-      SignalCRC = bitstream1;
+      SignalCRC = tmpval; // not seen this RF packet recently
    }
+   else
+      return true; // already seen the RF packet recently, but still want the humidity
+   //==================================================================================
+   // now process the various sensor types
+   //==================================================================================
+   if ((bitstream2 & 0xFFF) != 0xF00)
+   {
+      type = 1; // Xiron
+      // if (RawSignal.Pulses[0] != PLUGIN_ID)
+      //   return false; // only accept plugin_001 translated Xiron packets
+   }
+   else
+   {
+      type = 0;                       // Auriol
+      rc = (bitstream1 >> 12) & 0x07; // get 3 bits
+      if (rc != 0)
+         return false; // should always be '000'
+   }
+   //==================================================================================
+   bat = (bitstream1 >> 15) & 0x1;  // get battery strength indicator
+   bat0 = (bitstream1 >> 14) & 0x1; // get blank battery strength indicator
+   if (bat0 != 0)
+      return false;                          // blank bat must be 0
+   rc = (bitstream1 >> 16) & 0xFF;           // get rolling code
+   channel = ((bitstream1 >> 12) & 0x3) + 1; // channel indicator
+   if (channel > 3)
+      return false;                  // channel out of range
+   temperature = (bitstream1)&0xFFF; // get 12 temperature bits
+   if (temperature > 3000)
+   {
+      temperature = 4096 - temperature; // fix for minus temperatures
+      if (temperature > 0x258)
+         return false;                    // temperature out of range ( > -60.0 degrees)
+      temperature = temperature | 0x8000; // turn highest bit on for minus values
+   }
+   else
+   {
+      if (temperature > 0x258)
+         return false; // temperature out of range ( > 60.0 degrees)
+   }
+   if (type == 1)
+   {
+      humidity = (bitstream2)&0xFF; // humidity
+      if (humidity > 100)
+         return false; // humidity out of range ( > 100)
+   }
+   //==================================================================================
+   // Output
+   // ----------------------------------
+   display_Header();
+   if (type == 0)
+      display_Name(PSTR("Auriol V2"));
+   else
+      display_Name(PSTR("Xiron"));
+   char c_ID[4];
+   sprintf(c_ID, "%02X%02X", rc, channel);
+   display_IDc(c_ID);
+   display_TEMP(temperature);
+   if (type == 1)
+      display_HUM(humidity);
+   display_BAT(bat);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
