@@ -194,7 +194,7 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    unsigned long tmpval = (bitstream1 << 4) | (data[10]); // sensor type + ID + checksum
 
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != bitstream1))
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != tmpval))
       SignalCRC = tmpval; // not seen this RF packet recently
    else
       return true; // already seen the RF packet recently, but still want the humidity
