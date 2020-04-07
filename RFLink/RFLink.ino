@@ -29,6 +29,10 @@
 
 //****************************************************************************************************************************************
 
+#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
+void (*Reboot)(void) = 0; // reset function on adress 0.
+#endif
+
 void sendMsg(); // See at bottom
 
 void setup()
