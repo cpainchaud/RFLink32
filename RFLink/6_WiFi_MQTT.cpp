@@ -7,6 +7,8 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+#if (defined(ESP32) || defined(ESP8266))
+
 #include "4_Misc.h"
 #include "6_WiFi_MQTT.h"
 
@@ -16,7 +18,7 @@
 #include <ESP8266WiFi.h>
 #endif
 
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef MQTT_ENABLED
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
 #define MQTT_KEEPALIVE 60
@@ -36,8 +38,10 @@ void setup_WIFI()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
+#ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
   WiFi.setOutputPower(WIFI_PWR);
+#endif // ESP8266
   WiFi.mode(WIFI_STA);
 
   // Comment out for Dynamic IP
@@ -115,9 +119,9 @@ void publishMsg()
   }
 #ifdef MQTT_RETAINED
   MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
-#else
+#else  // MQTT_RETAINED
   MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
-#endif
+#endif // MQTT_RETAINED
 }
 
 void checkMQTTloop()
@@ -128,7 +132,7 @@ void checkMQTTloop()
   {
 #ifdef LA_ENABLED
     digitalWrite(LA_PROBE6, HIGH);
-#endif
+#endif // LA_ENABLED
     if (!MQTTClient.connected())
     {
       reconnect();
@@ -139,11 +143,11 @@ void checkMQTTloop()
     lastCheck = millis();
 #ifdef LA_ENABLED
     digitalWrite(LA_PROBE6, LOW);
-#endif
+#endif // LA_ENABLED
   }
 }
 
-#else
+#else // MQTT_ENABLED
 
 void setup_WIFI_OFF()
 {
@@ -154,4 +158,5 @@ void setup_WIFI_OFF()
   WiFi.forceSleepBegin();
 }
 
-#endif
+#endif // MQTT_ENABLED
+#endif // (defined(ESP32) || defined(ESP8266))

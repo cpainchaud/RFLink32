@@ -21,13 +21,26 @@
 #include "2_Signal.h"
 #include "4_Misc.h"
 #include "5_Plugin.h"
+#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
+#include <avr/power.h>
+#else
 #include "6_WiFi_MQTT.h"
+#endif
+
 //****************************************************************************************************************************************
 
 void sendMsg(); // See at bottom
 
 void setup()
 {
+#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
+  // Low Power Arduino
+  ADCSRA = 0;            // disable ADC
+  power_all_disable();   // turn off all modules
+  power_timer0_enable(); // Timer 0
+  power_usart0_enable(); // UART
+#endif
+
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
@@ -58,12 +71,14 @@ void setup()
 
   PluginInit();
 
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#if (defined(ESP32) || defined(ESP8266))
+#if defined(MQTT_ENABLED)
   setup_WIFI();
   setup_MQTT();
   reconnect();
 #else
   setup_WIFI_OFF();
+#endif
 #endif
   display_Header();
   display_Start();

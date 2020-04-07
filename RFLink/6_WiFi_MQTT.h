@@ -9,10 +9,12 @@
 #define WiFi_MQTT_h
 
 #include <Arduino.h>
+#include "RFLink.h"
+#if (defined(ESP32) || defined(ESP8266))
 
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef MQTT_ENABLED
 void setup_WIFI();
 void setup_MQTT();
 void reconnect();
@@ -20,6 +22,8 @@ void publishMsg();
 void checkMQTTloop();
 #else
 void setup_WIFI_OFF();
-#endif
+#endif // MQTT_ENABLED
 
-#endif
+#endif // (defined(ESP32) || defined(ESP8266))
+
+#endif // WiFi_MQTT_h

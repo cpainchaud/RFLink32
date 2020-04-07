@@ -44,14 +44,28 @@
 */
 
 // PIN Definition
-
-// ESP8266 D1 Mini
 #define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
 #define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
 #define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
-#define PIN_RF_RX_DATA D1        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+
+#ifdef ESP8266
+// ESP8266 D1 Mini
+#define PIN_RF_RX_DATA D1 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#endif
+
+#ifdef ESP32
+#define PIN_RF_RX_DATA 2 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#endif
+
+#ifdef __AVR_ATmega328P__
+#define PIN_RF_RX_DATA 2 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#endif
+
+#ifdef __AVR_ATmega2560__
+#define PIN_RF_RX_DATA 19 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#endif
 
 // WIFI
 #define WIFI_PWR 10 // 0~20.5dBm
@@ -63,12 +77,14 @@
 // #define MQTT_RETAINED   // Retained option
 
 // Logic Analyser
-#define LA_ENABLED
+// #define LA_ENABLED
+#ifdef LA_ENABLED
 #define LA_PROBE1 D0 // Loop start
 #define LA_PROBE2 D5 // FetchSignal
 #define LA_PROBE3 D6 // PluginRXCall
 #define LA_PROBE4 D7 // Msg chunk Serial print
 #define LA_PROBE5 D8 // publishMsg
 #define LA_PROBE6 D2 // MQTTClient.loop()
+#endif
 
 #endif
