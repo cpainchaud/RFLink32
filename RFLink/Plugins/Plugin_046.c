@@ -62,12 +62,12 @@ boolean Plugin_046(byte function, char *string)
    int temperature = 0;
    byte humidity = 0;
    byte channel = 0;
-   byte bitcounter = 1; // 1st bit skipped! (hence forced to 0)
+   byte bitcounter = 0;
    byte type = 0;
    //==================================================================================
    // get all the bits we need (36 bits)
    //==================================================================================
-   for (byte x = 4; x < (AURIOLV2_PULSECOUNT); x += 2)
+   for (byte x = 2; x < (AURIOLV2_PULSECOUNT); x += 2)
    {
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
          return false;
@@ -107,7 +107,7 @@ boolean Plugin_046(byte function, char *string)
    {
       if (bitstream1 == 0)
          return false; // Perform sanity check
-      if ((bitstream2 & 0xF00) != 0xF00)
+      if (((bitstream2 >> 8) & 0xF) != 0xF)
          return false; // check if 'E' area has all 4 bits set
 
       SignalCRC = tmpval; // not seen this RF packet recently
@@ -117,28 +117,32 @@ boolean Plugin_046(byte function, char *string)
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
-   if ((bitstream2 & 0xFFF) != 0xF00)
-   {
-      type = 1; // Xiron
-      // if (RawSignal.Pulses[0] != PLUGIN_ID)
-      //   return false; // only accept plugin_001 translated Xiron packets
-   }
+   humidity = (bitstream2)&0xFF; // humidity
+
+   if (humidity == 0x00)
+      type = 0; // Auriol has no humidity part
    else
-   {
-      type = 0;                       // Auriol
-      rc = (bitstream1 >> 12) & 0x07; // get 3 bits
-      if (rc != 0)
-         return false; // should always be '000'
-   }
+      type = 1; // Xiron
+   // if (RawSignal.Pulses[0] != PLUGIN_ID)
+   //   return false; // only accept plugin_001 translated Xiron packets
    //==================================================================================
+   if (type == 0)
+      rc = (bitstream1 >> 16) & 0xFF; // Auriol : get rolling code
+   if (type == 1)
+      rc = (bitstream1 >> 16) & 0x7F; // Xirion : get rolling code
+
    bat = (bitstream1 >> 15) & 0x1;  // get battery strength indicator
    bat0 = (bitstream1 >> 14) & 0x1; // get blank battery strength indicator
    if (bat0 != 0)
-      return false;                          // blank bat must be 0
-   rc = (bitstream1 >> 16) & 0xFF;           // get rolling code
+      return false; // blank bat must be 0
+
    channel = ((bitstream1 >> 12) & 0x3) + 1; // channel indicator
-   if (channel > 3)
-      return false;                  // channel out of range
+
+   if ((type == 0) && (channel > 1))
+      return false; // Auriol : channel out of range
+   if ((type == 1) && (channel > 3))
+      return false; // Xiron : channel out of range
+
    temperature = (bitstream1)&0xFFF; // get 12 temperature bits
    if (temperature > 3000)
    {
@@ -154,7 +158,6 @@ boolean Plugin_046(byte function, char *string)
    }
    if (type == 1)
    {
-      humidity = (bitstream2)&0xFF; // humidity
       if (humidity > 100)
          return false; // humidity out of range ( > 100)
    }
