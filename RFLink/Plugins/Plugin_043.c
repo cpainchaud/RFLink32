@@ -89,12 +89,11 @@
   \*********************************************************************************************/
 #define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
-#define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE  //900 //630
-#define LACROSSE43_MIDHI 1120 / RAWSIGNAL_SAMPLE_RATE //1500 //1050
-
-#define LACROSSE43_PULSEMID 1120 / RAWSIGNAL_SAMPLE_RATE   //1410 //990
-#define LACROSSE43_PULSEMAX 1440 / RAWSIGNAL_SAMPLE_RATE   //2100 //1500
-#define LACROSSE43_PULSEMINMAX 576 / RAWSIGNAL_SAMPLE_RATE //810 //570
+#define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE        //900 //630
+#define LACROSSE43_MIDHI 1120 / RAWSIGNAL_SAMPLE_RATE       //1500 //1050
+#define LACROSSE43_PULSEMINMAX 576 / RAWSIGNAL_SAMPLE_RATE  //810 //570
+#define LACROSSE43_PULSEMAXMIN 1120 / RAWSIGNAL_SAMPLE_RATE //1410 //990
+#define LACROSSE43_PULSEMAX 1440 / RAWSIGNAL_SAMPLE_RATE    //2100 //1500
 
 #ifdef PLUGIN_043
 #include "../4_Misc.h"
@@ -113,7 +112,8 @@ boolean Plugin_043(byte function, char *string)
    byte humidity = 0;
    //unsigned int rain = 0; // Not implemented
    //==================================================================================
-   // get bytes
+   // Get all 44 bits
+   //==================================================================================
    for (byte x = 1; x < RawSignal.Number; x += 2)
    {
       if ((RawSignal.Pulses[x + 1] < LACROSSE43_MIDLO) || (RawSignal.Pulses[x + 1] > LACROSSE43_MIDHI))
@@ -126,7 +126,7 @@ boolean Plugin_043(byte function, char *string)
                return false;
          }
       }
-      if (RawSignal.Pulses[x] > LACROSSE43_PULSEMID)
+      if (RawSignal.Pulses[x] > LACROSSE43_PULSEMAXMIN)
       {
          if ((RawSignal.Pulses[x] > LACROSSE43_PULSEMAX) && (x > 1))
             return false;
@@ -158,12 +158,11 @@ boolean Plugin_043(byte function, char *string)
    if (RawSignal.Number == (LACROSSE43_PULSECOUNT - 2))
       bitstream2 = (bitstream2 << 1); // add missing zero bit
    //==================================================================================
-   // all bytes received, make sure checksum is okay
+   // Perform a quick sanity check
    //==================================================================================
    if (bitstream1 == 0) // && (bitstream2 == 0)
       return false;
 
-   // prepare nibbles from bit stream
    data[0] = (bitstream1 >> 16) & 0xF;
    if (data[0] != 0x0)
       return false;
@@ -171,7 +170,9 @@ boolean Plugin_043(byte function, char *string)
    data[1] = (bitstream1 >> 12) & 0xF;
    if (data[1] != 0xA)
       return false;
-
+   //==================================================================================
+   // Prepare nibbles from bit stream
+   //==================================================================================
    data[2] = (bitstream1 >> 8) & 0xF;
    data[3] = (bitstream1 >> 4) & 0xF;
    data[4] = (bitstream1 >> 0) & 0xF;
@@ -182,7 +183,8 @@ boolean Plugin_043(byte function, char *string)
    data[9] = (bitstream2 >> 4) & 0xF;
    data[10] = (bitstream2 >> 0) & 0xF; // CRC
    //==================================================================================
-   // first perform a checksum check to make sure the packet is a valid LaCrosse packet
+   // Perform checksum calculations
+   //==================================================================================
    for (byte i = 0; i < 10; i++)     // max. value = 10*0xF 0x96
       checksum = checksum + data[i]; // less with real values
 
@@ -190,7 +192,7 @@ boolean Plugin_043(byte function, char *string)
    if (checksum != data[10])
       return false;
    //==================================================================================
-   // Prevent repeating signals from showing up, skips every second packet!
+   // Prevent repeating signals from showing up
    //==================================================================================
    unsigned long tmpval = (bitstream1 << 4) | (data[10]); // sensor type + ID + checksum
 
@@ -201,8 +203,6 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
-   // Output
-   // ----------------------------------
    data[4] = (data[4]) >> 1; // ID
    if (data[2] == 0x0)
    {
@@ -210,7 +210,9 @@ boolean Plugin_043(byte function, char *string)
       temperature += (data[6] * 10);
       temperature += (data[7]);
       temperature -= 500;
-
+      //==================================================================================
+      // Output
+      //==================================================================================
       display_Header();
       display_Name(PSTR("LaCrosse"));
       char c_ID[4];
@@ -218,7 +220,7 @@ boolean Plugin_043(byte function, char *string)
       display_IDc(c_ID);
       display_TEMP(temperature);
       display_Footer();
-
+      //==================================================================================
       RawSignal.Repeats = false;
       RawSignal.Number = 0;
       return true;
@@ -228,7 +230,9 @@ boolean Plugin_043(byte function, char *string)
       humidity = (data[5] * 10) + data[6];
       if (humidity == 0) // humidity should not be 0
          return false;
-
+      //==================================================================================
+      // Output
+      //==================================================================================
       display_Header();
       display_Name(PSTR("LaCrosse"));
       char c_ID[4];
@@ -236,13 +240,12 @@ boolean Plugin_043(byte function, char *string)
       display_IDc(c_ID);
       display_HUM(humidity);
       display_Footer();
-
+      //==================================================================================
       RawSignal.Repeats = true;
       RawSignal.Number = 0;
       return true;
    }
    else
       return false;
-   //==================================================================================
 }
 #endif // PLUGIN_043
