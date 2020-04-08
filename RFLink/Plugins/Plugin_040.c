@@ -46,67 +46,78 @@
 // ==================================================================================
 #define MEBUS_PULSECOUNT 58
 
+#define MEBUS_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
+#define MEBUS_PULSEMIN 1500 / RAWSIGNAL_SAMPLE_RATE
+#define MEBUS_PULSEMINMAX 2100 / RAWSIGNAL_SAMPLE_RATE
+#define MEBUS_PULSEMAXMIN 3400 / RAWSIGNAL_SAMPLE_RATE
+
 #ifdef PLUGIN_040
+#include "../4_Misc.h"
+
 boolean Plugin_040(byte function, char *string)
 {
    if (RawSignal.Number != MEBUS_PULSECOUNT)
       return false;
+
    unsigned long bitstream = 0L;
    unsigned int temperature = 0;
-   byte rc = 0;
-   byte checksum = 0;
    byte data[7];
+   byte checksum = 0;
+   byte rc = 0;
    byte channel = 0;
    //==================================================================================
-   // get all 28 bits
+   // Get all 28 bits
+   //==================================================================================
    for (byte x = 2; x <= MEBUS_PULSECOUNT - 2; x += 2)
    {
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
+      if (RawSignal.Pulses[x + 1] > MEBUS_MIDHI)
          return false; // make sure inbetween pulses are not too long
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3400)
+      if (RawSignal.Pulses[x] > MEBUS_PULSEMAXMIN)
       {
          bitstream = (bitstream << 1) | 0x1;
       }
       else
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2000)
+         if (RawSignal.Pulses[x] > MEBUS_PULSEMINMAX)
             return false; // invalid pulse length
-         if (RawSignal.Pulses[x] * RawSignal.Multiply < 1500)
+         if (RawSignal.Pulses[x] < MEBUS_PULSEMIN)
             return false; // invalid pulse length
          bitstream = (bitstream << 1);
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis() && SignalCRC != bitstream) || (SignalCRC != bitstream))
-   {
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 150 < millis() && SignalCRC != bitstream) || (SignalCRC != bitstream))
       SignalCRC = bitstream; // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // Perform a sanity check
-   }
    else
-   {
       return true; // already seen the RF packet recently
+   //==================================================================================
+   // Prepare nibbles from bit stream
+   //==================================================================================
+   for (byte i = 0; i < 7; i++)
+   {
+      data[i] = ((bitstream >> (24 - (4 * i))) & 0xF);
+      if (i > 0)
+         checksum += data[i];
    }
    //==================================================================================
-   data[0] = (bitstream >> 24) & 0x0f; // prepare nibbles from bit stream
-   data[1] = (bitstream >> 20) & 0x0f;
-   data[2] = (bitstream >> 16) & 0x0f;
-   data[3] = (bitstream >> 12) & 0x0f;
-   data[4] = (bitstream >> 8) & 0x0f;
-   data[5] = (bitstream >> 4) & 0x0f;
-   data[6] = (bitstream >> 0) & 0x0f;
+   // Perform checksum calculations
    //==================================================================================
-   // first perform a checksum check to make sure the packet is a valid mebus packet
-   checksum = data[1] + data[2] + data[3] + data[4] + data[5] + data[6];
-   checksum = (checksum - 1) & 0xf;
+   checksum = (checksum - 1) & 0xF;
    if (checksum != data[0])
       return false;
    //==================================================================================
-   rc = (data[1] << 4) + data[2];
+   // Now process the various sensor types
+   //==================================================================================
+   rc = (data[1] << 4) | data[2];
    channel = (data[6]) >> 2;
-   temperature = (data[3] << 8) + (data[4] << 4) + data[5];
+   temperature = (data[3] << 8) | (data[4] << 4) | data[5];
    if (temperature > 3000)
    {
       temperature = 4096 - temperature; // fix for minus temperatures
@@ -121,15 +132,14 @@ boolean Plugin_040(byte function, char *string)
    }
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   Serial.print(F("Mebus;"));                     // Label
-   sprintf(pbuffer, "ID=%02x%02x;", rc, channel); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "TEMP=%04x;", temperature);
-   Serial.print(pbuffer);
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Mebus"));
+   char c_ID[4];
+   sprintf(c_ID, "%02x%02x", rc, channel);
+   display_IDc(c_ID);
+   display_TEMP(temperature);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
