@@ -92,14 +92,17 @@
  * 20;53;DEBUG;Pulses=74;Pulses(uSec)=425,3800,350,1825,350,1825,325,1825,350,1825,325,3800,350,3800,350,1825,325,3800,350,1825,325,1800,350,1825,350,1825,325,1825,325,3800,325,1825,350,1800,350,1825,325,3825,325,3800,325,1825,325,1825,325,1800,325,1825,350,3800,325,1825,325,3800,350,1800,350,1800,350,3800,350,1825,325,1825,325,1825,325,1825,350,1825,325,1925,325;
  *
  \*********************************************************************************************/
-#define WS3500_PULSECOUNT 74
+#define ALECTOV1_PULSECOUNT 74
+
+#define ALECTOV1_MIDHI 700 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV1_PULSEMAXMIN 2560 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_030
 #include "../4_Misc.h"
 
 boolean Plugin_030(byte function, char *string)
 {
-   if (RawSignal.Number != WS3500_PULSECOUNT)
+   if (RawSignal.Number != ALECTOV1_PULSECOUNT)
       return false;
    unsigned long bitstream = 0L;
    byte data[8];
@@ -115,25 +118,29 @@ boolean Plugin_030(byte function, char *string)
    byte rc = 0;
    byte battery = 0;
    //==================================================================================
+   // Get all 36 bits
+   //==================================================================================
    for (byte x = 2; x <= 64; x = x + 2)
    {
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
+      if (RawSignal.Pulses[x + 1] > ALECTOV1_MIDHI)
          return false; // in between pulses should be short
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 2560)
+      if (RawSignal.Pulses[x] > ALECTOV1_PULSEMAXMIN)
          bitstream = ((bitstream >> 1) | (0x1L << 31)); // Reverses order, as number are in LSB 1st, beware N2 and N3 !
       else
          bitstream = (bitstream >> 1);
    }
    for (byte x = 66; x <= 72; x = x + 2)
    {
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 2560)
+      if (RawSignal.Pulses[x] > ALECTOV1_PULSEMAXMIN)
          checksum = ((checksum >> 1) | (0x1L << 3));
       else
          checksum = (checksum >> 1);
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
    if (bitstream == 0)
-      return false; // Perform a sanity check
+      return false;
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
@@ -145,7 +152,8 @@ boolean Plugin_030(byte function, char *string)
    else
       return true; // already seen the RF packet recently
    //==================================================================================
-   // Sort nibbles
+   // Prepare nibbles from bit stream
+   //==================================================================================
    for (byte i = 0; i < 8; i++)
    {
       data[i] = ((bitstream >> (4 * i)) & 0xF);
@@ -153,6 +161,7 @@ boolean Plugin_030(byte function, char *string)
    }
    //==================================================================================
    // Perform checksum calculations, Alecto checksums are Rollover Checksums by design!
+   //==================================================================================
    if ((data[2] & B0110) != B0110)               // Keep in mind, reversed nibble order
       checksumcalc = (0xF - checksumcalc) & 0xF; // Temperature packet
    else
@@ -164,6 +173,8 @@ boolean Plugin_030(byte function, char *string)
    }
    if (checksum != checksumcalc)
       return false;
+   //==================================================================================
+   // Now process the various sensor types
    //==================================================================================
    battery = !((data[2]) & B0001); // get battery indicator
    data[2] = (data[2]) & B0110;    // prepare nibble to contain only the needed bits
@@ -197,7 +208,7 @@ boolean Plugin_030(byte function, char *string)
          return false; // Humidity out of range, assume ALL data is bad?
       //==================================================================================
       // Output
-      // ----------------------------------
+      //==================================================================================
       display_Header();
       display_Name(PSTR("Alecto V1"));
       display_IDc(c_ID);
@@ -222,7 +233,7 @@ boolean Plugin_030(byte function, char *string)
          rain = (rain * 10) / 4;                                             // to get 10th of mm
          //==================================================================================
          // Output
-         // ----------------------------------
+         //==================================================================================
          display_RAIN(rain);
       }
       if ((data[3]) == B0001)
@@ -231,7 +242,7 @@ boolean Plugin_030(byte function, char *string)
          windspeed = (windspeed * 72) / 10;    // to get 10th of kph
          //==================================================================================
          // Output
-         // ----------------------------------
+         //==================================================================================
          display_WINSP(windspeed);
       }
       if ((data[3]) == B0111)
@@ -242,7 +253,7 @@ boolean Plugin_030(byte function, char *string)
          windgust = (windgust * 72) / 100;                                                   // to get kph
          //==================================================================================
          // Output
-         // ----------------------------------
+         //==================================================================================
          display_WINDIR(winddirection);
          display_WINGS(windgust);
       }
