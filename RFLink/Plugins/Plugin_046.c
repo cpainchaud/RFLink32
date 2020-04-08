@@ -44,8 +44,15 @@
  * Sample:
  * 20;1F;DEBUG;Pulses=74;Pulses(uSec)=550,1575,525,675,525,1625,500,700,475,725,500,1675,500,700,500,725,475,1675,475,750,450,750,475,725,450,750,450,750,475,750,450,750,475,1675,450,1700,425,1700,450,750,450,750,450,1700,450,1700,450,775,450,1700,450,1700,450,1700,425,1700,425,775,450,775,450,775,425,775,425,775,425,775,450,775,425,775,425,
  \*********************************************************************************************/
-#define PLUGIN_ID 46
+#define AURIOLV2_PLUGIN_ID 46
 #define AURIOLV2_PULSECOUNT 74
+
+#define AURIOLV2_MIDHI 700 / RAWSIGNAL_SAMPLE_RATE
+
+#define AURIOLV2_PULSEMIN 500 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV2_PULSEMINMAX 1100 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV2_PULSEMAXMIN 1400 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV2_PULSEMAX 2100 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_046
 #include "../4_Misc.h"
@@ -65,15 +72,15 @@ boolean Plugin_046(byte function, char *string)
    byte bitcounter = 0;
    byte type = 0;
    //==================================================================================
-   // get all the bits we need (36 bits)
+   // Get all 36 bits
    //==================================================================================
    for (byte x = 2; x < (AURIOLV2_PULSECOUNT); x += 2)
    {
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 700)
+      if (RawSignal.Pulses[x + 1] > AURIOLV2_MIDHI)
          return false;
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 1400)
+      if (RawSignal.Pulses[x] > AURIOLV2_PULSEMAXMIN)
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2100)
+         if (RawSignal.Pulses[x] > AURIOLV2_PULSEMAX)
             return false;
          if (bitcounter < 24)
          {
@@ -85,9 +92,9 @@ boolean Plugin_046(byte function, char *string)
       }
       else
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 1100)
+         if (RawSignal.Pulses[x] > AURIOLV2_PULSEMINMAX)
             return false;
-         if (RawSignal.Pulses[x] * RawSignal.Multiply < 500)
+         if (RawSignal.Pulses[x] < AURIOLV2_PULSEMIN)
             return false;
          if (bitcounter < 24)
          {
@@ -99,31 +106,33 @@ boolean Plugin_046(byte function, char *string)
       }
    }
    //==================================================================================
-   // Perform sanity checks and prevent repeating signals from showing up
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream1 == 0)
+      return false; // Perform sanity check
+   if (((bitstream2 >> 8) & 0xF) != 0xF)
+      return false; // check if 'E' area has all 4 bits set
+   //==================================================================================
+   // Prevent repeating signals from showing up
    //==================================================================================
    unsigned long tmpval = (bitstream1 << 8) | (bitstream2 & 0xFF); // All but "1111" padded section
 
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 150) < millis()) || (SignalCRC != tmpval))
    {
-      if (bitstream1 == 0)
-         return false; // Perform sanity check
-      if (((bitstream2 >> 8) & 0xF) != 0xF)
-         return false; // check if 'E' area has all 4 bits set
-
       SignalCRC = tmpval; // not seen this RF packet recently
    }
    else
       return true; // already seen the RF packet recently, but still want the humidity
    //==================================================================================
-   // now process the various sensor types
+   // Now process the various sensor types
    //==================================================================================
-   humidity = (bitstream2)&0xFF; // humidity
+   humidity = (bitstream2)&0xFF; // humidity, Xiron only
 
    if (humidity == 0x00)
       type = 0; // Auriol has no humidity part
    else
       type = 1; // Xiron
-   // if (RawSignal.Pulses[0] != PLUGIN_ID)
+   // if (RawSignal.Pulses[0] != AURIOLV2_PLUGIN_ID)
    //   return false; // only accept plugin_001 translated Xiron packets
    //==================================================================================
    if (type == 0)
@@ -163,7 +172,7 @@ boolean Plugin_046(byte function, char *string)
    }
    //==================================================================================
    // Output
-   // ----------------------------------
+   //==================================================================================
    display_Header();
    if (type == 0)
       display_Name(PSTR("Auriol V2"));
