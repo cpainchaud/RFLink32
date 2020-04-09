@@ -35,34 +35,36 @@
 #define AURIOL_PULSECOUNT 66
 
 #ifdef PLUGIN_045
+#include "../4_Misc.h"
+
 boolean Plugin_045(byte function, char *string)
 {
    if (RawSignal.Number != AURIOL_PULSECOUNT)
       return false;
-   unsigned long bitstream = 0L;
-   unsigned int temperature = 0;
+
+   unsigned long bitstream = 0L; // holds 8x4=32 bits
+   byte checksumcalc = 0;
    byte rc = 0;
    byte bat = 0;
-   byte checksumcalc = 0;
+   unsigned int temperature = 0;
    //==================================================================================
-   if (RawSignal.Number == AURIOL_PULSECOUNT)
+   // Get all 32 bits
+   //==================================================================================
+   for (byte x = 2; x < AURIOL_PULSECOUNT; x += 2)
    {
-      for (int x = 2; x < AURIOL_PULSECOUNT; x += 2)
+      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
+         return false; // inbetween pulses should not exceed a length of 550
+      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3000)
+      { // long bit = 1
+         bitstream = (bitstream << 1) | 0x1;
+      }
+      else
       {
-         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
-            return false; // inbetween pulses should not exceed a length of 550
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 3000)
-         { // long bit = 1
-            bitstream = (bitstream << 1) | 0x1;
-         }
-         else
-         {
-            if (RawSignal.Pulses[x] * RawSignal.Multiply < 1600)
-               return false; // pulse length too short to be valid?
-            if (RawSignal.Pulses[x] * RawSignal.Multiply > 2200)
-               return false;              // pulse length between 2000 - 3000 is invalid
-            bitstream = (bitstream << 1); // short bit = 0
-         }
+         if (RawSignal.Pulses[x] * RawSignal.Multiply < 1600)
+            return false; // pulse length too short to be valid?
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2200)
+            return false;              // pulse length between 2000 - 3000 is invalid
+         bitstream = (bitstream << 1); // short bit = 0
       }
    }
    //==================================================================================
