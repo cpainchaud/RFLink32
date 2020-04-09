@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-46 Auriol / Xiron                                     ##
+//##                                      Plugin-46 Auriol v2 / Xiron                                     ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the Auriol protocol for sensor type Z31055A-TX and Xiron 
@@ -61,15 +61,16 @@ boolean Plugin_046(byte function, char *string)
 {
    if ((RawSignal.Number) != AURIOLV2_PULSECOUNT)
       return false;
-   unsigned long bitstream1 = 0L;
-   unsigned long bitstream2 = 0L;
+
+   unsigned long bitstream1 = 0L; // holds first 6x4=24 bits
+   unsigned long bitstream2 = 0L; // holds last  3x4=12 bits
+   byte bitcounter = 0;           // counts number of received bits (converted from pulses)
    byte rc = 0;
    byte bat = 0;
    byte bat0 = 0;
    int temperature = 0;
    byte humidity = 0;
    byte channel = 0;
-   byte bitcounter = 0;
    byte type = 0;
    //==================================================================================
    // Get all 36 bits
@@ -120,7 +121,7 @@ boolean Plugin_046(byte function, char *string)
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 150) < millis()) || (SignalCRC != tmpval))
       SignalCRC = tmpval; // not seen this RF packet recently
    else
-      return true; // already seen the RF packet recently, but still want the humidity
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Now process the various sensor types
    //==================================================================================
