@@ -37,6 +37,8 @@
 #define AURIOLV3_PULSECOUNT 82
 
 #ifdef PLUGIN_044
+#include "../4_Misc.h"
+
 boolean Plugin_044(byte function, char *string)
 {
    if (RawSignal.Number != AURIOLV3_PULSECOUNT)
@@ -98,10 +100,12 @@ boolean Plugin_044(byte function, char *string)
       return true; // already seen the RF packet recently
    }
    //==================================================================================
-   rc = (bitstream1 >> 8) & 0xff;              // get rolling code
-   temperature = ((bitstream2) >> 12) & 0xfff; // get 12 temperature bits
-   temperature = (temperature - 0x4c4) & 0xffff;
-   temperature = (((temperature)*5) / 9) & 0xffff;
+   // now process sensor type
+   //==================================================================================
+   rc = (bitstream1 >> 8) & 0xFF;              // get rolling code
+   temperature = ((bitstream2) >> 12) & 0xFFF; // get 12 temperature bits
+   temperature = (temperature - 0x4c4) & 0xFFFF;
+   temperature = (((temperature)*5) / 9) & 0xFFFF;
    if (temperature > 3000)
    {
       temperature = 4096 - temperature; // fix for minus temperatures
@@ -118,18 +122,15 @@ boolean Plugin_044(byte function, char *string)
    channel = (bitstream2)&0x03;         // channel number
    //==================================================================================
    // Output
-   // ----------------------------------
-   Serial.print("20;");
-   PrintHexByte(PKSequenceNumber++);
-   Serial.print(F(";Auriol V3;ID=")); // Label
-   PrintHexByte(rc);
-   PrintHexByte(channel);
-   // ----------------------------------
-   sprintf(pbuffer, ";TEMP=%04x;", temperature); // temp
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "HUM=%02x;", humidity); // hum
-   Serial.print(pbuffer);
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Auriol V3"));
+   char c_ID[4];
+   sprintf(c_ID, "%02X%02X", rc, channel);
+   display_IDc(c_ID);
+   display_TEMP(temperature);
+   display_HUM(humidity);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
