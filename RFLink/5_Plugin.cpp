@@ -14,7 +14,7 @@ byte Plugin_id[PLUGIN_MAX];
 
 boolean RFDebug = false;   // debug RF signals with plugin 001 (no decode)
 boolean QRFDebug = false;  // debug RF signals with plugin 001 but no multiplication (faster?, compact)
-boolean RFUDebug = true;  // debug RF signals with plugin 254 (decode 1st)
+boolean RFUDebug = false;  // debug RF signals with plugin 254 (decode 1st)
 boolean QRFUDebug = false; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 /**********************************************************************************************\
