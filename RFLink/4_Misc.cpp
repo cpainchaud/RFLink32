@@ -423,3 +423,35 @@ byte reverseBits(byte data)
   return data;
 }
 /*********************************************************************************************/
+/// Generic Cyclic Redundancy Check CRC-8.
+///
+/// Example polynomial: 0x31 = x8 + x5 + x4 + 1 (x8 is implicit)
+/// Example polynomial: 0x80 = x8 + x7 (a normal bit-by-bit parity XOR)
+///
+/// @param message array of bytes to check
+/// @param nBytes number of bytes in message
+/// @param polynomial byte is from x^7 to x^0 (x^8 is implicitly one)
+/// @param init starting crc value
+/// @return CRC value
+//
+// Source : https://github.com/merbanan/rtl_433/blob/master/include/util.h
+//
+uint8_t crc8(const uint8_t message[], unsigned nBytes, uint8_t polynomial, uint8_t init)
+{
+    uint8_t remainder = init;
+    unsigned byte, bit;
+
+    for (byte = 0; byte < nBytes; ++byte) {
+        remainder ^= message[byte];
+        for (bit = 0; bit < 8; ++bit) {
+            if (remainder & 0x80) {
+                remainder = (remainder << 1) ^ polynomial;
+            } else {
+                remainder = (remainder << 1);
+            }
+        }
+    }
+    return remainder;
+}
+/*********************************************************************************************/
+
