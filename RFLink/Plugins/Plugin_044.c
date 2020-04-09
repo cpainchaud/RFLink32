@@ -34,7 +34,14 @@
  * Sample:
  * 20;C2;DEBUG;Pulses=82;Pulses(uSec)=475,3850,450,1700,450,3825,450,3900,450,3725,450,3825,450,3825,450,3900,450,3725,450,1700,450,1700,450,3900,450,3725,450,1700,450,1700,450,1800,450,1625,450,3800,450,3825,450,1800,450,1625,450,1700,450,1700,450,1800,450,3725,450,3800,450,1700,450,1800,450,1625,450,3825,450,1700,450,3900,450,1625,450,1700,450,1700,450,3900,450,1625,450,1700,450,1700,450,3825,500;
  \*********************************************************************************************/
+#define AURIOLV3_PLUGIN_ID 44
 #define AURIOLV3_PULSECOUNT 82
+
+#define AURIOLV3_MIDHI 650 / RAWSIGNAL_SAMPLE_RATE
+
+#define AURIOLV3_PULSEMIN 1500 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV3_PULSEMINMAX 2000 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV3_PULSEMAXMIN 3500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_044
 #include "../4_Misc.h"
@@ -56,9 +63,9 @@ boolean Plugin_044(byte function, char *string)
    //==================================================================================
    for (byte x = 2; x < AURIOLV3_PULSECOUNT; x += 2)
    {
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 650)
+      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > AURIOLV3_MIDHI)
          return false;
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3500)
+      if (RawSignal.Pulses[x] > AURIOLV3_PULSEMAXMIN)
       {
          if (bitcounter < 16)
          {
@@ -66,15 +73,13 @@ boolean Plugin_044(byte function, char *string)
             bitcounter++; // only need to count the first 10 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1) | 0x1;
-         }
       }
       else
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2000)
+         if (RawSignal.Pulses[x] > AURIOLV3_PULSEMINMAX)
             return false;
-         if (RawSignal.Pulses[x] * RawSignal.Multiply < 1500)
+         if (RawSignal.Pulses[x] < AURIOLV3_PULSEMIN)
             return false;
          if (bitcounter < 16)
          {
@@ -82,9 +87,7 @@ boolean Plugin_044(byte function, char *string)
             bitcounter++; // only need to count the first 10 bits
          }
          else
-         {
             bitstream2 = (bitstream2 << 1);
-         }
       }
    }
    //==================================================================================
