@@ -52,9 +52,9 @@ boolean Plugin_047(byte function, char *string)
       return false;
 
    unsigned long bitstream = 0L; // holds first 8x4=32 bits
-   unsigned int checksum = 0;    // holds last  2x4=8 bits
+   uint8_t checksum = 0;         // holds last  2x4=8 bits
    byte bitcounter = 0;          // counts number of received bits (converted from pulses)
-   unsigned int checksumcalc = 0;
+   uint8_t checksumcalc = 0;
    byte rc = 0;
    byte bat = 0;
    byte bat0 = 0;
@@ -119,12 +119,23 @@ boolean Plugin_047(byte function, char *string)
    else
       return true; // already seen the RF packet recently
    //==================================================================================
-
+   // Perform checksum calculations
+   //==================================================================================
+   // Source : https://github.com/merbanan/rtl_433/blob/master/src/devices/auriol_hg02832.c
+   //
+   // They tried to implement CRC-8 poly 0x31, but (accidentally?) reset the key every new byte.
+   // (equivalent key stream is 7a 3d 86 43 b9 c4 62 31 repeated 4 times.)
+   //
+   for (byte c = 0; c < 4; c++)
+      checksumcalc ^= ((bitstream >> (8 * c)) & 0xFF);
+   
+   if (checksum != crc8(&checksumcalc, 1, 0x31, 0x53))
+      return false;
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
    rc = (bitstream >> 24) & 0xFF;    // get rolling code
-   bat = !((bitstream >> 15) & 0x1) ; // get battery strength indicator
+   bat = !((bitstream >> 15) & 0x1); // get battery strength indicator
    bat0 = (bitstream >> 14) & 0x1;   // get blank battery strength indicator
    if (bat0 != 0)
       return false; // blank bat must be 0
