@@ -107,23 +107,15 @@ boolean Plugin_045(byte function, char *string)
    }
    //==================================================================================
    // Output
-   // ----------------------------------
-   Serial.print("20;");
-   PrintHexByte(PKSequenceNumber++);
-   Serial.print(F(";Auriol;ID=00")); // Label
-   PrintHexByte(rc);
-   // ----------------------------------
-   sprintf(pbuffer, ";TEMP=%04x;", temperature);
-   Serial.print(pbuffer);
-   if (bat == 0)
-   { // battery status
-      Serial.print(F("BAT=LOW;"));
-   }
-   else
-   {
-      Serial.print(F("BAT=OK;"));
-   }
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Auriol"));
+   char c_ID[2];
+   sprintf(c_ID, "%02X", rc);
+   display_IDc(c_ID);
+   display_TEMP(temperature);
+   display_BAT(bat);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
