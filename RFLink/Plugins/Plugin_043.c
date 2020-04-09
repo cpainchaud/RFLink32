@@ -107,7 +107,7 @@ boolean Plugin_043(byte function, char *string)
    unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
    byte bitcounter = 0;           // counts number of received bits (converted from pulses)
    byte data[11];
-   byte checksum = 0;
+   byte checksumcalc = 0;
    int temperature = 0;
    byte humidity = 0;
    //unsigned int rain = 0; // Not implemented
@@ -186,10 +186,10 @@ boolean Plugin_043(byte function, char *string)
    // Perform checksum calculations
    //==================================================================================
    for (byte i = 0; i < 10; i++)     // max. value = 10*0xF 0x96
-      checksum = checksum + data[i]; // less with real values
+      checksumcalc += data[i]; // less with real values
 
-   checksum = checksum & 0xF;
-   if (checksum != data[10])
+   checksumcalc = checksumcalc & 0xF;
+   if (checksumcalc != data[10])
       return false;
    //==================================================================================
    // Prevent repeating signals from showing up
