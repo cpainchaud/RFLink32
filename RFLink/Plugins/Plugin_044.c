@@ -43,16 +43,18 @@ boolean Plugin_044(byte function, char *string)
 {
    if (RawSignal.Number != AURIOLV3_PULSECOUNT)
       return false;
-   unsigned long bitstream1 = 0L;
-   unsigned long bitstream2 = 0L;
+
+   unsigned long bitstream1 = 0L; // holds first 4x4=16 bits
+   unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
+   byte bitcounter = 0;           // counts number of received bits (converted from pulses)
    byte rc = 0;
    byte channel = 0;
-   byte bitcounter = 0;
    unsigned long temperature = 0;
    byte humidity = 0;
    //==================================================================================
-   // get all the bits we need (40 bits)
-   for (int x = 2; x < AURIOLV3_PULSECOUNT; x += 2)
+   // Get all 40 bits
+   //==================================================================================
+   for (byte x = 2; x < AURIOLV3_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 650)
          return false;
