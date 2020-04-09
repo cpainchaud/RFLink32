@@ -84,7 +84,7 @@ boolean Plugin_045(byte function, char *string)
    //==================================================================================
    for (int i = 1; i < 32; i++)
    { // Perform a checksum calculation to make sure the received packet is a valid Auriol packet
-      checksumcalc = checksumcalc ^ ((bitstream >> i) & 0x01);
+      checksumcalc ^= ((bitstream >> i) & 0x01);
    }
    if (checksumcalc != (bitstream & 0x01))
       return false;
