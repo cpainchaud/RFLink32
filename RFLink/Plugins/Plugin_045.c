@@ -32,7 +32,14 @@
  * 20;34;DEBUG;Pulses=66;Pulses(uSec)=325,3725,325,1825,325,1825,325,1825,325,3700,325,3700,325,3700,325,3700,325,3700,325,1850,300,1825,325,1850,325,1825,325,1850,325,1825,300,1825,325,3725,300,3725,325,1825,325,1825,300,3725,300,1850,325,3725,300,1850,325,3725,300,3700,300,3725,300,1825,325,3700,325,3700,300,3700,325,1825,325;
  * 20;0A;DEBUG;Pulses=66;Pulses(uSec)=325,1850,300,1850,300,3700,300,1850,300,1850,300,1850,325,1850,300,1850,325,3700,325,1850,300,1850,300,1825,325,1850,300,1850,325,1825,300,1850,325,3725,300,3700,325,1825,300,1850,325,3700,300,3725,300,3725,300,1850,300,1850,300,3725,325,3700,300,1850,300,1825,325,1850,300,3700,300,1850,325;
  \*********************************************************************************************/
+#define AURIOL_PLUGIN_ID 45
 #define AURIOL_PULSECOUNT 66
+
+#define AURIOL_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
+
+#define AURIOL_PULSEMIN 1600 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOL_PULSEMINMAX 2200 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOL_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_045
 #include "../4_Misc.h"
@@ -52,37 +59,37 @@ boolean Plugin_045(byte function, char *string)
    //==================================================================================
    for (byte x = 2; x < AURIOL_PULSECOUNT; x += 2)
    {
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
-         return false; // inbetween pulses should not exceed a length of 550
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3000)
+      if (RawSignal.Pulses[x + 1] > AURIOL_MIDHI)
+         return false; // in between pulses should not exceed a length of 550
+      if (RawSignal.Pulses[x] > AURIOL_PULSEMAXMIN)
       { // long bit = 1
          bitstream = (bitstream << 1) | 0x1;
       }
       else
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply < 1600)
+         if (RawSignal.Pulses[x] < AURIOL_PULSEMIN)
             return false; // pulse length too short to be valid?
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 2200)
+         if (RawSignal.Pulses[x] > AURIOL_PULSEMINMAX)
             return false;              // pulse length between 2000 - 3000 is invalid
          bitstream = (bitstream << 1); // short bit = 0
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()))
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // Perform a sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 500 < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
-   for (int i = 1; i < 32; i++)
+   // Perform checksum calculations
+   //==================================================================================
+   for (byte i = 1; i < 32; i++)
    { // Perform a checksum calculation to make sure the received packet is a valid Auriol packet
       checksumcalc ^= ((bitstream >> i) & 0x01);
    }
@@ -91,6 +98,8 @@ boolean Plugin_045(byte function, char *string)
    rc = (bitstream >> 20) & 0x07; // get 3 bits to perform another sanity check
    if (rc != 0)
       return false; // selected bits should always be 000
+   //==================================================================================
+   // now process sensor type
    //==================================================================================
    bat = (bitstream >> 23) & 0x01;         // get battery strength indicator
    temperature = (bitstream >> 8) & 0xfff; // get 12 temperature bits
