@@ -63,13 +63,17 @@
  * 20;AE;DEBUG;Pulses=126;Pulses(uSec)=900,950,825,450,325,450,325,950,325,450,325,450,825,950,825,450,325,950,825,450,350,950,325,450,825,950,825,450,325,450,325,950,825,925,350,450,825,950,825,925,350,450,825,450,350,925,825,450,350,450,325,950,350,450,825,950,325,450,350,450,325,450,825,450,325,450,325,450,325,450,325,950,825,950,325,450,825,950,325,450,825,450,325,950,325,450,325,450,825,925,350,450,350,450,825,950,825,925,350,425,350,450,350,450,350,450,350,450,825,950,825,950,325,450,350,450,825,950,825,950,825,950,325,450,325;
  * 20;AF;Alecto V3;ID=009a;TEMP=ffe7;RAIN=7a;
  \*********************************************************************************************/
+#define ALECTOV3_PLUGIN_ID 31
 #define WS1100_PULSECOUNT 94
 #define WS1200_PULSECOUNT 126
+
 #define ALECTOV3_PULSEMID 300 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_031
+#include "../4_Misc.h"
+
 uint8_t Plugin_031_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
-unsigned int Plugin_031_ProtocolAlectoRainBase = 0;
+// unsigned int Plugin_031_ProtocolAlectoRainBase = 0;
 
 boolean Plugin_031(byte function, char *string)
 {
@@ -86,54 +90,56 @@ boolean Plugin_031(byte function, char *string)
    byte checksumcalc = 0;
    byte data[6];
    //==================================================================================
+   // Get all 36 bits
+   //==================================================================================
    for (byte x = 15; x <= 77; x = x + 2)
    { // get first 32 relevant bits
       if (RawSignal.Pulses[x] < ALECTOV3_PULSEMID)
-      {
          bitstream1 = (bitstream1 << 1) | 0x1;
-      }
       else
-      {
          bitstream1 = (bitstream1 << 1);
-      }
    }
    for (byte x = 79; x <= 141; x = x + 2)
    { // get second 32 relevant bits
       if (RawSignal.Pulses[x] < ALECTOV3_PULSEMID)
-      {
          bitstream2 = (bitstream2 << 1) | 0x1;
-      }
       else
-      {
          bitstream2 = (bitstream2 << 1);
-      }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
    if (bitstream1 == 0)
-      return false;                     // Sanity check
-   data[0] = (bitstream1 >> 24) & 0xff; // Sort data
-   data[1] = (bitstream1 >> 16) & 0xff;
-   data[2] = (bitstream1 >> 8) & 0xff;
-   data[3] = (bitstream1 >> 0) & 0xff;
-   data[4] = (bitstream2 >> 24) & 0xff;
-   data[5] = (bitstream2 >> 16) & 0xff;
-   // ----------------------------------
+      return false;
+   //==================================================================================
+   // Prepare nibbles from bit stream
+   //==================================================================================
+   data[0] = (bitstream1 >> 24) & 0xFF;
+   data[1] = (bitstream1 >> 16) & 0xFF;
+   data[2] = (bitstream1 >> 8) & 0xFF;
+   data[3] = (bitstream1 >> 0) & 0xFF;
+   data[4] = (bitstream2 >> 24) & 0xFF;
+   data[5] = (bitstream2 >> 16) & 0xFF;
+   //==================================================================================
+   // Perform checksum calculations
+   //==================================================================================
    if (RawSignal.Number == WS1200_PULSECOUNT)
    { // verify checksum
-      checksum = (bitstream2 >> 8) & 0xff;
+      checksum = (bitstream2 >> 8) & 0xFF;
       checksumcalc = Plugin_031_ProtocolAlectoCRC8(data, 6);
    }
    else
    {
-      checksum = (bitstream2 >> 24) & 0xff;
+      checksum = (bitstream2 >> 24) & 0xFF;
       checksumcalc = Plugin_031_ProtocolAlectoCRC8(data, 4);
    }
    if (checksum != checksumcalc)
       return false;
-   // ----------------------------------
-   rc = (bitstream1 >> 20) & 0xff;
-   temperature = ((bitstream1 >> 8) & 0x3ff); // 299=12b  -400 (0x190)  = FF9b
-   //temperature = ((bitstream1 >> 8) & 0x3ff) - 400;   // 299=12b  -400 (0x190)  = FF9b
+   //==================================================================================
+   // Now process the various sensor types
+   //==================================================================================
+   rc = (bitstream1 >> 20) & 0xFF;
+   temperature = ((bitstream1 >> 8) & 0x3FF); // 299=12b  -400 (0x190)  = FF9b
    if (temperature < 400)
    { // negative temperature value
       temperature = 400 - temperature;
@@ -146,37 +152,31 @@ boolean Plugin_031(byte function, char *string)
    }
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("Alecto V3;"));      // Label
-   sprintf(pbuffer, "ID=00%02x;", rc); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "TEMP=%04x;", temperature);
-   Serial.print(pbuffer);
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Alecto V3"));
+   display_IDn(rc, 2);
+   display_TEMP(temperature);
 
    if (RawSignal.Number == WS1100_PULSECOUNT)
    {
-      humidity = bitstream1 & 0xff; // alleen op WS1100?
-      sprintf(pbuffer, "HUM=%02x;", humidity);
-      Serial.print(pbuffer);
+      humidity = bitstream1 & 0xFF; // alleen op WS1100?
+      display_HUM(humidity);
    }
    else
    {
-      rain = (((bitstream2 >> 24) & 0xff) * 256) + ((bitstream1 >> 0) & 0xff);
+      rain = ((((bitstream2 >> 24) & 0xFF) << 8) | ((bitstream1 >> 0) & 0xFF));
+      display_RAIN(rain);
       // check if rain unit has been reset!
-      if (rain < Plugin_031_ProtocolAlectoRainBase)
-         Plugin_031_ProtocolAlectoRainBase = rain;
-      if (Plugin_031_ProtocolAlectoRainBase > 0)
-      {
-         //UserVar[basevar+1 -1] += ((float)rain - Plugin_031_ProtocolAlectoRainBase) * 0.30;
-         sprintf(pbuffer, "RAIN=%02x;", (rain)&0xff);
-         Serial.print(pbuffer);
-      }
-      Plugin_031_ProtocolAlectoRainBase = rain;
+      // if (rain < Plugin_031_ProtocolAlectoRainBase)
+      //    Plugin_031_ProtocolAlectoRainBase = rain;
+      // if (Plugin_031_ProtocolAlectoRainBase > 0)
+      // {
+      //    display_RAINRATE(rain - Plugin_031_ProtocolAlectoRainBase);
+      // }
+      // Plugin_031_ProtocolAlectoRainBase = rain;
    }
-   Serial.println();
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;     // do not process the packet any further
