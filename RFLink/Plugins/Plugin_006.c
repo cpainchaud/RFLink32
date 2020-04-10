@@ -56,11 +56,11 @@ boolean Plugin_006(byte function, char *string)
       {
          if (bitcounter < 32)
          {
-            bitstream = (bitstream << 1);
+            bitstream <<= 1;
          }
          else
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
          }
          bitcounter++;
       }
@@ -68,11 +68,13 @@ boolean Plugin_006(byte function, char *string)
       {
          if (bitcounter < 32)
          {
-            bitstream = (bitstream << 1) | 0x1;
+            bitstream <<= 1;
+            bitstream |= 0x1;
          }
          else
          {
-            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitstream1 <<= 1;
+            bitstream1 |= 0x1;
          }
          bitcounter++;
       }
@@ -88,15 +90,10 @@ boolean Plugin_006(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || RepeatingTimer < millis())
-   {
-      // not seen the RF packet recently
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 500 < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream;   // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    byte status = ((bitstream1) >> 16) & 0x0f;
    if (status > 3)

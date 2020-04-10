@@ -112,13 +112,14 @@ boolean Plugin_013(byte function, char *string)
       return false; // start pulse must be short
    for (byte x = 2; x < POWERFIX_PulseLength - 1; x += 2)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > POWEFIX_PULSEMID)
       {
          if (RawSignal.Pulses[x] > POWEFIX_PULSEMAX)
             return false; // Long pulse too long
          if (RawSignal.Pulses[x + 1] > POWEFIX_PULSEMID)
             return false; // pulse sequence check 01/10
-         bitstream = (bitstream << 1) | 0x1;
+         bitstream |= 0x1;
          if (bitcount > 11)
             parity = parity ^ 1;
       }
@@ -128,12 +129,13 @@ boolean Plugin_013(byte function, char *string)
             return false; // Short pulse too short
          if (RawSignal.Pulses[x + 1] < POWEFIX_PULSEMID)
             return false; // pulse sequence check 01/10
-         bitstream = (bitstream << 1);
+         // bitstream |= 0x0;
       }
       bitcount++;
    }
    //==================================================================================
-   // Perform Sanity Checks
+   // Perform a quick sanity check
+   //==================================================================================
    if (parity != 0)
       return false; // Parity check
    if (((bitstream)&0x4) == 4)
@@ -142,15 +144,9 @@ boolean Plugin_013(byte function, char *string)
    // Prevent repeating signals from showing up
    //==================================================================================
    if (SignalHash != SignalHashPrevious || (RepeatingTimer < millis() + 1500) || SignalCRC != bitstream)
-   {
-      // not seen the RF packet recently
-      SignalCRC = bitstream;
-   }
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Sort data
    address = ((bitstream) >> 8); // 12 bits address
@@ -176,14 +172,12 @@ boolean Plugin_013(byte function, char *string)
       }
    }
    //==================================================================================
-   // ----------------------------------
    // Output
-   // ----------------------------------
+   //==================================================================================
    display_Header();
    display_Name(PSTR("Powerfix"));
    display_IDn(address, 4); //"%S%04x"
    display_SWITCH(button);  // "%02x"
-
    switch (command)
    {
    case 0x00:

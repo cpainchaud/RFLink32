@@ -102,7 +102,6 @@ boolean Plugin_033(byte function, char *string)
    checksum = (bitstream >> 4) & 0xF;
    if (checksum != 0x1)
       return false;
-
    //==================================================================================
    // Now process the various sensor types
    //==================================================================================

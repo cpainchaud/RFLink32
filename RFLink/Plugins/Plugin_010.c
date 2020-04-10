@@ -92,21 +92,17 @@ boolean Plugin_010(byte function, char *string)
       }
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 750 && RawSignal.Pulses[x] * RawSignal.Multiply < 1000)
       {
-         if (halfbit == 1)
-         {                // cant receive a 1 bit after a single low value
-            return false; // pulse error, must not be a UPM packet or reception error
-         }
+         if (halfbit == 1) // cant receive a 1 bit after a single low value
+            return false;  // pulse error, must not be a UPM packet or reception error
+
          bitmask = !bitmask;
          if (bitcounter < 32)
          {
+            bitstream <<= 1; //Always shift
             if (bitmask == 1)
-            {
-               bitstream = (bitstream << 1);
-            }
+               bitstream |= 0x0;
             else
-            {
-               bitstream = (bitstream << 1) | 0x1;
-            }
+               bitstream |= 0x1;
             bitcounter++; // only need to count the first 10 bits
          }
          else
@@ -120,22 +116,18 @@ boolean Plugin_010(byte function, char *string)
       {
          if (RawSignal.Pulses[x] * RawSignal.Multiply > 625 && RawSignal.Pulses[x] * RawSignal.Multiply < 250)
             return false; // Not a valid UPM pulse length
-         if (halfbit == 0)
-         {               // 2 times a low value = 0 bit
-            halfbit = 1; // first half received
-         }
+
+         if (halfbit == 0) // 2 times a low value = 0 bit
+            halfbit = 1;   // first half received
          else
          {
             if (bitcounter < 32)
             {
+               bitstream <<= 1; //Always shift
                if (bitmask == 1)
-               {
-                  bitstream = (bitstream << 1);
-               }
+                  bitstream |= 0x0;
                else
-               {
-                  bitstream = (bitstream << 1) | 0x1;
-               }
+                  bitstream |= 0x1;
                checksum = checksum ^ 1;
                bitcounter++; // only need to count the first 10 bits
             }
@@ -157,10 +149,7 @@ boolean Plugin_010(byte function, char *string)
    // Checksum: xor all odd and all even bits should match the last bit
    // ----------------------------------
    if (checksum != crc)
-   {
-      //Serial.println("crc2 error");
       return false;
-   }
    //==================================================================================
    // now process the command
    //==================================================================================

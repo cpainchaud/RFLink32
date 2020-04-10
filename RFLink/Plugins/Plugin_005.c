@@ -62,13 +62,14 @@ boolean Plugin_005(byte function, char *string)
    // get all 24 bits
    for (int x = 2; x < EURODOMEST_PulseLength; x += 2)
    {
+      bitstream <<= 1; //Always shift
       if (RawSignal.Pulses[x] > EURODOMEST_PULSEMID)
       { // long pulse
          if (RawSignal.Pulses[x - 1] > EURODOMEST_PULSEMID)
             return false; // not a 01 or 10 transmission
          if (RawSignal.Pulses[x] > EURODOMEST_PULSEMAX)
             return false; // make sure the long pulse is within range
-         bitstream = (bitstream << 1) | 0x1;
+         bitstream |= 0x1;
       }
       else
       { // short pulse
@@ -76,25 +77,24 @@ boolean Plugin_005(byte function, char *string)
             return false; // pulse too short to be Eurodomest
          if (RawSignal.Pulses[x - 1] < EURODOMEST_PULSEMID)
             return false; // not a 01 or 10 transmission
-         bitstream = (bitstream << 1);
+         // bitstream |= 0x0;
       }
    }
+
+   //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || RepeatingTimer < millis())
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // no bits detected?
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 500 < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
-   // perform sanity checks to prevent false positives
+   // Perform more sanity checks to prevent false positives
    //==================================================================================
    address = ((bitstream >> 4) & 0xFFFFF);
    if (address == 0)

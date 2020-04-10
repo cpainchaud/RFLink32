@@ -58,19 +58,23 @@ boolean Plugin_008(byte function, char *string)
         {
             if (bitcounter < 8)
             {
-                sync = (sync << 1) | 0x1;
+                sync <<= 1;
+                sync |= 0x1;
             }
             else if (bitcounter < 32)
             {
-                address = (address << 1) | 0x1;
+                address <<= 1;
+                address |= 0x1;
             }
             else if (bitcounter < 40)
             {
-                command = (command << 1) | 0x1;
+                command <<= 1;
+                command |= 0x1;
             }
             else
             {
-                trailing = (trailing << 1) | 0x1;
+                trailing <<= 1;
+                trailing |= 0x1;
             }
             bitcounter++;
         }
@@ -78,19 +82,19 @@ boolean Plugin_008(byte function, char *string)
         {
             if (bitcounter < 8)
             {
-                sync = (sync << 1);
+                sync <<= 1;
             }
             else if (bitcounter < 32)
             {
-                address = (address << 1);
+                address <<= 1;
             }
             else if (bitcounter < 40)
             {
-                command = (command << 1);
+                command <<= 1;
             }
             else
             {
-                trailing = (trailing << 1);
+                trailing <<= 1;
             }
             bitcounter++;
         }
@@ -100,7 +104,8 @@ boolean Plugin_008(byte function, char *string)
     //==================================================================================
     if (sync != 0x55)
         return false;
-    if (trailing != 0xff)
+
+    if (trailing != 0xFF)
         return false;
     //==================================================================================
     // Prevent repeating signals from showing up
@@ -110,13 +115,10 @@ boolean Plugin_008(byte function, char *string)
         // not seen the RF packet recently
     }
     else
-    {
-        // already seen the RF packet recently
-        return true;
-    }
+        return true; // already seen the RF packet recently
     //==================================================================================
     //==================================================================================
-    status = (command)&1; // 0/1 off/on
+    status = (command & 1); // 0/1 off/on
 
     subchan = (((command) >> 1) & 7) + 1; // button code
     if (status == 0)
@@ -126,7 +128,7 @@ boolean Plugin_008(byte function, char *string)
     channel = 0x41 + temp;
     //==================================================================================
     // Output
-    // ----------------------------------
+    //==================================================================================
     display_Header();
     display_Name(PSTR("Kambrook"));
     display_IDn((address & 0xFFFFFF), 6); //"%S%06lx"

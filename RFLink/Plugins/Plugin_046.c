@@ -85,11 +85,15 @@ boolean Plugin_046(byte function, char *string)
             return false;
          if (bitcounter < 24)
          {
-            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitstream1 <<= 1;
+            bitstream1 |= 0x1;
             bitcounter++; // only need to count the first 24 bits
          }
          else
-            bitstream2 = (bitstream2 << 1) | 0x1;
+         {
+            bitstream2 <<= 1;
+            bitstream2 |= 0x1;
+         }
       }
       else
       {
@@ -99,11 +103,11 @@ boolean Plugin_046(byte function, char *string)
             return false;
          if (bitcounter < 24)
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
             bitcounter++; // only need to count the first 10 bits
          }
          else
-            bitstream2 = (bitstream2 << 1);
+            bitstream2 <<= 1;
       }
    }
    //==================================================================================

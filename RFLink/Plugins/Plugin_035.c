@@ -66,8 +66,9 @@ boolean Plugin_035(byte function, char *string)
          if (x < 95)
             if ((RawSignal.Pulses[x + 1] > IMAGINTRONIX_PULSEMID) || (RawSignal.Pulses[x + 1] < IMAGINTRONIX_PULSESHORT))
                return false;
-         data[bytecounter] = (data[bytecounter] << 1); // 0 bit
-         bitcounter++;                                 // received a bit
+         data[bytecounter] <<= 1; // 0 bit
+         // data[bytecounter] 0x0;// 0 bit
+         bitcounter++; // received a bit
       }
       else
       { // Short pulse = 1 bit
@@ -76,8 +77,9 @@ boolean Plugin_035(byte function, char *string)
          if (x < 95)
             if ((RawSignal.Pulses[x + 1] > IMAGINTRONIX_PULSEMID) || (RawSignal.Pulses[x + 1] < IMAGINTRONIX_PULSESHORT))
                return false;
-         data[bytecounter] = (data[bytecounter] << 1) | 0x1; // 1 bit
-         bitcounter++;                                       // received a bit
+         data[bytecounter] <<= 1;  // 1 bit
+         data[bytecounter] |= 0x1; // 1 bit
+         bitcounter++;             // received a bit
       }
       // prepare for next bit/byte
       if (bitcounter == 8)

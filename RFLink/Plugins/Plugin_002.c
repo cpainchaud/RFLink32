@@ -96,25 +96,29 @@ boolean Plugin_002(byte function, char *string)
       {
          if (bitcounter < 20)
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
             bitcounter++; // only need to count the first 20 bits
          }
          else
-            bitstream2 = (bitstream2 << 1);
+            bitstream2 <<= 1;
       }
       else
       {
          if (bitcounter < 20)
          {
-            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitstream1 <<= 1;
+            bitstream1 |= 0x1;
             bitcounter++; // only need to count the first 20 bits
          }
          else
-            bitstream2 = (bitstream2 << 1) | 0x1;
+         {
+            bitstream2 <<= 1;
+            bitstream2 |= 0x1;
+         }
       }
    }
    if (RawSignal.Number == (LACROSSE_PULSECOUNT - 2))
-      bitstream2 = (bitstream2 << 1); // add missing zero bit
+      bitstream2 <<= 1; // add missing zero bit
    //==================================================================================
    // all bytes received, sort data, do sanity checks and make sure checksum is okay
    //==================================================================================

@@ -62,11 +62,12 @@ boolean Plugin_014(byte function, char *string)
    // ==========================================================================
    for (byte x = 1; x < RawSignal.Number; x++)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > KOPPLA_PULSEMID)
       { // long pulse, 0 bit
          if (RawSignal.Pulses[x] > KOPPLA_PULSEMAX)
-            return false;              // long pulse is too long
-         bitstream = (bitstream << 1); // 0 bit
+            return false; // long pulse is too long
+         // bitstream |= 0x0; // 0 bit
       }
       else
       { // Short pulse
@@ -77,7 +78,7 @@ boolean Plugin_014(byte function, char *string)
          if (RawSignal.Pulses[x + 1] < KOPPLA_PULSEMIN)
             return false;                    // second short pulse is too short
          x++;                                // skip second short pulse
-         bitstream = (bitstream << 1) | 0x1; // 1 bit
+         bitstream |= 0x1; // 1 bit
       }
    }
    //==================================================================================
@@ -85,11 +86,11 @@ boolean Plugin_014(byte function, char *string)
    //==================================================================================
    if (bitstream == 0)
       return false; // No bits detected?
-   if ((((bitstream) >> 24) & 0x0f) != 0x0e)
+   if ((((bitstream) >> 24) & 0x0F) != 0x0E)
       return false;                           // Preamble should always be '1110'
-   sysunit = (((bitstream) >> 10) & 0x03fff); // 4 bits system code and 10 bits unit code
+   sysunit = (((bitstream) >> 10) & 0x03FFF); // 4 bits system code and 10 bits unit code
    checksum1 = (((bitstream) >> 8) & 0x03);   // first checksum
-   levelfade = (((bitstream) >> 2) & 0x3f);   // 6 bits level and face code
+   levelfade = (((bitstream) >> 2) & 0x3F);   // 6 bits level and face code
    checksum2 = ((bitstream)&0x03);            // second checksum
    // calculate checksum 1
    checksum = 3;

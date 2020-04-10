@@ -81,9 +81,15 @@ boolean Plugin_047(byte function, char *string)
             return false;
 
          if (bitcounter < 32)
-            bitstream = (bitstream << 1) | 0x1;
+         {
+            bitstream <<= 1;
+            bitstream |= 0x1;
+         }
          else
-            checksum = (checksum << 1) | 0x1;
+         {
+            checksum <<= 1;
+            checksum |= 0x1;
+         }
       }
       else
       {
@@ -94,9 +100,9 @@ boolean Plugin_047(byte function, char *string)
             return false;
 
          if (bitcounter < 32)
-            bitstream = (bitstream << 1);
+            bitstream <<= 1;
          else
-            checksum = (checksum << 1);
+            checksum <<= 1;
       }
       bitcounter++; // only need to count the first 40 bits
       if (bitcounter > 39)

@@ -134,11 +134,11 @@ boolean Plugin_043(byte function, char *string)
 
          if (bitcounter < 20)
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
             bitcounter++; // only need to count the first 16 bits
          }
          else
-            bitstream2 = (bitstream2 << 1);
+            bitstream2 <<= 1;
       }
       else
       {
@@ -147,11 +147,15 @@ boolean Plugin_043(byte function, char *string)
 
          if (bitcounter < 20)
          {
-            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitstream1 <<= 1;
+            bitstream1 |= 0x1;
             bitcounter++; // only need to count the first 20 bits
          }
          else
-            bitstream2 = (bitstream2 << 1) | 0x1;
+         {
+            bitstream2 <<= 1;
+            bitstream2 |= 0x1;
+         }
       }
    }
    if (RawSignal.Number == (LACROSSE43_PULSECOUNT - 4))

@@ -125,13 +125,10 @@ boolean Plugin_004(byte function, char *string)
       SignalCRC = bitstream;
    }
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Output
-   // ----------------------------------
+   //==================================================================================
    display_Header();
    display_Name(PSTR("NewKaku"));
    display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8); //"%S%08lx"

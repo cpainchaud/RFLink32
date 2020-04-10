@@ -67,33 +67,34 @@ boolean Plugin_007(byte function, char *string)
    // get bits
    for (byte x = 1 + start; x < RawSignal.Number - 2; x = x + 2)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > CONRADRSL2_PULSEMID)
       {
          if (RawSignal.Pulses[x + 1] > CONRADRSL2_PULSEMID)
-            return false;                    // manchester check
-         bitstream = (bitstream << 1) | 0x1; // 1
+            return false; // manchester check
+
+         bitstream |= 0x1; // 1
       }
       else
       {
          if (RawSignal.Pulses[x + 1] < CONRADRSL2_PULSEMID)
-            return false;              // manchester check
-         bitstream = (bitstream << 1); // 0
+            return false; // manchester check
+
+         // bitstream |= 0x0; // 0
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || RepeatingTimer < millis())
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 500 < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream;   // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // all bits received, make sure checksum is okay
    //==================================================================================

@@ -62,57 +62,48 @@ boolean Plugin_009(byte function, char *string)
    if (RawSignal.Number == X10_PulseLength + 2)
    {
       if ((RawSignal.Pulses[1] * RawSignal.Multiply > 3000) && (RawSignal.Pulses[2] * RawSignal.Multiply > 3000))
-      {
          start = 2;
-      }
       else
-      {
          return false; // not an X10 packet
-      }
    }
    // get all 24 bits
    for (byte x = 2 + start; x < ((X10_PulseLength) + start); x += 2)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > X10_PULSEMID)
-      {
-         bitstream = (bitstream << 1) | 0x1;
-      }
-      else
-      {
-         bitstream = (bitstream << 1);
-      }
+         bitstream |= 0x1;
+      // else
+      //    bitstream |= 0x0;
    }
+   //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || RepeatingTimer < millis())
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // order received data
-   data[0] = ((bitstream) >> 24) & 0xff;
-   data[1] = ((bitstream) >> 16) & 0xff;
-   data[2] = ((bitstream) >> 8) & 0xff;
-   data[3] = (bitstream)&0xff;
+   data[0] = (bitstream >> 24) & 0xFF;
+   data[1] = (bitstream >> 16) & 0xFF;
+   data[2] = (bitstream >> 8) & 0xFF;
+   data[3] = (bitstream) & 0xFF;
    // ----------------------------------
    // perform sanity checks
-   data[1] = data[1] ^ 0xff;
-   data[3] = data[3] ^ 0xff;
+   data[1] ^= 0xFF;
+   data[3] ^= 0xFF;
    if (data[0] != data[1])
       return false;
    if (data[2] != data[3])
       return false;
    // ----------------------------------
-   data[1] = data[1] & 0x0f; // lower nibble only
-   data[0] = data[0] & 0xf0; // upper nibble only
+   data[1] = data[1] & 0x0F; // lower nibble only
+   data[0] = data[0] & 0xF0; // upper nibble only
 
    housecode = 0;
    if (data[0] == 0x60)

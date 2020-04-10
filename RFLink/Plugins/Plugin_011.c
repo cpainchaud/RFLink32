@@ -84,11 +84,13 @@ boolean Plugin_011(byte function, char *string)
             return false; // Manchester check
          if (bitcounter < 24)
          {
-            bitstream1 = (bitstream1 << 1) | 0x1;
+            bitstream1 <<= 1;
+            bitstream1 |= 0x1;
          }
          else
          {
-            bitstream2 = (bitstream2 << 1) | 0x1;
+            bitstream2 <<= 1;
+            bitstream2 |= 0x1;
          }
          bitcounter++; // only need to count the first 10 bits
       }
@@ -100,11 +102,11 @@ boolean Plugin_011(byte function, char *string)
             return false; // Manchester check
          if (bitcounter < 24)
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
          }
          else
          {
-            bitstream2 = (bitstream2 << 1);
+            bitstream2 <<= 1;
          }
          bitcounter++; // only need to count the first 10 bits
       }
@@ -117,28 +119,22 @@ boolean Plugin_011(byte function, char *string)
       return false; // pulse range check
    //==================================================================================
    // first perform a check to make sure the packet is valid
-   byte tempbyte = (bitstream2 >> 8) & 0xff;
+   byte tempbyte = (bitstream2 >> 8) & 0xFF;
    if (tempbyte != 0x0)
       return false; // always 0x00?
-   tempbyte = (bitstream2 >> 16) & 0xff;
+   tempbyte = (bitstream2 >> 16) & 0xFF;
    if (tempbyte != 0x0)
       return false; // always 0x00?
-   tempbyte = (bitstream2)&0x3f;
+   tempbyte = bitstream2 & 0x3F;
    if (tempbyte != 0x01)
       return false; // low 6 bits are always '000001'?
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || ((RepeatingTimer + 1500) < millis()) || SignalCRC != bitstream2)
-   {
-      // not seen the RF packet recently
-      SignalCRC = bitstream2;
-   }
+   if (SignalHash != SignalHashPrevious || ((RepeatingTimer + 500) < millis()) || SignalCRC != bitstream2)
+      SignalCRC = bitstream2; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // now process the command / switch settings
    //==================================================================================
@@ -151,7 +147,7 @@ boolean Plugin_011(byte function, char *string)
    if (tempbyte == 3)
       channel = 0x44;
 
-   subchan = ((bitstream1)&0x03) + 1; // determine button number
+   subchan = (bitstream1 & 0x03) + 1; // determine button number
 
    command = (bitstream2 >> 7) & 0x01; // on/off command
    group = (bitstream2 >> 6) & 0x01;   // group setting
@@ -159,15 +155,13 @@ boolean Plugin_011(byte function, char *string)
    bitstream1 = bitstream1 >> 5;
    //==================================================================================
    // Output
-   // ----------------------------------
+   //==================================================================================
    display_Header();
    display_Name(PSTR("HomeConfort"));
    display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
-
    char c_SWITCH[4];
    sprintf(c_SWITCH, "%c%d", channel, subchan);
    display_SWITCHc(c_SWITCH);
-
    display_CMD((group & B01), (command & B01)); // #ALL , #ON
    display_Footer();
    //==================================================================================

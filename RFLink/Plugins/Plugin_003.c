@@ -268,16 +268,12 @@ boolean Plugin_003(byte function, char *string)
    // ==========================================================================
    // TIMING MEASUREMENT, this will find the shortest and longest pulse within the RF packet
    // ==========================================================================
-   for (i = 2; i < RawSignal.Number; i++)
-   { // skip first pulse as it is often affected by the start bit pulse duration
-      if (RawSignal.Pulses[i] < PTLow)
-      {                               // shortest pulse?
-         PTLow = RawSignal.Pulses[i]; // new value
-      }
-      else if (RawSignal.Pulses[i] > PTHigh)
-      {                                // longest pulse?
-         PTHigh = RawSignal.Pulses[i]; // new value
-      }
+   for (i = 2; i < RawSignal.Number; i++) // skip first pulse as it is often affected by the start bit pulse duration
+   {
+      if (RawSignal.Pulses[i] < PTLow)       // shortest pulse?
+         PTLow = RawSignal.Pulses[i];        // new value
+      else if (RawSignal.Pulses[i] > PTHigh) // longest pulse?
+         PTHigh = RawSignal.Pulses[i];       // new value
    }
    // -------------------------------------------
    // TIMING MEASUREMENT to devicetype
@@ -594,10 +590,10 @@ boolean Plugin_003(byte function, char *string)
    if (signaltype == 0x07)
    {                                                  // '0111' bits indicate bits 0, f and 1 are used in the signal (tri-state)
       display_IDn(((bitstream2 >> 4) & 0xFFFFFF), 6); // "%S%06lx
-      
+
       housecode = (bitstream2 & 0x03);
       unitcode = ((((bitstream2 >> 2) & 0x03) ^ 0x03) ^ housecode);
-      
+
       //command=((bitstream2 & 0x01)^ 0x01);   << ^1 reverses lidl light
       command = (bitstream2 & 0x03); // 00 01 10  0 1 f
       if (command > 1)

@@ -100,15 +100,12 @@ boolean Plugin_012(byte function, char *string)
       // get all 26pulses =>24 manchester bits => 12 actual bits
       type = 0;
       for (byte x = 2; x <= FA500RM3_PulseLength - 2; x += 2)
-      { // Method 3
+      {                   // Method 3
+         bitstream <<= 1; // Always shift
          if (RawSignal.Pulses[x] > FA500_PULSEMID)
-         {
-            bitstream = (bitstream << 1) | 0x1;
-         }
-         else
-         {
-            bitstream = (bitstream << 1);
-         }
+            bitstream |= 0x1;
+         // else
+         //    bitstream |= 0x0;
       }
    }
    else
@@ -116,24 +113,23 @@ boolean Plugin_012(byte function, char *string)
       // get all 58pulses =>28 bits
       type = 1;
       for (byte x = 1; x <= FA500RM1_PulseLength - 2; x += 2)
-      { // method 1
+      {                   // method 1
+         bitstream <<= 1; // Always shift
          if (RawSignal.Pulses[x] > FA500_PULSEMID)
-         {
-            bitstream = (bitstream << 1) | 0x1;
-         }
-         else
-         {
-            bitstream = (bitstream << 1);
-         }
+            bitstream |= 0x1;
+         // else
+         //    bitstream |= 0x0;
       }
    }
    //==================================================================================
    // perform sanity checks
+   //==================================================================================
    if (bitstream == 0)
       return false; // no bits detected?
+   
    if (type == 0)
    {
-      housecode = (((bitstream) >> 8) & 0x0f);
+      housecode = (((bitstream) >> 8) & 0x0F);
       unitcode = ((bitstream >> 1) & 0x7F);
       if (unitcode != 0x0A)
       { // invalid housecode?
@@ -160,7 +156,7 @@ boolean Plugin_012(byte function, char *string)
       { // B On/off
          housecode = 4;
       }
-      else if (address == 0xe5)
+      else if (address == 0xE5)
       { // C On/off
          housecode = 5;
       }
@@ -199,10 +195,9 @@ boolean Plugin_012(byte function, char *string)
    //      if (housecode == 4) housecode = 0x42; // B 0100 0001010 0/1     20   B    4
    //      if (housecode == 5) housecode = 0x43; // C 0101 0001010 0/1     28   C    5
    //      if (housecode == 0) housecode = 0x44; // D 0000 0001010 0/1     00   D    0
-   // ----------------------------------
+   //==================================================================================
    // Output
-   // ----------------------------------
-
+   //==================================================================================
    display_Header();
    display_Name(PSTR("FA500"));
 

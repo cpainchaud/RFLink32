@@ -72,17 +72,18 @@ boolean Plugin_040(byte function, char *string)
    {
       if (RawSignal.Pulses[x + 1] > MEBUS_MIDHI)
          return false; // make sure inbetween pulses are not too long
+
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > MEBUS_PULSEMAXMIN)
-      {
-         bitstream = (bitstream << 1) | 0x1;
-      }
+         bitstream |= 0x1;
       else
       {
          if (RawSignal.Pulses[x] > MEBUS_PULSEMINMAX)
             return false; // invalid pulse length
          if (RawSignal.Pulses[x] < MEBUS_PULSEMIN)
             return false; // invalid pulse length
-         bitstream = (bitstream << 1);
+
+         // bitstream |= 0x0;
       }
    }
    //==================================================================================

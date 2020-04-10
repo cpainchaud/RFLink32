@@ -61,17 +61,19 @@ boolean Plugin_045(byte function, char *string)
    {
       if (RawSignal.Pulses[x + 1] > AURIOL_MIDHI)
          return false; // in between pulses should not exceed a length of 550
+
+      bitstream <<= 1; // Always shift
+
       if (RawSignal.Pulses[x] > AURIOL_PULSEMAXMIN)
-      { // long bit = 1
-         bitstream = (bitstream << 1) | 0x1;
-      }
+         bitstream |= 0x1; // long bit = 1
       else
       {
          if (RawSignal.Pulses[x] < AURIOL_PULSEMIN)
             return false; // pulse length too short to be valid?
          if (RawSignal.Pulses[x] > AURIOL_PULSEMINMAX)
-            return false;              // pulse length between 2000 - 3000 is invalid
-         bitstream = (bitstream << 1); // short bit = 0
+            return false; // pulse length between 2000 - 3000 is invalid
+
+         // bitstream |= 0x0; // short bit = 0
       }
    }
    //==================================================================================

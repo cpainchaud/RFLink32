@@ -69,6 +69,7 @@ boolean Plugin_015(byte function, char *string)
    RawSignal.Pulses[0] = 0; // undo any Home Easy to Kaku blocking that might be active
    //==================================================================================
    // convert pulses into bit sections (preamble, address, bitstream)
+   //==================================================================================
    for (byte x = 1; x <= HomeEasy_PulseLength; x = x + 2)
    {
       if ((RawSignal.Pulses[x] < HomeEasy_PULSEMID) && (RawSignal.Pulses[x + 1] > HomeEasy_PULSEMID))
@@ -84,26 +85,22 @@ boolean Plugin_015(byte function, char *string)
          bitstream = (bitstream << 1) | rfbit; // 15 remaining bits
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
    // To prevent false positives make sure the preamble is correct, it should always be 0x63c
    // We compare only 10 bits to compensate for the first bit being seen incorrectly by some receiver modules
-   if ((preamble & 0x3ff) != 0x23c)
+   if ((preamble & 0x3FF) != 0x23C)
       return false; // comparing 10 bits is enough to make sure the packet is valid
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if (SignalHash != SignalHashPrevious || (RepeatingTimer < millis() + 1500) || SignalCRC != bitstream)
-   {
-      // not seen the RF packet recently
-      SignalCRC = bitstream;
-   }
+   if (SignalHash != SignalHashPrevious || (RepeatingTimer < millis() + 500) || SignalCRC != bitstream)
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    type = ((bitstream >> 12) & 0x3); // 11b for HE301
-   channel = (bitstream)&0x3f;
+   channel = (bitstream)&0x3F;
    if (type == 3)
    {                                      // HE301
       command = ((bitstream >> 8) & 0x1); // 0=on 1=off (both group and single device)
@@ -118,9 +115,9 @@ boolean Plugin_015(byte function, char *string)
       if (group == 1)
          command = (~command) & 1; // reverse bit for group: 1=group off 0=group on
    }
-   // ----------------------------------
+   //==================================================================================
    // Output
-   // ----------------------------------
+   //==================================================================================
    display_Header();
    display_Name(PSTR("HomeEasy"));
    display_IDn(address, 8);                        //"%S%08lx"

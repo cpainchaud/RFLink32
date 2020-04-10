@@ -73,17 +73,16 @@ boolean Plugin_032(byte function, char *string)
       if (RawSignal.Pulses[x + 1] > ALECTOV4_MIDHI)
          return false;
 
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > ALECTOV4_PULSEMAXMIN)
-         bitstream = (bitstream << 1) | 0x01;
+         bitstream |= 0x1;
       else
       {
          if (RawSignal.Pulses[x] < ALECTOV4_PULSEMIN)
             return false;
-
          if (RawSignal.Pulses[x] > ALECTOV4_PULSEMINMAX)
             return false;
-
-         bitstream = (bitstream << 1);
+         // bitstream |= 0x0;
       }
    }
 
@@ -92,17 +91,16 @@ boolean Plugin_032(byte function, char *string)
       if (RawSignal.Pulses[x + 1] > ALECTOV4_MIDHI)
          return false;
 
+      humidity <<= 1; // Always shift
       if (RawSignal.Pulses[x] > ALECTOV4_PULSEMAXMIN)
-         humidity = (humidity << 1) | 0x01;
+         humidity |= 0x1;
       else
       {
          if (RawSignal.Pulses[x] < ALECTOV4_PULSEMIN)
             return false;
-
          if (RawSignal.Pulses[x] > ALECTOV4_PULSEMINMAX)
             return false;
-
-         humidity = (humidity << 1);
+         // humidity |= 0x0;
       }
    }
    //==================================================================================

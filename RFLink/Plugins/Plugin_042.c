@@ -131,11 +131,11 @@ boolean Plugin_042(byte function, char *string)
 
          if (bitcounter < 10)
          {
-            bitstream1 = (bitstream1 << 1);
+            bitstream1 <<= 1;
             bitcounter++; // only need to count the first 10 bits
          }
          else
-            bitstream2 = (bitstream2 << 1);
+            bitstream2 <<= 1;
 
          halfbit = 0; // wait for next first low or high pulse
       }
@@ -151,12 +151,15 @@ boolean Plugin_042(byte function, char *string)
          {
             if (bitcounter < 10)
             {
-               bitstream1 = (bitstream1 << 1) | 0x1;
+               bitstream1 <<= 1;
+               bitstream1 |= 0x1;
                bitcounter++; // only need to count the first 10 bits
             }
             else
-               bitstream2 = (bitstream2 << 1) | 0x1;
-
+            {
+               bitstream2 <<= 1;
+               bitstream2 |= 0x1;
+            }
             halfbit = 0; // wait for next first low or high pulse
          }
       }
@@ -166,7 +169,7 @@ boolean Plugin_042(byte function, char *string)
    //==================================================================================
    // Perform a quick sanity check
    //==================================================================================
-   if ((bitstream1 >> 6) != 0x0c)
+   if ((bitstream1 >> 6) != 0x0C)
       return false; // sanity check, first 4 bits should always be '1100' to be a valid UPM/Esic packet
 
    // Impossible by design, see test above
