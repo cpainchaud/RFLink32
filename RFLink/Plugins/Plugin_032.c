@@ -39,81 +39,97 @@
  * 20;C2;DEBUG;Pulses=76;Pulses(uSec)=325,500,250,1800,375,3650,375,1775,375,3650,375,3650,375,1775,375,3650,375,1800,350,1800,375,3650,375,3650,375,3650,375,3650,375,1775,375,1775,375,1775,375,1775,375,1775,375,1775,375,1775,375,3650,375,3650,375,3650,375,1775,375,3650,375,3650,375,1775,375,1775,375,1775,375,1775,375,1775,375,1775,375,3650,375,3650,375,3650,375,3650,375;
  * 20;3E;DEBUG;Pulses=78;Pulses(uSec)=525,250,500,375,600,1650,450,3550,475,1675,450,3550,475,3550,450,1675,450,3575,450,1675,450,1700,450,1700,450,3575,425,3600,450,3575,475,1700,425,1725,425,1725,425,1725,400,1725,425,1725,425,3625,425,1725,425,1725,425,1725,425,3600,425,1725,400,1725,425,3600,425,1725,425,1725,400,1725,425,3600,400,1725,425,1725,400,3600,425,1725,425,1725,400;
  \*********************************************************************************************/
+#define ALECTOV4_PLUGIN_ID 32
+#define ALECTOV4_PULSECOUNT 74
+
+#define ALECTOV4_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV4_PULSEMIN 1500 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV4_PULSEMINMAX 2500 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV4_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
+
 #ifdef PLUGIN_032
 boolean Plugin_032(byte function, char *string)
 {
-   if (RawSignal.Number < 74 || RawSignal.Number > 78)
+   if (RawSignal.Number < ALECTOV4_PULSECOUNT || RawSignal.Number > (ALECTOV4_PULSECOUNT + 4))
       return false;
+
    unsigned long bitstream = 0L;
    int temperature = 0;
-   int humidity = 0;
+   byte humidity = 0; //bitstream2 !
    byte rc = 0;
    byte rc2 = 0;
 
    //==================================================================================
+   // Get all 36 bits
+   //==================================================================================
    byte start = 0;
-   if (RawSignal.Number == 78)
+   if (RawSignal.Number == (ALECTOV4_PULSECOUNT + 4))
       start = 4;
-   if (RawSignal.Number == 76)
+   if (RawSignal.Number == (ALECTOV4_PULSECOUNT + 2))
       start = 2;
-   for (int x = 2 + start; x <= 56 + start; x = x + 2)
+
+   for (byte x = 2 + start; x <= 56 + start; x = x + 2)
    { // Get first 28 bits
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
+      if (RawSignal.Pulses[x + 1] > ALECTOV4_MIDHI)
          return false;
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3000)
-      {
+
+      if (RawSignal.Pulses[x] > ALECTOV4_PULSEMAXMIN)
          bitstream = (bitstream << 1) | 0x01;
-      }
       else
       {
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 1500)
-         {
-            if (RawSignal.Pulses[x] * RawSignal.Multiply > 2100)
-               return false;
-            bitstream = (bitstream << 1);
-         }
-         else
-         {
+         if (RawSignal.Pulses[x] < ALECTOV4_PULSEMIN)
             return false;
-         }
+
+         if (RawSignal.Pulses[x] > ALECTOV4_PULSEMINMAX)
+            return false;
+
+         bitstream = (bitstream << 1);
       }
    }
-   for (int x = 58 + start; x <= 72 + start; x = x + 2)
+
+   for (byte x = 58 + start; x <= 72 + start; x = x + 2)
    { // Get remaining 8 bits
-      if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 550)
+      if (RawSignal.Pulses[x + 1] > ALECTOV4_MIDHI)
          return false;
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 3000)
-      {
+
+      if (RawSignal.Pulses[x] > ALECTOV4_PULSEMAXMIN)
          humidity = (humidity << 1) | 0x01;
-      }
       else
       {
+         if (RawSignal.Pulses[x] < ALECTOV4_PULSEMIN)
+            return false;
+
+         if (RawSignal.Pulses[x] > ALECTOV4_PULSEMINMAX)
+            return false;
+
          humidity = (humidity << 1);
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+
+   if (humidity == 0)
+      return false; // Sanity check
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 3000) < millis()))
-   { // 1000
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // Sanity check
-      if (humidity == 0)
-         return false; // Sanity check
-   }
+   unsigned long tmpval = (((bitstream << 8) & 0xFFF0) | humidity); // All but 8 1st ID bits ...
+
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != tmpval))
+      SignalCRC = tmpval; // not seen this RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
-   // Sort data
-   rc = (bitstream >> 20) & 0xff;
-   rc2 = (bitstream >> 12) & 0xfb;
+   // Now process the various sensor types
+   //==================================================================================
+   rc = (bitstream >> 20) & 0xFF;
+   rc2 = (bitstream >> 12) & 0xFF;
    if (((rc2)&0x08) != 0x08)
       return false; // needs to be 1
-   temperature = (bitstream)&0xfff;
+   temperature = (bitstream & 0xFFF);
    //fix 12 bit signed number conversion
    if ((temperature & 0x800) == 0x800)
    {
@@ -131,21 +147,16 @@ boolean Plugin_032(byte function, char *string)
       return false; // Humidity out of range
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("Alecto V4;"));             // Label
-   sprintf(pbuffer, "ID=%02x%02x;", rc, rc2); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "TEMP=%04x;", temperature);
-   Serial.print(pbuffer);
-   if (humidity < 99)
-   {                                           // Only report valid humidty values
-      sprintf(pbuffer, "HUM=%02d;", humidity); // decimal value..
-      Serial.print(pbuffer);
-   }
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Alecto V4"));
+   char c_ID[4];
+   sprintf(c_ID, "%02x%02x", rc, rc2);
+   display_IDc(c_ID);
+   display_TEMP(temperature);
+   if (humidity < 99) // Only report valid humidty values
+      display_HUM(humidity, false);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
