@@ -43,8 +43,8 @@
 // #define PLUGIN_034              // Cresta
 // #define PLUGIN_035              // Imagintronix
 #define PLUGIN_040 // Mebus
-// #define PLUGIN_041              // LaCrosse v3 ws7000
-// #define PLUGIN_042              // UPM/Esic
+#define PLUGIN_041 // LaCrosse v3 ws7000
+#define PLUGIN_042 // UPM/Esic
 #define PLUGIN_043 // LaCrosse v1
 #define PLUGIN_044 // Auriol v3
 #define PLUGIN_045 // Auriol
