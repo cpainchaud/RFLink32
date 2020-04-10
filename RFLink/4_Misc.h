@@ -38,7 +38,7 @@ void display_WINSP(unsigned int);
 void display_AWINSP(unsigned int);
 void display_WINGS(unsigned int);
 void display_WINDIR(unsigned int);
-void display_WINCHILL(unsigned int);
+void display_WINCHL(unsigned int);
 void display_WINTMP(unsigned int);
 void display_CHIME(unsigned int);
 void display_SMOKEALERT(boolean);

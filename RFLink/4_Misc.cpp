@@ -221,7 +221,7 @@ void display_WINDIR(unsigned int input)
 }
 
 // WINCHL => wind chill (hexadecimal, see TEMP)
-void display_WINCHILL(unsigned int input)
+void display_WINCHL(unsigned int input)
 {
   sprintf_P(dbuffer, PSTR("%S%04x"), F(";WINCHL="), input);
   strcat(pbuffer, dbuffer);

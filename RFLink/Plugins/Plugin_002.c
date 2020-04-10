@@ -89,7 +89,7 @@ boolean Plugin_002(byte function, char *string)
    {
       if ((RawSignal.Pulses[x + 1] < LACROSSE_MIDLO) || (RawSignal.Pulses[x + 1] > LACROSSE_MIDHI))
       {
-         if (x + 1 < RawSignal.Number) // in between pulse check
+         if ((x + 1) < RawSignal.Number) // in between pulse check
             return false;
       }
       if (RawSignal.Pulses[x] > LACROSSE_PULSEMID)

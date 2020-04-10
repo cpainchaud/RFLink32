@@ -125,17 +125,18 @@ boolean Plugin_030(byte function, char *string)
    {
       if (RawSignal.Pulses[x + 1] > ALECTOV1_MIDHI)
          return false; // in between pulses should be short
+
+      bitstream >>= 1;
+
       if (RawSignal.Pulses[x] > ALECTOV1_PULSEMAXMIN)
-         bitstream = ((bitstream >> 1) | (0x1L << 31)); // Reverses order, as number are in LSB 1st, beware N2 and N3 !
-      else
-         bitstream = (bitstream >> 1);
+         bitstream |= (0x1L << 31); // Reverses order, as number are in LSB 1st, beware N2 and N3 !
    }
    for (byte x = 66; x <= 72; x = x + 2)
    {
+      checksum >>= 1;
+
       if (RawSignal.Pulses[x] > ALECTOV1_PULSEMAXMIN)
-         checksum = ((checksum >> 1) | (0x1L << 3));
-      else
-         checksum = (checksum >> 1);
+         checksum |= (0x1L << 3);
    }
    //==================================================================================
    // Perform a quick sanity check

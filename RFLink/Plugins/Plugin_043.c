@@ -123,7 +123,7 @@ boolean Plugin_043(byte function, char *string)
             RawSignal.Pulses[1] = LACROSSE43_PULSEMAX - 1;
          else
          {
-            if (x + 1 < RawSignal.Number) // in between pulse check
+            if ((x + 1) < RawSignal.Number) // in between pulse check
                return false;
          }
       }
