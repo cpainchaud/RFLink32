@@ -39,9 +39,9 @@
 #define PLUGIN_030 // Alecto V1 (WS3500) 434 MHz.
 #define PLUGIN_031 // Alecto V3 (WS1100/WS1200/WSD-19) 433.9 MHz.
 #define PLUGIN_032 // Alecto V4
-// #define PLUGIN_033              // Conrad Pool Thermometer
-// #define PLUGIN_034              // Cresta
-// #define PLUGIN_035              // Imagintronix
+#define PLUGIN_033 // Conrad Pool Thermometer
+#define PLUGIN_034 // Cresta
+#define PLUGIN_035 // Imagintronix
 #define PLUGIN_040 // Mebus
 #define PLUGIN_041 // LaCrosse v3 ws7000
 #define PLUGIN_042 // UPM/Esic
