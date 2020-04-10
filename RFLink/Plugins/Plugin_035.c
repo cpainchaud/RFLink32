@@ -36,11 +36,15 @@
  * 20;02;DEBUG;Pulses=96;Pulses(uSec)=390,870,420,870,420,870,420,870,420,870,420,870,420,870,420,870,1260,870,420,870,1260,870,420,870, 1230,870,420,870,1260,870,420,870,1260,870,1260,870,1260,870,1230,870,1260,870,420,870,1260,870,420,870,1260,870,420,870,1260,870,1260,870,1260,870,420,870,1260,870,420,870,420,870,420,870,420,870,420,870,420,870,420,870,420,870,420,870,420,870,1230,870,1260,870,420,870,420,870,420,840,420,840,1260,6990;
  * 111111110101010100000101010001011111111110011110
  \*********************************************************************************************/
+#define IMAGINTRONIX_PLUGIN_ID 35
 #define IMAGINTRONIX_PULSECOUNT 96
+
 #define IMAGINTRONIX_PULSEMID 1000 / RAWSIGNAL_SAMPLE_RATE
 #define IMAGINTRONIX_PULSESHORT 550 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_035
+#include "../4_Misc.h"
+
 boolean Plugin_035(byte function, char *string)
 {
    if (RawSignal.Number != IMAGINTRONIX_PULSECOUNT)
@@ -85,45 +89,43 @@ boolean Plugin_035(byte function, char *string)
       }
    }
    //==================================================================================
-   // Verify packet and calculate checksum
+   // Perform a quick sanity check
    //==================================================================================
-   if (data[0] != 0xff)
+   if (data[0] != 0xFF)
       return false;
-   checksum = data[1] + data[2] + data[3] + data[4];
-   if (((checksum)&0xff) != data[5])
-      return false;
+
    if ((data[1] >> 4) != 0x5)
       return false;
-   if (data[4] != 0xff)
+
+   if (data[4] != 0xFF)
+      return false;
+   //==================================================================================
+   // Perform checksum calculations
+   //==================================================================================
+   checksum = data[1] + data[2] + data[3] + data[4];
+   checksum &= 0xFF;
+   if (checksum != data[5])
       return false;
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()))
-   {
-      //SignalCRC=bitstream;                       // not seen the RF packet recently
-   }
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
       return true; // already seen the RF packet recently
-   }
    //==================================================================================
-   rc = (data[1]) & 0x03;
-   temperature = (data[3]) << 4;
-   temperature = temperature / 2;
+   rc = (data[1]) & 0x3;
+   temperature = ((data[3]) << 4);
+   temperature /= temperature;
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   Serial.print(F("Imagintronix;")); // Label
-   sprintf(pbuffer, "ID=%04x;", rc); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "TEMP=%04x;", temperature);
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "HUM=%02x;", data[2]);
-   Serial.print(pbuffer);
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Imagintronix"));
+   display_IDn(rc, 4);
+   display_TEMP(temperature);
+   display_HUM(data[2], true);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
