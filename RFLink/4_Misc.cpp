@@ -133,11 +133,6 @@ void display_HUM(byte input, boolean bcd)
   strcat(pbuffer, dbuffer);
 }
 
-void display_HUM(byte input)
-{
-  display_HUM(input, false);
-}
-
 // BARO=9999 => Barometric pressure (hexadecimal)
 void display_BARO(unsigned int input)
 {

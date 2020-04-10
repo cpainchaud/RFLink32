@@ -26,7 +26,6 @@ void display_CMD(boolean, boolean);
 void display_SET_LEVEL(byte);
 void display_TEMP(unsigned int);
 void display_HUM(byte, boolean);
-void display_HUM(byte);
 void display_BARO(unsigned int);
 void display_HSTATUS(byte);
 void display_BFORECAST(byte);

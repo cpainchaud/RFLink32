@@ -193,7 +193,7 @@ boolean Plugin_002(byte function, char *string)
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
       display_IDc(c_ID);
-      display_HUM(humidity);
+      display_HUM(humidity, false);
       display_Footer();
    }
    else if (data[2] == B0010)

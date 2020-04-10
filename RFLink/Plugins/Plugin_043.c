@@ -186,8 +186,8 @@ boolean Plugin_043(byte function, char *string)
    //==================================================================================
    // Perform checksum calculations
    //==================================================================================
-   for (byte i = 0; i < 10; i++)     // max. value = 10*0xF 0x96
-      checksumcalc += data[i]; // less with real values
+   for (byte i = 0; i < 10; i++) // max. value = 10*0xF 0x96
+      checksumcalc += data[i];   // less with real values
 
    checksumcalc = checksumcalc & 0xF;
    if (checksumcalc != data[10])
@@ -239,7 +239,7 @@ boolean Plugin_043(byte function, char *string)
       char c_ID[4];
       sprintf(c_ID, "%02X%02X", data[3], data[4]);
       display_IDc(c_ID);
-      display_HUM(humidity);
+      display_HUM(humidity, false);
       display_Footer();
       //==================================================================================
       RawSignal.Repeats = true;

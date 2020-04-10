@@ -126,7 +126,7 @@ boolean Plugin_047(byte function, char *string)
    //
    for (byte c = 0; c < 4; c++)
       checksumcalc ^= ((bitstream >> (8 * c)) & 0xFF);
-   
+
    if (checksum != crc8(&checksumcalc, 1, 0x31, 0x53))
       return false;
    //==================================================================================
@@ -166,7 +166,7 @@ boolean Plugin_047(byte function, char *string)
    sprintf(c_ID, "%02X%02X", rc, channel);
    display_IDc(c_ID);
    display_TEMP(temperature);
-   display_HUM(humidity);
+   display_HUM(humidity, false);
    display_BAT(bat);
    display_Footer();
    //==================================================================================
