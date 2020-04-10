@@ -79,6 +79,7 @@
  * --------------------------------------------------------------------------------------------
  * UV packet (132 pulses)
  \*********************************************************************************************/
+#define LACROSSE41_PLUGIN_ID 41
 #define LACROSSE41_PULSECOUNT1 92  // Rain sensor
 #define LACROSSE41_PULSECOUNT2 162 // Meteo sensor
 #define LACROSSE41_PULSECOUNT3 122 // Wind sensor
@@ -87,190 +88,144 @@
 #define LACROSSE41_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_041
+#include "../4_Misc.h"
+
 boolean Plugin_041(byte function, char *string)
 {
-   boolean success = false;
    if ((RawSignal.Number != LACROSSE41_PULSECOUNT1) && (RawSignal.Number != LACROSSE41_PULSECOUNT2) &&
        (RawSignal.Number != LACROSSE41_PULSECOUNT3) && (RawSignal.Number != LACROSSE41_PULSECOUNT4))
       return false;
 
-   unsigned long bitstream1 = 0L; // holds first 16 bits
-   unsigned long bitstream2 = 0L; // holds last 28 bits
-
-   int sensor_data = 0;
-
-   byte checksum = 0;
-
+   byte data[18];
    byte bitcounter = 0;  // counts number of received bits (converted from pulses)
    byte bytecounter = 0; // used for counting the number of received bytes
-   byte data[18];
+   byte checksum = 0;
+   int sensor_data = 0;
    //==================================================================================
    // Check preamble
-   for (int x = 1; x < 20; x += 2)
+   //==================================================================================
+   for (byte x = 1; x < 20; x += 2)
    {
       if ((RawSignal.Pulses[x] < LACROSSE41_PULSEMID) || (RawSignal.Pulses[x + 1] > LACROSSE41_PULSEMID))
-      {
          return false; // bad preamble bit detected, abort
-      }
    }
    if ((RawSignal.Pulses[21] > LACROSSE41_PULSEMID) || (RawSignal.Pulses[22] < LACROSSE41_PULSEMID))
-   {
       return false; // There should be a 1 bit after the preamble
-   }
-   // get bits/nibbles
-   for (int x = 23; x < RawSignal.Number - 2; x += 2)
+   //==================================================================================
+   // Get bits/nibbles
+   //==================================================================================
+   for (byte x = 23; x < RawSignal.Number - 2; x += 2)
    {
       if (RawSignal.Pulses[x] < LACROSSE41_PULSEMID)
-      {                                                         // 1 bit
          data[bytecounter] = ((data[bytecounter] >> 1) | 0x08); // 1 bit, store in reversed bit order
-      }
       else
-      {
          data[bytecounter] = ((data[bytecounter] >> 1) & 0x07); // 0 bit, store in reversed bit order
-      }
       bitcounter++;
+
       if (bitcounter == 4)
       {
          x = x + 2;
          if (x > RawSignal.Number - 2)
             break; // dont check the last marker
+
          if ((RawSignal.Pulses[x] > LACROSSE41_PULSEMID) || (RawSignal.Pulses[x + 1] < LACROSSE41_PULSEMID))
-         {
             return false; // There should be a 1 bit after each nibble
-         }
+
          bitcounter = 0;
          bytecounter++;
+
          if (bytecounter > 17)
             return false; // received too many nibbles/bytes, abort
       }
    }
    //==================================================================================
-   // all bytes received, make sure checksum is okay
+   // Perform checksum calculations
    //==================================================================================
    // check xor value
    checksum = 0;
    for (byte i = 0; i < bytecounter; i++)
-   {
-      checksum = checksum ^ data[i];
-   }
+      checksum ^= data[i];
+
    if (checksum != 0)
       return false; // all (excluding last) nibbles xored must result in 0
+
    // check checksum value
    checksum = 5;
    for (byte i = 0; i < bytecounter; i++)
-   {
-      checksum = checksum + data[i];
-   }
+      checksum += data[i];
+
    checksum = checksum & 0x0f;
    if (checksum != (data[bytecounter]))
       return false; // all (excluding last) nibble added must result in last nibble value
    //==================================================================================
-   // Prevent repeating signals from showing up, skips every second packet!
+   // Prevent repeating signals from showing up
    //==================================================================================
-   unsigned long tempval = (data[4]) >> 1;
-   tempval = ((tempval) << 16) + ((data[3]) << 8) + data[2];
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()) || (SignalCRC != tempval))
-   {
-      // not seen this RF packet recently
-      SignalCRC = tempval;
-   }
+   unsigned long tempval = (((data[4]) >> 1) << 16) | ((data[3]) << 8) | data[2];
+
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 150) < millis()) || (SignalCRC != tempval))
+      SignalCRC = tempval; // not seen this RF packet recently
    else
-   {
       return true; // already seen the RF packet recently, but still want the humidity
-   }
    //==================================================================================
    // now process the various sensor types
    //==================================================================================
    // Output
-   // ----------------------------------
-   if (data[0] == 0x04)
-   {                                                    // Meteo sensor
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      Serial.print(F("LaCrosseV3;ID=")); // Label
-      PrintHex8(data, 2);
-
-      sensor_data = data[4] * 100;
-      sensor_data = sensor_data + data[3] * 10;
-      sensor_data = sensor_data + data[2];
-      sprintf(pbuffer, ";TEMP=%04x;", sensor_data);
-      Serial.print(pbuffer);
-
-      sensor_data = data[7] * 10;
-      sensor_data = sensor_data + data[6];
-      sprintf(pbuffer, "HUM=%04d;", sensor_data);
-      Serial.print(pbuffer);
-
-      sensor_data = data[10] * 100;
-      sensor_data = sensor_data + data[9] * 10;
-      sensor_data = sensor_data + data[8];
-      sensor_data = sensor_data + 200;
-      sprintf(pbuffer, "BARO=%04x;", sensor_data);
-      Serial.println(pbuffer);
-
-      RawSignal.Repeats = false;
-      RawSignal.Number = 0;
-      success = true;
-   }
-   else if (data[0] == 0x02)
-   {                                                    // Rain sensor
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      Serial.print(F("LaCrosseV3;ID=")); // Label
-      PrintHex8(data, 2);
-
-      sensor_data = data[4] * 100;
-      sensor_data = sensor_data + data[3] * 10;
-      sensor_data = sensor_data + data[2];
-      sprintf(pbuffer, ";RAIN=%04x;", sensor_data);
-      Serial.println(pbuffer);
-
-      RawSignal.Repeats = false;
-      RawSignal.Number = 0;
-      success = true;
-   }
-   else if (data[0] == 0x03)
-   {                                                    // wind sensor
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      Serial.print(F("LaCrosseV3;ID=")); // Label
-      PrintHex8(data, 2);
-
-      sensor_data = data[4] * 100;
-      sensor_data = sensor_data + data[3] * 10;
-      sensor_data = sensor_data + data[2];
-      sprintf(pbuffer, ";WINSP=%04x;", sensor_data);
-      Serial.print(pbuffer);
-
-      sensor_data = ((data[7]) >> 2) * 100;
-      sensor_data = sensor_data + data[6] * 10;
-      sensor_data = sensor_data + data[5];
-      sensor_data = sensor_data / 22.5;
-      sprintf(pbuffer, "WINDIR=%04x;", sensor_data);
-      Serial.println(pbuffer);
-
-      RawSignal.Repeats = false;
-      RawSignal.Number = 0;
-      success = true;
-   }
-   else if (data[0] == 0x05)
-   {                                                    // UV sensor
-      sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-      Serial.print(pbuffer);
-      Serial.print(F("LaCrosseV3;ID=")); // Label
-      PrintHex8(data, 2);
-
-      sensor_data = data[4] * 100;
-      sensor_data = sensor_data + data[3] * 10;
-      sensor_data = sensor_data + data[2];
-      sprintf(pbuffer, ";UV=%04x;", sensor_data);
-      Serial.println(pbuffer);
-
-      RawSignal.Repeats = false;
-      RawSignal.Number = 0;
-      success = true;
-   }
    //==================================================================================
-   return success;
+   display_Header();
+   display_Name(PSTR("LaCrosseV3"));
+   char c_ID[4];
+   sprintf(c_ID, "%02X%02X", data[0], data[1]);
+   display_IDc(c_ID);
+
+   if (data[0] == 0x4) // Meteo sensor
+   {
+      sensor_data = (data[4] * 100);
+      sensor_data += (data[3] * 10);
+      sensor_data += (data[2]);
+      display_TEMP(sensor_data);
+
+      sensor_data = (data[7] * 10);
+      sensor_data += (data[6]);
+      display_HUM(((byte)sensor_data));
+
+      sensor_data = (data[10] * 100);
+      sensor_data += (data[9] * 10);
+      sensor_data += (data[8]);
+      sensor_data += 200;
+      display_BARO(sensor_data);
+   }
+   else if (data[0] == 0x2) // Rain sensor
+   {
+      sensor_data = (data[4] * 100);
+      sensor_data += (data[3] * 10);
+      sensor_data += (data[2]);
+      display_RAIN(sensor_data);
+   }
+   else if (data[0] == 0x3)
+   { // wind sensor
+      sensor_data = (data[4] * 100);
+      sensor_data += (data[3] * 10);
+      sensor_data += (data[2]);
+      display_WINSP(sensor_data);
+
+      sensor_data = (((data[7]) >> 2) * 100);
+      sensor_data += (data[6] * 10);
+      sensor_data += (data[5]);
+      sensor_data *= 2;  // In two step
+      sensor_data /= 45; // / 22.5
+      display_WINDIR(sensor_data);
+   }
+   else if (data[0] == 0x5) // UV sensor
+   {
+      sensor_data = (data[4] * 100);
+      sensor_data += (data[3] * 10);
+      sensor_data += (data[2]);
+      display_UV(sensor_data);
+   }
+   display_Footer();
+   //==================================================================================
+   RawSignal.Repeats = true;
+   RawSignal.Number = 0;
+   return true;
 }
 #endif // PLUGIN_041
