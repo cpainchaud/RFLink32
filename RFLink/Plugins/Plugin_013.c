@@ -107,9 +107,14 @@ boolean Plugin_013(byte function, char *string)
    byte command = 0;
    byte parity = 0;
    byte bitcount = 0;
-   // ==========================================================================
+   //==================================================================================
+   // Perform a pre sanity check
+   //==================================================================================
    if (RawSignal.Pulses[1] > POWEFIX_PULSEMID)
       return false; // start pulse must be short
+   //==================================================================================
+   // Get all 20 bits
+   //==================================================================================
    for (byte x = 2; x < POWERFIX_PulseLength - 1; x += 2)
    {
       bitstream <<= 1; // Always shift

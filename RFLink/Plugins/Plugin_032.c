@@ -60,7 +60,6 @@ boolean Plugin_032(byte function, char *string)
    byte humidity = 0; //bitstream2 !
    byte rc = 0;
    byte rc2 = 0;
-
    //==================================================================================
    // Get all 36 bits
    //==================================================================================
@@ -70,7 +69,7 @@ boolean Plugin_032(byte function, char *string)
    if (RawSignal.Number == (ALECTOV4_PULSECOUNT + 2))
       start = 2;
 
-   for (byte x = 2 + start; x <= 56 + start; x = x + 2)
+   for (byte x = 2 + start; x <= 56 + start; x += 2)
    { // Get first 28 bits
       if (RawSignal.Pulses[x + 1] > ALECTOV4_MIDHI)
          return false;

@@ -73,7 +73,9 @@ boolean Plugin_010(byte function, char *string)
    byte start_stop = 0;
    byte x = 1;
    //==================================================================================
-   for (x = 1; x < RawSignal.Number - 2; x++)
+   // Get all 33 bits
+   //==================================================================================
+   for (byte x = 1; x < RawSignal.Number - 2; x++)
    { // get bytes
       if (start_stop != 0x01)
       {

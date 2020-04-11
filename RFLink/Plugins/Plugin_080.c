@@ -50,11 +50,12 @@ boolean Plugin_080(byte function, char *string)
 {
    if (RawSignal.Number != FA20_PULSECOUNT)
       return false;
+      
    unsigned long bitstream = 0L;
    //==================================================================================
-   // Get all 23? bits
+   // Get all 24 bits
    //==================================================================================
-   for (byte x = 4; x <= FA20_PULSECOUNT - 2; x = x + 2)
+   for (byte x = 4; x < FA20_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x - 1] > FA20_MIDHI)
          return false; // every preceding pulse must be below 1000!

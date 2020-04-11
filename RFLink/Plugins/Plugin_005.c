@@ -58,10 +58,14 @@ boolean Plugin_005(byte function, char *string)
    byte unitcode = 0;
    byte command = 0;
    unsigned int address = 0;
-   // ==========================================================================
+   //==================================================================================
+   // Perform a pre sanity check
+   //==================================================================================
    if (RawSignal.Pulses[49] > EURODOMEST_PULSEMID)
       return false; // last pulse needs to be short, otherwise no Eurodomest protocol
-   // get all 24 bits
+   //==================================================================================
+   // Get all 24 bits
+   //==================================================================================
    for (int x = 2; x < EURODOMEST_PulseLength; x += 2)
    {
       bitstream <<= 1; //Always shift

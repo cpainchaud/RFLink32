@@ -60,12 +60,11 @@ boolean Plugin_007(byte function, char *string)
    byte action = 0;
    byte start = 0;
    if (RawSignal.Number == CONRADRSL2_PULSECOUNT + 2)
-   {
       start = 2;
-   }
    //==================================================================================
-   // get bits
-   for (byte x = 1 + start; x < RawSignal.Number - 2; x = x + 2)
+   // Get all 32 bits
+   //==================================================================================
+   for (byte x = 1 + start; x < RawSignal.Number - 2; x += 2)
    {
       bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > CONRADRSL2_PULSEMID)
@@ -92,7 +91,7 @@ boolean Plugin_007(byte function, char *string)
    // Prevent repeating signals from showing up
    //==================================================================================
    if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 500 < millis()) || (SignalCRC != bitstream))
-      SignalCRC = bitstream;   // not seen the RF packet recently
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
       return true; // already seen the RF packet recently
    //==================================================================================

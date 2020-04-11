@@ -51,8 +51,9 @@ boolean Plugin_006(byte function, char *string)
    byte checksum = 0;
    int type = 0;
    //==================================================================================
-   // get bits
-   for (byte x = 2; x < BLYSS_PULSECOUNT; x = x + 2)
+   // Get all 52 bits
+   //==================================================================================
+   for (byte x = 2; x < BLYSS_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x] > BLYSS_PULSEMID)
       {

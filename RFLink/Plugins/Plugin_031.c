@@ -92,7 +92,7 @@ boolean Plugin_031(byte function, char *string)
    //==================================================================================
    // Get all 36 bits
    //==================================================================================
-   for (byte x = 15; x <= 77; x = x + 2)
+   for (byte x = 15; x <= 77; x += 2)
    {                    // get first 32 relevant bits
       bitstream1 <<= 1; // Always shift
       if (RawSignal.Pulses[x] < ALECTOV3_PULSEMID)

@@ -74,6 +74,8 @@ boolean Plugin_011(byte function, char *string)
    byte subchan = 0;
    byte group = 0;
    //==================================================================================
+   // Get all 48 bits
+   //==================================================================================
    for (int x = 2; x < HC_PULSECOUNT - 2; x += 2)
    { // get bytes
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 500)

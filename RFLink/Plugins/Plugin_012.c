@@ -94,7 +94,9 @@ boolean Plugin_012(byte function, char *string)
    byte command = 0;
    unsigned long bitstream = 0L;
    unsigned long address = 0L;
-   // ==========================================================================
+   //==================================================================================
+   // Get all 28 bits
+   //==================================================================================
    if (RawSignal.Number == (FA500RM3_PulseLength))
    {
       // get all 26pulses =>24 manchester bits => 12 actual bits

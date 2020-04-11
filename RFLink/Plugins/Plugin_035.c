@@ -59,7 +59,7 @@ boolean Plugin_035(byte function, char *string)
    byte bytecounter = 0; // used for counting the number of received bytes
    byte bitcounter = 0;  // counts number of received bits (converted from pulses)
    // get bits
-   for (byte x = 1; x < IMAGINTRONIX_PULSECOUNT; x = x + 2)
+   for (byte x = 1; x < IMAGINTRONIX_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x] > IMAGINTRONIX_PULSEMID)
       { // long pulse = 0 bit

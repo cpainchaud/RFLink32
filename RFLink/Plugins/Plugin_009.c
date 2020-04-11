@@ -59,6 +59,9 @@ boolean Plugin_009(byte function, char *string)
    byte command = 0;
    byte data[4];
    byte start = 0;
+   //==================================================================================
+   // Perform a pre sanity check
+   //==================================================================================
    if (RawSignal.Number == X10_PulseLength + 2)
    {
       if ((RawSignal.Pulses[1] * RawSignal.Multiply > 3000) && (RawSignal.Pulses[2] * RawSignal.Multiply > 3000))
@@ -66,7 +69,9 @@ boolean Plugin_009(byte function, char *string)
       else
          return false; // not an X10 packet
    }
-   // get all 24 bits
+   //==================================================================================
+   // Get all 24 bits
+   //==================================================================================
    for (byte x = 2 + start; x < ((X10_PulseLength) + start); x += 2)
    {
       bitstream <<= 1; // Always shift
@@ -92,7 +97,7 @@ boolean Plugin_009(byte function, char *string)
    data[0] = (bitstream >> 24) & 0xFF;
    data[1] = (bitstream >> 16) & 0xFF;
    data[2] = (bitstream >> 8) & 0xFF;
-   data[3] = (bitstream) & 0xFF;
+   data[3] = (bitstream)&0xFF;
    // ----------------------------------
    // perform sanity checks
    data[1] ^= 0xFF;

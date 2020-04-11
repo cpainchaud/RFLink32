@@ -68,6 +68,9 @@ boolean Plugin_015(byte function, char *string)
    byte temp = 0;
    RawSignal.Pulses[0] = 0; // undo any Home Easy to Kaku blocking that might be active
    //==================================================================================
+   // Get all 58? bits
+   //==================================================================================
+   //==================================================================================
    // convert pulses into bit sections (preamble, address, bitstream)
    //==================================================================================
    for (byte x = 1; x <= HomeEasy_PulseLength; x = x + 2)

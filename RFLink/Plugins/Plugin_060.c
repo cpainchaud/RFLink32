@@ -40,10 +40,17 @@ boolean Plugin_060(byte function, char *string)
 {
    if (RawSignal.Number != ALARMPIRV0_PULSECOUNT)
       return false;
+
    unsigned long bitstream = 0L;
+   //==================================================================================
+   // Perform a pre sanity check
+   //==================================================================================
    if (RawSignal.Pulses[1] > ALARMPIRV0_PULSESHORT)
       return false; // First pulse is start bit and should be short!
-   for (byte x = 2; x < ALARMPIRV0_PULSECOUNT; x = x + 2)
+   //==================================================================================
+   // Get all 12 bits
+   //==================================================================================
+   for (byte x = 2; x < ALARMPIRV0_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x] > ALARMPIRV0_PULSEMID)
       { // long pulse 800-875 (700-1000 accepted)

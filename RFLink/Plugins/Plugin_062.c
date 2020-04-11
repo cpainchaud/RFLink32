@@ -38,9 +38,12 @@ boolean Plugin_062(byte function, char *string)
       return false;
    if (RawSignal.Pulses[0] == 63)
       return false; // No need to test, packet for plugin 63
+      
    unsigned long bitstream = 0L;
    //==================================================================================
-   for (byte x = 2; x <= 48; x = x + 2)
+   // Get all 24 bits
+   //==================================================================================
+   for (byte x = 2; x <= 48; x += 2)
    {
       if (RawSignal.Pulses[x] > ALARMPIRV2_PULSEMID)
       {

@@ -67,9 +67,9 @@ boolean Plugin_081(byte function, char *string)
    if (RawSignal.Pulses[2] > MAXITROL1_MID)
       return false;
    //==================================================================================
-   // Get all 21 bits
+   // Get all 22 bits
    //==================================================================================
-   for (int x = 3; x <= MAXITROL1_PULSECOUNT - 1; x = x + 2)
+   for (int x = 3; x < MAXITROL1_PULSECOUNT + 1; x += 2)
    {
       bitstream <<= 1; // Always shift
 

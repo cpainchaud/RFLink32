@@ -121,7 +121,7 @@ boolean Plugin_030(byte function, char *string)
    //==================================================================================
    // Get all 36 bits
    //==================================================================================
-   for (byte x = 2; x <= 64; x = x + 2)
+   for (byte x = 2; x <= 64; x += 2)
    {
       if (RawSignal.Pulses[x + 1] > ALECTOV1_MIDHI)
          return false; // in between pulses should be short

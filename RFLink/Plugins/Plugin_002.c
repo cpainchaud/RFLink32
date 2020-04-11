@@ -84,8 +84,9 @@ boolean Plugin_002(byte function, char *string)
    unsigned int windgust = 0;
    unsigned int winddirection = 0;
    //==================================================================================
-   // get bytes
-   for (byte x = 1; x < RawSignal.Number; x += 2)
+   // Get all 52 bits
+   //==================================================================================
+   for (byte x = 1; x < RawSignal.Number + 1; x += 2)
    {
       if ((RawSignal.Pulses[x + 1] < LACROSSE_MIDLO) || (RawSignal.Pulses[x + 1] > LACROSSE_MIDHI))
       {

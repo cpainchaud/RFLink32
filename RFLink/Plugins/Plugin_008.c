@@ -41,6 +41,7 @@ boolean Plugin_008(byte function, char *string)
 {
     if (RawSignal.Number != KAMBROOK_PULSECOUNT)
         return false;
+        
     unsigned long address = 0L;
     byte sync = 0;
     byte command = 0;
@@ -50,9 +51,10 @@ boolean Plugin_008(byte function, char *string)
     byte status = 0;
     byte channel = 0;
     byte subchan = 0;
-    //==================================================================================
-    // get bits
-    for (byte x = 1; x < KAMBROOK_PULSECOUNT; x = x + 2)
+   //==================================================================================
+   // Get all 48 bits
+   //==================================================================================
+    for (byte x = 1; x < KAMBROOK_PULSECOUNT; x += 2)
     {
         if (RawSignal.Pulses[x] > KAMBROOK_PULSEMID)
         {

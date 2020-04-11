@@ -26,27 +26,30 @@
 
 boolean Plugin_063(byte function, char *string)
 {
+   if ((RawSignal.Number < OREGON_PLA_PULSECOUNT - 2) || (RawSignal.Number > OREGON_PLA_PULSECOUNT))
+      return false;
+
    if (RawSignal.Pulses[0] != 63)
       return false; // Only accept RF packets converted by plugin 1
    RawSignal.Pulses[0] = 0;
-   if ((RawSignal.Number < OREGON_PLA_PULSECOUNT - 2) || (RawSignal.Number > OREGON_PLA_PULSECOUNT))
-      return false;
+
    unsigned long bitstream = 0L;
    //==================================================================================
-   byte bits = 0;
-   byte rfbit = 1;
-
-   if ((RawSignal.Number < 50) || (RawSignal.Number > 52))
-      return false;
-   // Check preamble
-   for (byte x = 1; x < 28; x = x + 2)
+   // Perform a pre sanity check
+   //==================================================================================
+   for (byte x = 1; x < 28; x += 2)
    {
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 600)
          return false;
       if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 600)
          return false;
    }
-   // Check bits
+   //==================================================================================
+   byte bits = 0;
+   byte rfbit = 1;
+   //==================================================================================
+   // Get all 24 bits
+   //==================================================================================
    for (byte x = 29; x <= RawSignal.Number; x++)
    {
       if (RawSignal.Pulses[x] * RawSignal.Multiply > 600)
