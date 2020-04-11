@@ -34,11 +34,14 @@
  * False positive:
  * 20;52;DEBUG;Pulses=52;Pulses(uSec)=420,1860,330,3810,360,3960,360,1950,390,1920,360,3960,360,3960,360,3960,390,3960,390,3960,390,3960,390,1920,390,1920,390,1920,390,1890,480,1800,390,3930,390,1920,390,1920,420,1920,390,1920,420,1890,450,1860,420,1890,390,3930,390,6990;
  \*********************************************************************************************/
-#define FA20RFSTART 3000 // 8000
-#define FA20RFSPACE 675  //  800
-#define FA20RFLOW 1250   // 1300
-#define FA20RFHIGH 2550  // 2600
+#define FA20_PLUGIN_ID 43
 #define FA20_PULSECOUNT 52
+
+#define FA20_MIDHI 1000 / RAWSIGNAL_SAMPLE_RATE
+#define FA20_PULSEMIN 1000 / RAWSIGNAL_SAMPLE_RATE
+#define FA20_PULSEMINMAX 1500 / RAWSIGNAL_SAMPLE_RATE
+#define FA20_PULSEMAXMIN 2000 / RAWSIGNAL_SAMPLE_RATE
+#define FA20_PULSEMAX 2800 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_080
 #include "../4_Display.h"
@@ -49,43 +52,47 @@ boolean Plugin_080(byte function, char *string)
       return false;
    unsigned long bitstream = 0L;
    //==================================================================================
+   // Get all 23? bits
+   //==================================================================================
    for (byte x = 4; x <= FA20_PULSECOUNT - 2; x = x + 2)
    {
-      if (RawSignal.Pulses[x - 1] * RAWSIGNAL_SAMPLE_RATE > 1000)
+      if (RawSignal.Pulses[x - 1] > FA20_MIDHI)
          return false; // every preceding pulse must be below 1000!
-      if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 2000)
+
+      bitstream <<= 1;
+
+      if (RawSignal.Pulses[x] > FA20_PULSEMAXMIN)
       { // long pulse
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 2800)
+         if (RawSignal.Pulses[x] > FA20_PULSEMAX)
             return false; // long pulse too long
-         bitstream = (bitstream << 1) | 0x1;
+         bitstream |= 0x1;
       }
       else
       {
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 1500)
+         if (RawSignal.Pulses[x] > FA20_PULSEMINMAX)
             return false; // short pulse too long
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 1000)
+         if (RawSignal.Pulses[x] < FA20_PULSEMIN)
             return false; // short pulse too short
-         bitstream = bitstream << 1;
+         // bitstream |= 0x0;
       }
    }
+   //==================================================================================
+   // Perform a quick sanity check
    //==================================================================================
    if (bitstream == 0)
       return false;
    if (bitstream == 0xFFFFFF)
       return false;
-   if (((bitstream)&0xffff) == 0xffff)
+   if ((bitstream & 0xFFFF) == 0xFFFF)
       return false;
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   // ----------------------------------
-   Serial.print(F("FA20RF;"));               // Label
-   sprintf(pbuffer, "ID=%06lx;", bitstream); // ID
-   Serial.print(pbuffer);
-   Serial.print(F("SMOKEALERT=ON;"));
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("FA20RF"));
+   display_IDn(bitstream, 6);
+   display_SMOKEALERT(true);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;     // do not process the packet any further
@@ -94,6 +101,11 @@ boolean Plugin_080(byte function, char *string)
 #endif // PLUGIN_080
 
 #ifdef PLUGIN_TX_080
+#define FA20RFSTART 3000 // 8000
+#define FA20RFSPACE 675  //  800
+#define FA20RFLOW 1250   // 1300
+#define FA20RFHIGH 2550  // 2600
+
 boolean PluginTX_080(byte function, char *string)
 {
    boolean success = false;
