@@ -12,6 +12,7 @@
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
+byte Plugin_State[PLUGIN_MAX];
 
 boolean RFDebug = RFDebug_0;     // debug RF signals with plugin 001 (no decode)
 boolean QRFDebug = QRFDebug_0;   // debug RF signals with plugin 001 but no multiplication (faster?, compact)
@@ -540,6 +541,7 @@ void PluginInit(void)
   {
     Plugin_ptr[x] = 0;
     Plugin_id[x] = 0;
+    Plugin_State[x] = P_Enabled;
   }
 
   x = 0;
@@ -1659,7 +1661,7 @@ byte PluginRXCall(byte Function, char *str)
 {
   for (byte x = 0; x < PLUGIN_MAX; x++)
   {
-    if (Plugin_id[x] != 0)
+    if ((Plugin_id[x] != 0) && (Plugin_State[x] >= P_Enabled))
     {
       SignalHash = x; // store plugin number
       if (Plugin_ptr[x](Function, str))
