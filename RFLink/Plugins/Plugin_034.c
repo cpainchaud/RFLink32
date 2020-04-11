@@ -33,8 +33,8 @@
 
 #ifdef PLUGIN_034
 #include "../4_Display.h"
+#include "../7_Utils.h"
 
-byte Plugin_034_reverseBits(byte data);
 byte Plugin_034_WindDirSeg(byte data);
 
 boolean Plugin_034(byte function, char *string)
@@ -128,8 +128,9 @@ boolean Plugin_034(byte function, char *string)
    //==================================================================================
    // Perform checksum calculations
    //==================================================================================
-   for (byte i = 0; i < bytecounter; i++)
-      data[i] = Plugin_034_reverseBits(data[i]);
+   // for (byte i = 0; i < bytecounter; i++)
+   //    data[i] = reverse8(data[i]);
+   reflect_bytes(data, bytecounter);
 
    // get packet length
    length = data[2] & 0x3F; // drop bits 6 and 7
@@ -316,26 +317,12 @@ boolean Plugin_034(byte function, char *string)
    return true;
 }
 
-// *********************************************************************************************
-// * Reverse all bits in a byte
-// *********************************************************************************************
-byte Plugin_034_reverseBits(byte data)
-{
-   byte b = data;
-   for (byte i = 0; i < 8; ++i)
-   {
-      data = (data << 1) | (b & 1);
-      b >>= 1;
-   }
-   return data;
-}
-
 byte Plugin_034_WindDirSeg(byte data)
 {
-   // Encrypted using: a=-a&0xf; b=a^(a>>1);
+   // Encrypted using: a=-a&0xF; b=a^(a>>1);
    data ^= (data & 8) >> 1; /* Solve bit 2 */
    data ^= (data & 4) >> 1; /* Solve bit 1 */
    data ^= (data & 2) >> 1; /* Solve bit 0 */
-   return -data & 0xf;
+   return -data & 0xF;
 }
 #endif // PLUGIN_034
