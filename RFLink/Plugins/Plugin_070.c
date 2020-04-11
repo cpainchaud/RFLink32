@@ -42,7 +42,9 @@
  * w) 20;66;DEBUG;Pulses=36;Pulses(uSec)=650,2000,550,2000,550,550,2000,2000,550,2000,550,2000,550,550,2000,2000,550,2000,550,550,2000,2000,550,550,2000,550,2000,550,1950,550,2000,550,2000,550,2000;
  * b) 20;05;DEBUG;Pulses=36;Pulses(uSec)=2100,2100,500,2050,500,2100,500,600,1950,600,1950,600,1950,600,1950,2050,500,2050,500,600,1950,600,1950,2100,500,2050,500,600,1950,600,1950,600,1950,600,1950;
  \*********************************************************************************************/
+#define SELECTPLUS_PLUGIN_ID 70
 #define SELECTPLUS_PULSECOUNT 36
+
 #define SELECTPLUS_PULSEMID 650 / RAWSIGNAL_SAMPLE_RATE
 #define SELECTPLUS_PULSEMAX 2125 / RAWSIGNAL_SAMPLE_RATE
 
@@ -53,10 +55,12 @@ boolean Plugin_070(byte function, char *string)
 {
     if (RawSignal.Number != SELECTPLUS_PULSECOUNT)
         return false;
+
     unsigned long bitstream = 0L;
     byte checksum = 0;
     //==================================================================================
-    // get bytes
+    // Get all 18 bits
+    //==================================================================================
     for (byte x = 2; x < SELECTPLUS_PULSECOUNT; x = x + 2)
     {
         if (RawSignal.Pulses[x] < SELECTPLUS_PULSEMID)
@@ -90,21 +94,19 @@ boolean Plugin_070(byte function, char *string)
     //==================================================================================
     // all bytes received, make sure checksum is okay
     //==================================================================================
-    checksum = (bitstream)&0xf; // Second block
+    checksum = (bitstream & 0xF); // Second block
     if (checksum != 0)
         return false; // last 4 bits should always be 0
     //==================================================================================
     // Output
-    // ----------------------------------
-    Serial.print("20;");
-    PrintHexByte(PKSequenceNumber++);
-    Serial.print(F(";SelectPlus;")); // Label
-    // ----------------------------------
-    sprintf(pbuffer, "ID=%04x;", ((bitstream) >> 4) & 0xffff); // ID
-    Serial.print(pbuffer);
-    Serial.print(F("SWITCH=1;CMD=ON;"));
-    Serial.print(F("CHIME=01;"));
-    Serial.println();
+    //==================================================================================
+    display_Header();
+    display_Name(PSTR("SelectPlus"));
+    display_IDn(((bitstream >> 4) & 0xFFFF), 4);
+    display_SWITCH(1);
+    display_CMD(false, true);
+    display_CHIME(1);
+    display_Footer();
     //==================================================================================
     RawSignal.Repeats = true; // suppress repeats of the same RF packet
     RawSignal.Number = 0;     // do not process the packet any further
