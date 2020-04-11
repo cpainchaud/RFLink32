@@ -271,17 +271,10 @@ boolean Plugin_009(byte function, char *string)
       display_CMD(((command >> 3) & B01), (command & B01)); // #ALL #ON
       break;
    case 0x02:
+      display_CMD(CMD_Single, CMD_Bright); // #All #ON
+      break;
    case 0x03:
-      display_Name(PSTR(";CMD="));
-      switch (command)
-      {
-      case 0x02:
-         display_Name(PSTR("BRIGHT"));
-         break;
-      case 0x03:
-         display_Name(PSTR("DIM"));
-         break;
-      }
+      display_CMD(CMD_Single, CMD_Dim); // #All #ON
       break;
    }
    display_Footer();

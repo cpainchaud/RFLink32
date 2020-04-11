@@ -91,7 +91,7 @@ void display_SWITCHc(const char *input)
 }
 
 // CMD=ON => Command (ON/OFF/ALLON/ALLOFF) Additional for Milight: DISCO+/DISCO-/MODE0 - MODE8
-void display_CMD(boolean all, boolean on)
+void display_CMD(boolean all, byte on)
 {
   sprintf_P(dbuffer, PSTR("%S"), F(";CMD="));
   strcat(pbuffer, dbuffer);
@@ -102,10 +102,24 @@ void display_CMD(boolean all, boolean on)
     strcat(pbuffer, dbuffer);
   }
 
-  if (on == CMD_On)
+  switch (on)
+  {
+  case CMD_On:
     sprintf_P(dbuffer, PSTR("%S"), F("ON"));
-  else
+    break;
+  case CMD_Off:
     sprintf_P(dbuffer, PSTR("%S"), F("OFF"));
+    break;
+  case CMD_Bright:
+    sprintf_P(dbuffer, PSTR("%S"), F("BRIGHT"));
+    break;
+  case CMD_Dim:
+    sprintf_P(dbuffer, PSTR("%S"), F("DIM"));
+    break;
+  case CMD_Unknown:
+  default:
+    sprintf_P(dbuffer, PSTR("%S"), F("UNKNOWN"));
+  }
   strcat(pbuffer, dbuffer);
 }
 

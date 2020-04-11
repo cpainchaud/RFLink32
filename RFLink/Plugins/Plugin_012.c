@@ -226,7 +226,7 @@ boolean Plugin_012(byte function, char *string)
       display_CMD(CMD_Single, (command & B01)); // #ALL #ON
       break;
    default:
-      display_Name(PSTR(";CMD=UNKOWN"));
+      display_CMD(CMD_Single, CMD_Unknown);
    }
    display_Footer();
    // ----------------------------------
