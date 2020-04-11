@@ -254,7 +254,7 @@ void display_SMOKEALERT(boolean input)
 // PIR=ON => ON/OFF
 void display_PIR(boolean input)
 {
-  if (input == true)
+  if (input == PIR_On)
     sprintf_P(dbuffer, PSTR("%S"), F(";PIR=ON"));
   else
     sprintf_P(dbuffer, PSTR("%S"), F(";PIR=OFF"));

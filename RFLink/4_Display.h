@@ -46,6 +46,7 @@ void display_WINTMP(unsigned int);
 void display_CHIME(unsigned int);
 enum SMOKE_OnOff {SMOKE_Off, SMOKE_On}; 
 void display_SMOKEALERT(boolean);
+enum PIR_OnOff {PIR_Off, PIR_On}; 
 void display_PIR(boolean);
 void display_CO2(unsigned int);
 void display_SOUND(unsigned int);
