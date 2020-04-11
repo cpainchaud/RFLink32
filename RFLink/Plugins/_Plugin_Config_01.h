@@ -60,12 +60,12 @@
 // -------------------
 // Doorbells
 // -------------------
-// #define PLUGIN_070              // Select Plus (Action - Quhwa)
-// #define PLUGIN_071              // Plieger York
-// #define PLUGIN_072              // Byron SX doorbell
-// #define PLUGIN_073              // Deltronic doorbell
-// #define PLUGIN_074              // RL02
-// #define PLUGIN_075              // Silvercrest
+#define PLUGIN_070 // Select Plus (Action - Quhwa)
+#define PLUGIN_071 // Plieger York
+#define PLUGIN_072 // Byron SX doorbell
+#define PLUGIN_073 // Deltronic doorbell
+#define PLUGIN_074 // RL02
+#define PLUGIN_075 // Silvercrest
 // -------------------
 // Smoke detectors / Fire Places
 // -------------------
