@@ -45,6 +45,7 @@
 
 #ifdef PLUGIN_047
 #include "../4_Misc.h"
+#include "../7_Utils.h"
 
 boolean Plugin_047(byte function, char *string)
 {
