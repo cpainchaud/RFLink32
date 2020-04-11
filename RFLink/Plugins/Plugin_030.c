@@ -105,6 +105,7 @@ boolean Plugin_030(byte function, char *string)
 {
    if (RawSignal.Number != ALECTOV1_PULSECOUNT)
       return false;
+
    unsigned long bitstream = 0L;
    byte data[8];
    byte checksum = 0;
@@ -115,7 +116,6 @@ boolean Plugin_030(byte function, char *string)
    unsigned int windspeed = 0;
    unsigned int windgust = 0;
    unsigned int winddirection = 0;
-
    byte rc = 0;
    byte battery = 0;
    //==================================================================================

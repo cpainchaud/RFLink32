@@ -55,13 +55,14 @@ boolean Plugin_072(byte function, char *string)
    //==================================================================================
    for (byte x = 2; x < BYRON_PULSECOUNT; x += 2)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 350)
       { // 200-275 (150-350 is accepted)
          if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 150)
             return false; // pulse too short
          if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE < 350)
             return false; // bad manchester code
-         bitstream = (bitstream << 1);
+         // bitstream |= 0x0;
       }
       else
       { // 500-575 (450-650 is accepted)
@@ -71,23 +72,21 @@ boolean Plugin_072(byte function, char *string)
             return false; // pulse too short
          if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 650)
             return false; // pulse too long
-         bitstream = (bitstream << 1) | 0x1;
+         bitstream |= 0x1;
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()))
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000) < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Output
    //==================================================================================

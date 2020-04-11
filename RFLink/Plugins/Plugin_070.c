@@ -63,11 +63,12 @@ boolean Plugin_070(byte function, char *string)
     //==================================================================================
     for (byte x = 2; x < SELECTPLUS_PULSECOUNT; x = x + 2)
     {
+        bitstream <<= 1; // Always shift
         if (RawSignal.Pulses[x] < SELECTPLUS_PULSEMID)
         {
             if (RawSignal.Pulses[x + 1] < SELECTPLUS_PULSEMID)
                 return false; // invalid pulse sequence 10/01
-            bitstream = (bitstream << 1);
+            // bitstream |= 0x0;
         }
         else
         {
@@ -75,22 +76,21 @@ boolean Plugin_070(byte function, char *string)
                 return false; // invalid pulse duration, pulse too long
             if (RawSignal.Pulses[x + 1] > SELECTPLUS_PULSEMID)
                 return false; // invalid pulse sequence 10/01
-            bitstream = (bitstream << 1) | 0x1;
+            bitstream |= 0x1;
         }
     }
-    if (bitstream == 0)
-        return false; // sanity check
+   //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
     //==================================================================================
     // Prevent repeating signals from showing up
     //==================================================================================
-    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 2000) < millis()) || (SignalCRC != bitstream))
-    {
+    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000) < millis()) || (SignalCRC != bitstream))
         SignalCRC = bitstream; // not seen the RF packet recently
-    }
     else
-    {
         return true; // already seen the RF packet recently
-    }
     //==================================================================================
     // all bytes received, make sure checksum is okay
     //==================================================================================

@@ -57,58 +57,63 @@ boolean Plugin_071(byte function, char *string)
    //==================================================================================
    for (byte x = 1; x <= PLIEGER_PULSECOUNT - 2; x += 2)
    {
+      bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > PLIEGER_PULSEMID)
       {
          if (RawSignal.Pulses[x] > PLIEGER_PULSEMAX)
             return false;
          if (RawSignal.Pulses[x + 1] > PLIEGER_PULSEMID)
             return false; // Valid Manchester check
-         bitstream = (bitstream << 1) | 0x1;
+         bitstream |= 0x1;
       }
       else
       {
          if (RawSignal.Pulses[x + 1] < PLIEGER_PULSEMID)
             return false; // Valid Manchester check
-         bitstream = (bitstream << 1);
+         // bitstream |= 0x0;
       }
    }
    //==================================================================================
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0)
+      return false;
+   if (((bitstream >> 8) & 0xFF) != 0x00)
+      return false; // these 8 bits are always 0
+   //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()))
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000) < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
+      return true; // already seen the RF packet recently
+   //==================================================================================
+   id = ((bitstream >> 16) & 0xFFFF); // get 16 bits unique address
+   chime = bitstream & 0xFF;
+   switch (chime)
    {
-      // already seen the RF packet recently
-      return true;
-   }
-   //==================================================================================
-   // first perform two checks to validate the data
-   if (((bitstream >> 8) & 0xff) != 0x00)
-      return false; // these 8 bits are always 0
-   chime = bitstream & 0xff;
-   if (chime != 0x1c && chime != 0x03 && chime != 0xE0)
-      return false; // the chime number can only have 3 values
-   //==================================================================================
-   id = (bitstream >> 16) & 0xffff; // get 16 bits unique address
-   if (chime == 0xE0)
+   case 0x03:
+      chime = 0;
+      break;
+   case 0xE0:
       chime = 1;
-   if (chime == 0x1C)
+      break;
+   case 0x1C:
       chime = 2;
+      break;
+   default:
+      return false; // the chime number can only have 3 values
+   }
    //==================================================================================
    // Output
    //==================================================================================
-    display_Header();
-    display_Name(PSTR("Plieger"));
-    display_IDn(id, 4);
-    display_SWITCH(1);
-    display_CMD(false, true);
-    display_CHIME(chime);
-    display_Footer();
+   display_Header();
+   display_Name(PSTR("Plieger"));
+   display_IDn(id, 4);
+   display_SWITCH(1);
+   display_CMD(false, true);
+   display_CHIME(chime);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;     // do not process the packet any further
