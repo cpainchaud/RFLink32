@@ -36,6 +36,8 @@
  * 20;14;DEBUG;Pulses=114;Pulses(uSec)=360,60,60,390,360,60,60,390,60,390,60,390,390,60,360,60,60,390,360,60,60,390,360,60,360,60,60,390,360,60,60,390,60,390,360,60,360,60,360,60,30,390,360,60,360,60,360,60,390,60,360,60,60,390,390,60,360,60,360,60,390,60,360,60,390,60,360,60,360,60,390,60,60,390,60,390,30,390,60,390,60,390,360,60,60,390,60,390,60,390,60,390,360,60,360,60,60,390,60,390,60,390,360,60,60,390,60,390,360,60,60,390,360,1260;
  \*********************************************************************************************/
 // ==================================================================================
+#define LIDL_PLUGIN_ID 75
+
 #define LIDL_PULSECOUNT 90   // type 0
 #define LIDL_PULSECOUNT2 114 // type 1
 #define PLUGIN_ID 75
@@ -53,7 +55,8 @@ boolean Plugin_075(byte function, char *string)
    int bitcount = 0;
    byte type = 0;
    //==================================================================================
-   // get all bits
+   // Get all 40 bits
+   //==================================================================================
    if (RawSignal.Number == LIDL_PULSECOUNT)
    {
       if (RawSignal.Pulses[1] * RawSignal.Multiply > 1000 && RawSignal.Pulses[2] * RawSignal.Multiply > 1000 &&
@@ -160,24 +163,17 @@ boolean Plugin_075(byte function, char *string)
    }
    //==================================================================================
    // Output
-   // ----------------------------------
-   Serial.print("20;");
-   PrintHexByte(PKSequenceNumber++);
-   // ----------------------------------
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("SilverCrest"));
    if (type == 0)
-   {
-      Serial.print(";SilverCrest;");            // Label
-      sprintf(pbuffer, "ID=%08lx;", bitstream); // ID
-   }
+      display_IDn(bitstream, 8);
    else
-   {
-      Serial.print(";SilverCrest;");             // Label
-      sprintf(pbuffer, "ID=%08lx;", bitstream2); // ID
-   }
-   Serial.print(pbuffer);
-   Serial.print(F("SWITCH=1;CMD=ON;"));
-   Serial.print(F("CHIME=01;"));
-   Serial.println();
+      display_IDn(bitstream2, 8);
+   display_SWITCH(1);
+   display_CMD(false, true);
+   display_CHIME(1);
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;     // do not process the packet any further
