@@ -67,36 +67,35 @@ boolean Plugin_075(byte function, char *string)
          //
       }
       else
-      {
          return false;
-      }
-      for (int x = 10; x <= 90; x += 2)
+
+      for (byte x = 10; x <= 90; x += 2)
       {
          if (bitcount < 28)
          {
+            bitstream <<= 1; // Always shift
             if (RawSignal.Pulses[x] * RawSignal.Multiply > 550)
             {
-               bitstream = (bitstream << 1);
-               bitcount++;
+               // bitstream |= 0x0;
             }
             else
             {
-               bitstream = (bitstream << 1) | 0x1;
-               bitcount++;
+               bitstream |= 0x1;
             }
+            bitcount++;
          }
          else
          {
+            bitstream2 <<= 1; // Always shift
             if (RawSignal.Pulses[x] * RawSignal.Multiply > 550)
             {
-               bitstream2 = (bitstream2 << 1);
-               bitcount++;
+               // bitstream2 |= 0x0;
             }
             else
             {
-               bitstream2 = (bitstream2 << 1) | 0x1;
-               bitcount++;
+               bitstream2 |= 0x1;
             }
+            bitcount++;
          }
       }
    }
@@ -113,11 +112,11 @@ boolean Plugin_075(byte function, char *string)
                return false; // invalid pulse length
             if (bitcount > 23)
             {
-               bitstream2 = (bitstream2 << 1);
+               bitstream2 <<= 1;
             }
             else
             {
-               bitstream = (bitstream << 1);
+               bitstream <<= 1;
             }
             bitcount++;
          }
@@ -127,40 +126,38 @@ boolean Plugin_075(byte function, char *string)
                return false; // invalid pulse length
             if (bitcount > 23)
             {
-               bitstream2 = (bitstream2 << 1) | 0x1;
+               bitstream2 <<= 1;
+               bitstream2 |= 0x1;
             }
             else
             {
-               bitstream = (bitstream << 1) | 0x1;
+               bitstream <<= 1;
+               bitstream |= 0x1;
             }
             bitcount++;
          }
       }
    }
    //==================================================================================
-   // all bytes received, make sure checksum is okay
+   // Perform a quick sanity check
    //==================================================================================
    if (type == 0)
    {
-      if ((bitstream2 & 0xfff) != 0x00)
-         return false; // these 8 bits are always 0
+      if ((bitstream2 & 0xFFF) != 0x000)
+         return false; // these 12 bits are always 0
    }
    else
    {
-      if (bitstream != 0x5ca588)
+      if (bitstream != 0x5CA588)
          return false;
    }
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 2000) < millis()) || (SignalCRC != bitstream))
-   {
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000) < millis()) || (SignalCRC != bitstream))
       SignalCRC = bitstream; // not seen the RF packet recently
-   }
    else
-   {
       return true; // already seen the RF packet recently
-   }
    //==================================================================================
    // Output
    //==================================================================================

@@ -48,58 +48,57 @@ boolean Plugin_074(byte function, char *string)
 
     unsigned long bitstream = 0L;
     unsigned long checksum = 0L;
-    int i, j;
-    boolean error = false;
     //==================================================================================
     // Get all 12 bits
     //==================================================================================
-    for (i = 0; i < RL02_CodeLength; i++)
+    byte j = (RL02_T * 2) / RAWSIGNAL_SAMPLE_RATE;
+    for (byte i = 0; i < RL02_CodeLength; i++)
     {
-        j = (RL02_T * 2) / RAWSIGNAL_SAMPLE_RATE;
 
         if (RawSignal.Pulses[4 * i + 1] < j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] < j && RawSignal.Pulses[4 * i + 4] > j)
-        {                                 // 0101
-            bitstream = (bitstream >> 1); // 0
+        {                    // 0101
+            bitstream >>= 1; // 0
         }
         else if (RawSignal.Pulses[4 * i + 1] < j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] > j && RawSignal.Pulses[4 * i + 4] < j)
-        {                                                                // 0110
-            bitstream = (bitstream >> 1 | (1 << (RL02_CodeLength - 1))); // float
+        {
+            bitstream >>= 1;                           // 0110
+            bitstream |= (1 << (RL02_CodeLength - 1)); // 1
         }
         else if (RawSignal.Pulses[4 * i + 1] > j && RawSignal.Pulses[4 * i + 2] < j && RawSignal.Pulses[4 * i + 3] > j && RawSignal.Pulses[4 * i + 4] < j)
-        {                                 // 1010
-            bitstream = (bitstream >> 1); // 1
+        {                    // 1010
+            bitstream >>= 1; // 0
         }
         else
         {
             if (i == 0)
             {
                 if (RawSignal.Pulses[4 * i + 1] > j && RawSignal.Pulses[4 * i + 2] > j && RawSignal.Pulses[4 * i + 3] < j && RawSignal.Pulses[4 * i + 4] > j)
-                {                                                                // 1101
-                    bitstream = (bitstream >> 1 | (1 << (RL02_CodeLength - 1))); // 1
+                {
+                    bitstream >>= 1;                           // 1101
+                    bitstream |= (1 << (RL02_CodeLength - 1)); // 1
                 }
                 else
-                {
-                    error = true;
-                }
+                    return false;
             }
             else
-            {
-                error = true;
-            }
+                return false;
         }
     }
-    // ==========================================================================
-    // all bytes received, make sure packet is valid and checksum is okay
-    // ==========================================================================
-    if (error == true)
-        return false;
+    //==================================================================================
+    // Perform a quick sanity check
+    //==================================================================================
     if (bitstream == 0)
         return false; // sanity check
-    checksum = (bitstream)&0x000007FFL;
+    checksum = (bitstream & 0x000007FFL);
     if (checksum != 0x000007ADL)
         return false;
-    if (bitstream == 0)
-        return false; // sanity check
+    //==================================================================================
+    // Prevent repeating signals from showing up
+    //==================================================================================
+    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 1000) < millis()) || (SignalCRC != bitstream))
+        SignalCRC = bitstream; // not seen the RF packet recently
+    else
+        return true; // already seen the RF packet recently
     //==================================================================================
     // Output
     //==================================================================================
