@@ -50,7 +50,6 @@
 #define PLUGIN_045 // Auriol
 #define PLUGIN_046 // Auriol v2 / Xiron
 #define PLUGIN_047 // Auriol v4
-// #define PLUGIN_048              // Oregon V1/2/3
 // -------------------
 // Motion Sensors, include when needed
 // -------------------
@@ -76,15 +75,12 @@
 // -------------------
 // Misc
 // -------------------
-// #define PLUGIN_090              // Nodo Slave
 // -------------------
 // 868 MHZ
 // -------------------
-// #define PLUGIN_100              // Alecto V2 (DKW2012/ACH2010) 868 MHz.  => PLANNED
 // -------------------
 // Housekeeping
 // -------------------
-// #define PLUGIN_090              // Nodo Slave conversion plugin
 #define PLUGIN_254 // Debug to show unsupported packets
 // ****************************************************************************************************************************************
 // RFLink List of Plugins that have TRANSMIT functionality

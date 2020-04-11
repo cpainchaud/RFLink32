@@ -74,6 +74,7 @@ A270000104030080A04103
 #define NodoSlave_PULSECOUNT 194
 
 #ifdef PLUGIN_090
+#include "../4_Display.h"
 
 struct DataBlockStruct
 { // 16*sizeof(struct DataBlockStruct)+2 = 194   eg. 16*12+2

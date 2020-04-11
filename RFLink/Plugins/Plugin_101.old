@@ -36,7 +36,7 @@
 #define OSV3_PULSECOUNT_MIN 126 
 #define OSV3_PULSECOUNT_MAX 278
 
-
+#include "../4_Display.h"
 // =====================================================================================================
 class DecodeOOK {
 protected:

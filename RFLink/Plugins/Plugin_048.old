@@ -35,6 +35,7 @@
 #define OSV3_PULSECOUNT_MAX 290 // make sure to check the max length in plugin 1 as well..!
 
 #ifdef PLUGIN_048
+#include "../4_Display.h"
 /*
  * Many devices use 160 bits, known exceptions:
  * 0xEA4c         136 bits  // TH132N

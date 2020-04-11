@@ -15,6 +15,7 @@
  ***********************************************************************************************/
 
 #ifdef PLUGIN_TX_250
+#include "../4_Display.h"
 
 // prototyping functions
 byte Plugin_250_GetArgv(char *, char *, int);
