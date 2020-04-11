@@ -40,110 +40,129 @@
  * Sample RF packet: 
  * Pulses=26;Pulses(uSec)=475,300,325,700,325,700,325,700,325,700,725,300,725,300,725,300,725,300,725,300,325,700,725,300,725;
  \*********************************************************************************************/
-#define MAXITROL_PULSECOUNT 26
+#define MAXITROL2_PLUGIN_ID 82
+#define MAXITROL2_PULSECOUNT 26
 
-#define PLUGIN_082_RFSTART 100
-#define PLUGIN_082_RFSPACE 250
-#define PLUGIN_082_RFLOW 400
-#define PLUGIN_082_RFHIGH 750
+#define MAXITROL2_MID 550
+#define MAXITROL2_PULSEMINMAX 550 / RAWSIGNAL_SAMPLE_RATE
+#define MAXITROL2_PULSEMAX 900 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_082
 #include "../4_Display.h"
 
 boolean Plugin_082(byte function, char *string)
 {
-   if (RawSignal.Number != MAXITROL_PULSECOUNT)
+   if (RawSignal.Number != MAXITROL2_PULSECOUNT)
       return false;
+
    unsigned int bitstream = 0L;
    byte address = 0;
    byte command = 0;
    byte status = 0;
    //==================================================================================
-   // get bits
-   for (int x = 3; x <= MAXITROL_PULSECOUNT - 1; x = x + 2)
+   // Perform a pre sanity check
+   //==================================================================================
+   if (RawSignal.Pulses[1] > MAXITROL2_PULSEMINMAX)
+      return false;
+   if (RawSignal.Pulses[2] > MAXITROL2_MID)
+      return false;
+   //==================================================================================
+   // Get all 21 bits
+   //==================================================================================
+   for (int x = 3; x <= MAXITROL2_PULSECOUNT - 1; x = x + 2)
    {
-      if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 550)
+      bitstream <<= 1; // Always shift
+
+      if (RawSignal.Pulses[x] < MAXITROL2_PULSEMINMAX)
       {
-         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE < 550)
+         if (RawSignal.Pulses[x + 1] < MAXITROL2_MID)
             return false;
-         bitstream = (bitstream << 1); // 0
+         // bitstream |= 0x0; // 0
       }
       else
       {
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 900)
+         if (RawSignal.Pulses[x] > MAXITROL2_PULSEMAX)
             return false;
-         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE > 550)
+         if (RawSignal.Pulses[x + 1] > MAXITROL2_MID)
             return false;
-         bitstream = (bitstream << 1) | 0x1; // 1
+         bitstream |= 0x1; // 1
       }
    }
    //==================================================================================
-   // all bytes received, make sure packet is valid
-   if (RawSignal.Pulses[1] * RAWSIGNAL_SAMPLE_RATE > 550)
-      return false;
-   if (RawSignal.Pulses[2] * RAWSIGNAL_SAMPLE_RATE > 550)
+   // Perform a quick sanity check
+   //==================================================================================
+   if (bitstream == 0) // && (bitstream2 == 0)
       return false;
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer < millis()))
-   {
-      // not seen the RF packet recently
-      if (bitstream == 0)
-         return false; // sanity check
-   }
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != bitstream))
+      SignalCRC = bitstream; // not seen the RF packet recently
    else
-   {
-      // already seen the RF packet recently
-      return true;
-   }
+      return true; // already seen the RF packet recently
    //==================================================================================
-   command = (bitstream)&0x0f; // get address from pulses
-   address = ((bitstream) >> 4) & 0xff;
-   if (command == 0xB)
-      status = 1; // up
-   else if (command == 0xD)
-      status = 2; // down
-   else if (command == 0x7)
-      status = 3; // off
-   else if (command == 0x3)
-      status = 4; // on
-   else if (command == 0x8)
-      status = 5; // stop
-   else if (command == 0xa)
-      status = 6; // go up
-   else if (command == 0xc)
-      status = 7; // go down
-   else
+   command = (bitstream & 0x0F); // get address from pulses
+   address = ((bitstream >> 4) & 0xFF);
+
+   switch (command)
    {
+   case 0xB:
+      status = 1; // up
+      break;
+   case 0xD:
+      status = 2; // down
+      break;
+   case 0x7:
+      status = 3; // off
+      break;
+   case 0x3:
+      status = 4; // on
+      break;
+   case 0x8:
+      status = 5; // stop
+      break;
+   case 0xA:
+      status = 6; // go up
+      break;
+   case 0xC:
+      status = 7; // go down
+      break;
+   default:
       return false;
    }
    //==================================================================================
    // Output
-   // ----------------------------------
-   sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-   Serial.print(pbuffer);
-   Serial.print(F("Mertik;"));            // Label
-   sprintf(pbuffer, "ID=%02x;", address); // ID
-   Serial.print(pbuffer);
-   sprintf(pbuffer, "SWITCH=%02x;", status);
-   Serial.print(pbuffer);
-   Serial.print(F("CMD="));
-   if (status == 1)
-      Serial.print(F("UP;"));
-   if (status == 2)
-      Serial.print(F("DOWN;"));
-   if (status == 3)
-      Serial.print(F("OFF;"));
-   if (status == 4)
-      Serial.print(F("ON;"));
-   if (status == 5)
-      Serial.print(F("STOP;"));
-   if (status == 6)
-      Serial.print(F("GOUP;"));
-   if (status == 7)
-      Serial.print(F("GODOWN;"));
-   Serial.println();
+   //==================================================================================
+   display_Header();
+   display_Name(PSTR("Mertik v2"));
+   display_IDn(address, 2);
+   display_SWITCH(status);
+   display_Name(PSTR(";CMD="));
+   switch (status)
+   {
+   case 1:
+      display_Name(PSTR("UP"));
+      break;
+   case 2:
+      display_Name(PSTR("DOWN"));
+      break;
+   case 3:
+      display_Name(PSTR("OFF"));
+      break;
+   case 4:
+      display_Name(PSTR("ON"));
+      break;
+   case 5:
+      display_Name(PSTR("STOP"));
+      break;
+   case 6:
+      display_Name(PSTR("GOUP"));
+      break;
+   case 7:
+      display_Name(PSTR("GODOWN"));
+      break;
+   }
+   display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
@@ -152,6 +171,11 @@ boolean Plugin_082(byte function, char *string)
 #endif // PLUGIN_082
 
 #ifdef PLUGIN_TX_082
+#define MAXITROL2_RFSTART 100
+#define MAXITROL2_RFSPACE 250
+#define MAXITROL2_RFLOW 400
+#define MAXITROL2_RFHIGH 750
+
 boolean PluginTX_082(byte function, char *string)
 {
    boolean success = false;
