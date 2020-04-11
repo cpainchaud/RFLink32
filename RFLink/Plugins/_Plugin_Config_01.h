@@ -69,9 +69,9 @@
 // -------------------
 // Smoke detectors / Fire Places
 // -------------------
-// #define PLUGIN_080              // Flamingo FA20 / KD101 smoke detector
-// #define PLUGIN_082              // Mertik Maxitrol / Dru fireplace
-// #define PLUGIN_083              // Alecto SA33
+#define PLUGIN_080 // Flamingo FA20 / KD101 smoke detector
+#define PLUGIN_081 // Mertik Maxitrol / Dru fireplace
+#define PLUGIN_082 // Mertik Maxitrol / Dru fireplace
 // -------------------
 // Misc
 // -------------------
