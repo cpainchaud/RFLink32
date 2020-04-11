@@ -35,7 +35,9 @@
  * 20;2D;DEBUG;Pulses=66;Pulses(uSec)=875,275,300,750,800,275,300,750,800,275,300,750,800,275,300,750,800,275,300,750,800,250,300,750,800,275,275,750,800,275,300,750,300,750,300,750,300,750,300,750,300,750,300,750,300,750,300,750,300,750,300,750,300,750,800,275,800,275,800,250,300,750,300,750,225;
  * 20;2E;Plieger York;ID=aaaa;SWITCH=1;CMD=ON;CHIME=02;
  \*********************************************************************************************/
+#define PLIEGER_PLUGIN_ID 71
 #define PLIEGER_PULSECOUNT 66
+
 #define PLIEGER_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
 #define PLIEGER_PULSEMAX 1900 / RAWSIGNAL_SAMPLE_RATE
 
@@ -46,11 +48,13 @@ boolean Plugin_071(byte function, char *string)
 {
    if (RawSignal.Number != PLIEGER_PULSECOUNT)
       return false;
+
    unsigned long bitstream = 0L;
    unsigned int id = 0;
    byte chime = 0;
    //==================================================================================
-   // get all 32 bits
+   // Get all 32 bits
+   //==================================================================================
    for (byte x = 1; x <= PLIEGER_PULSECOUNT - 2; x += 2)
    {
       if (RawSignal.Pulses[x] > PLIEGER_PULSEMID)
@@ -97,17 +101,14 @@ boolean Plugin_071(byte function, char *string)
       chime = 2;
    //==================================================================================
    // Output
-   // ----------------------------------
-   Serial.print("20;");
-   PrintHexByte(PKSequenceNumber++);
-   Serial.print(F(";Plieger;")); // Label
-   // ----------------------------------
-   sprintf(pbuffer, "ID=%04x;", id); // ID
-   Serial.print(pbuffer);
-   Serial.print("SWITCH=1;CMD=ON;");
-   sprintf(pbuffer, "CHIME=%02x;", chime); // chime number
-   Serial.print(pbuffer);
-   Serial.println();
+   //==================================================================================
+    display_Header();
+    display_Name(PSTR("Plieger"));
+    display_IDn(id, 4);
+    display_SWITCH(1);
+    display_CMD(false, true);
+    display_CHIME(chime);
+    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;     // do not process the packet any further
