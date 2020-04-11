@@ -6,16 +6,17 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "RFLink.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
 
-boolean RFDebug = false;   // debug RF signals with plugin 001 (no decode)
-boolean QRFDebug = false;  // debug RF signals with plugin 001 but no multiplication (faster?, compact)
-boolean RFUDebug = false;  // debug RF signals with plugin 254 (decode 1st)
-boolean QRFUDebug = false; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
+boolean RFDebug = RFDebug_0;     // debug RF signals with plugin 001 (no decode)
+boolean QRFDebug = QRFDebug_0;   // debug RF signals with plugin 001 but no multiplication (faster?, compact)
+boolean RFUDebug = RFUDebug_0;   // debug RF signals with plugin 254 (decode 1st)
+boolean QRFUDebug = QRFUDebug_0; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 /**********************************************************************************************\
  * Load plugins
