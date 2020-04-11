@@ -92,7 +92,7 @@ boolean Plugin_080(byte function, char *string)
    display_Header();
    display_Name(PSTR("FA20RF"));
    display_IDn(bitstream, 6);
-   display_SMOKEALERT(true);
+   display_SMOKEALERT(SMOKE_On);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

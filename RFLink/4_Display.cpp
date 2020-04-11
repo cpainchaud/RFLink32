@@ -244,7 +244,7 @@ void display_CHIME(unsigned int input)
 // SMOKEALERT=ON => ON/OFF
 void display_SMOKEALERT(boolean input)
 {
-  if (input == true)
+  if (input == SMOKE_On)
     sprintf_P(dbuffer, PSTR("%S"), F(";SMOKEALERT=ON"));
   else
     sprintf_P(dbuffer, PSTR("%S"), F(";SMOKEALERT=OFF"));
