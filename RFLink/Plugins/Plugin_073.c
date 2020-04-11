@@ -31,7 +31,9 @@
  * 20;1B;DEBUG;Pulses=26;Pulses(uSec)=600,1150,500,1175,525,1175,500,1175,500,1175,500,1175,500,1175,475,1200,500,1200,475,575,1075,600,1075,1200,475;
  * 000000000110
  \*********************************************************************************************/
+#define DELTRONIC_PLUGIN_ID 73
 #define DELTRONIC_PULSECOUNT 26
+
 #define LENGTH_DEVIATION 300
 
 #ifdef PLUGIN_073
@@ -41,12 +43,15 @@ boolean Plugin_073(byte function, char *string)
 {
     if (RawSignal.Number != DELTRONIC_PULSECOUNT)
         return false;
-    //==================================================================================
+
     unsigned long bitstream = 0L;
     unsigned long checksum = 0L;
     //==================================================================================
     if (RawSignal.Pulses[1] * RAWSIGNAL_SAMPLE_RATE > 675)
         return false; // First pulse is start bit and should be short!
+                      //==================================================================================
+                      // Get all 12 bits
+                      //==================================================================================
     for (byte x = 2; x < DELTRONIC_PULSECOUNT; x = x + 2)
     {
         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 800)
@@ -83,7 +88,7 @@ boolean Plugin_073(byte function, char *string)
     //==================================================================================
     checksum = (bitstream)&0x00000FF0L;
     if (checksum != 0x00000FF0L)
-    {   // First 8 bits should always be 1
+    { // First 8 bits should always be 1
         //Serial.println("crc error");
         return false;
     }
@@ -91,16 +96,14 @@ boolean Plugin_073(byte function, char *string)
         return false; // sanity check
     //==================================================================================
     // Output
-    // ----------------------------------
-    Serial.print("20;");
-    PrintHexByte(PKSequenceNumber++);
-    Serial.print(F(";Deltronic;")); // Label
-    // ----------------------------------
-    sprintf(pbuffer, "ID=%04x;", (bitstream)&0x0000000FL); // ID
-    Serial.print(pbuffer);
-    Serial.print(F("SWITCH=1;CMD=ON;"));
-    Serial.print(F("CHIME=01;"));
-    Serial.println();
+    //==================================================================================
+    display_Header();
+    display_Name(PSTR("Deltronic"));
+    display_IDn((bitstream & 0x0000000FL), 4);
+    display_SWITCH(1);
+    display_CMD(false, true);
+    display_CHIME(1);
+    display_Footer();
     //==================================================================================
     RawSignal.Repeats = true; // suppress repeats of the same RF packet
     RawSignal.Number = 0;     // do not process the packet any further
