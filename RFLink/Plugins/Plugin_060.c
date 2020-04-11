@@ -91,7 +91,7 @@ boolean Plugin_060(byte function, char *string)
    display_Name(PSTR("X10"));
    display_IDn((bitstream & 0xFFFF), 4); // "%S%04x"
    display_SWITCH(1);
-   display_CMD(false, true); // #ALL , #ON
+   display_CMD(CMD_Single, CMD_On); // #ALL #ON
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

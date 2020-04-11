@@ -166,7 +166,7 @@ boolean Plugin_075(byte function, char *string)
    else
       display_IDn(bitstream2, 8);
    display_SWITCH(1);
-   display_CMD(false, true);
+   display_CMD(CMD_Single, CMD_On); // #ALL #ON
    display_CHIME(1);
    display_Footer();
    //==================================================================================

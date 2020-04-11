@@ -127,7 +127,7 @@ boolean Plugin_015(byte function, char *string)
    display_Name(PSTR("HomeEasy"));
    display_IDn(address, 8);                        //"%S%08lx"
    display_SWITCH(channel);                        // "%02x"
-   display_CMD((group & B01), (!(command & B01))); // #All #On
+   display_CMD((group & B01), (!(command & B01))); // #All #ON
    display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true;

@@ -140,8 +140,7 @@ boolean Plugin_006(byte function, char *string)
    char c_SWITCH[4];
    sprintf(c_SWITCH, "%c%d", channel, subchan);
    display_SWITCHc(c_SWITCH);
-
-   display_CMD((status >> 1) & B01, !(status & B01)); // #ALL #ON Serial.print(F("ON;"));
+   display_CMD((status >> 1) & B01, !(status & B01)); // #ALL #ON
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

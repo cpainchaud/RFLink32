@@ -128,9 +128,9 @@ boolean Plugin_005(byte function, char *string)
    display_IDn(address, 6);  //"%S%06lx"
    display_SWITCH(unitcode); // %02x
    if (unitcode > 4)
-      display_CMD(true, (command != 0x0)); // #ALL #ON
+      display_CMD(CMD_All, (command != 0x0)); // #ALL #ON 
    else
-      display_CMD(false, (command != 0X1)); // #ALL #ON
+      display_CMD(CMD_Single, (command != 0X1)); // #ALL #ON
    display_Footer();
 
    // ----------------------------------

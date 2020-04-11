@@ -140,7 +140,7 @@ boolean Plugin_004(byte function, char *string)
    if (i > 140 && dimbitpresent == 1)
       display_SET_LEVEL(dim); // Command and Dim part
    else
-      display_CMD((bitstream >> 5) & B01, (bitstream >> 4) & B01); // #ALL , #ON
+      display_CMD((CMD_Group)((bitstream >> 5) & B01),(CMD_OnOff)((bitstream >> 4) & B01));// #ALL , #ON
    display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

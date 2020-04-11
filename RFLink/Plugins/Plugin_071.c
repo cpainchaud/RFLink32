@@ -111,7 +111,7 @@ boolean Plugin_071(byte function, char *string)
    display_Name(PSTR("Plieger"));
    display_IDn(id, 4);
    display_SWITCH(1);
-   display_CMD(false, true);
+   display_CMD(CMD_Single, CMD_On); // #ALL #ON
    display_CHIME(chime);
    display_Footer();
    //==================================================================================

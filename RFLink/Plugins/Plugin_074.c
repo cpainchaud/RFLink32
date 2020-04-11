@@ -106,7 +106,7 @@ boolean Plugin_074(byte function, char *string)
     display_Name(PSTR("Byron MP"));
     display_IDn(((bitstream & 0x00000800L) ? 1 : 0), 4); // ID: 0 = Ring button, 1 = Change chime button
     display_SWITCH(1);
-    display_CMD(false, true);
+    display_CMD(CMD_Single, CMD_On);
     display_CHIME(1);
     display_Footer();
     // ----------------------------------

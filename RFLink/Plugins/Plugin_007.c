@@ -227,7 +227,7 @@ boolean Plugin_007(byte function, char *string)
    display_Name(PSTR("Conrad"));
    display_IDn((bitstream & 0xFFFFFF), 6);     //"%S%06lx"
    display_SWITCH(button);                     // %02x
-   display_CMD((group == 0x3), (action == 1)); // #ALL , #ON
+   display_CMD((group == 0x3), (action == 1)); // #ALL #ON
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

@@ -94,7 +94,7 @@ boolean Plugin_072(byte function, char *string)
    display_Name(PSTR("Byron SX"));
    display_IDn(((bitstream >> 4) & 0xFF), 4);
    display_SWITCH(1);
-   display_CMD(false, true);
+   display_CMD(CMD_Single, CMD_On); // #ALL #ON
    display_CHIME((bitstream & 0xF));
    display_Footer();
    //==================================================================================

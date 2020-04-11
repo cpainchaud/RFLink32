@@ -223,7 +223,7 @@ boolean Plugin_012(byte function, char *string)
    {
    case 0x00:
    case 0x01:
-      display_CMD(false, (command & B01)); // #ALL , #ON
+      display_CMD(CMD_Single, (command & B01)); // #ALL #ON
       break;
    default:
       display_Name(PSTR(";CMD=UNKOWN"));

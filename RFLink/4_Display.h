@@ -22,6 +22,8 @@ void display_IDn(unsigned int, byte);
 void display_IDc(const char *);
 void display_SWITCH(byte);
 void display_SWITCHc(const char *);
+enum CMD_Group {CMD_Single, CMD_All}; 
+enum CMD_OnOff {CMD_Off, CMD_On}; 
 void display_CMD(boolean, boolean);
 void display_SET_LEVEL(byte);
 void display_TEMP(unsigned int);

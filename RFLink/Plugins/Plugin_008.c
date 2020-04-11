@@ -141,7 +141,7 @@ boolean Plugin_008(byte function, char *string)
     sprintf(c_SWITCH, "%c%d", channel, subchan);
     display_SWITCHc(c_SWITCH);
 
-    display_CMD(false, (status & B01)); // #ALL , #ON
+    display_CMD(CMD_Single, (status & B01)); // #ALL #ON
     display_Footer();
     //==================================================================================
     RawSignal.Repeats = true; // suppress repeats of the same RF packet

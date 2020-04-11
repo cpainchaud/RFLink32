@@ -96,7 +96,7 @@ boolean Plugin_073(byte function, char *string)
     display_Name(PSTR("Deltronic"));
     display_IDn((bitstream & 0x0000000FL), 4);
     display_SWITCH(1);
-    display_CMD(false, true);
+    display_CMD(CMD_Single, CMD_On); // #ALL #ON
     display_CHIME(1);
     display_Footer();
     //==================================================================================

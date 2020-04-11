@@ -96,13 +96,13 @@ void display_CMD(boolean all, boolean on)
   sprintf_P(dbuffer, PSTR("%S"), F(";CMD="));
   strcat(pbuffer, dbuffer);
 
-  if (all == true)
+  if (all == CMD_All)
   {
     sprintf_P(dbuffer, PSTR("%S"), F("ALL"));
     strcat(pbuffer, dbuffer);
   }
 
-  if (on == true)
+  if (on == CMD_On)
     sprintf_P(dbuffer, PSTR("%S"), F("ON"));
   else
     sprintf_P(dbuffer, PSTR("%S"), F("OFF"));

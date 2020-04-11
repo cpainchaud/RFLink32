@@ -155,7 +155,7 @@ boolean Plugin_014(byte function, char *string)
    case 0x01:
    case 0x04:
    case 0x05:
-      display_CMD(((command >> 3) & B01), (command & B01));
+      display_CMD(((command >> 3) & B01), (command & B01)); // #ALL #ON
       break;
    case 0x02:
    case 0x03:
