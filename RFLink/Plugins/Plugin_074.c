@@ -37,6 +37,8 @@
 #define RL02_T 125 // 175 uS
 
 #ifdef PLUGIN_074
+#include "../4_Display.h"
+
 boolean Plugin_074(byte function, char *string)
 {
     if (RawSignal.Number != (RL02_CodeLength * 4) + 2)

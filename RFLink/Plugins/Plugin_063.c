@@ -22,7 +22,7 @@
 #define OREGON_PLA_PULSECOUNT 52
 
 #ifdef PLUGIN_063
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_063(byte function, char *string)
 {

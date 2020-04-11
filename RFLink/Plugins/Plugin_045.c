@@ -42,7 +42,7 @@
 #define AURIOL_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_045
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_045(byte function, char *string)
 {

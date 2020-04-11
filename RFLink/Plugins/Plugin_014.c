@@ -40,7 +40,7 @@
 #define KOPPLA_PULSEMIN 650 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_014
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_014(byte function, char *string)
 {

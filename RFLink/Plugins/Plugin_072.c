@@ -38,6 +38,8 @@
 #define BYRONHIGH 675
 
 #ifdef PLUGIN_072
+#include "../4_Display.h"
+
 boolean Plugin_072(byte function, char *string)
 {
    if (RawSignal.Number != BYRON_PULSECOUNT)

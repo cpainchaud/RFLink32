@@ -19,7 +19,7 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "2_Signal.h"
-#include "4_Misc.h"
+#include "4_Display.h"
 #include "5_Plugin.h"
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>

@@ -45,6 +45,8 @@
 #define EURODOMEST_PULSEMAX 900 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_005
+#include "../4_Display.h"
+
 boolean Plugin_005(byte function, char *string)
 {
    if (RawSignal.Number != EURODOMEST_PulseLength)

@@ -48,7 +48,7 @@
 #define NewKAKU_mT 650 / RAWSIGNAL_SAMPLE_RATE // us, approx. in between 1T and 4T
 
 #ifdef PLUGIN_004
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_004(byte function, char *string)
 {

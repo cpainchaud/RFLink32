@@ -97,7 +97,7 @@
 #define LACROSSE43_PULSEMAX 1440 / RAWSIGNAL_SAMPLE_RATE    //2100 //1500
 
 #ifdef PLUGIN_043
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_043(byte function, char *string)
 {

@@ -94,7 +94,7 @@
 #define POWEFIX_PULSEMAX 1400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_013
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_013(byte function, char *string)
 {

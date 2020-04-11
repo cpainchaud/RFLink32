@@ -41,6 +41,8 @@
 #define PLUGIN_ID 75
 
 #ifdef PLUGIN_075
+#include "../4_Display.h"
+
 boolean Plugin_075(byte function, char *string)
 {
    if ((RawSignal.Number != LIDL_PULSECOUNT) && (RawSignal.Number != LIDL_PULSECOUNT2))

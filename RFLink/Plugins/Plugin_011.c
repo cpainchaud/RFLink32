@@ -57,7 +57,7 @@
 #define HC_PULSECOUNT 100
 
 #ifdef PLUGIN_011
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_011(byte function, char *string)
 {

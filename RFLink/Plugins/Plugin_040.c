@@ -52,7 +52,7 @@
 #define MEBUS_PULSEMAXMIN 3400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_040
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_040(byte function, char *string)
 {

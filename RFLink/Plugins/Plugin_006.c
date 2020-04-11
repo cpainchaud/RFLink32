@@ -39,6 +39,8 @@
 #define BLYSS_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_006
+#include "../4_Display.h"
+
 boolean Plugin_006(byte function, char *string)
 {
    if (RawSignal.Number != BLYSS_PULSECOUNT)

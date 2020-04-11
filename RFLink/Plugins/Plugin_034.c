@@ -32,7 +32,7 @@
 #define CRESTA_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_034
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 byte Plugin_034_reverseBits(byte data);
 byte Plugin_034_WindDirSeg(byte data);
@@ -305,7 +305,8 @@ boolean Plugin_034(byte function, char *string)
       display_IDc(c_ID);
       display_Footer();
       // ----------------------------------
-      PrintHex8(data, length + 2);
+      for (byte i = 0; i < length + 2; i++)
+         Serial.printf("%02x", data[i]);
       Serial.print(F(";"));
       Serial.println();
       //==================================================================================

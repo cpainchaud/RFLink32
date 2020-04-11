@@ -40,6 +40,8 @@
 #define PLIEGER_PULSEMAX 1900 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_071
+#include "../4_Display.h"
+
 boolean Plugin_071(byte function, char *string)
 {
    if (RawSignal.Number != PLIEGER_PULSECOUNT)

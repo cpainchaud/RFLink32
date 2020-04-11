@@ -47,7 +47,7 @@
 #define X10_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_009
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_009(byte function, char *string)
 {

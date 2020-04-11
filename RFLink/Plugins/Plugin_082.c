@@ -48,6 +48,8 @@
 #define PLUGIN_082_RFHIGH 750
 
 #ifdef PLUGIN_082
+#include "../4_Display.h"
+
 boolean Plugin_082(byte function, char *string)
 {
    if (RawSignal.Number != MAXITROL_PULSECOUNT)

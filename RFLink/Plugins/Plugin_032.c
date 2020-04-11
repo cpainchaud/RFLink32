@@ -48,6 +48,8 @@
 #define ALECTOV4_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_032
+#include "../4_Display.h"
+
 boolean Plugin_032(byte function, char *string)
 {
    if (RawSignal.Number < ALECTOV4_PULSECOUNT || RawSignal.Number > (ALECTOV4_PULSECOUNT + 4))

@@ -46,7 +46,7 @@
 #define CONRADRSL2_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_007
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_007(byte function, char *string)
 {

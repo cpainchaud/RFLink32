@@ -64,7 +64,7 @@
 #define LACROSSE_PULSEMID 1000 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_002
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_002(byte function, char *string)
 {
@@ -259,7 +259,8 @@ boolean Plugin_002(byte function, char *string)
       display_Name(PSTR("LaCrosseV2"));
       display_IDc(c_ID);
       display_Name(PSTR(";DEBUG"));
-      PrintHex8(data, 12);
+      for (byte i = 0; i < 12; i++)
+         Serial.printf("%02x", data[i]);
       display_Footer();
       //return false;
    }

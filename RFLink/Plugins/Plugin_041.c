@@ -88,7 +88,7 @@
 #define LACROSSE41_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_041
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_041(byte function, char *string)
 {

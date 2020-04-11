@@ -55,7 +55,7 @@
 #define AURIOLV2_PULSEMAX 2100 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_046
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_046(byte function, char *string)
 {

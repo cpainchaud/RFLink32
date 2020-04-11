@@ -6,7 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
-#include "4_Misc.h"
+#include "4_Display.h"
 
 byte PKSequenceNumber = 0;       // 1 byte packet counter
 char dbuffer[30];                // Buffer for message chunk data
@@ -325,13 +325,6 @@ void display_RGBW(unsigned int input)
 }
 
 /*********************************************************************************************\
-   Convert HEX or DEC tring to unsigned long HEX, DEC
-  \*********************************************************************************************/
-unsigned long str2int(char *string)
-{
-  return (strtoul(string, NULL, 0));
-}
-/*********************************************************************************************\
    Convert string to command code
   \*********************************************************************************************/
 /*
@@ -351,102 +344,3 @@ unsigned long str2int(char *string)
   return false;
   }
 */
-/********************************************************************************************\
-   Convert unsigned long to float long through memory
-  \*********************************************************************************************/
-float ul2float(unsigned long ul)
-{
-  float f;
-  memcpy(&f, &ul, 4);
-  return f;
-}
-/*********************************************************************************************/
-void PrintHex8(uint8_t *data, uint8_t length)
-{ // prints 8-bit data in hex (lowercase)
-  char tmp[length * 2 + 1];
-  byte first;
-  int j = 0;
-  for (uint8_t i = 0; i < length; i++)
-  {
-    first = (data[i] >> 4) | 48;
-    if (first > 57)
-      tmp[j] = first + (byte)39;
-    else
-      tmp[j] = first;
-    j++;
-
-    first = (data[i] & 0x0F) | 48;
-    if (first > 57)
-      tmp[j] = first + (byte)39;
-    else
-      tmp[j] = first;
-    j++;
-  }
-  tmp[length * 2] = 0;
-  Serial.print(tmp);
-}
-/*********************************************************************************************/
-// todo: make uppercase?  3a = 3 or 48 (0x30) = 0x33   >57 (0x39)   a>3a >39 >   +27
-void PrintHexByte(uint8_t data)
-{ // prints 8-bit value in hex (single byte)
-  char tmp[3];
-  byte first;
-  first = (data >> 4) | 48; // or with 0x30
-  if (first > 57)
-    tmp[0] = first + (byte)7; // 39;  // if > 0x39 add 0x27
-  else
-    tmp[0] = first;
-
-  first = (data & 0x0F) | 48;
-  if (first > 57)
-    tmp[1] = first + (byte)7; // 39;
-  else
-    tmp[1] = first;
-  tmp[2] = 0;
-  Serial.print(tmp);
-}
-/*********************************************************************************************/
-// Reverse all bits in a byte
-byte reverseBits(byte data)
-{
-  byte b = data;
-  for (byte i = 0; i < 8; ++i)
-  {
-    data = (data << 1) | (b & 1);
-    b >>= 1;
-  }
-  return data;
-}
-/*********************************************************************************************/
-/// Generic Cyclic Redundancy Check CRC-8.
-///
-/// Example polynomial: 0x31 = x8 + x5 + x4 + 1 (x8 is implicit)
-/// Example polynomial: 0x80 = x8 + x7 (a normal bit-by-bit parity XOR)
-///
-/// @param message array of bytes to check
-/// @param nBytes number of bytes in message
-/// @param polynomial byte is from x^7 to x^0 (x^8 is implicitly one)
-/// @param init starting crc value
-/// @return CRC value
-//
-// Source : https://github.com/merbanan/rtl_433/blob/master/include/util.h
-//
-uint8_t crc8(const uint8_t message[], unsigned nBytes, uint8_t polynomial, uint8_t init)
-{
-    uint8_t remainder = init;
-    unsigned byte, bit;
-
-    for (byte = 0; byte < nBytes; ++byte) {
-        remainder ^= message[byte];
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 0x80) {
-                remainder = (remainder << 1) ^ polynomial;
-            } else {
-                remainder = (remainder << 1);
-            }
-        }
-    }
-    return remainder;
-}
-/*********************************************************************************************/
-

@@ -81,7 +81,7 @@
 #define FA500_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_012
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_012(byte function, char *string)
 {

@@ -96,7 +96,7 @@
 #define UPM_PULSEHILO 1600 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_042
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_042(byte function, char *string)
 {

@@ -56,7 +56,7 @@
 #define RGB_PULSE_LOLO 400 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_010
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_010(byte function, char *string)
 {

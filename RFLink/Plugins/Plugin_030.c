@@ -99,7 +99,7 @@
 #define ALECTOV1_PULSEMAXMIN 2560 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_030
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_030(byte function, char *string)
 {

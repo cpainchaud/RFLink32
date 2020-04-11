@@ -70,7 +70,7 @@
 #define ALECTOV3_PULSEMID 300 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_031
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 uint8_t Plugin_031_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 // unsigned int Plugin_031_ProtocolAlectoRainBase = 0;

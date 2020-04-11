@@ -41,6 +41,8 @@
 #define FA20_PULSECOUNT 52
 
 #ifdef PLUGIN_080
+#include "../4_Display.h"
+
 boolean Plugin_080(byte function, char *string)
 {
    if (RawSignal.Number != FA20_PULSECOUNT)

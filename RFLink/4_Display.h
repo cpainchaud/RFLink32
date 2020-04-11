@@ -53,11 +53,6 @@ void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
-unsigned long str2int(char *string);
-float ul2float(unsigned long ul);
-void PrintHex8(uint8_t *data, uint8_t length);
-void PrintHexByte(uint8_t data);
-byte reverseBits(byte data);
-uint8_t crc8(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8_t init);
+// int str2cmd(char *command)
 
 #endif

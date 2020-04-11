@@ -221,7 +221,7 @@
 #define KAKU_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE // (17)  510 = KAKU_R*2 not sufficient!
 
 #ifdef PLUGIN_003
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_003(byte function, char *string)
 {

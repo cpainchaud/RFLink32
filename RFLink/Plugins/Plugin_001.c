@@ -83,7 +83,7 @@
 #define PULSE6500 6500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_001
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_001(byte function, char *string)
 {
@@ -209,15 +209,15 @@ boolean Plugin_001(byte function, char *string)
       display_Name(PSTR("DEBUG"));
       display_Footer();
       // ----------------------------------
-      Serial.print(F("20;XX;DEBUG;Pulses="));  // debug data
-      Serial.print(RawSignal.Number);    // print number of pulses
-      Serial.print(F(";Pulses(uSec)=")); // print pulse durations
+      Serial.print(F("20;XX;DEBUG;Pulses=")); // debug data
+      Serial.print(RawSignal.Number);         // print number of pulses
+      Serial.print(F(";Pulses(uSec)="));      // print pulse durations
       // ----------------------------------
-      if (QRFDebug == true)
-         PrintHex8(RawSignal.Pulses + 1, RawSignal.Number);
-      else
+      for (i = 1; i < RawSignal.Number + 1; i++)
       {
-         for (i = 1; i < RawSignal.Number + 1; i++)
+         if (QRFDebug == true)
+            Serial.printf("%02x", RawSignal.Pulses[i]);
+         else
          {
             Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);
             if (i < RawSignal.Number)

@@ -44,7 +44,7 @@
 #define AURIOLV3_PULSEMAXMIN 3500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_044
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_044(byte function, char *string)
 {

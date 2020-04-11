@@ -43,7 +43,7 @@
 #define ALARMPIRV1_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_061
-#include "../4_Misc.h"
+#include "../4_Display.h"
 
 boolean Plugin_061(byte function, char *string)
 {

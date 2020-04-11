@@ -47,6 +47,8 @@
 #define SELECTPLUS_PULSEMAX 2125 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_070
+#include "../4_Display.h"
+
 boolean Plugin_070(byte function, char *string)
 {
     if (RawSignal.Number != SELECTPLUS_PULSECOUNT)

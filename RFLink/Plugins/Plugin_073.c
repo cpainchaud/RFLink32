@@ -35,6 +35,8 @@
 #define LENGTH_DEVIATION 300
 
 #ifdef PLUGIN_073
+#include "../4_Display.h"
+
 boolean Plugin_073(byte function, char *string)
 {
     if (RawSignal.Number != DELTRONIC_PULSECOUNT)
