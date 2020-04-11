@@ -33,6 +33,8 @@
  * Change chime:
  * 20;0B;DEBUG;Pulses=50;Pulses(uSec)=175,400,450,50,100,400,100,400,100,400,450,50,100,400,450,50,100,400,100,400,100,400,425,50,100,400,100,400,100,400,450,50,100,400,425,50,100,400,425,50,100,400,425,75,100,400,425,75,100;
  \*********************************************************************************************/
+#define RL02_PLUGIN_ID 74
+
 #define RL02_CodeLength 12
 #define RL02_T 125 // 175 uS
 
@@ -48,7 +50,9 @@ boolean Plugin_074(byte function, char *string)
     unsigned long checksum = 0L;
     int i, j;
     boolean error = false;
-    // ==========================================================================
+    //==================================================================================
+    // Get all 12 bits
+    //==================================================================================
     for (i = 0; i < RL02_CodeLength; i++)
     {
         j = (RL02_T * 2) / RAWSIGNAL_SAMPLE_RATE;
@@ -96,19 +100,16 @@ boolean Plugin_074(byte function, char *string)
         return false;
     if (bitstream == 0)
         return false; // sanity check
-    // ==========================================================================
-    // ----------------------------------
+    //==================================================================================
     // Output
-    // ----------------------------------
-    Serial.print("20;");
-    PrintHexByte(PKSequenceNumber++);
-    Serial.print(F(";Byron MP;")); // Label
-    // ----------------------------------
-    sprintf(pbuffer, "ID=%04x;", (bitstream & 0x00000800L) ? 1 : 0); // ID: 0 = Ring button, 1 = Change chime button
-    Serial.print(pbuffer);
-    Serial.print(F("SWITCH=1;CMD=ON;"));
-    Serial.print(F("CHIME=01;"));
-    Serial.println();
+    //==================================================================================
+    display_Header();
+    display_Name(PSTR("Byron MP"));
+    display_IDn(((bitstream & 0x00000800L) ? 1 : 0), 4); // ID: 0 = Ring button, 1 = Change chime button
+    display_SWITCH(1);
+    display_CMD(false, true);
+    display_CHIME(1);
+    display_Footer();
     // ----------------------------------
     RawSignal.Repeats = true;
     RawSignal.Number = 0;
