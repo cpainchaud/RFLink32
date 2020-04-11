@@ -67,6 +67,7 @@
  * The Home Confort remote sends the same RF packet at least 6 times over the air. The delay in between the re-transmits is too short to detect individual packets
  * So we break, filter and convert the Home Confort RF packets in this plugin
  \*********************************************************************************************/
+#define P001_PLUGIN_ID 001
 #define OVERSIZED_LIMIT 291 // longest packet is handled by plugin 48
 
 #define PULSE500 500 / RAWSIGNAL_SAMPLE_RATE

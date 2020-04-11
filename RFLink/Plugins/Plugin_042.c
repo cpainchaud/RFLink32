@@ -87,7 +87,7 @@
  500   51
 0011111011 0011010111 0110011101 10100
  \*********************************************************************************************/
-#define UPM_PLUGIN_ID 42
+#define UPM_PLUGIN_ID 042
 #define UPM_MIN_PULSECOUNT 46
 #define UPM_MAX_PULSECOUNT 56
 

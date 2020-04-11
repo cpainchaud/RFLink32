@@ -36,6 +36,7 @@
  * 001111000110111100010110 3C6F16
  * 110000111001000011101001 c390E9
  \*********************************************************************************************/
+#define ALARMPIRV1_PLUGIN_ID 061
 #define ALARMPIRV1_PULSECOUNT 50
 
 #define ALARMPIRV1_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE

@@ -19,6 +19,8 @@
  * Even if you do not know what to do with the data yourself you might want to share your data so
  * others can analyse it.
  \*********************************************************************************************/
+#define P254_PLUGIN_ID 254
+
 #ifdef PLUGIN_254
 #include "../4_Display.h"
 

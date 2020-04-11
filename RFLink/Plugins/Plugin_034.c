@@ -25,7 +25,7 @@
  * UV Index:     11 bytes
  * Rain:          9 bytes, seen as 132, 136 pulses
  \*********************************************************************************************/
-#define CRESTA_PLUGIN_ID 34
+#define CRESTA_PLUGIN_ID 034
 #define CRESTA_MIN_PULSECOUNT 124 // unknown until we have a collection of all packet types but this seems to be the minimum
 #define CRESTA_MAX_PULSECOUNT 284 // unknown until we have a collection of all packet types
 

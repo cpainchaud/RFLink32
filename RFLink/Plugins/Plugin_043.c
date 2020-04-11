@@ -87,7 +87,7 @@
  * d = Check Xor : (2 ^ F ^ B ^ 2 ^ B ^ F) = 0
  * e = Check Sum : (const5 + 2 + F + B + 2 + B + F) and F = D
   \*********************************************************************************************/
-#define LACROSSE43_PLUGIN_ID 43
+#define LACROSSE43_PLUGIN_ID 043
 #define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
 #define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE        //900 //630

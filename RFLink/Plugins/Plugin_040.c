@@ -44,6 +44,7 @@
 //                  |----------|----------> temperature 0 - 51.1
 //                |-|---------------------> set when minus temperatures -51.2 - 0
 // ==================================================================================
+#define MEBUS_PLUGIN_ID 040
 #define MEBUS_PULSECOUNT 58
 
 #define MEBUS_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE

@@ -26,6 +26,7 @@
  * 1001101010101010 01100110
  * 10000000 1010
  \*********************************************************************************************/
+#define ALARMPIRV0_PLUGIN_ID 060
 #define ALARMPIRV0_PULSECOUNT 26
 
 #define ALARMPIRV0_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE

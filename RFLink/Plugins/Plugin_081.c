@@ -40,7 +40,7 @@
  * Sample RF packet: 
  * Pulses=26;Pulses(uSec)=475,300,325,700,325,700,325,700,325,700,725,300,725,300,725,300,725,300,725,300,325,700,725,300,725;
  \*********************************************************************************************/
-#define MAXITROL1_PLUGIN_ID 81
+#define MAXITROL1_PLUGIN_ID 081
 #define MAXITROL1_PULSECOUNT 46
 
 #define MAXITROL1_MID 550

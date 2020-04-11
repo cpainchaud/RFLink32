@@ -31,6 +31,7 @@
  * is furnished to do so, subject to the following conditions:
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  \*********************************************************************************************/
+#define OSV3_PLUGIN_ID 048
 #define OSV3_PULSECOUNT_MIN 50  // 126
 #define OSV3_PULSECOUNT_MAX 290 // make sure to check the max length in plugin 1 as well..!
 

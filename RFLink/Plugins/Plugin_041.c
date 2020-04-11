@@ -79,7 +79,7 @@
  * --------------------------------------------------------------------------------------------
  * UV packet (132 pulses)
  \*********************************************************************************************/
-#define LACROSSE41_PLUGIN_ID 41
+#define LACROSSE41_PLUGIN_ID 041
 #define LACROSSE41_PULSECOUNT1 92  // Rain sensor
 #define LACROSSE41_PULSECOUNT2 162 // Meteo sensor
 #define LACROSSE41_PULSECOUNT3 122 // Wind sensor
