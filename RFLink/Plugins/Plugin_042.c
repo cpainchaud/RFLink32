@@ -273,7 +273,7 @@ boolean Plugin_042(byte function, char *string)
          sprintf(c_ID, "%02X%02X", rc, devicecode);
          display_IDc(c_ID);
          display_TEMP(temperature);
-         display_HUM(humidity, false); // Humidity 0x15 = 21% decimal
+         display_HUM(humidity, HUM_HEX); // Humidity 0x15 = 21% decimal
          //==================================================================================
       }
    }
@@ -296,7 +296,7 @@ boolean Plugin_042(byte function, char *string)
       sprintf(c_ID, "%02X%02X", rc, devicecode);
       display_IDc(c_ID);
       display_TEMP(temperature);
-      display_HUM(humidity, false); // Humidity 0x15 = 21% decimal
+      display_HUM(humidity, HUM_HEX); // Humidity 0x15 = 21% decimal
    }
    //==================================================================================
    // Output (common)

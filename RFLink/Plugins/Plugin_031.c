@@ -163,7 +163,7 @@ boolean Plugin_031(byte function, char *string)
    if (RawSignal.Number == WS1100_PULSECOUNT)
    {
       humidity = bitstream1 & 0xFF; // alleen op WS1100?
-      display_HUM(humidity, false);
+      display_HUM(humidity, HUM_HEX);
    }
    else
    {

@@ -154,7 +154,7 @@ boolean Plugin_032(byte function, char *string)
    display_IDc(c_ID);
    display_TEMP(temperature);
    if (humidity < 99) // Only report valid humidty values
-      display_HUM(humidity, false);
+      display_HUM(humidity, HUM_HEX);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

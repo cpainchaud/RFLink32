@@ -289,7 +289,7 @@ boolean Plugin_034(byte function, char *string)
       sprintf(c_ID, "%02X%02X", data[1], channel);
       display_IDc(c_ID);
       display_TEMP(sensor_data);
-      display_HUM(data[6], true);
+      display_HUM(data[6], HUM_BCD);
       display_BAT(battery);
       display_Footer();
       //==================================================================================

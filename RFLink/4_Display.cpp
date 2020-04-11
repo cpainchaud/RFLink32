@@ -126,10 +126,10 @@ void display_TEMP(unsigned int input)
 // HUM=99 => Humidity (decimal value: 0-100 to indicate relative humidity in %)
 void display_HUM(byte input, boolean bcd)
 {
-  if (bcd == false)
-    sprintf_P(dbuffer, PSTR("%S%02d"), F(";HUM="), input);
-  else
+  if (bcd == HUM_BCD)
     sprintf_P(dbuffer, PSTR("%S%02x"), F(";HUM="), input);
+  else
+    sprintf_P(dbuffer, PSTR("%S%02d"), F(";HUM="), input);
   strcat(pbuffer, dbuffer);
 }
 

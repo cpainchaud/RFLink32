@@ -186,7 +186,7 @@ boolean Plugin_046(byte function, char *string)
    display_IDc(c_ID);
    display_TEMP(temperature);
    if (type == 1)
-      display_HUM(humidity, false);
+      display_HUM(humidity, HUM_HEX);
    display_BAT(bat);
    display_Footer();
    //==================================================================================

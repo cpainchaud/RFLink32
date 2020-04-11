@@ -138,7 +138,7 @@ boolean Plugin_044(byte function, char *string)
    sprintf(c_ID, "%02X%02X", rc, channel);
    display_IDc(c_ID);
    display_TEMP(temperature);
-   display_HUM(humidity, false);
+   display_HUM(humidity, HUM_HEX);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
