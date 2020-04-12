@@ -45,18 +45,25 @@ void setup()
   power_usart0_enable(); // UART
 #endif
 
-  Serial.begin(BAUD); // Initialise the serial port
-  Serial.println();   // ESP "Garbage" message
-
-  pinMode(PIN_RF_RX_DATA, INPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_TX_DATA, OUTPUT);            // Initialise in/output ports
-  pinMode(PIN_RF_TX_VCC, OUTPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_TX_GND, OUTPUT);             // Initialise in/output ports
+  // RX pins
   pinMode(PIN_RF_RX_VCC, OUTPUT);             // Initialise in/output ports
+  pinMode(PIN_RF_RX_NA, INPUT);               // Initialise in/output ports
+  pinMode(PIN_RF_RX_DATA, INPUT);             // Initialise in/output ports
   pinMode(PIN_RF_RX_GND, OUTPUT);             // Initialise in/output ports
-  digitalWrite(PIN_RF_TX_GND, LOW);           // turn GND to TX receiver ON
   digitalWrite(PIN_RF_RX_GND, LOW);           // turn GND to RF receiver ON
   digitalWrite(PIN_RF_RX_VCC, HIGH);          // turn VCC to RF receiver ON
+  digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP); // pull-up resistor on (to prevent garbage)
+
+  // TX Pins
+  // pinMode(PIN_RF_TX_VCC, OUTPUT);    // Initialise in/output ports
+  // pinMode(PIN_RF_TX_DATA, OUTPUT);   // Initialise in/output ports
+  // pinMode(PIN_RF_TX_GND, OUTPUT);    // Initialise in/output ports
+  // digitalWrite(PIN_RF_TX_GND, LOW);  // turn GND to TX receiver ON
+  // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
+  //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
+
+  Serial.begin(BAUD); // Initialise the serial port
+  Serial.println();   // ESP "Garbage" message
 
   PluginInit();
 
