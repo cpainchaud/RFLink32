@@ -130,9 +130,6 @@ void checkMQTTloop()
 
   if (millis() > lastCheck + MQTT_LOOP_MS)
   {
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE6, HIGH);
-#endif // LA_ENABLED
     if (!MQTTClient.connected())
     {
       reconnect();
@@ -141,9 +138,6 @@ void checkMQTTloop()
     MQTTClient.loop();
     // Serial.println(F("Done"));
     lastCheck = millis();
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE6, LOW);
-#endif // LA_ENABLED
   }
 }
 

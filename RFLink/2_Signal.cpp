@@ -24,30 +24,14 @@ boolean ScanEvent(void)
   while (Timer > millis()) // || RepeatingTimer > millis())
   {
     // delay(1); // For Modem Sleep
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE2, HIGH);
-#endif
     if (FetchSignal())
     { // RF: *** data start ***
-#ifdef LA_ENABLED
-      digitalWrite(LA_PROBE2, LOW);
-      digitalWrite(LA_PROBE3, HIGH);
-#endif
       if (PluginRXCall(0, 0))
       { // Check all plugins to see which plugin can handle the received signal.
-#ifdef LA_ENABLED
-        digitalWrite(LA_PROBE3, LOW);
-#endif
         RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
         return true;
       }
-#ifdef LA_ENABLED
-      digitalWrite(LA_PROBE3, LOW);
-#endif
     }
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE2, LOW);
-#endif
   } // while
   return false;
 }
