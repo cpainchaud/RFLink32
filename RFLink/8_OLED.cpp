@@ -12,7 +12,7 @@
 
 #include "4_Display.h"
 #include "8_OLED.h"
-#include <U8x8lib.h>
+//#include <U8x8lib.h> // Comment to avoid dependency graph inclusion
 
 #define U8X8_PIN_NONE 255
 // 0.91" I2C 128x32 Display
