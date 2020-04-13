@@ -26,6 +26,9 @@
 #else
 #include "6_WiFi_MQTT.h"
 #endif
+#ifdef OLED_ENABLED
+#include "8_OLED.h"
+#endif
 //****************************************************************************************************************************************
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
@@ -64,6 +67,8 @@ void setup()
   // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
   //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 
+  delay(100);
+
 #if (defined(ESP32) || defined(ESP8266))
 #if defined(MQTT_ENABLED)
   setup_WIFI();
@@ -72,6 +77,9 @@ void setup()
 #else
   setup_WIFI_OFF();
 #endif
+#endif
+#ifdef OLED_ENABLED
+  setup_OLED();
 #endif
   display_Header();
   display_Splash();
@@ -82,9 +90,13 @@ void setup()
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   publishMsg();
 #endif
+#ifdef OLED_ENABLED
+  splash_OLED();
+#endif
   pbuffer[0] = 0;
+
   PluginInit();
-  delay(10);
+  delay(100);
 }
 
 void loop()
@@ -106,6 +118,9 @@ void sendMsg()
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
+#endif
+#ifdef OLED_ENABLED
+    print_OLED();
 #endif
     pbuffer[0] = 0;
   }

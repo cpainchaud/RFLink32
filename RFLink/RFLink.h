@@ -77,6 +77,15 @@
 #define PIN_RF_RX_GND 19        // Ground to the receiver on this pin
 #endif
 
+// OLED display, 0.91" SSD1306 I2C
+// #define OLED_ENABLED
+#ifdef OLED_ENABLED
+#define PIN_OLED_GND NOT_A_PIN // Ground power on this pin
+#define PIN_OLED_VCC NOT_A_PIN // +3 volt / Vcc power on this pin#
+#define PIN_OLED_SCL D1        // I2C SCL
+#define PIN_OLED_SDA D2        // I2C SDA
+#endif
+
 // WIFI
 #define WIFI_PWR 10 // 0~20.5dBm
 
