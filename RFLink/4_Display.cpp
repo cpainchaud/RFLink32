@@ -355,3 +355,14 @@ void display_RGBW(unsigned int input)
   return false;
   }
 */
+
+void replacechar(char *str, char orig, char rep)
+{
+    char *ix = str;
+    int n = 0;
+    while ((ix = strchr(ix, orig)) != NULL)
+    {
+        *ix++ = rep;
+        n++;
+    }
+}

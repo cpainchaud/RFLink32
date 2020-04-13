@@ -59,5 +59,6 @@ void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
 // int str2cmd(char *command)
+void replacechar(char *, char, char);
 
 #endif
