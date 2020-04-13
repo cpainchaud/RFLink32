@@ -122,7 +122,7 @@ boolean Plugin_046(byte function, char *string)
    //==================================================================================
    unsigned long tmpval = (bitstream1 << 8) | (bitstream2 & 0xFF); // All but "1111" padded section
 
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 150) < millis()) || (SignalCRC != tmpval))
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != tmpval))
       SignalCRC = tmpval; // not seen this RF packet recently
    else
       return true; // already seen the RF packet recently
