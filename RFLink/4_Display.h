@@ -17,7 +17,7 @@ extern char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
 void display_Header(void);
 void display_Name(const char *);
 void display_Footer(void);
-void display_Start(void);
+void display_Splash(void);
 void display_IDn(unsigned int, byte);
 void display_IDc(const char *);
 void display_SWITCH(byte);

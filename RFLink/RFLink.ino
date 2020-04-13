@@ -26,7 +26,6 @@
 #else
 #include "6_WiFi_MQTT.h"
 #endif
-
 //****************************************************************************************************************************************
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
@@ -45,6 +44,9 @@ void setup()
   power_usart0_enable(); // UART
 #endif
 
+  Serial.begin(BAUD); // Initialise the serial port
+  Serial.println();   // ESP "Garbage" message
+
   // RX pins
   pinMode(PIN_RF_RX_VCC, OUTPUT);             // Initialise in/output ports
   pinMode(PIN_RF_RX_NA, INPUT);               // Initialise in/output ports
@@ -62,11 +64,6 @@ void setup()
   // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
   //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 
-  Serial.begin(BAUD); // Initialise the serial port
-  Serial.println();   // ESP "Garbage" message
-
-  PluginInit();
-
 #if (defined(ESP32) || defined(ESP8266))
 #if defined(MQTT_ENABLED)
   setup_WIFI();
@@ -77,45 +74,27 @@ void setup()
 #endif
 #endif
   display_Header();
-  display_Start();
+  display_Splash();
   display_Footer();
 #ifdef SERIAL_ENABLED
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE4, HIGH);
-#endif
   Serial.print(pbuffer);
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE4, LOW);
-#endif
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE5, HIGH);
-#endif
   publishMsg();
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE5, LOW);
-#endif
 #endif
   pbuffer[0] = 0;
+  PluginInit();
+  delay(10);
 }
 
 void loop()
 {
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE1, HIGH);
-#endif
-
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
   checkMQTTloop();
 #endif
 
   if (ScanEvent())
     sendMsg();
-
-#ifdef LA_ENABLED
-  digitalWrite(LA_PROBE1, LOW);
-#endif
 }
 
 void sendMsg()
@@ -123,22 +102,10 @@ void sendMsg()
   if (pbuffer[0] != 0)
   {
 #ifdef SERIAL_ENABLED
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE4, HIGH);
-#endif
     Serial.print(pbuffer);
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE4, LOW);
-#endif
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE5, HIGH);
-#endif
     publishMsg();
-#ifdef LA_ENABLED
-    digitalWrite(LA_PROBE5, LOW);
-#endif
 #endif
     pbuffer[0] = 0;
   }

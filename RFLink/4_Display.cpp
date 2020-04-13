@@ -38,12 +38,9 @@ void display_Footer(void)
 }
 
 // Start message
-void display_Start(void)
+void display_Splash(void)
 {
-  sprintf_P(dbuffer, PSTR("%S"), F(";RFLink_ESP Gateway V3.0 - "));
-  strcat(pbuffer, dbuffer);
-
-  sprintf_P(dbuffer, PSTR("R%02x"), REVNR);
+  sprintf_P(dbuffer, PSTR("%S%d.%d"), F(";RFLink_ESP;VER="), BUILDNR, REVNR);
   strcat(pbuffer, dbuffer);
 }
 
