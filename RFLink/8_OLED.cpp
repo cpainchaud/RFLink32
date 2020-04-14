@@ -30,7 +30,7 @@ void setup_OLED()
 {
     u8x8.begin();
     u8x8.setPowerSave(1);
-    u8x8.setContrast(0);
+    u8x8.setContrast(255);
 
     u8x8log.begin(u8x8, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
     u8x8log.setRedrawMode(0); // 0: Update screen with newline, 1: Update screen for every char
