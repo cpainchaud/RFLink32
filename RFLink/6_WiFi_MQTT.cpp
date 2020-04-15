@@ -11,6 +11,7 @@
 
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
+#include "9_AutoConnect.h"
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -27,7 +28,6 @@
 #define MQTT_SOCKET_TIMEOUT 60
 
 #include <PubSubClient.h>
-#include "6_Credentials.h"
 
 // Update these with values suitable for your network.
 
@@ -40,17 +40,17 @@ void setup_WIFI()
   WiFi.setAutoReconnect(true);
 #ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-  WiFi.setOutputPower(WIFI_PWR);
+  WiFi.setOutputPower(ac_WIFI_PWR);
 #endif // ESP8266
   WiFi.mode(WIFI_STA);
 
   // Comment out for Dynamic IP
-  WiFi.config(ip, gateway, subnet);
+  WiFi.config(ac_WIFI_IP, ac_WIFI_GATEWAYS, ac_WIFI_SUBNET);
 
   // We start by connecting to a WiFi network
   Serial.print(F("\nConnecting to "));
-  Serial.print(ssid);
-  WiFi.begin(ssid, password);
+  Serial.print(ac_WIFI_SSID);
+  WiFi.begin(ac_WIFI_SSID, ac_WIFI_PSWD);
 
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -68,7 +68,7 @@ void setup_WIFI()
 void setup_MQTT()
 {
   MQTTClient.setClient(WIFIClient);
-  MQTTClient.setServer(MQTT_SERVER, MQTT_PORT);
+  MQTTClient.setServer(ac_MQTT_SERVER.c_str(), ac_MQTT_PORT.toInt());
   // MQTTClient.setCallback(callback);
 }
 
@@ -93,11 +93,11 @@ void reconnect()
   {
     Serial.print(F("Attempting MQTT connection..."));
     // Attempt to connect
-    if (MQTTClient.connect(MQTT_ID, MQTT_USER, MQTT_PSWD))
+    if (MQTTClient.connect(ac_MQTT_ID.c_str(), ac_MQTT_USER.c_str(), ac_MQTT_PSWD.c_str()))
     {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      // MQTTClient.subscribe(MQTT_TOPIC_IN);
+      // MQTTClient.subscribe(ac_MQTT_TOPIC_IN.c_str());
     }
     else
     {
@@ -117,11 +117,7 @@ void publishMsg()
   {
     reconnect();
   }
-#ifdef MQTT_RETAINED
-  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
-#else  // MQTT_RETAINED
-  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
-#endif // MQTT_RETAINED
+  MQTTClient.publish(ac_MQTT_TOPIC_OUT.c_str(), pbuffer, ac_MQTT_RETAINED);
 }
 
 void checkMQTTloop()

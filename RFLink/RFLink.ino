@@ -21,6 +21,7 @@
 #include "2_Signal.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
+#include "9_AutoConnect.h"
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
 #else
@@ -70,8 +71,9 @@ void setup()
   delay(100);
 
 #if (defined(ESP32) || defined(ESP8266))
+setup_AutoConnect();
 #if defined(MQTT_ENABLED)
-  setup_WIFI();
+  //setup_WIFI();
   setup_MQTT();
   reconnect();
 #else

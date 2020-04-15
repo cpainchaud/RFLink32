@@ -12,9 +12,15 @@
 #include "RFLink.h"
 #if (defined(ESP32) || defined(ESP8266))
 
-extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
+#ifdef ESP32
+#include <WiFi.h>
+#elif ESP8266
+#include <ESP8266WiFi.h>
+#endif
 
 #ifdef MQTT_ENABLED
+extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
+
 void setup_WIFI();
 void setup_MQTT();
 void reconnect();
