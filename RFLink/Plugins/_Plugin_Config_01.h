@@ -36,6 +36,7 @@
 // -------------------
 // Weather sensors
 // -------------------
+#define PLUGIN_029 // Alecto V2 (WS3000/DWK2012) 434 MHz.
 #define PLUGIN_030 // Alecto V1 (WS3500) 434 MHz.
 #define PLUGIN_031 // Alecto V3 (WS1100/WS1200/WSD-19) 433.9 MHz.
 #define PLUGIN_032 // Alecto V4
