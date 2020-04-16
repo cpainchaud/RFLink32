@@ -40,6 +40,7 @@ extern String ac_MQTT_TOPIC_OUT;
 extern String ac_MQTT_TOPIC_IN;
 extern boolean ac_MQTT_RETAINED;
 extern String ac_Adv_HostName;
+extern String ac_Adv_Power;
 
 void setup_AutoConnect();
 

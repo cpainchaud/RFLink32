@@ -14,6 +14,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h> // Replace with WebServer.h for ESP32
+#include <SPI.h>              // To acces Flash Memory
 #include <FS.h>               // To save MQTT parameters
 #include <AutoConnect.h>
 #endif
@@ -65,7 +66,7 @@ void setup_AutoConnect()
         }
         // config.bootUri = AC_ONBOOTURI_HOME;
         // config.homeUri = "/";
-        config.title = "RFlink-ESP";
+        config.title = "RFlink ESP";
         config.autoReconnect = true;
         portal.config(config);
 
@@ -79,7 +80,7 @@ void setup_AutoConnect()
 
     if (portal.begin())
     {
-        if (MDNS.begin("RFLink-ESP"))
+        if (MDNS.begin("RFLink_ESP"))
         {
             MDNS.addService("http", "tcp", 80);
         }
@@ -96,11 +97,6 @@ void setup_AutoConnect()
         }
     }
 }
-
-// void loop_AutoConnect()
-// {
-//     portal.handleClient();
-// }
 
 void getParams(AutoConnectAux &aux)
 {
