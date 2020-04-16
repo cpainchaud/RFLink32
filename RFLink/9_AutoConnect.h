@@ -42,7 +42,6 @@ extern boolean ac_MQTT_RETAINED;
 extern String ac_Adv_HostName;
 
 void setup_AutoConnect();
-void loop_AutoConnect();
 
 // JSON definition of AutoConnectAux.
 // Multiple AutoConnectAux can be defined in the JSON array.

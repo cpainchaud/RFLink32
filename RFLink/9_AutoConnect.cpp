@@ -66,7 +66,7 @@ void setup_AutoConnect()
         // config.bootUri = AC_ONBOOTURI_HOME;
         // config.homeUri = "/";
         config.title = "RFlink-ESP";
-        // config.autoReconnect = true; disabled for faster tests
+        config.autoReconnect = true;
         portal.config(config);
 
         portal.on(AUX_SETTING_URI, loadParams);
@@ -97,10 +97,10 @@ void setup_AutoConnect()
     }
 }
 
-void loop_AutoConnect()
-{
-    portal.handleClient();
-}
+// void loop_AutoConnect()
+// {
+//     portal.handleClient();
+// }
 
 void getParams(AutoConnectAux &aux)
 {

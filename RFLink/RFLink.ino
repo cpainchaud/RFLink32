@@ -120,7 +120,6 @@ void sendMsg()
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
-    loop_AutoConnect();
 #endif
 #ifdef OLED_ENABLED
     print_OLED();
