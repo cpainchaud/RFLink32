@@ -42,6 +42,7 @@ extern boolean ac_MQTT_RETAINED;
 extern String ac_Adv_HostName;
 
 void setup_AutoConnect();
+void loop_AutoConnect();
 
 // JSON definition of AutoConnectAux.
 // Multiple AutoConnectAux can be defined in the JSON array.
@@ -51,30 +52,25 @@ void setup_AutoConnect();
 static const char AUX_settings[] PROGMEM = R"raw(
 [
   {
-    "title": "RFlink-ESP Settings",
+    "title": "RFLink ESP settings",
     "uri": "/settings",
     "menu": true,
     "element": [
       {
-        "name": "style",
+        "name": "style1",
         "type": "ACStyle",
-        "value": "label+input,label+select{position:sticky;left:180px;width:230px!important;box-sizing:border-box;}"
+        "value": "label+input,label+select{position:sticky;left:180px;width:210px!important;box-sizing:border-box;}"
       },
       {
-        "name": "newline0",
-        "type": "ACElement",
-        "value": "<hr>"
-      },
-      {
-        "name": "header",
+        "name": "header0",
         "type": "ACText",
-        "value": "<h2>MQTT broker settings</h2>",
+        "value": "<h2>MQTT settings</h2>",
         "style": "text-align:center;color:#2f4f4f;padding:10px;"
       },
       {
-        "name": "caption",
+        "name": "caption1",
         "type": "ACText",
-        "value": "MQTT Broker settings",
+        "value": "Connexion",
         "style": "font-family:serif;color:#4682b4;"
       },
       {
@@ -86,79 +82,93 @@ static const char AUX_settings[] PROGMEM = R"raw(
         "name": "MQTT_SERVER",
         "type": "ACInput",
         "value": "",
-        "label": "MQTT Server",
+        "label": "Server",
         "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$",
-        "placeholder": "MQTT broker server"
+        "placeholder": "example : 192.168.0.10"
       },
       {
         "name": "MQTT_PORT",
         "type": "ACInput",
         "value": "",
-        "label": "MQTT Port",
-        "placeholder": "MQTT port (default 1883)"
+        "label": "Port",
+        "placeholder": "default is 1883"
       },
       {
         "name": "MQTT_ID",
         "type": "ACInput",
-        "label": "MQTT ID",
-        "pattern": "^[0-9]{6}$"
+        "label": "ID",
+        "pattern": "^[0-9]{6}$",
+        "placeholder": "example : RFLink-ESP-xx"
       },
       {
         "name": "MQTT_USER",
         "type": "ACInput",
-        "label": "MQTT User",
+        "label": "User",
         "pattern": "^[0-9]{6}$"
       },
       {
         "name": "MQTT_PSWD",
         "type": "ACInput",
-        "label": "MQTT Password"
+        "label": "Password"
       },
       {
-        "name": "MQTT_TOPIC_OUT",
-        "type": "ACInput",
-        "label": "Out Topic",
-        "pattern": "(.*)[^\/]$",
-        "placeholder": "example : RFlink/msg"
-      },
-      {
-        "name": "MQTT_TOPIC_IN",
-        "type": "ACInput",
-        "label": "In Topic",
-        "pattern": "(.*)[^\/]$",
-        "placeholder": "example : RFlink/cmd"
-      },
-      {
-        "name": "MQTT_RETAINED",
-        "type": "ACCheckbox",
-        "value": "unique",
-        "label": "MQTT Retained",
-        "checked": false
+        "name": "caption2",
+        "type": "ACText",
+        "value": "Messages",
+        "style": "font-family:serif;color:#4682b4;"
       },
       {
         "name": "newline2",
         "type": "ACElement",
         "value": "<hr>"
       },
-     {
-        "name": "style2",
-        "type": "ACStyle",
-        "value": "label+input,label+select{position:sticky;left:180px;width:230px!important;box-sizing:border-box;}"
+      {
+        "name": "MQTT_TOPIC_OUT",
+        "type": "ACInput",
+        "label": "Out Topic",
+        "pattern": "(.*)[^\/]$",
+        "placeholder": "example : /RFlink/msg"
       },
       {
-        "name": "header2",
-        "type": "ACText",
-        "value": "<h2>Advanced Settings</h2>",
-        "style": "text-align:center;color:#2f4f4f;padding:10px;"
+        "name": "MQTT_TOPIC_IN",
+        "type": "ACInput",
+        "label": "In Topic",
+        "pattern": "(.*)[^\/]$",
+        "placeholder": "example : /RFlink/cmd"
       },
       {
-        "name": "caption2",
-        "type": "ACText",
-        "value": "Other settings",
-        "style": "font-family:serif;color:#4682b4;"
+        "name": "MQTT_RETAINED",
+        "type": "ACCheckbox",
+        "value": "unique",
+        "labelPosition" : "AC_Infront",
+        "post" : "AC_Tag_BR",
+        "label": "Retained",
+        "checked": false
       },
       {
         "name": "newline3",
+        "type": "ACElement",
+        "value": "<hr>"
+      },
+     {
+        "name": "style4",
+        "type": "ACStyle",
+        "value": "label+input,label+select{position:sticky;left:180px;width:210px!important;box-sizing:border-box;}"
+      },
+      {
+        "name": "header4",
+        "type": "ACText",
+        "value": "<h2>Advanced settings</h2>",
+        "style": "text-align:center;color:#2f4f4f;padding:10px;"
+      },
+      {
+        "name": "caption5",
+        "type": "ACText",
+        "value": "Wifi",
+        "style": "font-family:serif;color:#4682b4;"
+      },
+      {
+        "name": "newline5",
         "type": "ACElement",
         "value": "<hr>"
       },
@@ -166,9 +176,18 @@ static const char AUX_settings[] PROGMEM = R"raw(
         "name": "Adv_HostName",
         "type": "ACInput",
         "value": "RFlink-ESP",
-        "label": "Hostname",
-        "pattern": "^\d*[a-z][a-z0-9!^(){}\-_~]*$"
-        
+        "label": "Hostname"
+      },
+      {
+        "name": "Adv_Power",
+        "type": "ACInput",
+        "label": "TX Power",
+        "placeholder": "default is 20 (max)"
+      },
+      {
+        "name": "newline6",
+        "type": "ACElement",
+        "value": "<hr>"
       },
       {
         "name": "save",
@@ -185,19 +204,24 @@ static const char AUX_settings[] PROGMEM = R"raw(
     ]
   },
   {
-    "title": "RFlink-ESP Settings",
+    "title": "RFlink ESP settings",
     "uri": "/settings_save",
     "menu": false,
     "element": [
       {
         "name": "caption",
         "type": "ACText",
-        "value": "<h4>Parameters saved as:</h4>",
+        "value": "<h4>Saved values</h4>",
         "style": "text-align:center;color:#2f4f4f;padding:10px;"
       },
       {
         "name": "parameters",
         "type": "ACText"
+      },
+      {
+        "name": "newline",
+        "type": "ACElement",
+        "value": "<hr>"
       },
       {
         "name": "clear",

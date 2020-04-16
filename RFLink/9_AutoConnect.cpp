@@ -20,12 +20,11 @@
 
 ESP8266WebServer Server; // Replace with WebServer for ESP32
 AutoConnect portal(Server);
-//AutoConnect portal;
 AutoConnectConfig config;
 
 void rootPage()
 {
-    char content[] = "Hello, world";
+    char content[] = "RFLink ESP";
     Server.send(200, "text/plain", content);
 }
 
@@ -39,6 +38,7 @@ String ac_MQTT_TOPIC_IN;
 boolean ac_MQTT_RETAINED;
 // Adds advanced tab to Autoconnect
 String ac_Adv_HostName;
+String ac_Adv_Power;
 
 // Prototypes
 String loadParams(AutoConnectAux &aux, PageArgument &args);
@@ -63,10 +63,10 @@ void setup_AutoConnect()
             config.hostName = ac_Adv_HostName;
             Serial.println("hostname set to " + config.hostName);
         }
-        config.bootUri = AC_ONBOOTURI_HOME;
-        config.homeUri = "/";
+        // config.bootUri = AC_ONBOOTURI_HOME;
+        // config.homeUri = "/";
         config.title = "RFlink-ESP";
-        config.autoReconnect = true;
+        // config.autoReconnect = true; disabled for faster tests
         portal.config(config);
 
         portal.on(AUX_SETTING_URI, loadParams);
@@ -97,6 +97,11 @@ void setup_AutoConnect()
     }
 }
 
+void loop_AutoConnect()
+{
+    portal.handleClient();
+}
+
 void getParams(AutoConnectAux &aux)
 {
     //////  MQTT  settings //////
@@ -119,6 +124,8 @@ void getParams(AutoConnectAux &aux)
     ////// advanced settings //////
     ac_Adv_HostName = aux["Adv_HostName"].value;
     ac_Adv_HostName.trim();
+    ac_Adv_Power = aux["Adv_Power"].value;
+    ac_Adv_Power.trim();
 }
 
 // Load parameters saved with  saveParams from SPIFFS into the
@@ -140,7 +147,7 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     }
     else
     {
-        Serial.println(PARAM_FILE " open failed");
+        Serial.println(PARAM_FILE " open+r failed");
 #ifdef ESP32
         Serial.println("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'.");
 #endif
@@ -164,24 +171,34 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     // To retrieve the elements of /settings, it is necessary to get
     // the AutoConnectAux object of /settings.
     File param = SPIFFS.open(PARAM_FILE, "w");
-    my_settings.saveElement(param, {"MQTT_SERVER", "MQTT_PORT",
-                                    "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
-                                    "MQTT_TOPIC_OUT", "MQTT_TOPIC_IN",
-                                    "MQTT_RETAINED"});
-    param.close();
-
+    if (param)
+    {
+        my_settings.saveElement(param, {"MQTT_SERVER", "MQTT_PORT",
+                                        "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
+                                        "MQTT_TOPIC_OUT", "MQTT_TOPIC_IN", "MQTT_RETAINED",
+                                        "Adv_HostName", "Adv_Power"});
+        param.close();
+    }
+    {
+        Serial.println(PARAM_FILE " open+w failed");
+    }
     // Echo back saved parameters to AutoConnectAux page.
     AutoConnectText &echo = aux["parameters"].as<AutoConnectText>();
-    echo.value = "Server: " + ac_MQTT_SERVER;
-    echo.value = " Port: " + ac_MQTT_PORT + "<br>";
+    echo.value = "<u><b>MQTT settings</b></u><br>";
+    echo.value += "<b>Connexion</b><br>";
+    echo.value += "Server: " + ac_MQTT_SERVER + "<br>";
+    echo.value += "Port: " + ac_MQTT_PORT + "<br>";
     echo.value += "ID: " + ac_MQTT_ID + "<br>";
     echo.value += "Username: " + ac_MQTT_USER + "<br>";
     echo.value += "Password: " + ac_MQTT_PSWD + "<br>";
-    echo.value += "Out Topic: " + ac_MQTT_TOPIC_OUT + "<br><br>";
-    echo.value += "On Topic: " + ac_MQTT_TOPIC_IN + "<br><br>";
-    echo.value += "Message reatined: " + String(ac_MQTT_RETAINED == true ? "true" : "false") + "<br>";
-
-    echo.value += "hostname: " + ac_Adv_HostName + "<br>";
+    echo.value += "<br><b>Messages</b><br>";
+    echo.value += "Out Topic: " + ac_MQTT_TOPIC_OUT + "<br>";
+    echo.value += "In Topic: " + ac_MQTT_TOPIC_IN + "<br>";
+    echo.value += "Retained: " + String(ac_MQTT_RETAINED == true ? "true" : "false") + "<br>";
+    echo.value += "<u><br><b>Advanced settings</b></u><br>";
+    echo.value += "<b>WiFi</b><br>";
+    echo.value += "Hostname: " + ac_Adv_HostName + "<br>";
+    echo.value += "TX Power: " + ac_Adv_Power + "<br>";
     return String("");
 }
 

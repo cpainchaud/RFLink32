@@ -71,7 +71,7 @@ void setup()
   delay(100);
 
 #if (defined(ESP32) || defined(ESP8266))
-setup_AutoConnect();
+  setup_AutoConnect();
 #if defined(MQTT_ENABLED)
   //setup_WIFI();
   setup_MQTT();
@@ -120,6 +120,7 @@ void sendMsg()
 #endif
 #if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
     publishMsg();
+    loop_AutoConnect();
 #endif
 #ifdef OLED_ENABLED
     print_OLED();
