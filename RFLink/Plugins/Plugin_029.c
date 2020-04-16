@@ -107,7 +107,7 @@ boolean Plugin_029(byte function, char *string)
   //==================================================================================
   msgtype = (data[0] >> 4) & 0xF; // msg type must be 5 or 10
   if ((msgtype != 0xA) && (msgtype != 0x5))
-    return true; // why true? -> Time format?
+    return false; // why true? -> Time format?
   //==================================================================================
   // Perform checksum calculations, Alecto checksums are Rollover Checksums by design!
   //==================================================================================
@@ -128,6 +128,7 @@ boolean Plugin_029(byte function, char *string)
   // Now process the various sensor types
   //==================================================================================
   rc = (data[0] << 4) | (data[1] >> 4); // rolling code
+  byte bat = !((data[1] >> 3) & 0x1); // supposed bat bit
   int temp = 0;
   unsigned int rain = 0;
   byte hum = 0;
@@ -137,11 +138,12 @@ boolean Plugin_029(byte function, char *string)
 
   temp = (((data[1] & 0x3) << 8 | data[2]) - 400);
   hum = data[3];
-  wspeed = data[4] * 108;
+  wspeed = data[4] * 124;
   wspeed /= 10;
-  wgust = data[5] * 108;
+  wgust = data[5] * 124;
   wgust /= 10;
   rain = (data[6] << 8) | data[7];
+  rain *= 3;
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
   {
     wdir = (data[8] & 0xF);
@@ -156,12 +158,13 @@ boolean Plugin_029(byte function, char *string)
     display_Name(PSTR("Alecto V2"));
   display_IDn(rc, 4);
   display_TEMP(temp);
-  display_HUM(hum, HUM_BCD);
+  display_HUM(hum, HUM_HEX);
   display_WINSP(wspeed);
   display_WINGS(wgust);
   display_RAIN(rain);
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
     display_WINDIR(wdir);
+  display_BAT(bat);
   display_Footer();
   //==================================================================================
   RawSignal.Repeats = true; // suppress repeats of the same RF packet
