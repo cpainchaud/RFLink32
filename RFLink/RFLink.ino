@@ -48,6 +48,7 @@ void setup()
   power_usart0_enable(); // UART
 #endif
 
+  delay(150);         // Time needed to switch back from Upload to Console
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
