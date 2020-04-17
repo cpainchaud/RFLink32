@@ -49,6 +49,7 @@ extern String ac_Adv_HostName;
 extern String ac_Adv_Power;
 
 void setup_AutoConnect();
+void loop_AutoConnect();
 
 // JSON definition of AutoConnectAux.
 // Multiple AutoConnectAux can be defined in the JSON array.

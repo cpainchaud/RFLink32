@@ -101,6 +101,12 @@ void setup_AutoConnect()
     SPIFFS.end();
 }
 
+void loop_AutoConnect()
+{
+    MDNS.update();
+    portal.handleClient();
+}
+
 void getParams(AutoConnectAux &aux)
 {
     //////  MQTT  settings //////
