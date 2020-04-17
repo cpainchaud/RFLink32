@@ -49,24 +49,27 @@ void setup_AutoConnect()
 {
     if (portal.load(FPSTR(AUX_settings)))
     { // we load all the settings from "/settings" uri
-        AutoConnectAux &my_settings = *portal.aux(AUX_SETTING_URI);
+        AutoConnectAux &aux1 = *portal.aux(AUX_SETTING_URI);
         PageArgument args;
-        loadParams(my_settings, args);
 
-        config.apid = String("RFLink-ESP-") + String(GET_CHIPID(), HEX);
-        Serial.println("AP name set to " + config.apid);
+        loadParams(aux1, args);
 
-        // if not defined, default Wifi AP is 12345678, you can change it here
-        // config.psk = "RFlink-ESP";
-
-        if (ac_Adv_HostName.length())
+        if (config.immediateStart)
+        {
+            // if not defined, default Wifi AP is 12345678, you can change it here
+            // config.psk = "RFlink-ESP";
+            config.apid = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
+            Serial.print(F("AP name set to "));
+            Serial.println(config.apid);
+        }
+        else if (ac_Adv_HostName.length())
         {
             config.hostName = ac_Adv_HostName;
             Serial.print(F("Hostname set to "));
             Serial.println(config.hostName);
         }
-        // config.bootUri = AC_ONBOOTURI_HOME;
-        // config.homeUri = "/";
+        config.bootUri = AC_ONBOOTURI_HOME;
+        config.homeUri = "/";
         config.title = "RFlink ESP";
         config.autoReconnect = true;
         portal.config(config);
@@ -138,25 +141,48 @@ void getParams(AutoConnectAux &aux)
 String loadParams(AutoConnectAux &aux, PageArgument &args)
 {
     (void)(args);
-    File param = SPIFFS.open(PARAM_FILE, "r");
-    if (param)
+    static boolean initConfig = true;
+
+    SPIFFS.begin();
+    File my_file = SPIFFS.open(PARAM_FILE, "r");
+    Serial.print(PARAM_FILE);
+    if (my_file)
     {
-        if (aux.loadElement(param))
+        if (aux.loadElement(my_file))
         {
             getParams(aux);
-            Serial.println(PARAM_FILE " loaded");
+            Serial.println(F(" loaded"));
+            if (initConfig)
+            {
+                config.immediateStart = false; // Only Home AP
+                config.autoRise = false;       // Captive AP disabled
+            }
         }
         else
-        param.close();
+        {
             Serial.println(F(" failed to load"));
+            if (initConfig)
+            {
+                config.immediateStart = true; // Don't even try Home AP
+                config.autoRise = true;       // Captive AP enabled
+            }
+        }
+        my_file.close();
     }
     else
     {
         Serial.println(F(" open+r failed"));
+        if (initConfig)
+        {
+            config.immediateStart = true; // Don't even try Home AP
+            config.autoRise = true;       // Captive AP enabled
+        }
 #ifdef ESP32
         Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
 #endif
     }
+    SPIFFS.end();
+    initConfig = false;
     return String("");
 }
 
@@ -175,20 +201,20 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     // The entered value is owned by AutoConnectAux of /settings.
     // To retrieve the elements of /settings, it is necessary to get
     // the AutoConnectAux object of /settings.
-    File param = SPIFFS.open(PARAM_FILE, "w");
-    if (param)
     SPIFFS.begin();
+    File my_file = SPIFFS.open(PARAM_FILE, "w");
+    Serial.print(PARAM_FILE);
+    if (my_file)
     {
-        my_settings.saveElement(param, {"MQTT_SERVER", "MQTT_PORT",
-                                        "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
-                                        "MQTT_TOPIC_OUT", "MQTT_TOPIC_IN", "MQTT_RETAINED",
-                                        "Adv_HostName", "Adv_Power"});
-        param.close();
+        src_aux.saveElement(my_file, {"MQTT_SERVER", "MQTT_PORT",
+                                      "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
+                                      "MQTT_TOPIC_OUT", "MQTT_TOPIC_IN", "MQTT_RETAINED",
+                                      "Adv_HostName", "Adv_Power"});
+        Serial.println(F(" saved"));
+        my_file.close();
     }
     else
-    {
-        Serial.println(PARAM_FILE " open+w failed");
-    }
+        Serial.print(F(" open+w failed"));
     SPIFFS.end();
     // Echo back saved parameters to AutoConnectAux page.
     AutoConnectText &echo = aux["parameters"].as<AutoConnectText>();
