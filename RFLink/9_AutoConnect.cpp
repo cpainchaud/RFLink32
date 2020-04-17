@@ -47,6 +47,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args);
 
 void setup_AutoConnect()
 {
+    SPIFFS.begin();
     if (portal.load(FPSTR(AUX_settings)))
     { // we load all the settings from "/settings" uri
         AutoConnectAux &my_settings = *portal.aux(AUX_SETTING_URI);
@@ -175,6 +176,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
                                         "Adv_HostName", "Adv_Power"});
         param.close();
     }
+    else
     {
         Serial.println(PARAM_FILE " open+w failed");
     }
