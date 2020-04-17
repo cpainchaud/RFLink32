@@ -205,7 +205,7 @@ static const char AUX_settings[] PROGMEM = R"raw(
         "name": "discard",
         "type": "ACSubmit",
         "value": "Discard",
-        "uri": "/"
+        "uri": "/settings"
       }
     ]
   },
