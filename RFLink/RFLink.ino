@@ -70,16 +70,27 @@ void setup()
 
   delay(100);
 
+#if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
-  setup_AutoConnect();
-#if defined(MQTT_ENABLED)
-  //setup_WIFI();
-  setup_MQTT();
-  reconnect();
-#else
   setup_WIFI_OFF();
 #endif
 #endif
+
+#if (!defined(AUTOCONNECT_ENABLED) && defined(MQTT_ENABLED))
+  setup_WIFI();
+  setup_MQTT();
+  reconnect();
+#endif
+
+#ifdef AUTOCONNECT_ENABLED
+  setup_AutoConnect();
+#endif
+
+#ifdef MQTT_ENABLED
+  setup_MQTT();
+  reconnect();
+#endif
+
 #ifdef OLED_ENABLED
   setup_OLED();
 #endif
@@ -103,10 +114,12 @@ void setup()
 
 void loop()
 {
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef AUTOCONNECT_ENABLED
+  loop_AutoConnect();
+#endif
+#ifdef MQTT_ENABLED
   checkMQTTloop();
 #endif
-
   if (ScanEvent())
     sendMsg();
 }
@@ -118,7 +131,7 @@ void sendMsg()
 #ifdef SERIAL_ENABLED
     Serial.print(pbuffer);
 #endif
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef MQTT_ENABLED
     publishMsg();
 #endif
 #ifdef OLED_ENABLED

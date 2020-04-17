@@ -11,8 +11,14 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #ifdef AUTOCONNECT_ENABLED
+
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#endif
+
+#ifdef ESP32
+#error "AutoConnect for ESP32 not implemented... Yet"
+#endif
 
 #include <AutoConnect.h>
 #define GET_CHIPID() (ESP.getChipId())
@@ -21,7 +27,7 @@
 #define PARAM_FILE "/settings.json"
 #define AUX_SETTING_URI "/settings"
 #define AUX_SAVE_URI "/settings_save"
-//#define AUX_CLEAR_URI   "/settings_clear"
+//#define AUX_CLEAR_URI "/settings_clear"
 
 extern byte ac_WIFI_PWR;
 extern IPAddress ac_WIFI_IP;
@@ -234,6 +240,5 @@ static const char AUX_settings[] PROGMEM = R"raw(
 ]
 )raw";
 
-#endif
-#endif
-#endif
+#endif // AUTOCONNECT_ENABLED
+#endif // AutoConnect_h

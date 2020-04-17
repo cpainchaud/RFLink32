@@ -87,14 +87,18 @@
 #endif
 
 // WIFI
+#if (defined(ESP32) || defined(ESP8266))
 #define WIFI_PWR 10 // 0~20.5dBm
 #define AUTOCONNECT_ENABLED
+#endif
 
 // MQTT messages
 #define SERIAL_ENABLED    // Send RFLink messages over Serial
+#if (defined(ESP32) || defined(ESP8266))
 #define MQTT_ENABLED      // Send RFLink messages over MQTT
 #define MQTT_LOOP_MS 7500 // MQTTClient.loop(); call period (in mSec)
 // #define MQTT_RETAINED   // Retained option
+#endif
 
 // Debug default
 #define RFDebug_0 false   // debug RF signals with plugin 001 (no decode)

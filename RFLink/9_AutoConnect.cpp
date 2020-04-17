@@ -8,8 +8,8 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "9_AutoConnect.h"
-
 #ifdef AUTOCONNECT_ENABLED
+
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
