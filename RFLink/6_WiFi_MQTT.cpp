@@ -145,9 +145,13 @@ void setup_WIFI_OFF()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(false);
+  #ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  #endif
   WiFi.mode(WIFI_OFF);
+  #ifdef ESP8266
   WiFi.forceSleepBegin();
+  #endif
 }
 #endif
 #endif
