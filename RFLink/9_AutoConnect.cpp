@@ -47,7 +47,6 @@ void rootPage()
 
 void setup_AutoConnect()
 {
-    SPIFFS.begin();
     if (portal.load(FPSTR(AUX_settings)))
     { // we load all the settings from "/settings" uri
         AutoConnectAux &my_settings = *portal.aux(AUX_SETTING_URI);
@@ -99,6 +98,7 @@ void setup_AutoConnect()
             yield();
         }
     }
+    SPIFFS.end();
 }
 
 void getParams(AutoConnectAux &aux)
@@ -171,6 +171,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     // the AutoConnectAux object of /settings.
     File param = SPIFFS.open(PARAM_FILE, "w");
     if (param)
+    SPIFFS.begin();
     {
         my_settings.saveElement(param, {"MQTT_SERVER", "MQTT_PORT",
                                         "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
@@ -182,6 +183,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     {
         Serial.println(PARAM_FILE " open+w failed");
     }
+    SPIFFS.end();
     // Echo back saved parameters to AutoConnectAux page.
     AutoConnectText &echo = aux["parameters"].as<AutoConnectText>();
     echo.value = F("<u><b>MQTT settings</b></u>");
