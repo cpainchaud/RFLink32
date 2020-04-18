@@ -47,7 +47,7 @@ boolean Plugin_254(byte function, char *string)
    // ----------------------------------
    for (i = 1; i < RawSignal.Number + 1; i++)
    {
-      if (QRFDebug == true)
+      if (QRFUDebug == true)
          Serial.printf("%02x", RawSignal.Pulses[i]);
       else
       {
