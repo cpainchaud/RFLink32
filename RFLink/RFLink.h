@@ -26,7 +26,7 @@
 #define PLUGIN_MAX 55                   // 55         // Maximum number of Receive plugins
 #define PLUGIN_TX_MAX 0                 // 26         // Maximum number of Transmit plugins
 #define INPUT_COMMAND_SIZE 60           // 60         // Maximum number of characters that a command via serial can be.
-#define PRINT_BUFFER_SIZE 90            // 60         // Maximum number of characters that a command should print in one go via the print buffer.
+#define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
 /*
 #define VALUE_PAIR                     44
