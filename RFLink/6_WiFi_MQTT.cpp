@@ -7,7 +7,6 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
-#if (defined(ESP32) || defined(ESP8266))
 
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
@@ -117,11 +116,7 @@ void publishMsg()
   {
     reconnect();
   }
-#ifdef MQTT_RETAINED
-  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, true);
-#else  // MQTT_RETAINED
-  MQTTClient.publish(MQTT_TOPIC_OUT, pbuffer, false);
-#endif // MQTT_RETAINED
+  MQTTClient.publish(MQTT_TOPIC_OUT.c_str(), pbuffer, MQTT_RETAINED);
 }
 
 void checkMQTTloop()
@@ -143,14 +138,18 @@ void checkMQTTloop()
 
 #else // MQTT_ENABLED
 
+#if (defined(ESP32) || defined(ESP8266))
 void setup_WIFI_OFF()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(false);
+  #ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  #endif
   WiFi.mode(WIFI_OFF);
+  #ifdef ESP8266
   WiFi.forceSleepBegin();
+  #endif
 }
-
-#endif // MQTT_ENABLED
 #endif // (defined(ESP32) || defined(ESP8266))
+#endif // MQTT_ENABLED
