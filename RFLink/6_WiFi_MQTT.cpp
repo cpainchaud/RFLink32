@@ -44,12 +44,12 @@ void setup_WIFI()
   WiFi.mode(WIFI_STA);
 
   // Comment out for Dynamic IP
-  WiFi.config(ip, gateway, subnet);
+  WiFi.config(ipaddr_addr(WIFI_IP.c_str()), ipaddr_addr(WIFI_GATEWAY.c_str()), ipaddr_addr(WIFI_SUBNET.c_str()));
 
   // We start by connecting to a WiFi network
   Serial.print(F("\nConnecting to "));
-  Serial.print(ssid);
-  WiFi.begin(ssid, password);
+  Serial.print(WIFI_SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PSWD);
 
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -67,7 +67,7 @@ void setup_WIFI()
 void setup_MQTT()
 {
   MQTTClient.setClient(WIFIClient);
-  MQTTClient.setServer(MQTT_SERVER, MQTT_PORT);
+  MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
   // MQTTClient.setCallback(callback);
 }
 
@@ -92,11 +92,11 @@ void reconnect()
   {
     Serial.print(F("Attempting MQTT connection..."));
     // Attempt to connect
-    if (MQTTClient.connect(MQTT_ID, MQTT_USER, MQTT_PSWD))
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
     {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      // MQTTClient.subscribe(MQTT_TOPIC_IN);
+      // MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
     }
     else
     {
