@@ -53,8 +53,8 @@
 
 #define ACH2010_MIN_PULSECOUNT 160 // reduce this value (144?) in case of bad reception
 #define ACH2010_MAX_PULSECOUNT 160
-#define DKW2012_MIN_PULSECOUNT 164
-#define DKW2012_MAX_PULSECOUNT 176
+#define DKW2012_MIN_PULSECOUNT 172
+#define DKW2012_MAX_PULSECOUNT 182
 
 #define DKW2012_PULSEMINMAX 768 / RAWSIGNAL_SAMPLE_RATE
 
@@ -138,10 +138,10 @@ boolean Plugin_029(byte function, char *string)
 
   temp = (((data[1] & 0x3) << 8 | data[2]) - 400);
   hum = data[3];
-  wspeed = data[4] * 124;
-  wspeed /= 10;
-  wgust = data[5] * 124;
-  wgust /= 10;
+  wspeed = data[4] * 245;
+  wspeed /= 20;
+  wgust = data[5] * 245;
+  wgust /= 20;
   rain = (data[6] << 8) | data[7];
   rain *= 3;
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
