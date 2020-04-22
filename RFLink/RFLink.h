@@ -66,8 +66,8 @@
 #ifdef __AVR_ATmega328P__
 #define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
 #define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA D1       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND 2         // Ground to the receiver on this pin
+#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
 #endif
 
 #ifdef __AVR_ATmega2560__
