@@ -58,5 +58,18 @@ So far, in addition of core libraries, we use:
 
 ![Pinout](https://github.com/couin3/RFLink/blob/master/pictures/RFLink-ESP_Pinout.jpg "Pinout") 
 
+### Alternative Pinout
+- ESP8266 can't draw more than 12mA on a GPIO pin.
+- Some receivers have current spikes bigger than that (eg RXB12).
+- This lead to a non working receiver / non starting ESP.
+- Here is a more classic working wiring
+
+|  Name (Alt)   | D1 mini | RXB6  |
+|---------------|---------|-------|
+| PIN_RF_TX_VCC |   3v3   | 5 VCC |
+| PIN_RF_TX_NA  |   N/A   | 6 DER |
+| PIN_RF_TX_DATA|   D7    | 7 DAT |
+| PIN_RF_TX_GND |   GND   | 8 GND |
+
 ### Thanks
 Special thanks to: Axellum, Etimou, Schmurtz, Zoomx 

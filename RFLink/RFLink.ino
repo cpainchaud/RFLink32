@@ -101,7 +101,7 @@ void setup()
 #ifdef SERIAL_ENABLED
   Serial.print(pbuffer);
 #endif
-#if defined(MQTT_ENABLED) && (defined(ESP32) || defined(ESP8266))
+#ifdef MQTT_ENABLED
   publishMsg();
 #endif
 #ifdef OLED_ENABLED

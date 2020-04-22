@@ -45,10 +45,15 @@ boolean Plugin_254(byte function, char *string)
    Serial.print(RawSignal.Number);         // print number of pulses
    Serial.print(F(";Pulses(uSec)="));      // print pulse durations
    // ----------------------------------
+   char dbuffer[3];
+
    for (i = 1; i < RawSignal.Number + 1; i++)
    {
       if (QRFUDebug == true)
-         Serial.printf("%02x", RawSignal.Pulses[i]);
+      {
+         sprintf(dbuffer, "%02x", RawSignal.Pulses[i]);
+         Serial.print(dbuffer);
+      }
       else
       {
          Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);

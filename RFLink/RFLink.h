@@ -10,15 +10,15 @@
 
 //
 #define BUILDNR 0x01                    // 0x07       // shown in version
-#define REVNR 0x00                      // 0X42       // shown in version and startup string
+#define REVNR 0x01                      // 0X42       // shown in version and startup string
 #define BAUD 57600                      // 57600      // Baudrate for serial communication.
 #define MIN_RAW_PULSES 50               // 50         // Minimal number of bits that need to have been received before we spend CPU time on decoding the signal.
 #define RAW_BUFFER_SIZE 292             // 292        // Maximum number of pulses that is received in one go.
 #define RAWSIGNAL_SAMPLE_RATE 32        // 32         // =8 bits. Sample width / resolution in uSec for raw RF pulses.
-#define SIGNAL_SEEK_TIMEOUT_MS 25       // 25         // After this time in mSec. RF signal will be considered absent.
-#define SIGNAL_MIN_PREAMBLE_US 3000     // 3000       //
-#define MIN_PULSE_LENGTH_US 25          // 25         // Pulses shorter than this value in uSec. will be seen as garbage and not taken as actual pulses.
-#define SIGNAL_END_TIMEOUT_US 5000      // 4500       // After this time in uSec. the RF signal will be considered to have stopped.
+#define SIGNAL_SEEK_TIMEOUT_MS 25       // 25         // After this time in mSec, RF signal will be considered absent.
+#define SIGNAL_MIN_PREAMBLE_US 3000     // 3000       // After this time in mSec, a RF signal will be considered to have started.
+#define MIN_PULSE_LENGTH_US 100         // 25!        // Pulses shorter than this value in uSec. will be seen as garbage and not taken as actual pulses.
+#define SIGNAL_END_TIMEOUT_US 5000      // 4500       // After this time in uSec, the RF signal will be considered to have stopped.
 #define SIGNAL_REPEAT_TIME_MS 250       // 500        // Time in mSec. in which the same RF signal should not be accepted again. Filters out retransmits.
 #define TRANSMITTER_STABLE_DELAY_US 500 // 500        // delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define SCAN_HIGH_TIME_MS 50            // 50         // time interval in ms. fast processing for background tasks
@@ -26,7 +26,7 @@
 #define PLUGIN_MAX 55                   // 55         // Maximum number of Receive plugins
 #define PLUGIN_TX_MAX 0                 // 26         // Maximum number of Transmit plugins
 #define INPUT_COMMAND_SIZE 60           // 60         // Maximum number of characters that a command via serial can be.
-#define PRINT_BUFFER_SIZE 60            // 60            // Maximum number of characters that a command should print in one go via the print buffer.
+#define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
 /*
 #define VALUE_PAIR                     44
@@ -51,28 +51,28 @@
 #ifdef ESP8266
 // ESP8266 D1 Mini
 #define PIN_RF_RX_VCC D5  // Power to the receiver on this pin
-#define PIN_RF_RX_NA D6   // Alt. RX_DATA. Forced as inpupt.
+#define PIN_RF_RX_NA D6   // Alt. RX_DATA. Forced as input
 #define PIN_RF_RX_DATA D7 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_RX_GND D8  // Ground to the receiver on this pin
 #endif
 
 #ifdef ESP32
 #define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as inpupt.
+#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
 #define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
 #endif
 
 #ifdef __AVR_ATmega328P__
 #define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as inpupt.
-#define PIN_RF_RX_DATA D1       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND 2         // Ground to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
 #endif
 
 #ifdef __AVR_ATmega2560__
 #define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as inpupt.
+#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
 #define PIN_RF_RX_DATA D1       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_RX_GND 19        // Ground to the receiver on this pin
 #endif
@@ -93,11 +93,11 @@
 #endif
 
 // MQTT messages
-#define SERIAL_ENABLED    // Send RFLink messages over Serial
+#define SERIAL_ENABLED // Send RFLink messages over Serial
 #if (defined(ESP32) || defined(ESP8266))
-#define MQTT_ENABLED      // Send RFLink messages over MQTT
-#define MQTT_LOOP_MS 7500 // MQTTClient.loop(); call period (in mSec)
-// #define MQTT_RETAINED   // Retained option
+#define MQTT_ENABLED        // Send RFLink messages over MQTT
+#define MQTT_LOOP_MS 7500   // MQTTClient.loop(); call period (in mSec)
+#define MQTT_RETAINED false // Retained option
 #endif
 
 // Debug default

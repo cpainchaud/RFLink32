@@ -1,7 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-100 AlectoV2                                        ##
-//##                                        > 868 MHz Plugin <                                         ##
+//##                                        Plugin-029 DKW2012/ACH2010                                 ##
 //#######################################################################################################
 
 /*********************************************************************************************\
@@ -50,23 +49,30 @@
  * L = ?
  * M = Checksum
  \*********************************************************************************************/
-#define DKW2012_MIN_PULSECOUNT 164
-#define DKW2012_MAX_PULSECOUNT 176
+#define DKW2012_PLUGIN_ID 029
+
 #define ACH2010_MIN_PULSECOUNT 160 // reduce this value (144?) in case of bad reception
 #define ACH2010_MAX_PULSECOUNT 160
+#define DKW2012_MIN_PULSECOUNT 170
+#define DKW2012_MAX_PULSECOUNT 178
 
-#ifdef PLUGIN_100
+#define DKW2012_PULSEMINMAX 768 / RAWSIGNAL_SAMPLE_RATE
+
+#ifdef PLUGIN_029
 #include "../4_Display.h"
 
-uint8_t Plugin_100_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
+uint8_t Plugin_029_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 
-boolean Plugin_100(byte function, char *string)
+boolean Plugin_029(byte function, char *string)
 {
-  if (!(((RawSignal.Number >= ACH2010_MIN_PULSECOUNT) && (RawSignal.Number <= ACH2010_MAX_PULSECOUNT)) || ((RawSignal.Number >= DKW2012_MIN_PULSECOUNT) && (RawSignal.Number <= DKW2012_MAX_PULSECOUNT))))
+  if (!(
+          ((RawSignal.Number >= ACH2010_MIN_PULSECOUNT) &&
+           (RawSignal.Number <= ACH2010_MAX_PULSECOUNT)) ||
+          ((RawSignal.Number >= DKW2012_MIN_PULSECOUNT) &&
+           (RawSignal.Number <= DKW2012_MAX_PULSECOUNT))))
     return false;
 
   byte c = 0;
-  byte rfbit;
   byte data[10];
   byte msgtype = 0;
   byte rc = 0;
@@ -76,87 +82,91 @@ boolean Plugin_100(byte function, char *string)
   //==================================================================================
   if (RawSignal.Number > ACH2010_MAX_PULSECOUNT)
     maxidx = 9;
-  // Get message back to front as the header is almost never received complete for ACH2010
   byte idx = maxidx;
-  for (byte x = RawSignal.Number; x > 0; x = x - 2)
+  //==================================================================================
+  // Get all 8x11 bits
+  //==================================================================================
+  // Get message back to front as the header is almost never received complete for ACH2010
+  for (byte x = RawSignal.Number; x > 0; x -= 2)
   {
-    if (RawSignal.Pulses[x - 1] * RAWSIGNAL_SAMPLE_RATE < 0x300)
-      rfbit = 0x80;
-    else
-      rfbit = 0;
-    data[idx] = (data[idx] >> 1) | rfbit;
-    c++;
-    if (c == 8)
+    data[idx] >>= 1; // Always shift
+    if (RawSignal.Pulses[x - 1] < DKW2012_PULSEMINMAX)
+      data[idx] |= 0x80;
+    // else
+    //  data[idx] |= 0x00;
+
+    if (++c == 8)
     {
-      if (idx == 0)
+      if (idx-- == 0)
         break;
       c = 0;
-      idx--;
     }
   }
   //==================================================================================
+  // Perform a quick sanity check
+  //==================================================================================
+  msgtype = (data[0] >> 4) & 0xF; // msg type must be 5 or 10
+  if ((msgtype != 0xA) && (msgtype != 0x5))
+    return false; // why true? -> Time format?
+  //==================================================================================
+  // Perform checksum calculations, Alecto checksums are Rollover Checksums by design!
+  //==================================================================================
   checksum = data[maxidx];
-  checksumcalc = Plugin_100_ProtocolAlectoCRC8(data, maxidx);
-
-  msgtype = (data[0] >> 4) & 0xf;       // msg type must be 5 or 10
-  rc = (data[0] << 4) | (data[1] >> 4); // rolling code
-
+  checksumcalc = Plugin_029_ProtocolAlectoCRC8(data, maxidx);
   if (checksum != checksumcalc)
     return false;
-  if ((msgtype != 10) && (msgtype != 5))
-    return true; // why true?
   //==================================================================================
-  unsigned int temp = 0;
+  // Prevent repeating signals from showing up
+  //==================================================================================
+  unsigned long tmpval = data[0] << 8 | data[1];
+
+  if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || (SignalCRC != tmpval))
+    SignalCRC = tmpval; // not seen the RF packet recently
+  else
+    return true; // already seen the RF packet recently
+  //==================================================================================
+  // Now process the various sensor types
+  //==================================================================================
+  rc = (data[0] << 4) | (data[1] >> 4); // rolling code
+  byte bat = !((data[1] >> 3) & 0x1); // supposed bat bit
+  int temp = 0;
   unsigned int rain = 0;
   byte hum = 0;
-  int wdir = 0;
-  int wspeed = 0;
-  int wgust = 0;
+  unsigned int wdir = 0;
+  unsigned int wspeed = 0;
+  unsigned int wgust = 0;
 
-  temp = (((data[1] & 0x3) * 256 + data[2]) - 400);
+  temp = (((data[1] & 0x3) << 8 | data[2]) - 400);
   hum = data[3];
-  wspeed = data[4] * 108;
-  wspeed = wspeed / 10;
-  wgust = data[5] * 108;
-  wgust = wgust / 10;
-  rain = (data[6] * 256) + data[7];
+  wspeed = data[4] * 245;
+  wspeed /= 20;
+  wgust = data[5] * 245;
+  wgust /= 20;
+  rain = (data[6] << 8) | data[7];
+  rain *= 3;
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
   {
-    wdir = (data[8] & 0xf);
+    wdir = (data[8] & 0xF);
   }
-  // ----------------------------------
+  //==================================================================================
   // Output
-  // ----------------------------------
-  sprintf(pbuffer, "20;%02X;", PKSequenceNumber++); // Node and packet number
-  Serial.print(pbuffer);
-  // ----------------------------------
+  //==================================================================================
+  display_Header();
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
-  {
-    Serial.print("DKW2012;"); // Label
-  }
+    display_Name(PSTR("DKW2012"));
   else
-  {
-    Serial.print("Alecto V2;"); // Label
-  }
-  sprintf(pbuffer, "ID=00%02x;", rc); // ID
-  Serial.print(pbuffer);
-  sprintf(pbuffer, "TEMP=%04x;", temp);
-  Serial.print(pbuffer);
-  sprintf(pbuffer, "HUM=%02x;", hum);
-  Serial.print(pbuffer);
-  sprintf(pbuffer, "WINSP=%04x;", wspeed);
-  Serial.print(pbuffer);
-  sprintf(pbuffer, "WINGS=%04x;", wgust);
-  Serial.print(pbuffer);
-  sprintf(pbuffer, "RAIN=%04x;", rain);
-  Serial.print(pbuffer);
+    display_Name(PSTR("Alecto V2"));
+  display_IDn(rc, 4);
+  display_TEMP(temp);
+  display_HUM(hum, HUM_HEX);
+  display_WINSP(wspeed);
+  display_WINGS(wgust);
+  display_RAIN(rain);
   if (RawSignal.Number >= DKW2012_MIN_PULSECOUNT)
-  {
-    sprintf(pbuffer, "WINDIR=%04d;", wdir);
-    Serial.print(pbuffer);
-  }
-  Serial.println();
-  // ----------------------------------
+    display_WINDIR(wdir);
+  display_BAT(bat);
+  display_Footer();
+  //==================================================================================
   RawSignal.Repeats = true; // suppress repeats of the same RF packet
   RawSignal.Number = 0;     // do not process the packet any further
   return true;
@@ -168,7 +178,7 @@ boolean Plugin_100(byte function, char *string)
  *           http://lucsmall.com/2012/04/30/weather-station-hacking-part-3/
  *           https://github.com/lucsmall/WH2-Weather-Sensor-Library-for-Arduino/blob/master/WeatherSensorWH2.cpp
  \*********************************************************************************************/
-uint8_t Plugin_100_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len)
+uint8_t Plugin_029_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len)
 {
   uint8_t crc = 0;
   // Indicated changes are from reference CRC-8 function in OneWire library
@@ -186,4 +196,4 @@ uint8_t Plugin_100_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len)
   }
   return crc;
 }
-#endif // PLUGIN_100
+#endif // PLUGIN_029
