@@ -76,7 +76,7 @@ void setup_WIFI()
 
 void setup_MQTT()
 {
-    if (ac_MQTT_PORT == "")      ac_MQTT_PORT = "1883"; // just in case ....
+    if (MQTT_PORT == "")      MQTT_PORT = "1883"; // just in case ....
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
   // MQTTClient.setCallback(callback);
@@ -103,9 +103,9 @@ void reconnect()
   {
 
     // MQTTClient.setServer(serverName.c_str(), Mqtt_Port.toInt());
-    Serial.println(String("Attempting MQTT broker:") + ac_MQTT_SERVER.c_str());
+    Serial.println(String("Attempting MQTT broker:") + MQTT_SERVER.c_str());
 
-    if (MQTTClient.connect(ac_MQTT_ID.c_str(), ac_MQTT_USER.c_str(), ac_MQTT_PSWD.c_str()))
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
     {
       // Once connected, resubscribe
       // MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
@@ -115,9 +115,9 @@ void reconnect()
     }
     else
     {
-      Serial.println("Connection mqttserver:" + String(ac_MQTT_SERVER.c_str()));
-      Serial.println("Connection Mqtt_Username:" + String(ac_MQTT_USER.c_str()));
-      Serial.println("Connection Mqtt_Password:" + String(ac_MQTT_USER.c_str()));
+      Serial.println("Connection mqttserver:" + String(MQTT_SERVER.c_str()));
+      Serial.println("Connection Mqtt_Username:" + String(MQTT_USER.c_str()));
+      Serial.println("Connection Mqtt_Password:" + String(MQTT_USER.c_str()));
       Serial.println("Connection failed:" + String(MQTTClient.state()));
       if (!--retry)
         break;
