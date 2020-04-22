@@ -22,7 +22,8 @@
 #include <AutoConnect.h>
 #define GET_CHIPID() (ESP.getChipId())
 
-// --------- These labels can be renamed (Need clean-up before re-build) ---------   https://hieromon.github.io/AutoConnect/changelabel.html#label-text-replacement-header-file
+// --------- These labels can be renamed (Need clean-up before re-build) ---------
+//  https://hieromon.github.io/AutoConnect/changelabel.html#label-text-replacement-header-file
 //  AUTOCONNECT_MENULABEL_CONFIGNEW   "Configure new AP"
 //  AUTOCONNECT_MENULABEL_OPENSSIDS   "Open SSIDs"
 //  AUTOCONNECT_MENULABEL_DISCONNECT  "Disconnect"
@@ -33,24 +34,20 @@
 //  AUTOCONNECT_BUTTONLABEL_RESET     "RESET"
 //  AUTOCONNECT_BUTTONLABEL_UPDATE    "UPDATE"
 
-
 #ifdef AUTOCONNECT_MENULABEL_CONFIGNEW
 #undef AUTOCONNECT_MENULABEL_CONFIGNEW
-#define AUTOCONNECT_MENULABEL_CONFIGNEW   "Configure Wifi"
+#define AUTOCONNECT_MENULABEL_CONFIGNEW "Configure Wifi"
 #endif
-
 
 #ifdef AUTOCONNECT_MENULABEL_RESET
 #undef AUTOCONNECT_MENULABEL_RESET
-#define AUTOCONNECT_MENULABEL_RESET   "Reboot"
+#define AUTOCONNECT_MENULABEL_RESET "Reboot"
 #endif
 
 #ifdef AUTOCONNECT_MENULABEL_OPENSSIDS
 #undef AUTOCONNECT_MENULABEL_OPENSSIDS
-#define AUTOCONNECT_MENULABEL_OPENSSIDS   "Known networks"
+#define AUTOCONNECT_MENULABEL_OPENSSIDS "Known networks"
 #endif
-
-
 
 // Adds MQTT tab to Autoconnect
 #define PARAM_FILE "/settings.json"
@@ -80,8 +77,8 @@ void HandleLastMsg();
 // Multiple AutoConnectAux can be defined in the JSON array.
 // In this example, JSON is hard-coded to make it easier to understand
 // the AutoConnectAux API. In practice, it will be an external content
-  // which separated from the sketch, as the mqtt_RSSI_FS example shows.
-  static const char AUX_settings[] PROGMEM = R"raw(
+// which separated from the sketch, as the mqtt_RSSI_FS example shows.
+static const char AUX_settings[] PROGMEM = R"raw(
   [
     {
       "title": "MQTT settings",
