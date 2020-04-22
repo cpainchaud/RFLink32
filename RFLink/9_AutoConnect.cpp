@@ -244,10 +244,8 @@ void setup_AutoConnect()
         // config.psk = "RFlink-ESP";
         config.apid = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
 
-        if (ac_Adv_HostName.length())
-        {
-            config.hostName = ac_Adv_HostName;
-        }
+        if (Adv_HostName.length())
+            config.hostName = Adv_HostName;
         else
         {
             config.hostName = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
@@ -403,16 +401,16 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     // The 'where()' function returns the AutoConnectAux that caused
     // the transition to this page.
 
-    if (ac_MQTT_PORT == "")
-        ac_MQTT_PORT = "1883"; // just in case ....
-    if (ac_MQTT_ID == "")
-        ac_MQTT_ID = "RFlink-ESP"; // just in case ....
-    if (ac_MQTT_TOPIC_IN == "")
-        ac_MQTT_TOPIC_IN = "/RFlink/cmd"; // just in case ....
-    if (ac_MQTT_TOPIC_OUT == "")
-        ac_MQTT_TOPIC_OUT = "/RFLink/msg"; // just in case ....
-    if (ac_Adv_HostName == "")
-        ac_Adv_HostName = "RFlink-ESP"; // just in case ....
+    if (MQTT_PORT == "")
+        MQTT_PORT = "1883"; // just in case ....
+    if (MQTT_ID == "")
+        MQTT_ID = "RFlink-ESP"; // just in case ....
+    if (MQTT_TOPIC_IN == "")
+        MQTT_TOPIC_IN = "/RFlink/cmd"; // just in case ....
+    if (MQTT_TOPIC_OUT == "")
+        MQTT_TOPIC_OUT = "/RFLink/msg"; // just in case ....
+    if (Adv_HostName == "")
+        Adv_HostName = "RFlink-ESP"; // just in case ....
 
     AutoConnectAux &src_aux = *portal.aux(portal.where());
     getParams(src_aux);
