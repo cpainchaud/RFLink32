@@ -10,7 +10,11 @@
 
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
+#ifndef AUTOCONNECT_ENABLED
+#include "6_Credentials.h"
+#else
 #include "9_AutoConnect.h"
+#endif
 
 #ifndef AUTOCONNECT_ENABLED
 #ifdef ESP32
@@ -35,13 +39,16 @@
 WiFiClient WIFIClient;
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
+#ifndef AUTOCONNECT_ENABLED
+  static String WIFI_PWR = String(WIFI_PWR_0);
+
 void setup_WIFI()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
 #ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-  WiFi.setOutputPower(ac_WIFI_PWR);
+  WiFi.setOutputPower(WIFI_PWR.toInt());
 #endif // ESP8266
   WiFi.mode(WIFI_STA);
 
@@ -65,6 +72,7 @@ void setup_WIFI()
   Serial.print(F("\tRSSI "));
   Serial.println(WiFi.RSSI());
 }
+#endif
 
 void setup_MQTT()
 {
@@ -114,6 +122,10 @@ void reconnect()
 
 void publishMsg()
 {
+#ifndef AUTOCONNECT_ENABLED
+  static boolean MQTT_RETAINED = MQTT_RETAINED_0;
+#endif // !AUTOCONNECT_ENABLED
+
   if (!MQTTClient.connected())
   {
     reconnect();
@@ -145,13 +157,13 @@ void setup_WIFI_OFF()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(false);
-  #ifdef ESP8266
+#ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-  #endif
+#endif
   WiFi.mode(WIFI_OFF);
-  #ifdef ESP8266
+#ifdef ESP8266
   WiFi.forceSleepBegin();
-  #endif
+#endif
 }
 #endif
 #endif

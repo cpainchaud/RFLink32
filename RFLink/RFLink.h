@@ -73,8 +73,8 @@
 #ifdef __AVR_ATmega2560__
 #define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
 #define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA D1       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND 19        // Ground to the receiver on this pin
+#define PIN_RF_RX_DATA 19       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
 #endif
 
 // OLED display, 0.91" SSD1306 I2C
@@ -88,16 +88,16 @@
 
 // WIFI
 #if (defined(ESP32) || defined(ESP8266))
-#define WIFI_PWR 10 // 0~20.5dBm
+#define WIFI_PWR_0 10 // 0~20.5dBm
 #define AUTOCONNECT_ENABLED
 #endif
 
 // MQTT messages
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 #if (defined(ESP32) || defined(ESP8266))
-#define MQTT_ENABLED        // Send RFLink messages over MQTT
-#define MQTT_LOOP_MS 7500   // MQTTClient.loop(); call period (in mSec)
-#define MQTT_RETAINED false // Retained option
+#define MQTT_ENABLED          // Send RFLink messages over MQTT
+#define MQTT_LOOP_MS 7500     // MQTTClient.loop(); call period (in mSec)
+#define MQTT_RETAINED_0 false // Retained option
 #endif
 
 // Debug default
@@ -106,4 +106,4 @@
 #define RFUDebug_0 false  // debug RF signals with plugin 254 (decode 1st)
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
-#endif
+#endif // RFLink_h

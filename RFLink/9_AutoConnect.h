@@ -10,15 +10,14 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+
 #ifdef AUTOCONNECT_ENABLED
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
-#endif
-
-#ifdef ESP32
+#elif ESP32
 #error "AutoConnect for ESP32 not implemented... Yet"
-#endif
+#endif // ESP8266
 
 #include <AutoConnect.h>
 #define GET_CHIPID() (ESP.getChipId())
@@ -29,24 +28,16 @@
 #define AUX_SAVE_URI "/settings_save"
 //#define AUX_CLEAR_URI "/settings_clear"
 
-extern byte ac_WIFI_PWR;
-extern IPAddress ac_WIFI_IP;
-extern IPAddress ac_WIFI_GATEWAYS;
-extern IPAddress ac_WIFI_SUBNET;
-extern IPAddress ac_WIFI_DNS;
-extern char ac_WIFI_SSID[];
-extern char ac_WIFI_PSWD[];
-
-extern String ac_MQTT_SERVER;
-extern String ac_MQTT_PORT;
-extern String ac_MQTT_ID;
-extern String ac_MQTT_USER;
-extern String ac_MQTT_PSWD;
-extern String ac_MQTT_TOPIC_OUT;
-extern String ac_MQTT_TOPIC_IN;
-extern boolean ac_MQTT_RETAINED;
-extern String ac_Adv_HostName;
-extern String ac_Adv_Power;
+extern String MQTT_SERVER;
+extern String MQTT_PORT;
+extern String MQTT_ID;
+extern String MQTT_USER;
+extern String MQTT_PSWD;
+extern String MQTT_TOPIC_OUT;
+extern String MQTT_TOPIC_IN;
+extern boolean MQTT_RETAINED;
+extern String Adv_HostName;
+extern String Adv_Power;
 
 void setup_AutoConnect();
 void loop_AutoConnect();

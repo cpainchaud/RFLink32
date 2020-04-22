@@ -11,8 +11,11 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
+#ifdef OLED_ENABLED
+
 void setup_OLED();
 void splash_OLED();
 void print_OLED();
 
-#endif
+#endif // OLED_ENABLED
+#endif // OLED_h

@@ -22,7 +22,10 @@
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
+#ifndef AUTOCONNECT_ENABLED
 void setup_WIFI();
+#endif // !AUTOCONNECT_ENABLED
+
 void setup_MQTT();
 void reconnect();
 void publishMsg();

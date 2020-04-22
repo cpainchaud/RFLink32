@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "9_AutoConnect.h"
+
 #ifdef AUTOCONNECT_ENABLED
 
 #ifdef ESP8266
@@ -17,23 +18,25 @@
 #include <SPI.h>              // To acces Flash Memory
 #include <FS.h>               // To save MQTT parameters
 #include <AutoConnect.h>
-#endif
+#elif ESP32
+#error "AutoConnect for ESP32 not implemented... Yet"
+#endif // ESP8266
 
 ESP8266WebServer Server; // Replace with WebServer for ESP32
 AutoConnect portal(Server);
 AutoConnectConfig config;
 
-String ac_MQTT_SERVER;
-String ac_MQTT_PORT;
-String ac_MQTT_ID;
-String ac_MQTT_USER;
-String ac_MQTT_PSWD;
-String ac_MQTT_TOPIC_OUT;
-String ac_MQTT_TOPIC_IN;
-boolean ac_MQTT_RETAINED;
+String MQTT_SERVER;
+String MQTT_PORT;
+String MQTT_ID;
+String MQTT_USER;
+String MQTT_PSWD;
+String MQTT_TOPIC_OUT;
+String MQTT_TOPIC_IN;
+boolean MQTT_RETAINED;
 // Adds advanced tab to Autoconnect
-String ac_Adv_HostName;
-String ac_Adv_Power;
+String Adv_HostName;
+String Adv_Power;
 
 // Prototypes
 String loadParams(AutoConnectAux &aux, PageArgument &args);
@@ -62,9 +65,9 @@ void setup_AutoConnect()
             Serial.print(F("AP name set to "));
             Serial.println(config.apid);
         }
-        else if (ac_Adv_HostName.length())
+        else if (Adv_HostName.length())
         {
-            config.hostName = ac_Adv_HostName;
+            config.hostName = Adv_HostName;
             Serial.print(F("Hostname set to "));
             Serial.println(config.hostName);
         }
@@ -113,27 +116,27 @@ void loop_AutoConnect()
 void getParams(AutoConnectAux &aux)
 {
     //////  MQTT  settings //////
-    ac_MQTT_SERVER = aux["MQTT_SERVER"].value;
-    ac_MQTT_SERVER.trim();
-    ac_MQTT_PORT = aux["MQTT_PORT"].value;
-    ac_MQTT_PORT.trim();
-    ac_MQTT_ID = aux["MQTT_ID"].value;
-    ac_MQTT_ID.trim();
-    ac_MQTT_USER = aux["MQTT_USER"].value;
-    ac_MQTT_USER.trim();
-    ac_MQTT_PSWD = aux["MQTT_PSWD"].value;
-    ac_MQTT_PSWD.trim();
-    ac_MQTT_TOPIC_OUT = aux["MQTT_TOPIC_OUT"].value;
-    ac_MQTT_TOPIC_OUT.trim();
-    ac_MQTT_TOPIC_IN = aux["MQTT_TOPIC_IN"].value;
-    ac_MQTT_TOPIC_IN.trim();
-    ac_MQTT_RETAINED = aux["MQTT_RETAINED"].as<AutoConnectCheckbox>().checked;
+    MQTT_SERVER = aux["MQTT_SERVER"].value;
+    MQTT_SERVER.trim();
+    MQTT_PORT = aux["MQTT_PORT"].value;
+    MQTT_PORT.trim();
+    MQTT_ID = aux["MQTT_ID"].value;
+    MQTT_ID.trim();
+    MQTT_USER = aux["MQTT_USER"].value;
+    MQTT_USER.trim();
+    MQTT_PSWD = aux["MQTT_PSWD"].value;
+    MQTT_PSWD.trim();
+    MQTT_TOPIC_OUT = aux["MQTT_TOPIC_OUT"].value;
+    MQTT_TOPIC_OUT.trim();
+    MQTT_TOPIC_IN = aux["MQTT_TOPIC_IN"].value;
+    MQTT_TOPIC_IN.trim();
+    MQTT_RETAINED = aux["MQTT_RETAINED"].as<AutoConnectCheckbox>().checked;
 
     ////// advanced settings //////
-    ac_Adv_HostName = aux["Adv_HostName"].value;
-    ac_Adv_HostName.trim();
-    ac_Adv_Power = aux["Adv_Power"].value;
-    ac_Adv_Power.trim();
+    Adv_HostName = aux["Adv_HostName"].value;
+    Adv_HostName.trim();
+    Adv_Power = aux["Adv_Power"].value;
+    Adv_Power.trim();
 }
 
 // Load parameters saved with  saveParams from SPIFFS into the
@@ -179,7 +182,7 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
         }
 #ifdef ESP32
         Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
-#endif
+#endif // ESP32
     }
     SPIFFS.end();
     initConfig = false;
@@ -221,30 +224,30 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value = F("<u><b>MQTT settings</b></u>");
     echo.value += F("<br><b>Connexion</b>");
     echo.value += F("<br>Server: ");
-    echo.value += ac_MQTT_SERVER;
+    echo.value += MQTT_SERVER;
     echo.value += F("<br>Port: ");
-    echo.value += ac_MQTT_PORT;
+    echo.value += MQTT_PORT;
     echo.value += F("<br>ID: ");
-    echo.value += ac_MQTT_ID;
+    echo.value += MQTT_ID;
     echo.value += F("<br>Username: ");
-    echo.value += ac_MQTT_USER;
+    echo.value += MQTT_USER;
     echo.value += F("<br>Password: ");
-    echo.value += ac_MQTT_PSWD;
+    echo.value += MQTT_PSWD;
     echo.value += F("<br><br><b>Messages</b>");
     echo.value += F("<br>Out Topic: ");
-    echo.value += ac_MQTT_TOPIC_OUT;
+    echo.value += MQTT_TOPIC_OUT;
     echo.value += F("<br>In Topic: ");
-    echo.value += ac_MQTT_TOPIC_IN;
+    echo.value += MQTT_TOPIC_IN;
     echo.value += F("<br>Retained: ");
-    echo.value += String(ac_MQTT_RETAINED == true ? "true" : "false");
+    echo.value += String(MQTT_RETAINED == true ? "true" : "false");
     echo.value += F("<br><u><br><b>Advanced settings</b></u>");
     echo.value += F("<br><b>WiFi</b>");
     echo.value += F("<br>Hostname: ");
-    echo.value += ac_Adv_HostName;
+    echo.value += Adv_HostName;
     echo.value += F("<br>TX Power: ");
-    echo.value += ac_Adv_Power;
+    echo.value += Adv_Power;
     echo.value += F("<br>");
     return String("");
 }
 
-#endif
+#endif // AUTOCONNECT_ENABLE

@@ -8,6 +8,8 @@
 #ifndef CREDENTIALS_h
 #define CREDENTIALS_h
 
+#ifndef AUTOCONNECT_ENABLED
+
 // local AP
 String WIFI_SSID = "your_AP_ssid";
 String WIFI_PSWD = "your_AP_passwd";
@@ -29,4 +31,5 @@ String MQTT_PSWD = "your_mqtt_pswd";
 String MQTT_TOPIC_OUT = "/RFLink/msg";
 String MQTT_TOPIC_IN = "/RFLink/cmd";
 
+#endif
 #endif

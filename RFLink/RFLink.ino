@@ -21,14 +21,12 @@
 #include "2_Signal.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
+#include "6_WiFi_MQTT.h"
+#include "8_OLED.h"
 #include "9_AutoConnect.h"
+
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
-#else
-#include "6_WiFi_MQTT.h"
-#endif
-#ifdef OLED_ENABLED
-#include "8_OLED.h"
 #endif
 //****************************************************************************************************************************************
 

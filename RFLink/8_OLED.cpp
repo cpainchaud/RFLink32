@@ -79,4 +79,4 @@ void print_OLED()
     u8x8log.print(pbuffer);
 }
 
-#endif
+#endif // OLED_ENABLED
