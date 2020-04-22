@@ -58,7 +58,6 @@ void rootPage()
     if (webServer.hasArg("BtnSave"))
     { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
 
-
         // === Debug Part ===
         String message = "Number of args received: ";
         message += webServer.args(); //Get number of parameters
@@ -76,10 +75,9 @@ void rootPage()
         StaticJsonDocument<6400> doc;
         //JsonObject obj = doc.createNestedObject();
 
-        Serial.println("xxx5555");
         for (byte x = 0; x < PLUGIN_MAX; x++)
         {
-            if (Plugin_id[x] != 0) 
+            if (Plugin_id[x] != 0)
             {
                 // pour chaque plugin activé lors de la compilation du firmware, on créé un enregistrement dans le fichier protocols.json
                 // si le serveur a un argument c'est que la checkbox est cochée
@@ -96,7 +94,6 @@ void rootPage()
                     doc[x][String(Plugin_id[x])] = 0;
                     Plugin_State[x] = 1;
                 }
-
             }
         }
 
@@ -236,7 +233,6 @@ void setup_AutoConnect()
 {
     if (portal.load(FPSTR(AUX_settings)))
     { // we load all the settings from "/settings" uri
-        Serial.println(F("00000000000000"));
         AutoConnectAux &aux1 = *portal.aux(AUX_SETTING_URI);
         PageArgument args;
         loadParams(aux1, args);
@@ -247,11 +243,8 @@ void setup_AutoConnect()
         if (Adv_HostName.length())
             config.hostName = Adv_HostName;
         else
-        {
             config.hostName = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
-        }
 
-        Serial.println(F("33333333333333333333"));
         config.title = "RFlink-ESP Network Configuration";
         config.autoReconnect = true;
         config.homeUri = "/";
@@ -269,17 +262,16 @@ void setup_AutoConnect()
         //---------------------------------------------------------------------
         portal.config(config);
         /////////////////
-        Serial.println("AP name set to " + config.apid);
-        Serial.println("hostname set to " + config.hostName);
+        Serial.print(F("AP name set to "));
+        Serial.println(config.apid);
+        Serial.print(F("hostname set to "));
+        Serial.println(config.hostName);
         /////////////////
-        Serial.println(F("33333333333333333333bis"));
         portal.on(AUX_SETTING_URI, loadParams);
         portal.on(AUX_SAVE_URI, saveParams);
-        Serial.println(F("33333333333333333333bisbis"));
     }
     else
     {
-        Serial.println(F("4444444444444444444444"));
         Serial.println(F("Impossible to load settings web page"));
     }
     //-------------------------------------
@@ -287,7 +279,6 @@ void setup_AutoConnect()
     if (portal.begin())
     {
         config.bootUri = AC_ONBOOTURI_HOME;
-        Serial.println(F("5555555555555555555555"));
         if (MDNS.begin(config.hostName))
             MDNS.addService("http", "tcp", 80);
         Serial.print(F("connected: "));
@@ -297,7 +288,6 @@ void setup_AutoConnect()
     }
     else
     {
-        Serial.println(F("6666666666666666666"));
         Serial.print(F("connection failed:"));
         Serial.println(String(WiFi.status()));
         while (1)
@@ -307,14 +297,11 @@ void setup_AutoConnect()
         }
     }
     //SPIFFS.end();
-    Serial.println(F("7777777777777777"));
 
     WebServer &webServer = portal.host();
     webServer.on("/", rootPage);
     // for ajax refresh of LastMsg
     webServer.on("/LastMsg", HandleLastMsg);
-
-    Serial.println(F("88888888888888888888888"));
 }
 
 void loop_AutoConnect()
@@ -323,7 +310,7 @@ void loop_AutoConnect()
     portal.handleClient();
 }
 
-void HandleLastMsg()  // Required only for ajax auto-refresh of the last message
+void HandleLastMsg() // Required only for ajax auto-refresh of the last message
 {
     WebServer &webServer = portal.host();
     webServer.send(200, "text/plane", LastMsg); //Send Last Message  only to client ajax request
