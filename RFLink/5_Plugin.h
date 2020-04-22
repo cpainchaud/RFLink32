@@ -15,6 +15,7 @@ extern byte Plugin_id[PLUGIN_MAX];
 
 enum PState {P_Forbidden, P_Disabled, P_Enabled, P_Mandatory}; 
 extern byte Plugin_State[PLUGIN_MAX];
+extern String Plugin_Description[PLUGIN_MAX];
 
 extern boolean RFDebug;   // debug RF signals with plugin 001 (no decode)
 extern boolean QRFDebug;  // debug RF signals with plugin 001 but no multiplication (faster?, compact)
