@@ -6,24 +6,32 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include "RFLink.h"
+#include "5_Plugin.h"
 #include "9_AutoConnect.h"
-
+#include "4_Display.h" // To be able to display the last message
 #ifdef AUTOCONNECT_ENABLED
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266WebServer.h> // Replace with WebServer.h for ESP32
-#include <SPI.h>              // To acces Flash Memory
-#include <FS.h>               // To save MQTT parameters
-#include <AutoConnect.h>
+//#include <ESP8266WebServer.h> // Replace with WebServer.h for ESP32
+// #include <ESP8266HTTPClient.h>
+typedef ESP8266WebServer WebServer;
 #elif ESP32
-#error "AutoConnect for ESP32 not implemented... Yet"
-#endif // ESP8266
+#include <WiFi.h>
+//#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <SPIFFS.h>
+typedef WebServer WebServer;
+#endif
 
-ESP8266WebServer Server; // Replace with WebServer for ESP32
-AutoConnect portal(Server);
+//#include <SPI.h>              // To acces Flash Memory
+#include <FS.h> // To save MQTT parameters
+#include <AutoConnect.h>
+
+AutoConnect portal;
 AutoConnectConfig config;
 
 String MQTT_SERVER;
@@ -37,6 +45,7 @@ boolean MQTT_RETAINED;
 // Adds advanced tab to Autoconnect
 String Adv_HostName;
 String Adv_Power;
+String LastMsg;
 
 // Prototypes
 String loadParams(AutoConnectAux &aux, PageArgument &args);
@@ -44,49 +53,243 @@ String saveParams(AutoConnectAux &aux, PageArgument &args);
 
 void rootPage()
 {
-    char content[] = "RFLink ESP";
-    Server.send(200, "text/plain", content);
+
+    WebServer &webServer = portal.host();
+    if (webServer.hasArg("BtnSave"))
+    { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
+
+
+        // === Debug Part ===
+        String message = "Number of args received: ";
+        message += webServer.args(); //Get number of parameters
+        message += "\n";             //Add a new line
+        for (int i = 0; i < webServer.args(); i++)
+        {
+            message += "Arg nº" + (String)i + " – > "; //Include the current iteration value
+            message += webServer.argName(i) + ": ";    //Get the name of the parameter
+            message += webServer.arg(i) + "\n";        //Get the value of the parameter
+        }
+        Serial.println(message);
+        // ==================
+
+        //const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2);
+        StaticJsonDocument<6400> doc;
+        //JsonObject obj = doc.createNestedObject();
+
+        Serial.println("xxx5555");
+        for (byte x = 0; x < PLUGIN_MAX; x++)
+        {
+            if (Plugin_id[x] != 0) 
+            {
+                // pour chaque plugin activé lors de la compilation du firmware, on créé un enregistrement dans le fichier protocols.json
+                // si le serveur a un argument c'est que la checkbox est cochée
+
+                // doc[x]["protocol"] = Plugin_id[x];
+                // webServer.hasArg(Plugin_id[x] + "_ProtocolState") ? doc[x]["state"] = 1 : doc[x]["state"] = 0;
+                if (webServer.hasArg(String(Plugin_id[x]) + "_ProtocolState"))
+                {
+                    doc[x][String(Plugin_id[x])] = 1;
+                    Plugin_State[x] = 2;
+                }
+                else
+                {
+                    doc[x][String(Plugin_id[x])] = 0;
+                    Plugin_State[x] = 1;
+                }
+
+            }
+        }
+
+        File configFile = SPIFFS.open("/protocols.json", "w");
+        String configString;
+        serializeJson(doc, configString);
+        configFile.print(configString);
+        // === Debug Part ===
+        Serial.println(configString);
+        // ==================
+
+        configFile.close();
+    }
+
+    // This is the Home Page - Choose theme here : https://www.bootstrapcdn.com/bootswatch/?theme
+
+    String content =
+        "<html>"
+        "<title>RFLink-ESP</title>"
+        "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+        "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>"
+        "<link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css'><script src='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js'></script>"
+        "</head>"
+        "<body>"
+
+        // !!!!!!!!!!!!!!! Ajax auto refresh, disable it to avoid a lot of request on the ESP !!!!!!!!!!!!!!!
+        // to do : add a checkbox to enable/disable it dynamically
+        "<script>"
+        "setInterval(function() {" // Call a function repetatively with 2 Second interval"
+        "  getData();"
+        "}, 1000);" //1 Second update rate
+        " "
+        "function getData() {"
+        "  var xhttp = new XMLHttpRequest();"
+        "  xhttp.onreadystatechange = function() {"
+        "	if (this.readyState == 4 && this.status == 200) {"
+        "	  document.getElementById('LastMsg').innerHTML ="
+        "	  this.responseText;"
+        "	}"
+        "  };"
+        "  xhttp.open('GET', 'LastMsg', true);"
+        "  xhttp.send();"
+        "}"
+        "</script>"
+        // !!!!!!!!!!!!!!! Ajax auto refresh, disable it to avoid a lot of request on the ESP !!!!!!!!!!!!!!!
+
+        // Navigation bar
+
+        "<nav class='navbar navbar-expand-lg navbar-dark bg-primary'>"
+        "  <a class='navbar-brand' href='#'>RFlink-ESP</a>"
+        "  <button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarColor01' aria-controls='navbarColor01' aria-expanded='false' aria-label='Toggle navigation'>"
+        "	<span class='navbar-toggler-icon'></span>"
+        "  </button>"
+        "  <div class='collapse navbar-collapse' id='navbarColor01'>"
+        "	<ul class='navbar-nav mr-auto'>"
+        "	  <li class='nav-item active'>"
+        "		<a class='nav-link' href='#'>Home <span class='sr-only'>(current)</span></a>"
+        "	  </li>"
+        "	  <li class='nav-item'>"
+        "		<a class='nav-link' href='/_ac'>Network Config</a>"
+        "	  </li>"
+        "	  <li class='nav-item'>"
+        "		<a class='nav-link' href='https://github.com/couin3/RFLink' target='_blank'>About</a>"
+        "	  </li>"
+        "	</ul>"
+        "  </div>"
+        "</nav>";
+
+    //// Graphical icon to access network config
+    //"	  <li class='nav-item'>" AUTOCONNECT_LINK(COG_32) "</li>";
+    //       "<h1>RFLink-ESP  " AUTOCONNECT_LINK(COG_32) "</h1><Br>";
+
+    //// iframe test :
+    //"<iframe width=\"450\" height=\"260\" style=\"transform:scale(0.79);-o-transform:scale(0.79);-webkit-transform:scale(0.79);-moz-transform:scale(0.79);-ms-transform:scale(0.79);transform-origin:0 0;-o-transform-origin:0 0;-webkit-transform-origin:0 0;-moz-transform-origin:0 0;-ms-transform-origin:0 0;border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/454951/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&type=line\"></iframe>"
+
+    // content += "Last refresh : "; // Require NTP time, We'll see that later....
+    //content +=          ctime(&now);
+    content += "<Br>";
+    content += "<div class='card bg-light mb-3' style='max-width: 50rem;'>";
+    content += "  <div class='card-header'>Last Message</div>";
+    content += "  <div class='card-body'>";
+    //  ======== Ajax = autrefresh mode ========
+    content += "<p class='card-text'><span id='LastMsg'></p>";
+    //==========================================
+    //==========================================
+    //  ===== No Ajax = no autrefresh mode =====
+    // content += "<p class='card-text'>" + LastMsg + "</p>";
+    //==========================================
+    content += "  </div>";
+    content += "</div>";
+
+    content += "<Br>";
+
+    content += "<form action='/' method='POST'><button type='button submit' name='BtnTimeBeforeSWoff' value='0' class='btn btn-secondary'>Refresh</button></form><Br>";
+
+    content += "<table class='table table-hover'  style='max-width: 50rem;'>";
+    content += "<thead><tr><th>N&deg;</th><th>Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
+    content += "<tbody>";                                                              // Table content
+    content += "<form action='/' method='POST'>";
+    for (byte x = 0; x < PLUGIN_MAX; x++)
+    {
+        if ((Plugin_id[x] != 0)) //  && (Plugin_State[x] >= P_Enabled)
+        {
+            ////////////////// One table line ///////////////////
+            x % 2 ? content += "<tr class='table-light'><td>" : content += "<tr><td>";
+
+            content += Plugin_id[x];
+            content += "</td><td>";
+            content += Plugin_Description[x];
+            content += "</td><td>";
+            content += "<input type='checkbox' class='form-check-input' name='";
+            content += Plugin_id[x];
+            content += "_ProtocolState' value='State'";
+
+            if (Plugin_State[x] == 2)
+            {
+                content += " checked";
+            }
+            content += ">";
+            content += "</td>";
+            ////////////////// One table line ///////////////////
+        }
+    }
+
+    content += "</tr><tr><td></td><td></td><td></td></tr>"; // we add a last line to bottom of the table
+    content += "</tbody></table>";
+
+    content += "<button type='button submit' name='BtnSave' value='0' class='btn btn-success btn-lg'>save</button></form></div>";
+
+    content += "</body>";
+    content += "</html>";
+
+    webServer.send(200, "text/html", content);
 }
 
 void setup_AutoConnect()
 {
     if (portal.load(FPSTR(AUX_settings)))
     { // we load all the settings from "/settings" uri
+        Serial.println(F("00000000000000"));
         AutoConnectAux &aux1 = *portal.aux(AUX_SETTING_URI);
         PageArgument args;
-
         loadParams(aux1, args);
+        // if not defined, default Wifi AP is 12345678, you can change it here
+        // config.psk = "RFlink-ESP";
+        config.apid = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
 
-        if (config.immediateStart)
+        if (ac_Adv_HostName.length())
         {
-            // if not defined, default Wifi AP is 12345678, you can change it here
-            // config.psk = "RFlink-ESP";
-            config.apid = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
-            Serial.print(F("AP name set to "));
-            Serial.println(config.apid);
+            config.hostName = ac_Adv_HostName;
         }
-        else if (Adv_HostName.length())
+        else
         {
-            config.hostName = Adv_HostName;
-            Serial.print(F("Hostname set to "));
-            Serial.println(config.hostName);
+            config.hostName = String("RFLink_ESP-") + String(GET_CHIPID(), HEX);
         }
-        config.bootUri = AC_ONBOOTURI_HOME;
-        config.homeUri = "/";
-        config.title = "RFlink ESP";
+
+        Serial.println(F("33333333333333333333"));
+        config.title = "RFlink-ESP Network Configuration";
         config.autoReconnect = true;
-        portal.config(config);
+        config.homeUri = "/";
+        // config.menuItems = AC_MENUITEM_OPENSSIDS | AC_MENUITEM_HOME;   // choose exposed menu items
 
+        // ----  little trick to launch soft AP directly after 1st boot : ----
+        AutoConnectCredential credential;
+        uint8_t SSIDqty = credential.entries();
+        if (SSIDqty == 0)
+        {
+            Serial.println(F("No SSID recorded, starting soft AP mode"));
+            config.immediateStart = true;
+            config.autoRise = true;
+        }
+        //---------------------------------------------------------------------
+        portal.config(config);
+        /////////////////
+        Serial.println("AP name set to " + config.apid);
+        Serial.println("hostname set to " + config.hostName);
+        /////////////////
+        Serial.println(F("33333333333333333333bis"));
         portal.on(AUX_SETTING_URI, loadParams);
         portal.on(AUX_SAVE_URI, saveParams);
+        Serial.println(F("33333333333333333333bisbis"));
     }
     else
-        Serial.println(F("load error"));
-
+    {
+        Serial.println(F("4444444444444444444444"));
+        Serial.println(F("Impossible to load settings web page"));
+    }
     //-------------------------------------
 
     if (portal.begin())
     {
+        config.bootUri = AC_ONBOOTURI_HOME;
+        Serial.println(F("5555555555555555555555"));
         if (MDNS.begin(config.hostName))
             MDNS.addService("http", "tcp", 80);
         Serial.print(F("connected: "));
@@ -96,6 +299,7 @@ void setup_AutoConnect()
     }
     else
     {
+        Serial.println(F("6666666666666666666"));
         Serial.print(F("connection failed:"));
         Serial.println(String(WiFi.status()));
         while (1)
@@ -104,13 +308,27 @@ void setup_AutoConnect()
             yield();
         }
     }
-    SPIFFS.end();
+    //SPIFFS.end();
+    Serial.println(F("7777777777777777"));
+
+    WebServer &webServer = portal.host();
+    webServer.on("/", rootPage);
+    // for ajax refresh of LastMsg
+    webServer.on("/LastMsg", HandleLastMsg);
+
+    Serial.println(F("88888888888888888888888"));
 }
 
 void loop_AutoConnect()
 {
     MDNS.update();
     portal.handleClient();
+}
+
+void HandleLastMsg()  // Required only for ajax auto-refresh of the last message
+{
+    WebServer &webServer = portal.host();
+    webServer.send(200, "text/plane", LastMsg); //Send Last Message  only to client ajax request
 }
 
 void getParams(AutoConnectAux &aux)
@@ -144,7 +362,7 @@ void getParams(AutoConnectAux &aux)
 String loadParams(AutoConnectAux &aux, PageArgument &args)
 {
     (void)(args);
-    static boolean initConfig = true;
+    //static boolean initConfig = true;
 
     SPIFFS.begin();
     File my_file = SPIFFS.open(PARAM_FILE, "r");
@@ -155,37 +373,23 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
         {
             getParams(aux);
             Serial.println(F(" loaded"));
-            if (initConfig)
-            {
-                config.immediateStart = false; // Only Home AP
-                config.autoRise = false;       // Captive AP disabled
-            }
         }
         else
         {
             Serial.println(F(" failed to load"));
-            if (initConfig)
-            {
-                config.immediateStart = true; // Don't even try Home AP
-                config.autoRise = true;       // Captive AP enabled
-            }
+            //if (initConfig)
         }
         my_file.close();
     }
     else
     {
         Serial.println(F(" open+r failed"));
-        if (initConfig)
-        {
-            config.immediateStart = true; // Don't even try Home AP
-            config.autoRise = true;       // Captive AP enabled
-        }
 #ifdef ESP32
         Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
 #endif // ESP32
     }
     SPIFFS.end();
-    initConfig = false;
+    //initConfig = false;
     return String("");
 }
 
@@ -198,6 +402,18 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
 {
     // The 'where()' function returns the AutoConnectAux that caused
     // the transition to this page.
+
+    if (ac_MQTT_PORT == "")
+        ac_MQTT_PORT = "1883"; // just in case ....
+    if (ac_MQTT_ID == "")
+        ac_MQTT_ID = "RFlink-ESP"; // just in case ....
+    if (ac_MQTT_TOPIC_IN == "")
+        ac_MQTT_TOPIC_IN = "/RFlink/cmd"; // just in case ....
+    if (ac_MQTT_TOPIC_OUT == "")
+        ac_MQTT_TOPIC_OUT = "/RFLink/msg"; // just in case ....
+    if (ac_Adv_HostName == "")
+        ac_Adv_HostName = "RFlink-ESP"; // just in case ....
+
     AutoConnectAux &src_aux = *portal.aux(portal.where());
     getParams(src_aux);
     // AutoConnectInput& mqttserver = my_settings["mqttserver"].as<AutoConnectInput>();  //-> BUG
@@ -219,6 +435,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     else
         Serial.print(F(" open+w failed"));
     SPIFFS.end();
+
     // Echo back saved parameters to AutoConnectAux page.
     AutoConnectText &echo = aux["parameters"].as<AutoConnectText>();
     echo.value = F("<u><b>MQTT settings</b></u>");
