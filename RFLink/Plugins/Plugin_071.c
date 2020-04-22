@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                 Plugin-71 Plieger York doorbell                                   ##
+//##                                 Plugin-071 Plieger York doorbell                                   ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the Plieger York Doorbell protocol
@@ -36,6 +36,8 @@
  * 20;2E;Plieger York;ID=aaaa;SWITCH=1;CMD=ON;CHIME=02;
  \*********************************************************************************************/
 #define PLIEGER_PLUGIN_ID 071
+#define PLUGIN_DESC_071 "Plieger"
+
 #define PLIEGER_PULSECOUNT 66
 
 #define PLIEGER_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE

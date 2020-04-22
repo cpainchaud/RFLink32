@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-13: Powerfix RCB-i 3600                             ##
+//##                                       Plugin-013: Powerfix RCB-i 3600                             ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of sending and receiving the Powerfix RCB-i 3600 protocol
@@ -89,6 +89,7 @@
  * 0101010110010101010101011001010101011001
  \*********************************************************************************************/
 #define POWERFIX_PLUGIN_ID 013
+#define PLUGIN_DESC_013 "Powerfix"
 #define POWERFIX_PulseLength 42
 
 #define POWEFIX_PULSEMID 900 / RAWSIGNAL_SAMPLE_RATE

@@ -68,6 +68,7 @@
  * So we break, filter and convert the Home Confort RF packets in this plugin
  \*********************************************************************************************/
 #define P001_PLUGIN_ID 001
+#define PLUGIN_DESC_001 "Long Packet Translation and debugging"
 #define OVERSIZED_LIMIT 291 // longest packet is handled by plugin 48
 
 #define PULSE500 500 / RAWSIGNAL_SAMPLE_RATE
@@ -86,7 +87,6 @@
 #ifdef PLUGIN_001
 #include "../4_Display.h"
 
-String PLUGIN_DESC_001 = "Long Packet Translation and debugging";
 boolean Plugin_001(byte function, char *string)
 {
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)

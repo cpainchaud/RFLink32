@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                          Plugin-43 LaCrosse                                       ##
+//##                                        Plugin-041: LaCrosse                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding LaCrosse  weatherstation outdoor sensors
@@ -80,6 +80,8 @@
  * UV packet (132 pulses)
  \*********************************************************************************************/
 #define LACROSSE41_PLUGIN_ID 041
+#define PLUGIN_DESC_041 "LaCrosseV3"
+
 #define LACROSSE41_PULSECOUNT1 92  // Rain sensor
 #define LACROSSE41_PULSECOUNT2 162 // Meteo sensor
 #define LACROSSE41_PULSECOUNT3 122 // Wind sensor

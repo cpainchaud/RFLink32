@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                          Plugin-006 Blyss & Avidsen                               ##
+//##                                        Plugin-006: Blyss & Avidsen                                ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This Plugin takes care of receiving of the Blyss protocol
@@ -36,6 +36,7 @@
  * 20;0C;Blyss;ID=ff98;SWITCH=A1;CMD=OFF;
  \*********************************************************************************************/
 #define BLYSS_PLUGIN_ID 006
+#define PLUGIN_DESC_006 "Blyss / Avidsen"
 #define BLYSS_PULSECOUNT 106
 #define BLYSS_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
 

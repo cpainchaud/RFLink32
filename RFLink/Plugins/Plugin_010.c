@@ -1,6 +1,6 @@
-
+//#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-10 TRC02 RGB Controller                               ##
+//##                                    Plugin-010: TRC02 RGB Controller                               ##
 //#######################################################################################################
 /*********************************************************************************************\
  * Decodes signals from a wireless RGB TRC02 controller remote control
@@ -46,6 +46,7 @@
  * 20;01;TRC02;ID=03023c;SWITCH=00;CMD=ON;
  \*********************************************************************************************/
 #define RGB_PLUGIN_ID 010
+#define PLUGIN_DESC_010 "TRC02RGB"
 #define RGB_MIN_PULSECOUNT 180
 #define RGB_MAX_PULSECOUNT 186
 

@@ -20,6 +20,7 @@
  * others can analyse it.
  \*********************************************************************************************/
 #define P254_PLUGIN_ID 254
+#define PLUGIN_DESC_254 "Unidentified Packet debugging"
 
 #ifdef PLUGIN_254
 #include "../4_Display.h"

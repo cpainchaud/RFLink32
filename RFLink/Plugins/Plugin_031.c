@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-31 AlectoV3                                         ##
+//##                                      Plugin-031: AlectoV3                                         ##
 //#######################################################################################################
 /*********************************************************************************************\
  * Dit protocol zorgt voor ontvangst van Alecto weerstation buitensensoren
@@ -64,6 +64,7 @@
  * 20;AF;Alecto V3;ID=009a;TEMP=ffe7;RAIN=7a;
  \*********************************************************************************************/
 #define ALECTOV3_PLUGIN_ID 031
+#define PLUGIN_DESC_031 "Alecto V3"
 #define WS1100_PULSECOUNT 94
 #define WS1200_PULSECOUNT 126
 

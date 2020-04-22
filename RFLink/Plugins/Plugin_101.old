@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                     Plugin-48 Oregon V1/2/3                                       ##
+//##                                     Plugin-101 Oregon V1/2/3                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This protocol takes care of receiving a few 868 Mhz protocols
@@ -31,6 +31,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  \*********************************************************************************************/
 #define PLUGIN_ID 101
+#define PLUGIN_DESC_101 ""
 #define PLUGIN_NAME "Few868"
 
 #define OSV3_PULSECOUNT_MIN 126 

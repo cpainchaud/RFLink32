@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-060 AlarmSensor                                       ##
+//##                                     Plugin-060: AlarmSensor                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This protocol provides support for some Alarm sensors that are part of a Varel/Chubb/Ajax alarm
@@ -27,6 +27,8 @@
  * 10000000 1010
  \*********************************************************************************************/
 #define ALARMPIRV0_PLUGIN_ID 060
+#define PLUGIN_DESC_060 "X10"
+
 #define ALARMPIRV0_PULSECOUNT 26
 
 #define ALARMPIRV0_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE

@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                          Plugin-43 LaCrosse                                       ##
+//##                                        Plugin-043: LaCrosse                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding LaCrosse  weatherstation outdoor sensors
@@ -88,6 +88,8 @@
  * e = Check Sum : (const5 + 2 + F + B + 2 + B + F) and F = D
   \*********************************************************************************************/
 #define LACROSSE43_PLUGIN_ID 043
+#define PLUGIN_DESC_043 "LaCrosse"
+
 #define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
 #define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE        //900 //630

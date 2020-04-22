@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-061 AlarmSensor                                       ##
+//##                                     Plugin-061: AlarmSensor                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This protocol provides support for some chinese Alarm "gadgets" (Motion detectors and door/window contacts)
@@ -37,6 +37,8 @@
  * 110000111001000011101001 c390E9
  \*********************************************************************************************/
 #define ALARMPIRV1_PLUGIN_ID 061
+#define PLUGIN_DESC_061 "EV1527"
+
 #define ALARMPIRV1_PULSECOUNT 50
 
 #define ALARMPIRV1_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE

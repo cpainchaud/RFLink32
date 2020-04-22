@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-03: Kaku (ARC)                                      ##
+//##                                        Plugin-003: Kaku (ARC)                                      ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of sending and receiving the ARC protocol known from Klik-Aan-Klik-Uit (KAKU) 
@@ -217,6 +217,7 @@
  * 20;54;DEBUG;Pulses=50;Pulses(uSec)=1410,390,1350,360,1350,360,1380,360,1350,360,1380,360,1380,360,1380,360,1350,360,1350,360,1350,360,1380,360,1380,360,1380,360,1350,360,1380,360,1350,360,1350,360,390,1350,390,1350,390,1320,390,1320,420,1320,420,1320,390,6990;
  \*********************************************************************************************/
 #define KAKU_PLUGIN_ID 003
+#define PLUGIN_DESC_003 "Kaku / AB400D / Impuls / PT2262 / Sartano / Tristate"
 #define KAKU_CodeLength 12                        // number of data bits
 #define KAKU_R 300 / RAWSIGNAL_SAMPLE_RATE        //360 // 300          // 370? 350 us
 #define KAKU_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE // (17)  510 = KAKU_R*2 not sufficient!

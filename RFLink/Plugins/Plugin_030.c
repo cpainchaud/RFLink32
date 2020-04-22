@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-30 AlectoV1                                         ##
+//##                                      Plugin-030: AlectoV1                                         ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the protocol used for outdoor sensors of the Alecto weather stations
@@ -93,6 +93,7 @@
  *
  \*********************************************************************************************/
 #define ALECTOV1_PLUGIN_ID 030
+#define PLUGIN_DESC_030 "Alecto V1"
 #define ALECTOV1_PULSECOUNT 74
 
 #define ALECTOV1_MIDHI 700 / RAWSIGNAL_SAMPLE_RATE

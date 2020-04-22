@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-062 Chuango AlarmSensors                              ##
+//##                                     Plugin-062: Chuango AlarmSensors                              ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This protocol provides support for Chuango Alarm sensors (Motion detectors and door/window contacts)
@@ -24,6 +24,8 @@
  * 00010010 01110100 01111000   = 0x 12 74 78
  \*********************************************************************************************/
 #define ALARMPIRV2_PLUGIN_ID 062
+#define PLUGIN_DESC_062 "Chuango"
+
 #define ALARMPIRV2_PULSECOUNT 50
 
 #define ALARMPIRV2_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE

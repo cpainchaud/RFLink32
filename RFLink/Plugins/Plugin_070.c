@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                             Plugin-70 Select Plus Wireless Doorbell                               ##
+//##                             Plugin-070 Select Plus Wireless Doorbell                               ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This Plugin takes care of reception of the Select Plus wireless doorbell (Sold at Action for 6 euro's)
@@ -43,6 +43,7 @@
  * b) 20;05;DEBUG;Pulses=36;Pulses(uSec)=2100,2100,500,2050,500,2100,500,600,1950,600,1950,600,1950,600,1950,2050,500,2050,500,600,1950,600,1950,2100,500,2050,500,600,1950,600,1950,600,1950,600,1950;
  \*********************************************************************************************/
 #define SELECTPLUS_PLUGIN_ID 070
+#define PLUGIN_DESC_070 "SelectPlus"
 #define SELECTPLUS_PULSECOUNT 36
 
 #define SELECTPLUS_PULSEMID 650 / RAWSIGNAL_SAMPLE_RATE

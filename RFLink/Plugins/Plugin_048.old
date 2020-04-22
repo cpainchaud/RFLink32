@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                     Plugin-48 Oregon V1/2/3                                       ##
+//##                                    Plugin-48: Oregon V1/2/3                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This protocol takes care of receiving Oregon Scientific outdoor sensors that use the V1, V2 and V3 protocol
@@ -32,6 +32,8 @@
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  \*********************************************************************************************/
 #define OSV3_PLUGIN_ID 048
+#define PLUGIN_DESC_048 "Oregon V1/2/3"
+
 #define OSV3_PULSECOUNT_MIN 50  // 126
 #define OSV3_PULSECOUNT_MAX 290 // make sure to check the max length in plugin 1 as well..!
 

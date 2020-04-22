@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-063 Oregon PIR/LED/ALARM                              ##
+//##                                     Plugin-063: Oregon PIR/LED/ALARM                              ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin provides support for Oregon PIR/LED/ALARM devices
@@ -20,6 +20,8 @@
  * 00101110 10001000 = 2E88
  \*********************************************************************************************/
 #define OREGON_PLA_PLUGIN_ID 063
+#define PLUGIN_DESC_063 "X10"
+
 #define OREGON_PLA_PULSECOUNT 52
 
 #ifdef PLUGIN_063

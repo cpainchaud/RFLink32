@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-42 UPM/Esic                                           ##
+//##                                    Plugin-042: UPM/Esic                                           ##
 //#######################################################################################################
 /*********************************************************************************************\
  * Dit protocol zorgt voor ontvangst van UPM/Esic weerstation buitensensoren 
@@ -88,6 +88,8 @@
 0011111011 0011010111 0110011101 10100
  \*********************************************************************************************/
 #define UPM_PLUGIN_ID 042
+#define PLUGIN_DESC_042 "UPM/Esic / UPM/Esic F2"
+
 #define UPM_MIN_PULSECOUNT 46
 #define UPM_MAX_PULSECOUNT 56
 

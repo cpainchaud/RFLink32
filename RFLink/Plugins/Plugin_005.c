@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                 Plugin-03: Intertek Eurodomest 972080                             ##
+//##                                 Plugin-005: Intertek Eurodomest 972080                            ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of sending and receiving the Intertek Eurodomest 972080 protocol. 
@@ -39,6 +39,7 @@
  * 20;9D;DEBUG;Pulses=50;Pulses(uSec)=1250,200,750,175,200,750,200,750,750,200,200,750,200,750,750,200,200,750,750,200,750,200,200,750,750,200,200,750,200,750,750,200,200,750,750,200,200,750,200,750,750,200,750,200,750,200,750,200,200;
  \*********************************************************************************************/
 #define EURODOMEST_PLUGIN_ID 005
+#define PLUGIN_DESC_005 "Eurodomest"
 #define EURODOMEST_PulseLength 50
 
 #define EURODOMEST_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE

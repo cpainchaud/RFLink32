@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-40 Mebus                                            ##
+//##                                      Plugin-040: Mebus                                            ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding Mebus weatherstation outdoor sensors
@@ -45,6 +45,7 @@
 //                |-|---------------------> set when minus temperatures -51.2 - 0
 // ==================================================================================
 #define MEBUS_PLUGIN_ID 040
+#define PLUGIN_DESC_040 "Mebus"
 #define MEBUS_PULSECOUNT 58
 
 #define MEBUS_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE

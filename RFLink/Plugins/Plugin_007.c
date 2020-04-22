@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                      Plugin-007 CONRAD RSL2                                       ##
+//##                                     Plugin-007: CONRAD RSL2                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This Plugin takes care of receiving of the Conrad RSL2 protocol
@@ -43,6 +43,7 @@
 
  \*********************************************************************************************/
 #define CONRADRSL2_PLUGIN_ID 007
+#define PLUGIN_DESC_007 "Conrad"
 #define CONRADRSL2_PULSECOUNT 66
 
 #define CONRADRSL2_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE

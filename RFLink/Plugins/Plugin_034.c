@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-34 Cresta                                           ##
+//##                                      Plugin-034: Cresta                                           ##
 //#######################################################################################################
 /*********************************************************************************************\
  * Dit protocol zorgt voor ontvangst van Cresta temperatuur weerstation buitensensoren 
@@ -26,6 +26,8 @@
  * Rain:          9 bytes, seen as 132, 136 pulses
  \*********************************************************************************************/
 #define CRESTA_PLUGIN_ID 034
+#define PLUGIN_DESC_034 "Cresta"
+
 #define CRESTA_MIN_PULSECOUNT 124 // unknown until we have a collection of all packet types but this seems to be the minimum
 #define CRESTA_MAX_PULSECOUNT 284 // unknown until we have a collection of all packet types
 

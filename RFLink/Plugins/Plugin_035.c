@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                        Plugin-35 Imagintronix                                     ##
+//##                                      Plugin-035: Imagintronix                                     ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding Imagintronix sensors
@@ -37,6 +37,8 @@
  * 111111110101010100000101010001011111111110011110
  \*********************************************************************************************/
 #define IMAGINTRONIX_PLUGIN_ID 035
+#define PLUGIN_DESC_035 "Imagintronix"
+
 #define IMAGINTRONIX_PULSECOUNT 96
 
 #define IMAGINTRONIX_PULSEMID 1000 / RAWSIGNAL_SAMPLE_RATE

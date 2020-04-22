@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                     Plugin-75 Lidl doorbell                                       ##
+//##                                     Plugin-075 Lidl doorbell                                       ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the Lidl/SilverCrest Doorbell protocol for model Z31370-TX
@@ -37,6 +37,8 @@
  \*********************************************************************************************/
 // ==================================================================================
 #define LIDL_PLUGIN_ID 075
+#define PLUGIN_DESC_075 "SilverCrest"
+
 #define LIDL_PULSECOUNT 90   // type 0
 #define LIDL_PULSECOUNT2 114 // type 1
 

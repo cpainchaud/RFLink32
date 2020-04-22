@@ -32,6 +32,8 @@
  * 000000000110
  \*********************************************************************************************/
 #define DELTRONIC_PLUGIN_ID 073
+#define PLUGIN_DESC_073 "Deltronic"
+
 #define DELTRONIC_PULSECOUNT 26
 
 #define LENGTH_DEVIATION 300
