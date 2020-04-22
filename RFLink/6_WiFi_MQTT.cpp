@@ -76,6 +76,7 @@ void setup_WIFI()
 
 void setup_MQTT()
 {
+    if (ac_MQTT_PORT == "")      ac_MQTT_PORT = "1883"; // just in case ....
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
   // MQTTClient.setCallback(callback);
@@ -95,30 +96,70 @@ void setup_MQTT()
 */
 
 void reconnect()
-{
-  // Loop until we're reconnected
-  // delay(1);
+{ // MQTT connection (documented way from AutoConnect : https://github.com/Hieromon/AutoConnect/tree/master/examples/mqttRSSI_NA)
+
+  uint8_t retry = 3;
   while (!MQTTClient.connected())
   {
-    Serial.print(F("Attempting MQTT connection..."));
-    // Attempt to connect
-    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
+
+    // MQTTClient.setServer(serverName.c_str(), Mqtt_Port.toInt());
+    Serial.println(String("Attempting MQTT broker:") + ac_MQTT_SERVER.c_str());
+
+    if (MQTTClient.connect(ac_MQTT_ID.c_str(), ac_MQTT_USER.c_str(), ac_MQTT_PSWD.c_str()))
     {
-      Serial.println(F("Connected"));
       // Once connected, resubscribe
       // MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
+      Serial.println("MQTT connection Established"); //+ String(clientId));
+                                                     // ... and resubscribe
+      //return true;
     }
     else
     {
-      Serial.print(F("\nFailed, rc="));
-      Serial.print(MQTTClient.state());
-      Serial.println(F("\tTry again in 5 seconds"));
-      // Wait 5 seconds before retrying
-      for (byte i = 0; i < 10; i++)
-        delay(500); // delay(5000) may cause hang
+      Serial.println("Connection mqttserver:" + String(ac_MQTT_SERVER.c_str()));
+      Serial.println("Connection Mqtt_Username:" + String(ac_MQTT_USER.c_str()));
+      Serial.println("Connection Mqtt_Password:" + String(ac_MQTT_USER.c_str()));
+      Serial.println("Connection failed:" + String(MQTTClient.state()));
+      if (!--retry)
+        break;
+      delay(500);
     }
   }
 }
+
+
+
+// void reconnect()
+// {
+//   // Loop until we're reconnected
+//   // delay(1);
+//   uint8_t retry = 3;
+
+//   Serial.print(F("test"));
+//   while (!MQTTClient.connected())
+//   {
+//     Serial.print(F("Attempting MQTT connection..."));
+//     // Attempt to connect
+//     if (MQTTClient.connect(ac_MQTT_ID.c_str(), ac_MQTT_USER.c_str(), ac_MQTT_PSWD.c_str()))
+//     {
+//       Serial.println(F("Connected"));
+//       // Once connected, resubscribe
+//       // MQTTClient.subscribe(ac_MQTT_TOPIC_IN.c_str());
+//     }
+//     else
+//     {
+//       Serial.print(F("\nFailed, rc="));
+//       Serial.print(MQTTClient.state());
+//       Serial.println(F("\tTry again in 5 seconds"));
+//       // Wait 5 seconds before retrying
+//       for (byte i = 0; i < 10; i++)
+//         delay(500); // delay(5000) may cause hang
+//             if (!--retry)
+//         break;
+//       delay(500);
+//     }
+
+//   }
+// }
 
 void publishMsg()
 {
