@@ -15,14 +15,38 @@ char InputBuffer_Serial[INPUT_COMMAND_SIZE];
 
 boolean ReadSerial();
 boolean CheckCmd();
+boolean CopySerial(char *);
 /*********************************************************************************************/
 
 boolean CheckSerial()
 {
   if (ReadSerial())
+  {
+    Serial.flush();
+    Serial.print(F("Message arrived [Serial] "));
+    Serial.println(InputBuffer_Serial);
     if (CheckCmd())
       return true;
+  }
   return false;
+}
+
+boolean CheckMQTT(byte *mqtt_in)
+{
+  if (CopySerial((char *)mqtt_in))
+  {
+    Serial.flush();
+    Serial.print(F("Message arrived [MQTT] "));
+    Serial.println(InputBuffer_Serial);
+    if (CheckCmd())
+      return true;
+  }
+  return false;
+}
+
+boolean CopySerial(char *src)
+{
+  return (strncpy(InputBuffer_Serial, src, INPUT_COMMAND_SIZE - 2));
 }
 
 boolean ReadSerial()

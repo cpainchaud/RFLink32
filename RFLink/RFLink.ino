@@ -114,6 +114,7 @@ void loop()
 {
 #ifdef MQTT_ENABLED
   checkMQTTloop();
+  sendMsg();
 #endif
 
   if (CheckSerial())

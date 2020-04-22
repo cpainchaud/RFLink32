@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
-
+#include "3_Serial.h"
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
 
@@ -32,6 +32,8 @@
 
 WiFiClient WIFIClient;
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
+
+void callback(char *, byte *, unsigned int);
 
 void setup_WIFI()
 {
@@ -68,21 +70,14 @@ void setup_MQTT()
 {
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
-  // MQTTClient.setCallback(callback);
+  MQTTClient.setCallback(callback);
 }
 
-/*
-  void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print(F("Message arrived ["));
-  Serial.print(topic);
-  Serial.print("] ");
-  for (unsigned int i = 0; i < length; i++) {
-    Serial.write(payload[i]);
-  }
-  Serial.write('\n');
-  Serial.println();
-  }
-*/
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  payload[length] = 0;
+  CheckMQTT(payload);
+}
 
 void reconnect()
 {
@@ -96,7 +91,7 @@ void reconnect()
     {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      // MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
+      MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
     }
     else
     {
@@ -143,13 +138,13 @@ void setup_WIFI_OFF()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(false);
-  #ifdef ESP8266
+#ifdef ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-  #endif
+#endif
   WiFi.mode(WIFI_OFF);
-  #ifdef ESP8266
+#ifdef ESP8266
   WiFi.forceSleepBegin();
-  #endif
+#endif
 }
 #endif // (defined(ESP32) || defined(ESP8266))
 #endif // MQTT_ENABLED
