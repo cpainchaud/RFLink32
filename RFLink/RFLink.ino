@@ -19,6 +19,7 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "2_Signal.h"
+#include "3_Serial.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
@@ -31,11 +32,20 @@
 #endif
 //****************************************************************************************************************************************
 
+void sendMsg(); // See at bottom
+
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 void (*Reboot)(void) = 0; // reset function on adress 0.
 #endif
 
-void sendMsg(); // See at bottom
+#if (defined(ESP8266) || defined(ESP32))
+void CallReboot(void)
+{
+  sendMsg();
+  delay(1);
+  ESP.restart();
+}
+#endif
 
 void setup()
 {
@@ -105,6 +115,10 @@ void loop()
 #ifdef MQTT_ENABLED
   checkMQTTloop();
 #endif
+
+  if (CheckSerial())
+    sendMsg();
+
   if (ScanEvent())
     sendMsg();
 }
