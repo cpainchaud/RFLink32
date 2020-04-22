@@ -67,6 +67,7 @@
 #ifdef PLUGIN_002
 #include "../4_Display.h"
 
+String PLUGIN_DESC_002 = "LaCrosseV2";
 boolean Plugin_002(byte function, char *string)
 {
    if ((RawSignal.Number != LACROSSE_PULSECOUNT) && (RawSignal.Number != (LACROSSE_PULSECOUNT - 2)))
