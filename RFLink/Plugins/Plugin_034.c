@@ -306,8 +306,12 @@ boolean Plugin_034(byte function, char *string)
       display_IDc(c_ID);
       display_Footer();
       // ----------------------------------
+      char dbuffer[3];
       for (byte i = 0; i < length + 2; i++)
-         Serial.printf("%02x", data[i]);
+      {
+         sprintf(dbuffer, "%02x", data[i]);
+         Serial.print(dbuffer);
+      }
       Serial.print(F(";"));
       Serial.println();
       //==================================================================================
