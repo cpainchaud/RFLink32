@@ -165,7 +165,7 @@ boolean Plugin_034(byte function, char *string)
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
-   unsigned long tmpval = (data[3] << 16) | ((data[1]) << 8) | channel;
+   unsigned long tmpval = ((unsigned long)data[3] << 16) | ((data[1]) << 8) | channel;
 
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != tmpval))
       SignalCRC = tmpval; // not seen the RF packet recently
