@@ -203,18 +203,13 @@ boolean CheckCmd()
         // Handle Generic Commands / Translate protocol data into Nodo text commands
         // -------------------------------------------------------
 
-        // if (PluginTXCall(0, InputBuffer_Serial))
-        // {
-        //   ValidCommand = 1;
-        // }
-        // else
-        // {
-        // Answer that an invalid command was received?
-        ValidCommand = 2;
-        //}
         disableRX();
         enableTX();
 
+        if (PluginTXCall(0, InputBuffer_Serial))
+          ValidCommand = 1;
+        else // Answer that an invalid command was received?
+          ValidCommand = 2;
 
         disableTX();
         enableRX();
