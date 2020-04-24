@@ -336,33 +336,51 @@ void display_RGBW(unsigned int input)
 }
 
 /*********************************************************************************************\
-   Convert string to command code
+   Convert HEX or DEC tring to unsigned long HEX, DEC
   \*********************************************************************************************/
-/*
-  int str2cmd(char *command) {
-  if (strcasecmp(command, "ON") == 0) return VALUE_ON;
-  if (strcasecmp(command, "OFF") == 0) return VALUE_OFF;
-  if (strcasecmp(command, "ALLON") == 0) return VALUE_ALLON;
-  if (strcasecmp(command, "ALLOFF") == 0) return VALUE_ALLOFF;
-  if (strcasecmp(command, "PAIR") == 0) return VALUE_PAIR;
-  if (strcasecmp(command, "DIM") == 0) return VALUE_DIM;
-  if (strcasecmp(command, "BRIGHT") == 0) return VALUE_BRIGHT;
-  if (strcasecmp(command, "UP") == 0) return VALUE_UP;
-  if (strcasecmp(command, "DOWN") == 0) return VALUE_DOWN;
-  if (strcasecmp(command, "STOP") == 0) return VALUE_STOP;
-  if (strcasecmp(command, "CONFIRM") == 0) return VALUE_CONFIRM;
-  if (strcasecmp(command, "LIMIT") == 0) return VALUE_LIMIT;
+unsigned long str2int(char *string)
+{
+  return (strtoul(string, NULL, 0));
+}
+/*********************************************************************************************\
+   Convert string to command code
+\*********************************************************************************************/
+int str2cmd(char *command)
+{
+  if (strcasecmp(command, "ON") == 0)
+    return VALUE_ON;
+  if (strcasecmp(command, "OFF") == 0)
+    return VALUE_OFF;
+  if (strcasecmp(command, "ALLON") == 0)
+    return VALUE_ALLON;
+  if (strcasecmp(command, "ALLOFF") == 0)
+    return VALUE_ALLOFF;
+  if (strcasecmp(command, "PAIR") == 0)
+    return VALUE_PAIR;
+  if (strcasecmp(command, "DIM") == 0)
+    return VALUE_DIM;
+  if (strcasecmp(command, "BRIGHT") == 0)
+    return VALUE_BRIGHT;
+  if (strcasecmp(command, "UP") == 0)
+    return VALUE_UP;
+  if (strcasecmp(command, "DOWN") == 0)
+    return VALUE_DOWN;
+  if (strcasecmp(command, "STOP") == 0)
+    return VALUE_STOP;
+  if (strcasecmp(command, "CONFIRM") == 0)
+    return VALUE_CONFIRM;
+  if (strcasecmp(command, "LIMIT") == 0)
+    return VALUE_LIMIT;
   return false;
-  }
-*/
+}
 
 void replacechar(char *str, char orig, char rep)
 {
-    char *ix = str;
-    int n = 0;
-    while ((ix = strchr(ix, orig)) != NULL)
-    {
-        *ix++ = rep;
-        n++;
-    }
+  char *ix = str;
+  int n = 0;
+  while ((ix = strchr(ix, orig)) != NULL)
+  {
+    *ix++ = rep;
+    n++;
+  }
 }

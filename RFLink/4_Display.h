@@ -58,7 +58,8 @@ void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
-// int str2cmd(char *command)
+unsigned long str2int(char *);
+int str2cmd(char *);
 void replacechar(char *, char, char);
 
 #endif

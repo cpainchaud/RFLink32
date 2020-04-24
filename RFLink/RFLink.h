@@ -28,7 +28,6 @@
 #define INPUT_COMMAND_SIZE 60           // 60         // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
-/*
 #define VALUE_PAIR                     44
 #define VALUE_ALLOFF                   55
 #define VALUE_OFF                      74
@@ -41,7 +40,6 @@
 #define VALUE_CONFIRM                  81
 #define VALUE_LIMIT                    82
 #define VALUE_ALLON                   141
-*/
 
 // PIN Definition
 //
