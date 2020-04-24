@@ -202,15 +202,12 @@ boolean CheckCmd()
         // -------------------------------------------------------
         // Handle Generic Commands / Translate protocol data into Nodo text commands
         // -------------------------------------------------------
-
         disableRX();
         enableTX();
-
         if (PluginTXCall(0, InputBuffer_Serial))
           ValidCommand = 1;
         else // Answer that an invalid command was received?
           ValidCommand = 2;
-
         disableTX();
         enableRX();
       }
@@ -218,18 +215,12 @@ boolean CheckCmd()
   } // if > 7
   if (ValidCommand != 0)
   {
+    display_Header();
     if (ValidCommand == 1)
-    {
-      display_Header();
       display_Name(PSTR("OK"));
-      display_Footer();
-    }
     else
-    {
-      display_Header();
       display_Name(PSTR("CMD UNKNOWN"));
-      display_Footer();
-    }
+    display_Footer();
   }
   InputBuffer_Serial[0] = 0; // serial data has been processed.
   ValidCommand = 0;
