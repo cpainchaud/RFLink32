@@ -140,7 +140,7 @@ boolean Plugin_004(byte function, char *string)
    if (i > 140 && dimbitpresent == 1)
       display_SET_LEVEL(dim); // Command and Dim part
    else
-      display_CMD((CMD_Group)((bitstream >> 5) & B01),(CMD_OnOff)((bitstream >> 4) & B01));// #ALL , #ON
+      display_CMD((CMD_Group)((bitstream >> 5) & B01), (CMD_OnOff)((bitstream >> 4) & B01)); // #ALL , #ON
    display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
@@ -150,12 +150,16 @@ boolean Plugin_004(byte function, char *string)
 #endif // Plugin_004
 
 #ifdef PLUGIN_TX_004
+#include "3_Serial.h"
+#include "4_Display.h"
+
 void AC_Send(unsigned long data, byte cmd);
 
 boolean PluginTX_004(byte function, char *string)
 {
    boolean success = false;
-   //10;NewKaku;123456;3;ON;                   // ON, OFF, ALLON, ALLOFF, ALL 99, 99
+   // ON, OFF, ALLON, ALLOFF, ALL 99, 99
+   //10;NewKaku;123456;3;ON;
    //10;NewKaku;0cac142;2;ON;
    //10;NewKaku;050515;f;OFF;
    //10;NewKaku;2100fed;1;ON;
@@ -163,25 +167,29 @@ boolean PluginTX_004(byte function, char *string)
    //10;NewKaku;306070b;f;ON;
    //10;NewKaku;306070b;10;ON;
    //01234567890123456789012
+
+   Serial.println("\n*** TX_004 ***");
+   Serial.println(InputBuffer_Serial);
+
    if (strncasecmp(InputBuffer_Serial + 3, "NEWKAKU;", 8) == 0)
    {
+      Serial.println("Newkaku OK");
+
       byte x = 18; // pointer to the switch number
       if (InputBuffer_Serial[17] != ';')
       {
          if (InputBuffer_Serial[18] != ';')
-         {
             return false;
-         }
          else
-         {
             x = 19;
-         }
       }
+
+      Serial.println("Switch OK");
 
       unsigned long bitstream = 0L;
       unsigned long tempaddress = 0L;
       byte cmd = 0;
-      //byte c=0; // MRI commented
+      byte c = 0;
       byte Address = 0; // Address 1..16
 
       // -----
@@ -190,9 +198,14 @@ boolean PluginTX_004(byte function, char *string)
       InputBuffer_Serial[x - 1] = 0x00;
       tempaddress = str2int(InputBuffer_Serial + 9);
       // -----
-      //while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16
-      //   if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-      //}
+      while ((c = InputBuffer_Serial[x++]) != ';')
+      { // Address: 1 to 16
+         if (c >= '0' && c <= '9')
+         {
+            Address = Address * 10;
+            Address = Address + c - '0';
+         }
+      }
       InputBuffer_Serial[x - 2] = 0x30; // Get unit number from hexadecimal value
       InputBuffer_Serial[x - 1] = 0x78; // x points to the first character of the unit number
       if (InputBuffer_Serial[x + 1] == ';')
@@ -208,23 +221,25 @@ boolean PluginTX_004(byte function, char *string)
             cmd = 3;
          }
          else
-         {
             return false;
-         }
       }
+
+      Serial.println("Unit1 OK");
+
       Address = str2int(InputBuffer_Serial + (x - 2)); // NewKAKU unit number
       if (Address > 16)
          return false; // invalid address
-      Address--;       // 1 to 16 -> 0 to 15 (transmitted value is 1 less than shown values)
-      x = x + cmd;     // point to on/off/dim command part
+
+      Serial.println("Unit2 OK");
+
+      Address--; // 1 to 16 -> 0 to 15 (transmitted value is 1 less than shown values)
+      x += cmd;  // point to on/off/dim command part
       // -----
       tempaddress = (tempaddress << 6) + Address; // Complete transmitted address
       // -----
-      cmd = str2cmd(InputBuffer_Serial + x); // Get ON/OFF etc. command
-      if (cmd == false)
-      {                                         // Not a valid command received? ON/OFF/ALLON/ALLOFF
+      cmd = str2cmd(InputBuffer_Serial + x);    // Get ON/OFF etc. command
+      if (cmd == false)                         // Not a valid command received? ON/OFF/ALLON/ALLOFF
          cmd = str2int(InputBuffer_Serial + x); // get DIM value
-      }
       // --------------- Prepare bitstream ------------
       bitstream = tempaddress & 0xFFFFFFCF; // adres geheel over nemen behalve de twee bits 5 en 6 die het schakel commando bevatten.
 
@@ -244,7 +259,12 @@ boolean PluginTX_004(byte function, char *string)
       }
       // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
       // --------------- NEWKAKU SEND ------------
+      Serial.println("Send Ready");
+
       AC_Send(bitstream, cmd);
+
+      Serial.println("Send OK");
+
       success = true;
    }
    // --------------------------------------
@@ -275,9 +295,9 @@ void AC_Send(unsigned long data, byte cmd)
       }
    }
    // Prepare transmit
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_RX_VCC, LOW);               // Turn off power to the RF receiver
+   digitalWrite(PIN_RF_TX_VCC, HIGH);              // Enable the 433Mhz transmitter
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
    // send bits
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
@@ -368,9 +388,8 @@ void AC_Send(unsigned long data, byte cmd)
       delayMicroseconds(fpulse * 40); //31*335=10385 40*260=10400
    }
    // End transmit
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
-   RFLinkHW();
+   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
+   digitalWrite(PIN_RF_TX_VCC, LOW);               // Turn thew 433Mhz transmitter off
+   digitalWrite(PIN_RF_RX_VCC, HIGH);              // Turn the 433Mhz receiver on
 }
 #endif // Plugin_TX_004
