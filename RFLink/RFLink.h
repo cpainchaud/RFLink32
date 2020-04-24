@@ -51,7 +51,7 @@
 #define PIN_RF_RX_GND D8       // Ground to the receiver on this pin
 #define PIN_RF_TX_VCC D5       // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND D6       // Ground power to the transmitter on this pin
-#define PIN_RF_TX_DATA D1      // Data to the 433Mhz transmitter on this pin
+#define PIN_RF_TX_DATA D4      // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef ESP32
