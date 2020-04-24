@@ -8,9 +8,10 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "RFLink.h"
+#include "4_Display.h" // To allow displaying the last message
 #include "5_Plugin.h"
+#include "6_WiFi_MQTT.h"
 #include "9_AutoConnect.h"
-#include "4_Display.h" // To be able to display the last message
 #ifdef AUTOCONNECT_ENABLED
 
 #ifdef ESP8266
@@ -449,6 +450,9 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value += F("<br>TX Power: ");
     echo.value += Adv_Power;
     echo.value += F("<br>");
+
+    setup_MQTT(); // Reload settings
+
     return String("");
 }
 
