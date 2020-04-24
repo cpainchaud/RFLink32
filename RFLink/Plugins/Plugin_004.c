@@ -157,7 +157,6 @@ void AC_Send(unsigned long data, byte cmd);
 
 boolean PluginTX_004(byte function, char *string)
 {
-   boolean success = false;
    // ON, OFF, ALLON, ALLOFF, ALL 99, 99
    //10;NewKaku;123456;3;ON;
    //10;NewKaku;0cac142;2;ON;
@@ -168,116 +167,196 @@ boolean PluginTX_004(byte function, char *string)
    //10;NewKaku;306070b;10;ON;
    //01234567890123456789012
 
-   Serial.println("\n*** TX_004 ***");
-   Serial.println(InputBuffer_Serial);
+   // Start message split
+   // Serial.print("*** Spliting message ***\n");
 
-   if (strncasecmp(InputBuffer_Serial + 3, "NEWKAKU;", 8) == 0)
+   static const char c_delim[2] = ";";
+   static char c_label[10];
+   static char c_ID[10];
+   static char c_Switch[10];
+   static char c_Cmd[10];
+
+   // 10
+   char *ptr = strtok(InputBuffer_Serial, c_delim);
+   if (ptr != NULL)
    {
-      Serial.println("Newkaku OK");
-
-      byte x = 18; // pointer to the switch number
-      if (InputBuffer_Serial[17] != ';')
-      {
-         if (InputBuffer_Serial[18] != ';')
-            return false;
-         else
-            x = 19;
-      }
-
-      Serial.println("Switch OK");
-
-      unsigned long bitstream = 0L;
-      unsigned long tempaddress = 0L;
-      byte cmd = 0;
-      byte c = 0;
-      byte Address = 0; // Address 1..16
-
-      // -----
-      InputBuffer_Serial[9] = 0x30; // Get NEWKAKU/AC main address part from hexadecimal value
-      InputBuffer_Serial[10] = 0x78;
-      InputBuffer_Serial[x - 1] = 0x00;
-      tempaddress = str2int(InputBuffer_Serial + 9);
-      // -----
-      while ((c = InputBuffer_Serial[x++]) != ';')
-      { // Address: 1 to 16
-         if (c >= '0' && c <= '9')
-         {
-            Address = Address * 10;
-            Address = Address + c - '0';
-         }
-      }
-      InputBuffer_Serial[x - 2] = 0x30; // Get unit number from hexadecimal value
-      InputBuffer_Serial[x - 1] = 0x78; // x points to the first character of the unit number
-      if (InputBuffer_Serial[x + 1] == ';')
-      {
-         InputBuffer_Serial[x + 1] = 0x00;
-         cmd = 2;
-      }
-      else
-      {
-         if (InputBuffer_Serial[x + 2] == ';')
-         {
-            InputBuffer_Serial[x + 2] = 0x00;
-            cmd = 3;
-         }
-         else
-            return false;
-      }
-
-      Serial.println("Unit1 OK");
-
-      Address = str2int(InputBuffer_Serial + (x - 2)); // NewKAKU unit number
-      if (Address > 16)
-         return false; // invalid address
-
-      Serial.println("Unit2 OK");
-
-      Address--; // 1 to 16 -> 0 to 15 (transmitted value is 1 less than shown values)
-      x += cmd;  // point to on/off/dim command part
-      // -----
-      tempaddress = (tempaddress << 6) + Address; // Complete transmitted address
-      // -----
-      cmd = str2cmd(InputBuffer_Serial + x);    // Get ON/OFF etc. command
-      if (cmd == false)                         // Not a valid command received? ON/OFF/ALLON/ALLOFF
-         cmd = str2int(InputBuffer_Serial + x); // get DIM value
-      // --------------- Prepare bitstream ------------
-      bitstream = tempaddress & 0xFFFFFFCF; // adres geheel over nemen behalve de twee bits 5 en 6 die het schakel commando bevatten.
-
-      // Dimming of groups is also possible but not supported yet!
-      // when level=0 is it better to transmit just the off command ?
-
-      if (cmd == VALUE_ON || cmd == VALUE_OFF)
-      {
-         bitstream |= (cmd == VALUE_ON) << 4; // bit-5 is the on/off command in the KAKU signal
-         cmd = 0xff;
-      }
-      else if (cmd == VALUE_ALLON || cmd == VALUE_ALLOFF)
-      {
-         bitstream |= B1 << 5;                   // bit 5 is the group indicator
-         bitstream |= (cmd == VALUE_ALLON) << 4; // bit-4 is the on/off indicator
-         cmd = 0xff;
-      }
-      // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
-      // --------------- NEWKAKU SEND ------------
-      Serial.println("Send Ready");
-
-      AC_Send(bitstream, cmd);
-
-      Serial.println("Send OK");
-
-      success = true;
+      strcpy(c_label, "10");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) != 0)
+         return false;
    }
+   else
+      return false;
+
+   // Newkaku
+   ptr = strtok(NULL, c_delim);
+   if (ptr != NULL)
+   {
+      strcpy(c_label, "NEWKAKU");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) != 0)
+         return false;
+   }
+   else
+      return false;
+
+   // ID
+   ptr = strtok(NULL, c_delim);
+   if (ptr != NULL)
+   {
+      strcpy(c_label, "ID=");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+         ptr += strlen(c_label);
+
+      if (strlen(ptr) > 8)
+         return false;
+
+      for (byte i = 0; i < strlen(ptr); i++)
+         if (!isxdigit(ptr[i]))
+            return false;
+
+      strcpy(c_ID, ptr);
+      c_ID[8] = 0;
+   }
+   else
+      return false;
+
+   // Switch
+   ptr = strtok(NULL, c_delim);
+   if (ptr != NULL)
+   {
+      strcpy(c_label, "SWITCH=");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+         ptr += strlen(c_label);
+
+      if (strlen(ptr) > 1)
+         return false;
+
+      for (byte i = 0; i < strlen(ptr); i++)
+         if (!isxdigit(ptr[i]))
+            return false;
+
+      strcpy(c_Switch, ptr);
+   }
+   else
+      return false;
+
+   // Command
+   ptr = strtok(NULL, c_delim);
+   if (ptr != NULL)
+   {
+      strcpy(c_label, "SET_LEVEL=");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+         ptr += strlen(c_label);
+
+      strcpy(c_label, "CMD=");
+      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+         ptr += strlen(c_label);
+
+      if (strlen(ptr) > 7)
+         return false;
+
+      for (byte i = 0; i < strlen(ptr); i++)
+         if (!isalnum(ptr[i]))
+            return false;
+
+      strcpy(c_Cmd, ptr);
+   }
+   else
+      return false;
+
+   // End
+   ptr = strtok(NULL, c_delim);
+   if (ptr != NULL)
+      return false;
+
+   // Summary message split
+   // Serial.print("*** Split OK ***\n");
+   // Serial.println(c_ID);
+   // Serial.println(c_Switch);
+   // Serial.println(c_Cmd);
+
+   // --------------- Prepare bitstream ------------
+   // Dimming of groups is also possible but not supported yet!
+   // when level=0 is it better to transmit just the off command ?
+   // Serial.print("*** Creating bitstream ***\n");
+   unsigned long bitstream = 0L; // 32 bits complete packet
+
+   unsigned long ID_bitstream = 0L; // 26 bits Address
+   ID_bitstream = strtoul(c_ID, NULL, HEX);
+   ID_bitstream &= 0x03FFFFFF;
+   // Serial.println("ID_bitstream");
+   // Serial.println(ID_bitstream, HEX);
+
+   bitstream = (ID_bitstream << 6); // 26 bits on top
+
+   byte Switch_bitstream = 0; // 4 bits Unit
+   Switch_bitstream = (byte)strtoul(c_Switch, NULL, HEX);
+   Switch_bitstream--; // 1 to 16 -> 0 to 15 (displayed value is one more)
+   if (Switch_bitstream > 0xF)
+      return false; // invalid address
+   // Serial.println("Switch_bitstream");
+   // Serial.println(Switch_bitstream, HEX);
+
+   bitstream |= Switch_bitstream; // Complete transmitted address
+   bitstream &= 0xFFFFFFCF;       // Bit 4 and 5 are left for cmd
+
+   byte Cmd_bitstream = 0x00; // 2 bits Command
+   byte cmd = 0;
+   cmd = str2cmd(c_Cmd); // Get ON/OFF etc. command
+   if (cmd == false)     // Not a valid command received? ON/OFF/ALLON/ALLOFF
+      cmd = (byte)strtoul(c_Cmd, NULL, HEX);
+   // ON
+   switch (cmd)
+   {
+   case VALUE_ON:
+   case VALUE_ALLON:
+      Cmd_bitstream |= B01;
+      break;
+   }
+   // Group
+   switch (cmd)
+   {
+   case VALUE_ALLON:
+   case VALUE_ALLOFF:
+      Cmd_bitstream |= B10;
+      break;
+   }
+   // Dimmer
+   switch (cmd)
+   {
+   case VALUE_ON:
+   case VALUE_OFF:
+   case VALUE_ALLON:
+   case VALUE_ALLOFF:
+      cmd = 0xFF;
+      break;
+   }
+   // Serial.println("Cmd_bitstream");
+   // Serial.println(Cmd_bitstream, HEX);
+
+   bitstream |= (Cmd_bitstream << 4);
+
+   // Serial.println("Complete bitstream");
+   // Serial.println(bitstream, HEX);
+
+   // Serial.println("cmd");
+   // Serial.println(cmd, HEX);
+
+   // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
+   // --------------- NEWKAKU SEND ------------
+
+   AC_Send(bitstream, cmd);
+
    // --------------------------------------
-   return success;
+   return true;
 }
 
 void AC_Send(unsigned long data, byte cmd)
 {
-   int fpulse = 260;  // Pulse width in microseconds
-   int fretrans = 10; // Number of code retransmissions
+   int fpulse = 260; // Pulse width in microseconds
+   int fretrans = 5; // Number of code retransmissions
 
    unsigned long bitstream = 0L;
-   byte command;
+   byte command = 0;
    // prepare data to send
    for (unsigned short i = 0; i < 32; i++)
    { // reverse data bits
