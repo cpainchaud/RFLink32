@@ -31,7 +31,6 @@
 #include "8_OLED.h"
 #endif
 //****************************************************************************************************************************************
-
 void sendMsg(); // See at bottom
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
@@ -61,24 +60,8 @@ void setup()
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
-  // RX pins
-  pinMode(PIN_RF_RX_VCC, OUTPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_RX_NA, INPUT);               // Initialise in/output ports
-  pinMode(PIN_RF_RX_DATA, INPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_RX_GND, OUTPUT);             // Initialise in/output ports
-  digitalWrite(PIN_RF_RX_GND, LOW);           // turn GND to RF receiver ON
-  digitalWrite(PIN_RF_RX_VCC, HIGH);          // turn VCC to RF receiver ON
-  digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP); // pull-up resistor on (to prevent garbage)
-
-  // TX Pins
-  // pinMode(PIN_RF_TX_VCC, OUTPUT);    // Initialise in/output ports
-  // pinMode(PIN_RF_TX_DATA, OUTPUT);   // Initialise in/output ports
-  // pinMode(PIN_RF_TX_GND, OUTPUT);    // Initialise in/output ports
-  // digitalWrite(PIN_RF_TX_GND, LOW);  // turn GND to TX receiver ON
-  // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
-  //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
-
-  delay(100);
+  disableTX();
+  enableRX();
 
 #if (defined(ESP32) || defined(ESP8266))
 #ifdef MQTT_ENABLED
@@ -107,6 +90,7 @@ void setup()
   pbuffer[0] = 0;
 
   PluginInit();
+  PluginTXInit();
   delay(100);
 }
 
@@ -140,4 +124,45 @@ void sendMsg()
     pbuffer[0] = 0;
   }
 }
+
+void enableRX()
+{
+  // RX pins
+  pinMode(PIN_RF_RX_GND, OUTPUT);        // Initialise in/output ports
+  pinMode(PIN_RF_RX_VCC, OUTPUT);        // Initialise in/output ports
+  pinMode(PIN_RF_RX_NA, INPUT);          // Initialise in/output ports
+  pinMode(PIN_RF_RX_DATA, INPUT);        // Initialise in/output ports
+  digitalWrite(PIN_RF_RX_GND, LOW);      // turn GND to RF receiver ON
+  digitalWrite(PIN_RF_RX_VCC, HIGH);     // turn VCC to RF receiver ON
+  pinMode(PIN_RF_RX_DATA, INPUT_PULLUP); // Initialise in/output ports
+}
+
+void disableRX()
+{
+  // RX pins
+  pinMode(PIN_RF_RX_DATA, INPUT);
+  pinMode(PIN_RF_RX_NA, INPUT);
+  pinMode(PIN_RF_RX_VCC, INPUT);
+  pinMode(PIN_RF_RX_GND, INPUT);
+}
+
+void enableTX()
+{
+  // TX Pins
+  pinMode(PIN_RF_TX_GND, OUTPUT);    // Initialise in/output ports
+  pinMode(PIN_RF_TX_VCC, OUTPUT);    // Initialise in/output ports
+  pinMode(PIN_RF_TX_DATA, OUTPUT);   // Initialise in/output ports
+  digitalWrite(PIN_RF_TX_GND, LOW);  // turn GND to TX receiver ON
+  digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
+  delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
+}
+
+void disableTX()
+{
+  // TX Pins
+  pinMode(PIN_RF_TX_DATA, INPUT);
+  pinMode(PIN_RF_TX_VCC, INPUT);
+  pinMode(PIN_RF_TX_GND, INPUT);
+}
+
 /*********************************************************************************************/

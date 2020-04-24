@@ -44,37 +44,46 @@
 */
 
 // PIN Definition
-#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
-#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
-
+//
 #ifdef ESP8266
 // ESP8266 D1 Mini
-#define PIN_RF_RX_VCC D5  // Power to the receiver on this pin
-#define PIN_RF_RX_NA D6   // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA D7 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND D8  // Ground to the receiver on this pin
+#define PIN_RF_RX_VCC D7       // Power to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA D2      // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND D8       // Ground to the receiver on this pin
+#define PIN_RF_TX_VCC D5       // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND D6       // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA D1      // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef ESP32
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 2         // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef __AVR_ATmega328P__
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 2         // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef __AVR_ATmega2560__
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 19       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 19        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
 // OLED display, 0.91" SSD1306 I2C
@@ -106,5 +115,9 @@
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 void CallReboot(void);
+void enableRX();
+void disableRX();
+void enableTX();
+void disableTX();
 
 #endif

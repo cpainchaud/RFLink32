@@ -212,6 +212,12 @@ boolean CheckCmd()
         // Answer that an invalid command was received?
         ValidCommand = 2;
         //}
+        disableRX();
+        enableTX();
+
+
+        disableTX();
+        enableRX();
       }
     }
   } // if > 7
