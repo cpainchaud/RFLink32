@@ -156,16 +156,16 @@ static const char AUX_settings[] PROGMEM = R"raw(
           "type": "ACInput",
           "label": "Out Topic",
           "pattern": "(.*)[^\/]$",
-          "placeholder": "example : /RFlink/msg",
-          "value": "/RFlink/msg"
+          "placeholder": "example : /RFLink/msg",
+          "value": "/RFLink/msg"
         },
         {
           "name": "MQTT_TOPIC_IN",
           "type": "ACInput",
           "label": "In Topic",
           "pattern": "(.*)[^\/]$",
-          "placeholder": "example : /RFlink/cmd",
-          "value": "/RFlink/cmd"
+          "placeholder": "example : /RFLink/cmd",
+          "value": "/RFLink/cmd"
         },
         {
           "name": "MQTT_RETAINED",
