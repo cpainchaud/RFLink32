@@ -116,8 +116,9 @@ void reconnect()
     else
     {
       Serial.println("Connection mqttserver:" + String(MQTT_SERVER.c_str()));
+      Serial.println("Connection Mqtt_ID:" + String(MQTT_ID.c_str()));
       Serial.println("Connection Mqtt_Username:" + String(MQTT_USER.c_str()));
-      Serial.println("Connection Mqtt_Password:" + String(MQTT_USER.c_str()));
+      Serial.println("Connection Mqtt_Password: ********");
       Serial.println("Connection failed:" + String(MQTTClient.state()));
       if (!--retry)
         break;
