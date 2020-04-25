@@ -58,7 +58,6 @@ void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
-unsigned long str2int(char *);
 #define VALUE_PAIR                     44
 #define VALUE_ALLOFF                   55
 #define VALUE_OFF                      74
