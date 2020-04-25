@@ -128,13 +128,18 @@ void sendMsg()
 void enableRX()
 {
   // RX pins
-  pinMode(PIN_RF_RX_GND, OUTPUT);        // Initialise in/output ports
-  pinMode(PIN_RF_RX_VCC, OUTPUT);        // Initialise in/output ports
   pinMode(PIN_RF_RX_NA, INPUT);          // Initialise in/output ports
   pinMode(PIN_RF_RX_DATA, INPUT);        // Initialise in/output ports
+  pinMode(PIN_RF_RX_NMOS, OUTPUT);       // MOSFET, always output
+  pinMode(PIN_RF_RX_PMOS, OUTPUT);       // MOSFET, always output
+  digitalWrite(PIN_RF_RX_NMOS, HIGH);    // turn GND to RF receiver ON
+  digitalWrite(PIN_RF_RX_PMOS, LOW);     // turn VCC to RF receiver ON
+  pinMode(PIN_RF_RX_GND, OUTPUT);        // Initialise in/output ports
+  pinMode(PIN_RF_RX_VCC, OUTPUT);        // Initialise in/output ports
   digitalWrite(PIN_RF_RX_GND, LOW);      // turn GND to RF receiver ON
   digitalWrite(PIN_RF_RX_VCC, HIGH);     // turn VCC to RF receiver ON
   pinMode(PIN_RF_RX_DATA, INPUT_PULLUP); // Initialise in/output ports
+  delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 }
 
 void disableRX()
@@ -142,6 +147,10 @@ void disableRX()
   // RX pins
   pinMode(PIN_RF_RX_DATA, INPUT);
   pinMode(PIN_RF_RX_NA, INPUT);
+  pinMode(PIN_RF_RX_PMOS, OUTPUT);    // MOSFET, always output
+  pinMode(PIN_RF_RX_NMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(PIN_RF_RX_PMOS, HIGH); // turn VCC to RF receiver OFF
+  digitalWrite(PIN_RF_RX_NMOS, LOW);  // turn GND to RF receiver OFF
   pinMode(PIN_RF_RX_VCC, INPUT);
   pinMode(PIN_RF_RX_GND, INPUT);
 }
@@ -149,18 +158,29 @@ void disableRX()
 void enableTX()
 {
   // TX Pins
-  pinMode(PIN_RF_TX_GND, OUTPUT);    // Initialise in/output ports
-  pinMode(PIN_RF_TX_VCC, OUTPUT);    // Initialise in/output ports
-  pinMode(PIN_RF_TX_DATA, OUTPUT);   // Initialise in/output ports
-  digitalWrite(PIN_RF_TX_GND, LOW);  // turn GND to TX receiver ON
-  digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
+  pinMode(PIN_RF_TX_DATA, OUTPUT); // Initialise in/output ports
+  digitalWrite(PIN_RF_TX_DATA, LOW);  // No signal yet
+  pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
+  pinMode(PIN_RF_TX_PMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(PIN_RF_TX_NMOS, HIGH); // turn GND to TX receiver ON
+  digitalWrite(PIN_RF_TX_PMOS, LOW);  // turn VCC to TX receiver ON
+  pinMode(PIN_RF_TX_GND, OUTPUT);     // Initialise in/output ports
+  pinMode(PIN_RF_TX_VCC, OUTPUT);     // Initialise in/output ports
+  digitalWrite(PIN_RF_TX_GND, LOW);   // turn GND to TX receiver ON
+  digitalWrite(PIN_RF_TX_VCC, HIGH);  // turn VCC to TX receiver ON
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 }
 
 void disableTX()
 {
   // TX Pins
-  pinMode(PIN_RF_TX_DATA, INPUT);
+  delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
+  digitalWrite(PIN_RF_TX_DATA, LOW);  // No more signal
+  pinMode(PIN_RF_TX_DATA, INPUT);     //
+  pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
+  pinMode(PIN_RF_TX_PMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(PIN_RF_TX_PMOS, HIGH); // turn VCC to TX receiver OFF
+  digitalWrite(PIN_RF_TX_NMOS, LOW);  // turn GND to TX receiver OFF
   pinMode(PIN_RF_TX_VCC, INPUT);
   pinMode(PIN_RF_TX_GND, INPUT);
 }
