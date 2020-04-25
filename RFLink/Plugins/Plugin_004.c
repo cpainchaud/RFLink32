@@ -165,188 +165,45 @@ boolean PluginTX_004(byte function, char *string)
    //10;NewKaku;306070b;10;ON;
    //01234567890123456789012
 
-   // Start message split
-   // Serial.print("*** Spliting message ***\n");
+   unsigned long bitstream = 0L;    // 32 bits complete packet
+   unsigned long ID_bitstream = 0L; // 26 bits Address
+   byte Switch_bitstream = 0;       // 4 bits Unit
+   byte Cmd_bitstream = 0;          // 2 bits Command
+   byte Cmd_dimmer = 0;             // 4 bits Alt Command
 
-   static const char c_delim[2] = ";";
-   static char c_label[10];
-   static char c_ID[10];
-   static char c_Switch[10];
-   static char c_Cmd[10];
-
-   // 10
-   char *ptr = strtok(InputBuffer_Serial, c_delim);
-   if (ptr != NULL)
-   {
-      strcpy(c_label, "10");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) != 0)
-         return false;
-   }
-   else
+   if (!retrieve_Init10())
       return false;
-
-   // Newkaku
-   ptr = strtok(NULL, c_delim);
-   if (ptr != NULL)
-   {
-      strcpy(c_label, "NEWKAKU");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) != 0)
-         return false;
-   }
-   else
+   if (!retrieve_Name("Newkaku"))
       return false;
-
-   // ID
-   ptr = strtok(NULL, c_delim);
-   if (ptr != NULL)
-   {
-      strcpy(c_label, "ID=");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-         ptr += strlen(c_label);
-
-      if (strlen(ptr) > 8)
-         return false;
-
-      for (byte i = 0; i < strlen(ptr); i++)
-         if (!isxdigit(ptr[i]))
-            return false;
-
-      strcpy(c_ID, ptr);
-      c_ID[8] = 0;
-   }
-   else
+   if (!retrieve_ID(ID_bitstream))
       return false;
-
-   // Switch
-   ptr = strtok(NULL, c_delim);
-   if (ptr != NULL)
-   {
-      strcpy(c_label, "SWITCH=");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-         ptr += strlen(c_label);
-
-      if (strlen(ptr) > 1)
-         return false;
-
-      for (byte i = 0; i < strlen(ptr); i++)
-         if (!isxdigit(ptr[i]))
-            return false;
-
-      strcpy(c_Switch, ptr);
-   }
-   else
+   if (!retrieve_Switch(Switch_bitstream))
       return false;
-
-   // Command
-   ptr = strtok(NULL, c_delim);
-   if (ptr != NULL)
-   {
-      strcpy(c_label, "SET_LEVEL=");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-         ptr += strlen(c_label);
-
-      strcpy(c_label, "CMD=");
-      if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-         ptr += strlen(c_label);
-
-      if (strlen(ptr) > 7)
-         return false;
-
-      for (byte i = 0; i < strlen(ptr); i++)
-         if (!isalnum(ptr[i]))
-            return false;
-
-      strcpy(c_Cmd, ptr);
-   }
-   else
+   if (!retrieve_Command(Cmd_bitstream, Cmd_dimmer))
       return false;
-
-   // End
-   ptr = strtok(NULL, c_delim);
-   if (ptr != NULL)
+   if (!retrieve_End())
       return false;
-
-   // Summary message split
-   // Serial.print("*** Split OK ***\n");
-   // Serial.println(c_ID);
-   // Serial.println(c_Switch);
-   // Serial.println(c_Cmd);
 
    // --------------- Prepare bitstream ------------
    // Dimming of groups is also possible but not supported yet!
    // when level=0 is it better to transmit just the off command ?
    // Serial.print("*** Creating bitstream ***\n");
-   unsigned long bitstream = 0L; // 32 bits complete packet
 
-   unsigned long ID_bitstream = 0L; // 26 bits Address
-   ID_bitstream = strtoul(c_ID, NULL, HEX);
-   ID_bitstream &= 0x03FFFFFF;
-   // Serial.println("ID_bitstream");
-   // Serial.println(ID_bitstream, HEX);
 
    bitstream = (ID_bitstream << 6); // 26 bits on top
-
-   byte Switch_bitstream = 0; // 4 bits Unit
-   Switch_bitstream = (byte)strtoul(c_Switch, NULL, HEX);
-   Switch_bitstream--; // 1 to 16 -> 0 to 15 (displayed value is one more)
-   if (Switch_bitstream > 0xF)
-      return false; // invalid address
-   // Serial.println("Switch_bitstream");
-   // Serial.println(Switch_bitstream, HEX);
-
    bitstream |= Switch_bitstream; // Complete transmitted address
-   bitstream &= 0xFFFFFFCF;       // Bit 4 and 5 are left for cmd
-
-   byte Cmd_bitstream = 0x00; // 2 bits Command
-   byte cmd = 0;
-   cmd = str2cmd(c_Cmd); // Get ON/OFF etc. command
-   if (cmd == false)     // Not a valid command received? ON/OFF/ALLON/ALLOFF
-      cmd = (byte)strtoul(c_Cmd, NULL, HEX);
-   // ON
-   switch (cmd)
-   {
-   case VALUE_ON:
-   case VALUE_ALLON:
-      Cmd_bitstream |= B01;
-      break;
-   }
-   // Group
-   switch (cmd)
-   {
-   case VALUE_ALLON:
-   case VALUE_ALLOFF:
-      Cmd_bitstream |= B10;
-      break;
-   }
-   // Dimmer
-   switch (cmd)
-   {
-   case VALUE_ON:
-   case VALUE_OFF:
-   case VALUE_ALLON:
-   case VALUE_ALLOFF:
-      cmd = 0xFF;
-      break;
-   }
-   // Serial.println("Cmd_bitstream");
-   // Serial.println(Cmd_bitstream, HEX);
-
+   // bitstream &= 0xFFFFFFCF;    // Bit 4 and 5 are left for cmd
    bitstream |= (Cmd_bitstream << 4);
 
-   // Serial.println("Complete bitstream");
-   // Serial.println(bitstream, HEX);
 
-   // Serial.println("cmd");
-   // Serial.println(cmd, HEX);
 
    // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
    // --------------- NEWKAKU SEND ------------
 
-   AC_Send(bitstream, cmd);
+   AC_Send(bitstream, Cmd_dimmer);
 
    // --------------------------------------
    return true;
 }
-
 
 #endif // Plugin_TX_004
