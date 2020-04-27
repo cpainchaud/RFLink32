@@ -10,7 +10,16 @@
 
 #include <Arduino.h>
 
-enum PState {P_Forbidden, P_Disabled, P_Enabled, P_Mandatory}; 
+#define PLUGIN_MAX 55   // 55         // Maximum number of Receive plugins
+#define PLUGIN_TX_MAX 5 // 26         // Maximum number of Transmit plugins
+
+enum PState
+{
+    P_Forbidden,
+    P_Disabled,
+    P_Enabled,
+    P_Mandatory
+};
 
 extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 extern byte Plugin_id[PLUGIN_MAX];
@@ -25,9 +34,6 @@ extern boolean RFDebug;   // debug RF signals with plugin 001 (no decode)
 extern boolean QRFDebug;  // debug RF signals with plugin 001 but no multiplication (faster?, compact)
 extern boolean RFUDebug;  // debug RF signals with plugin 254 (decode 1st)
 extern boolean QRFUDebug; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
-
-// void(*Reboot)(void) = 0;
-// boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char*);
 
 // Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
 void PluginInit(void);
