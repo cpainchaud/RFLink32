@@ -8,11 +8,8 @@
 #ifndef RFLink_h
 #define RFLink_h
 
-//
 #define BUILDNR 0x04                    // 0x07       // shown in version
 #define REVNR 0x00                      // 0X42       // shown in version and startup string
-#define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
-
 #define BUILDNR 0x04 // 0x07       // shown in version
 #define REVNR 0x00   // 0X42       // shown in version and startup string
 

@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "RFLink.h"
 #include "3_Serial.h"
 #include "4_Display.h"
 
