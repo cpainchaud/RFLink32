@@ -9,8 +9,8 @@
 #include "RFLink.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
-#include <EEPROM.h> //used to store current plugins states
-#include <FS.h>     // To save MQTT parameters
+//#include <EEPROM.h> //used to store current plugins states
+#include <FS.h> // To save MQTT parameters
 #include <ArduinoJson.h>
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
@@ -1311,7 +1311,6 @@ void PluginInit(void)
   Plugin_ptr[x++] = &Plugin_255;
 #endif
 
-
 // read config file to desactivated protocols
 #ifdef AUTOCONNECT_ENABLED
   Serial.println("mounting FS...");
@@ -1340,17 +1339,15 @@ void PluginInit(void)
           {
             Serial.println(F("Failed to read file, using default configuration"));
           }
-          
 
           for (x = 0; x < PLUGIN_MAX; x++)
-          {            
+          {
             if (doc[x][String(Plugin_id[x])] == 0)
             {
               Plugin_State[x] = P_Disabled;
             }
           }
           configFile.close();
-          
         }
       }
     }

@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+#include "8_OLED.h"
 
 #ifdef OLED_ENABLED
 
