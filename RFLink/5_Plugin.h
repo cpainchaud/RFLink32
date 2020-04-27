@@ -10,12 +10,16 @@
 
 #include <Arduino.h>
 
+enum PState {P_Forbidden, P_Disabled, P_Enabled, P_Mandatory}; 
+
 extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 extern byte Plugin_id[PLUGIN_MAX];
-
-enum PState {P_Forbidden, P_Disabled, P_Enabled, P_Mandatory}; 
 extern byte Plugin_State[PLUGIN_MAX];
 extern String Plugin_Description[PLUGIN_MAX];
+
+extern boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char *); // Transmit plugins
+extern byte PluginTX_id[PLUGIN_TX_MAX];
+extern byte PluginTX_State[PLUGIN_TX_MAX];
 
 extern boolean RFDebug;   // debug RF signals with plugin 001 (no decode)
 extern boolean QRFDebug;  // debug RF signals with plugin 001 but no multiplication (faster?, compact)
@@ -27,10 +31,10 @@ extern boolean QRFUDebug; // debug RF signals with plugin 254 but no multiplicat
 
 // Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
 void PluginInit(void);
-// void PluginTXInit(void);
+void PluginTXInit(void);
 byte PluginInitCall(byte Function, char *str);
-// byte PluginTXInitCall(byte Function, char *str);
+byte PluginTXInitCall(byte Function, char *str);
 byte PluginRXCall(byte Function, char *str);
-// byte PluginTXCall(byte Function, char *str);
+byte PluginTXCall(byte Function, char *str);
 
 #endif

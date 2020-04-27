@@ -93,7 +93,7 @@
 // -- Any of the following protocols can be excluded whenever not needed --
 // ------------------------------------------------------------------------
 // #define PLUGIN_TX_003           // Kaku : Klik-Aan-Klik-Uit (with code wheel) aka ARC
-// #define PLUGIN_TX_004           // NewKAKU : Klik-Aan-Klik-Uit with automatic coding aka Intertechno.
+#define PLUGIN_TX_004 // NewKAKU : Klik-Aan-Klik-Uit with automatic coding aka Intertechno.
 // #define PLUGIN_TX_005           // Eurodomest
 // #define PLUGIN_TX_006           // Blyss
 // #define PLUGIN_TX_007           // Conrad RSL2

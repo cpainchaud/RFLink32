@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "3_Serial.h"
 #include "4_Display.h"
 
 byte PKSequenceNumber = 0;       // 1 byte packet counter
@@ -335,34 +336,214 @@ void display_RGBW(unsigned int input)
   strcat(pbuffer, dbuffer);
 }
 
+// --------------------- //
+// get label shared func //
+// --------------------- //
+
+char *ptr;
+const char c_delim[2] = ";";
+char c_label[10];
+
+boolean retrieve_Init10()
+{
+  // 10
+  ptr = strtok(InputBuffer_Serial, c_delim);
+  if (ptr != NULL)
+  {
+    if (strncasecmp(ptr, "10", strlen("10")) != 0)
+      return false;
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_Name(const char *c_Name)
+{
+  // Newkaku
+  ptr = strtok(NULL, c_delim);
+  if (ptr != NULL)
+  {
+    if (strncasecmp(ptr, c_Name, strlen(c_Name)) != 0)
+      return false;
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_ID(unsigned long &ul_ID)
+{
+  // ID
+  char c_ID[10];
+
+  ptr = strtok(NULL, c_delim);
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "ID=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 8)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isxdigit(ptr[i]))
+        return false;
+
+    strcpy(c_ID, ptr);
+    c_ID[8] = 0;
+
+    ul_ID = strtoul(c_ID, NULL, HEX);
+    ul_ID &= 0x03FFFFFF;
+
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_Switch(byte &b_Switch)
+{
+  // Switch
+  char c_Switch[10];
+
+  ptr = strtok(NULL, c_delim);
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "SWITCH=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 1)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isxdigit(ptr[i]))
+        return false;
+
+    strcpy(c_Switch, ptr);
+
+    b_Switch = (byte)strtoul(c_Switch, NULL, HEX);
+    b_Switch--; // 1 to 16 -> 0 to 15 (displayed value is one more)
+    if (b_Switch > 0xF)
+      return false; // invalid address
+
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
+{
+  // Command
+  char c_Cmd[10];
+
+  ptr = strtok(NULL, c_delim);
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "SET_LEVEL=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    strcpy(c_label, "CMD=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 7)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isalnum(ptr[i]))
+        return false;
+
+    strcpy(c_Cmd, ptr);
+
+    b_Cmd2 = str2cmd(c_Cmd); // Get ON/OFF etc. command
+    if (b_Cmd2 == false)     // Not a valid command received? ON/OFF/ALLON/ALLOFF
+      b_Cmd2 = (byte)strtoul(c_Cmd, NULL, HEX);
+    // ON
+    switch (b_Cmd2)
+    {
+    case VALUE_ON:
+    case VALUE_ALLON:
+      b_Cmd |= B01;
+      break;
+    }
+    // Group
+    switch (b_Cmd2)
+    {
+    case VALUE_ALLON:
+    case VALUE_ALLOFF:
+      b_Cmd |= B10;
+      break;
+    }
+    // Dimmer
+    switch (b_Cmd2)
+    {
+    case VALUE_ON:
+    case VALUE_OFF:
+    case VALUE_ALLON:
+    case VALUE_ALLOFF:
+      b_Cmd2 = 0xFF;
+      break;
+    }
+
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_End()
+{
+  // End
+  ptr = strtok(NULL, c_delim);
+  if (ptr != NULL)
+    return false;
+  return true;
+}
+
 /*********************************************************************************************\
    Convert string to command code
-  \*********************************************************************************************/
-/*
-  int str2cmd(char *command) {
-  if (strcasecmp(command, "ON") == 0) return VALUE_ON;
-  if (strcasecmp(command, "OFF") == 0) return VALUE_OFF;
-  if (strcasecmp(command, "ALLON") == 0) return VALUE_ALLON;
-  if (strcasecmp(command, "ALLOFF") == 0) return VALUE_ALLOFF;
-  if (strcasecmp(command, "PAIR") == 0) return VALUE_PAIR;
-  if (strcasecmp(command, "DIM") == 0) return VALUE_DIM;
-  if (strcasecmp(command, "BRIGHT") == 0) return VALUE_BRIGHT;
-  if (strcasecmp(command, "UP") == 0) return VALUE_UP;
-  if (strcasecmp(command, "DOWN") == 0) return VALUE_DOWN;
-  if (strcasecmp(command, "STOP") == 0) return VALUE_STOP;
-  if (strcasecmp(command, "CONFIRM") == 0) return VALUE_CONFIRM;
-  if (strcasecmp(command, "LIMIT") == 0) return VALUE_LIMIT;
-  return false;
-  }
-*/
-
-void replacechar(char *str, char orig, char rep)
+\*********************************************************************************************/
+int str2cmd(char *command)
 {
-    char *ix = str;
-    int n = 0;
-    while ((ix = strchr(ix, orig)) != NULL)
-    {
-        *ix++ = rep;
-        n++;
-    }
+  if (strcasecmp(command, "ON") == 0)
+    return VALUE_ON;
+  if (strcasecmp(command, "OFF") == 0)
+    return VALUE_OFF;
+  if (strcasecmp(command, "ALLON") == 0)
+    return VALUE_ALLON;
+  if (strcasecmp(command, "ALLOFF") == 0)
+    return VALUE_ALLOFF;
+  if (strcasecmp(command, "PAIR") == 0)
+    return VALUE_PAIR;
+  if (strcasecmp(command, "DIM") == 0)
+    return VALUE_DIM;
+  if (strcasecmp(command, "BRIGHT") == 0)
+    return VALUE_BRIGHT;
+  if (strcasecmp(command, "UP") == 0)
+    return VALUE_UP;
+  if (strcasecmp(command, "DOWN") == 0)
+    return VALUE_DOWN;
+  if (strcasecmp(command, "STOP") == 0)
+    return VALUE_STOP;
+  if (strcasecmp(command, "CONFIRM") == 0)
+    return VALUE_CONFIRM;
+  if (strcasecmp(command, "LIMIT") == 0)
+    return VALUE_LIMIT;
+  return false;
 }
+
+// void replacechar(char *str, char orig, char rep)
+// {
+//   char *ix = str;
+//   int n = 0;
+//   while ((ix = strchr(ix, orig)) != NULL)
+//   {
+//     *ix++ = rep;
+//     n++;
+//   }
+// }

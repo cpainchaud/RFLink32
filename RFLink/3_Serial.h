@@ -11,7 +11,9 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
-//extern char InputBuffer_Serial[INPUT_COMMAND_SIZE];   // Buffer for Seriel data
-// boolean CheckSerial();
+extern char InputBuffer_Serial[INPUT_COMMAND_SIZE];
+
+boolean CheckSerial();
+boolean CheckMQTT(byte *);
 
 #endif

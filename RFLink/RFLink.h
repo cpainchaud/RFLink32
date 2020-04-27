@@ -24,57 +24,68 @@
 #define SCAN_HIGH_TIME_MS 50            // 50         // time interval in ms. fast processing for background tasks
 #define FOCUS_TIME_MS 50                // 50         // Duration in mSec. that, after receiving serial data from USB only the serial port is checked.
 #define PLUGIN_MAX 55                   // 55         // Maximum number of Receive plugins
-#define PLUGIN_TX_MAX 0                 // 26         // Maximum number of Transmit plugins
+#define PLUGIN_TX_MAX 5                 // 26         // Maximum number of Transmit plugins
 #define INPUT_COMMAND_SIZE 60           // 60         // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
-/*
-#define VALUE_PAIR                     44
-#define VALUE_ALLOFF                   55
-#define VALUE_OFF                      74
-#define VALUE_ON                       75
-#define VALUE_DIM                      76
-#define VALUE_BRIGHT                   77
-#define VALUE_UP                       78
-#define VALUE_DOWN                     79
-#define VALUE_STOP                     80
-#define VALUE_CONFIRM                  81
-#define VALUE_LIMIT                    82
-#define VALUE_ALLON                   141
-*/
-
 // PIN Definition
-#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
-#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
-
+//
+// #define PULLUP_RF_TX_DATA
 #ifdef ESP8266
 // ESP8266 D1 Mini
-#define PIN_RF_RX_VCC D5  // Power to the receiver on this pin
-#define PIN_RF_RX_NA D6   // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA D7 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND D8  // Ground to the receiver on this pin
+#define PIN_RF_RX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_RX_NMOS D5        // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA D3        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_TX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_TX_NMOS D6        // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA D4        // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef ESP32
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_RX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA NOT_A_PIN // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_TX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_TX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef __AVR_ATmega328P__
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 2        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_RX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 2         // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_TX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_TX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef __AVR_ATmega2560__
-#define PIN_RF_RX_VCC NOT_A_PIN // Power to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN  // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA 19       // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_RX_GND NOT_A_PIN // Ground to the receiver on this pin
+#define PIN_RF_RX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_RX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_RX_VCC 16         // Power to the receiver on this pin
+#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
+#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA 19        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_TX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#define PIN_RF_TX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_TX_VCC 15         // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_DATA 14        // Data to the 433Mhz transmitter on this pin
 #endif
 
 // OLED display, 0.91" SSD1306 I2C
@@ -95,9 +106,9 @@
 // MQTT messages
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 #if (defined(ESP32) || defined(ESP8266))
-#define MQTT_ENABLED          // Send RFLink messages over MQTT
-#define MQTT_LOOP_MS 7500     // MQTTClient.loop(); call period (in mSec)
-#define MQTT_RETAINED_0 false // Retained option
+#define MQTT_ENABLED        // Send RFLink messages over MQTT
+#define MQTT_LOOP_MS 1000   // MQTTClient.loop(); call period (in mSec)
+#define MQTT_RETAINED false // Retained option
 #endif
 
 // Debug default
@@ -106,4 +117,10 @@
 #define RFUDebug_0 false  // debug RF signals with plugin 254 (decode 1st)
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
-#endif // RFLink_h
+void CallReboot(void);
+void enableRX();
+void disableRX();
+void enableTX();
+void disableTX();
+
+#endif

@@ -34,4 +34,6 @@ boolean ScanEvent(void);
 // void RFLinkHW(void);
 // void RawSendRF(void);
 
+void AC_Send(unsigned long data, byte cmd);
+
 #endif

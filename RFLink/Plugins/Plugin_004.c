@@ -141,7 +141,7 @@ boolean Plugin_004(byte function, char *string)
    if (i > 140 && dimbitpresent == 1)
       display_SET_LEVEL(dim); // Command and Dim part
    else
-      display_CMD((CMD_Group)((bitstream >> 5) & B01),(CMD_OnOff)((bitstream >> 4) & B01));// #ALL , #ON
+      display_CMD((CMD_Group)((bitstream >> 5) & B01), (CMD_OnOff)((bitstream >> 4) & B01)); // #ALL , #ON
    display_Footer();
    // ----------------------------------
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
@@ -151,12 +151,13 @@ boolean Plugin_004(byte function, char *string)
 #endif // Plugin_004
 
 #ifdef PLUGIN_TX_004
-void AC_Send(unsigned long data, byte cmd);
+#include "3_Serial.h"
+#include "4_Display.h"
 
 boolean PluginTX_004(byte function, char *string)
 {
-   boolean success = false;
-   //10;NewKaku;123456;3;ON;                   // ON, OFF, ALLON, ALLOFF, ALL 99, 99
+   // ON, OFF, ALLON, ALLOFF, ALL 99, 99
+   //10;NewKaku;123456;3;ON;
    //10;NewKaku;0cac142;2;ON;
    //10;NewKaku;050515;f;OFF;
    //10;NewKaku;2100fed;1;ON;
@@ -164,214 +165,46 @@ boolean PluginTX_004(byte function, char *string)
    //10;NewKaku;306070b;f;ON;
    //10;NewKaku;306070b;10;ON;
    //01234567890123456789012
-   if (strncasecmp(InputBuffer_Serial + 3, "NEWKAKU;", 8) == 0)
-   {
-      byte x = 18; // pointer to the switch number
-      if (InputBuffer_Serial[17] != ';')
-      {
-         if (InputBuffer_Serial[18] != ';')
-         {
-            return false;
-         }
-         else
-         {
-            x = 19;
-         }
-      }
 
-      unsigned long bitstream = 0L;
-      unsigned long tempaddress = 0L;
-      byte cmd = 0;
-      //byte c=0; // MRI commented
-      byte Address = 0; // Address 1..16
+   unsigned long bitstream = 0L;    // 32 bits complete packet
+   unsigned long ID_bitstream = 0L; // 26 bits Address
+   byte Switch_bitstream = 0;       // 4 bits Unit
+   byte Cmd_bitstream = 0;          // 2 bits Command
+   byte Cmd_dimmer = 0;             // 4 bits Alt Command
 
-      // -----
-      InputBuffer_Serial[9] = 0x30; // Get NEWKAKU/AC main address part from hexadecimal value
-      InputBuffer_Serial[10] = 0x78;
-      InputBuffer_Serial[x - 1] = 0x00;
-      tempaddress = str2int(InputBuffer_Serial + 9);
-      // -----
-      //while((c=InputBuffer_Serial[x++])!=';'){ // Address: 1 to 16
-      //   if(c>='0' && c<='9'){Address=Address*10;Address=Address+c-'0';}
-      //}
-      InputBuffer_Serial[x - 2] = 0x30; // Get unit number from hexadecimal value
-      InputBuffer_Serial[x - 1] = 0x78; // x points to the first character of the unit number
-      if (InputBuffer_Serial[x + 1] == ';')
-      {
-         InputBuffer_Serial[x + 1] = 0x00;
-         cmd = 2;
-      }
-      else
-      {
-         if (InputBuffer_Serial[x + 2] == ';')
-         {
-            InputBuffer_Serial[x + 2] = 0x00;
-            cmd = 3;
-         }
-         else
-         {
-            return false;
-         }
-      }
-      Address = str2int(InputBuffer_Serial + (x - 2)); // NewKAKU unit number
-      if (Address > 16)
-         return false; // invalid address
-      Address--;       // 1 to 16 -> 0 to 15 (transmitted value is 1 less than shown values)
-      x = x + cmd;     // point to on/off/dim command part
-      // -----
-      tempaddress = (tempaddress << 6) + Address; // Complete transmitted address
-      // -----
-      cmd = str2cmd(InputBuffer_Serial + x); // Get ON/OFF etc. command
-      if (cmd == false)
-      {                                         // Not a valid command received? ON/OFF/ALLON/ALLOFF
-         cmd = str2int(InputBuffer_Serial + x); // get DIM value
-      }
-      // --------------- Prepare bitstream ------------
-      bitstream = tempaddress & 0xFFFFFFCF; // adres geheel over nemen behalve de twee bits 5 en 6 die het schakel commando bevatten.
+   if (!retrieve_Init10())
+      return false;
+   if (!retrieve_Name("Newkaku"))
+      return false;
+   if (!retrieve_ID(ID_bitstream))
+      return false;
+   if (!retrieve_Switch(Switch_bitstream))
+      return false;
+   if (!retrieve_Command(Cmd_bitstream, Cmd_dimmer))
+      return false;
+   if (!retrieve_End())
+      return false;
 
-      // Dimming of groups is also possible but not supported yet!
-      // when level=0 is it better to transmit just the off command ?
+   // --------------- Prepare bitstream ------------
+   // Dimming of groups is also possible but not supported yet!
+   // when level=0 is it better to transmit just the off command ?
+   // Serial.print("*** Creating bitstream ***\n");
 
-      if (cmd == VALUE_ON || cmd == VALUE_OFF)
-      {
-         bitstream |= (cmd == VALUE_ON) << 4; // bit-5 is the on/off command in the KAKU signal
-         cmd = 0xff;
-      }
-      else if (cmd == VALUE_ALLON || cmd == VALUE_ALLOFF)
-      {
-         bitstream |= B1 << 5;                   // bit 5 is the group indicator
-         bitstream |= (cmd == VALUE_ALLON) << 4; // bit-4 is the on/off indicator
-         cmd = 0xff;
-      }
-      // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
-      // --------------- NEWKAKU SEND ------------
-      AC_Send(bitstream, cmd);
-      success = true;
-   }
+
+   bitstream = (ID_bitstream << 6); // 26 bits on top
+   bitstream |= Switch_bitstream; // Complete transmitted address
+   // bitstream &= 0xFFFFFFCF;    // Bit 4 and 5 are left for cmd
+   bitstream |= (Cmd_bitstream << 4);
+
+
+
+   // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
+   // --------------- NEWKAKU SEND ------------
+
+   AC_Send(bitstream, Cmd_dimmer);
+
    // --------------------------------------
-   return success;
+   return true;
 }
 
-void AC_Send(unsigned long data, byte cmd)
-{
-   int fpulse = 260;  // Pulse width in microseconds
-   int fretrans = 10; // Number of code retransmissions
-
-   unsigned long bitstream = 0L;
-   byte command;
-   // prepare data to send
-   for (unsigned short i = 0; i < 32; i++)
-   { // reverse data bits
-      bitstream <<= 1;
-      bitstream |= (data & B1);
-      data >>= 1;
-   }
-   if (cmd != 0xff)
-   { // reverse dim bits
-      for (unsigned short i = 0; i < 4; i++)
-      {
-         command <<= 1;
-         command |= (cmd & B1);
-         cmd >>= 1;
-      }
-   }
-   // Prepare transmit
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   // send bits
-   for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
-   {
-      data = bitstream;
-      if (cmd != 0xff)
-         cmd = command;
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
-      //delayMicroseconds(fpulse);  //335
-      delayMicroseconds(335);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
-      delayMicroseconds(fpulse * 10 + (fpulse >> 1)); //335*9=3015 //260*10=2600
-      for (unsigned short i = 0; i < 32; i++)
-      {
-         if (i == 27 && cmd != 0xff)
-         { // DIM command, send special DIM sequence TTTT replacing on/off bit
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
-            delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
-            delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
-            delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
-            delayMicroseconds(fpulse);
-         }
-         else
-            switch (data & B1)
-            {
-            case 0:
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse * 5); // 335*3=1005 260*5=1300  260*4=1040
-               break;
-            case 1:
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse * 5);
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse);
-               break;
-            }
-         //Next bit
-         data >>= 1;
-      }
-      // send dim bits when needed
-      if (cmd != 0xff)
-      { // need to send DIM command bits
-         for (unsigned short i = 0; i < 4; i++)
-         { // 4 bits
-            switch (cmd & B1)
-            {
-            case 0:
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse * 5); // 335*3=1005 260*5=1300
-               break;
-            case 1:
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse * 5);
-               digitalWrite(PIN_RF_TX_DATA, HIGH);
-               delayMicroseconds(fpulse);
-               digitalWrite(PIN_RF_TX_DATA, LOW);
-               delayMicroseconds(fpulse);
-               break;
-            }
-            //Next bit
-            cmd >>= 1;
-         }
-      }
-      //Send termination/synchronisation-signal. Total length: 32 periods
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
-      delayMicroseconds(fpulse);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
-      delayMicroseconds(fpulse * 40); //31*335=10385 40*260=10400
-   }
-   // End transmit
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
-   RFLinkHW();
-}
 #endif // Plugin_TX_004
