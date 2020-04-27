@@ -39,11 +39,10 @@
 WiFiClient WIFIClient;
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
+void callback(char *, byte *, unsigned int);
+
 #ifndef AUTOCONNECT_ENABLED
 static String WIFI_PWR = String(WIFI_PWR_0);
-#endif
-
-void callback(char *, byte *, unsigned int);
 
 void setup_WIFI()
 {
@@ -109,18 +108,18 @@ void reconnect()
       // Once connected, resubscribe
       MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
       Serial.print(F("MQTT connection Established : "));
-      Serial.println(clientId.c_str());
+      Serial.println(MQTT_ID.c_str());
       MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
     }
     else
     {
-      Serial.print(F("Connection mqttserver : "));
+      Serial.print(F("Connection MQTT_Server : "));
       Serial.println(MQTT_SERVER.c_str());
-      Serial.print(F("Connection Mqtt_ID : "));
+      Serial.print(F("Connection MQTT_ID : "));
       Serial.println(MQTT_ID.c_str());
-      Serial.print(F("Connection Mqtt_Username : "));
+      Serial.print(F("Connection MQTT_Username : "));
       Serial.println(MQTT_USER.c_str());
-      Serial.print(F("Connection Mqtt_Password : ********"));
+      Serial.print(F("Connection MQTT_Password : ********"));
       Serial.print(F("Connection failed : "));
       Serial.println(MQTTClient.state());
       if (!--retry)
@@ -135,18 +134,15 @@ void reconnect()
 {
   // Loop until we're reconnected
   // delay(1);
-  uint8_t retry = 3;
-
-  Serial.print(F("test"));
   while (!MQTTClient.connected())
   {
     Serial.print(F("Attempting MQTT connection..."));
     // Attempt to connect
-    if (MQTTClient.connect(ac_MQTT_ID.c_str(), ac_MQTT_USER.c_str(), ac_MQTT_PSWD.c_str()))
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
     {
       Serial.println(F("Connected"));
       // Once connected, resubscribe
-      // MQTTClient.subscribe(ac_MQTT_TOPIC_IN.c_str());
+      MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
     }
     else
     {
@@ -156,9 +152,6 @@ void reconnect()
       // Wait 5 seconds before retrying
       for (byte i = 0; i < 10; i++)
         delay(500); // delay(5000) may cause hang
-      if (!--retry)
-        break;
-      delay(500);
     }
   }
 }

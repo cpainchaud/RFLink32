@@ -451,7 +451,9 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value += Adv_Power;
     echo.value += F("<br>");
 
+#ifdef MQTT_ENABLED
     setup_MQTT(); // Reload settings
+#endif
 
     return String("");
 }
