@@ -34,13 +34,13 @@
 #ifdef ESP8266
 // ESP8266 D1 Mini
 #define PIN_RF_RX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_RX_NMOS D5        // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_RX_VCC NOT_A_PIN  // Power to the receiver on this pin
-#define PIN_RF_RX_GND NOT_A_PIN  // Ground to the receiver on this pin
-#define PIN_RF_RX_NA NOT_A_PIN   // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA D3        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_NMOS NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_RX_VCC D5         // Power to the receiver on this pin
+#define PIN_RF_RX_GND D8         // Ground to the receiver on this pin
+#define PIN_RF_RX_NA D6          // Alt. RX_DATA. Forced as input
+#define PIN_RF_RX_DATA D7        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_TX_PMOS NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_TX_NMOS D6        // Low Side N-MOSFET, active on HIGH level
+#define PIN_RF_TX_NMOS D0        // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND NOT_A_PIN  // Ground power to the transmitter on this pin
 #define PIN_RF_TX_DATA D4        // Data to the 433Mhz transmitter on this pin
