@@ -13,6 +13,11 @@
 
 #ifdef OLED_ENABLED
 
+#define PIN_OLED_GND NOT_A_PIN // Ground power on this pin
+#define PIN_OLED_VCC NOT_A_PIN // +3 volt / Vcc power on this pin#
+#define PIN_OLED_SCL D1        // I2C SCL
+#define PIN_OLED_SDA D2        // I2C SDA
+
 void setup_OLED();
 void splash_OLED();
 void print_OLED();
