@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+#include "1_Radio.h"
 #include "3_Serial.h"
 #include "4_Display.h"
 #include "5_Plugin.h"

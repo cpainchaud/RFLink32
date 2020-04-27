@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "1_Radio.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
