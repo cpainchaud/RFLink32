@@ -11,9 +11,6 @@
 //
 #define BUILDNR 0x04                    // 0x07       // shown in version
 #define REVNR 0x00                      // 0X42       // shown in version and startup string
-#define BAUD 57600                      // 57600      // Baudrate for serial communication.
-#define FOCUS_TIME_MS 50                // 50         // Duration in mSec. that, after receiving serial data from USB only the serial port is checked.
-#define INPUT_COMMAND_SIZE 60           // 60         // Maximum number of characters that a command via serial can be.
 #define PRINT_BUFFER_SIZE 90            // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
 #define BUILDNR 0x04 // 0x07       // shown in version
