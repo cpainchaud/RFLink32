@@ -10,9 +10,7 @@
 #include "3_Serial.h"
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
-#ifndef AUTOCONNECT_ENABLED
-#include "6_Credentials.h"
-#else
+#ifdef AUTOCONNECT_ENABLED
 #include "9_AutoConnect.h"
 #endif
 

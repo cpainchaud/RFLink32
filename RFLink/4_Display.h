@@ -105,4 +105,7 @@ boolean retrieve_End();
 int str2cmd(char *);
 // void replacechar(char *, char, char);
 
+uint8_t String2GPIO(String);
+String GPIO2String(uint8_t uGPIO);
+
 #endif

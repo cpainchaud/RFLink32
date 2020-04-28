@@ -55,18 +55,6 @@
 #define AUX_SAVE_URI "/settings_save"
 //#define AUX_CLEAR_URI "/settings_clear"
 
-extern String MQTT_SERVER;
-extern String MQTT_PORT;
-extern String MQTT_ID;
-extern String MQTT_USER;
-extern String MQTT_PSWD;
-extern String MQTT_TOPIC_OUT;
-extern String MQTT_TOPIC_IN;
-extern boolean MQTT_RETAINED;
-extern String Adv_HostName;
-extern String Adv_Power;
-extern String LastMsg;
-
 void setup_AutoConnect();
 void loop_AutoConnect();
 
@@ -81,7 +69,7 @@ void HandleLastMsg();
 static const char AUX_settings[] PROGMEM = R"raw(
   [
     {
-      "title": "MQTT settings",
+      "title": "RFLink settings",
       "uri": "/settings",
       "menu": true,
       "element": [
@@ -126,14 +114,12 @@ static const char AUX_settings[] PROGMEM = R"raw(
           "name": "MQTT_ID",
           "type": "ACInput",
           "label": "ID",
-          "pattern": "^[0-9]{6}$",
           "placeholder": "example : RFLink-ESP-xx"
         },
         {
           "name": "MQTT_USER",
           "type": "ACInput",
-          "label": "User",
-          "pattern": "^[0-9]{6}$"
+          "label": "User"
         },
         {
           "name": "MQTT_PSWD",
@@ -217,6 +203,124 @@ static const char AUX_settings[] PROGMEM = R"raw(
         },
         {
           "name": "newline6",
+          "type": "ACElement",
+          "value": "<hr>"
+        },
+        {
+          "name": "style5",
+          "type": "ACStyle",
+          "value": "label+input,label+select{position:sticky;left:180px;width:210px!important;box-sizing:border-box;}"
+        },
+        {
+          "name": "header5",
+          "type": "ACText",
+          "value": "<h2>GPIO settings</h2>",
+          "style": "text-align:center;color:#2f4f4f;padding:10px;"
+        },
+        {
+          "name": "caption6",
+          "type": "ACText",
+          "value": "Radio Receiver",
+          "style": "font-family:serif;color:#4682b4;"
+        },
+        {
+          "name": "newline7",
+          "type": "ACElement",
+          "value": "<hr>"
+        },
+        {
+          "name": "PIN_RF_RX_PMOS",
+          "type": "ACInput",
+          "label": "RX_PMOS",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_RX_NMOS",
+          "type": "ACInput",
+          "label": "RX_NMOS",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_RX_VCC",
+          "type": "ACInput",
+          "label": "RX_VCC",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_RX_GND",
+          "type": "ACInput",
+          "label": "RX_GND",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_RX_NA",
+          "type": "ACInput",
+          "label": "RX_NA",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_RX_DATA",
+          "type": "ACInput",
+          "label": "RX_DATA",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PULLUP_RF_RX_DATA",
+          "type": "ACCheckbox",
+          "value": "unique",
+          "labelPosition" : "AC_Infront",
+          "post" : "AC_Tag_BR",
+          "label": "Pullup on RX_DATA",
+          "checked": false
+        },
+        {
+          "name": "newlineX",
+          "type": "ACElement",
+          "value": "</br>"
+        },
+        {
+          "name": "caption7",
+          "type": "ACText",
+          "value": "Radio Emitter",
+          "style": "font-family:serif;color:#4682b4;"
+        },
+        {
+          "name": "newline8",
+          "type": "ACElement",
+          "value": "<hr>"
+        },
+        {
+          "name": "PIN_RF_TX_PMOS",
+          "type": "ACInput",
+          "label": "TX_PMOS",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_TX_NMOS",
+          "type": "ACInput",
+          "label": "TX_NMOS",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_TX_VCC",
+          "type": "ACInput",
+          "label": "TX_VCC",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_TX_GND",
+          "type": "ACInput",
+          "label": "TX_GND",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "PIN_RF_TX_DATA",
+          "type": "ACInput",
+          "label": "TX_DATA",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
+          "name": "newline9",
           "type": "ACElement",
           "value": "<hr>"
         },

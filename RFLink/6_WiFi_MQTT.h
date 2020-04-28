@@ -11,7 +11,20 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
-#ifndef AUTOCONNECT_ENABLED
+#ifdef AUTOCONNECT_ENABLED
+extern String MQTT_SERVER;
+extern String MQTT_PORT;
+extern String MQTT_ID;
+extern String MQTT_USER;
+extern String MQTT_PSWD;
+extern String MQTT_TOPIC_OUT;
+extern String MQTT_TOPIC_IN;
+extern boolean MQTT_RETAINED;
+extern String Adv_HostName;
+extern String Adv_Power;
+extern String LastMsg;
+#else
+#include "6_Credentials.h"
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
