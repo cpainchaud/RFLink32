@@ -203,12 +203,14 @@ boolean CheckCmd()
         // -------------------------------------------------------
         // Handle Generic Commands / Translate protocol data into Nodo text commands
         // -------------------------------------------------------
-        setmode_TX();
+        set_Radio_mode(Radio_TX);
+
         if (PluginTXCall(0, InputBuffer_Serial))
           ValidCommand = 1;
         else // Answer that an invalid command was received?
           ValidCommand = 2;
-        setmode_RX();
+
+        set_Radio_mode(Radio_RX);
       }
     }
   } // if > 7

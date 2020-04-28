@@ -8,12 +8,6 @@
 #include <Arduino.h>
 #include "1_Radio.h"
 
-// Prototype
-void enableRX();
-void disableRX();
-void enableTX();
-void disableTX();
-
 uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
 uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
 uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
@@ -27,16 +21,40 @@ uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
 uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
 boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
 
-void setmode_RX()
-{
-  disableTX();
-  enableRX();
-}
+// Prototype
+void enableRX();
+void disableRX();
+void enableTX();
+void disableTX();
 
-void setmode_TX()
+Radio_State current_State = Radio_NA;
+
+void set_Radio_mode(Radio_State new_State)
 {
-  disableRX();
-  enableTX();
+  if (current_State != new_State)
+  {
+    switch (new_State)
+    {
+    case Radio_OFF:
+      disableTX();
+      disableRX();
+      break;
+
+    case Radio_RX:
+      disableTX();
+      enableRX();
+      break;
+
+    case Radio_TX:
+      disableRX();
+      enableTX();
+      break;
+
+    case Radio_NA:
+      break;
+    }
+    current_State = new_State;
+  }
 }
 
 void enableRX()

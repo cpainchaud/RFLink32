@@ -60,7 +60,7 @@ void setup()
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
-  setmode_RX();
+  set_Radio_mode(Radio_OFF);
 
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
@@ -102,7 +102,8 @@ void setup()
 
   PluginInit();
   PluginTXInit();
-  delay(100);
+ 
+  set_Radio_mode(Radio_RX);
 }
 
 void loop()

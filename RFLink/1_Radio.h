@@ -85,7 +85,14 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_DATA_0 14        // Data to the 433Mhz transmitter on this pin
 #endif
 
-void setmode_RX();
-void setmode_TX();
+enum Radio_State
+{
+    Radio_OFF,
+    Radio_RX,
+    Radio_TX,
+    Radio_NA
+};
+
+void set_Radio_mode(Radio_State new_state);
 
 #endif // Radio_h
