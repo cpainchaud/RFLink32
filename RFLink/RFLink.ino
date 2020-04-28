@@ -102,7 +102,7 @@ void setup()
 
   PluginInit();
   PluginTXInit();
- 
+
   set_Radio_mode(Radio_RX);
 }
 
@@ -118,8 +118,10 @@ void loop()
     sendMsg();
 #endif
 
+#ifdef SERIAL_ENABLED
     if (CheckSerial())
       sendMsg();
+#endif
 
     if (ScanEvent())
       sendMsg();

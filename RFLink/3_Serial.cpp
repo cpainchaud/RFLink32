@@ -23,9 +23,11 @@ boolean CheckSerial()
 {
   if (ReadSerial())
   {
+#ifdef SERIAL_ENABLED
     Serial.flush();
     Serial.print(F("Message arrived [Serial] "));
     Serial.println(InputBuffer_Serial);
+#endif
     if (CheckCmd())
       return true;
   }
@@ -36,9 +38,11 @@ boolean CheckMQTT(byte *mqtt_in)
 {
   if (CopySerial((char *)mqtt_in))
   {
+#ifdef SERIAL_ENABLED
     Serial.flush();
     Serial.print(F("Message arrived [MQTT] "));
     Serial.println(InputBuffer_Serial);
+#endif
     if (CheckCmd())
       return true;
   }
