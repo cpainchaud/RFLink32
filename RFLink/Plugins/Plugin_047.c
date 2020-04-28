@@ -98,7 +98,7 @@ boolean Plugin_047(byte function, char *string)
          if (RawSignal.Pulses[x] < AURIOLV4_PULSEMIN)
             return false;
 
-         if (RawSignal.Pulses[x] > LACROSSE43_PULSEMINMAX)
+         if (RawSignal.Pulses[x] > AURIOLV4_PULSEMINMAX)
             return false;
 
          if (bitcounter < 32)
