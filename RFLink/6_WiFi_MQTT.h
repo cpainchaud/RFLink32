@@ -24,13 +24,12 @@ extern String Adv_HostName;
 extern String Adv_Power;
 extern String LastMsg;
 #else
-#include "6_Credentials.h"
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
 #include <ESP8266WiFi.h>
 #endif
-#endif // !AUTOCONNECT_ENABLED
+#endif // AUTOCONNECT_ENABLED
 
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message

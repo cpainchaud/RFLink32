@@ -8,13 +8,13 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "RFLink.h"
+#ifdef AUTOCONNECT_ENABLED
+
 #include "1_Radio.h"
 #include "4_Display.h" // To allow displaying the last message
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 #include "9_AutoConnect.h"
-#ifdef AUTOCONNECT_ENABLED
-
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>

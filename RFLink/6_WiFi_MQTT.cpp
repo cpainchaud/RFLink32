@@ -12,6 +12,8 @@
 #include "6_WiFi_MQTT.h"
 #ifdef AUTOCONNECT_ENABLED
 #include "9_AutoConnect.h"
+#else
+#include "6_Credentials.h"
 #endif
 
 #ifndef AUTOCONNECT_ENABLED
