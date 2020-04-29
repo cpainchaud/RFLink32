@@ -67,7 +67,7 @@ void setup()
   // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
   //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 
-  delay(100);
+  PluginInit();
 
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
@@ -107,7 +107,6 @@ void setup()
 #endif
   pbuffer[0] = 0;
 
-  PluginInit();
   delay(100);
 }
 
