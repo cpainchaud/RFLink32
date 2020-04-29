@@ -343,7 +343,7 @@ void display_RGBW(unsigned int input)
 
 char *ptr;
 const char c_delim[2] = ";";
-char c_label[10];
+char c_label[12];
 
 boolean retrieve_Init10()
 {
@@ -361,7 +361,7 @@ boolean retrieve_Init10()
 
 boolean retrieve_Name(const char *c_Name)
 {
-  // Newkaku
+  // Newkaku ... or else!
   ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
   {
@@ -549,6 +549,7 @@ int str2cmd(char *command)
 //   }
 // }
 
+#ifdef AUTOCONNECT_ENABLED
 uint8_t String2GPIO(String sGPIO)
 {
   byte num_part;
@@ -634,3 +635,4 @@ String GPIO2String(uint8_t uGPIO)
       return "NOT_A_PIN";
   }
 }
+#endif //AUTOCONNECT_ENABLED
