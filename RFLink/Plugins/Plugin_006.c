@@ -138,7 +138,7 @@ boolean Plugin_006(byte function, char *string)
 
    display_IDn(address, 4); //"%04x"
 
-   char c_SWITCH[4];
+   char c_SWITCH[5];
    sprintf(c_SWITCH, "%c%d", channel, subchan);
    display_SWITCHc(c_SWITCH);
    display_CMD((status >> 1) & B01, !(status & B01)); // #ALL #ON

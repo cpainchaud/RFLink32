@@ -138,7 +138,7 @@ boolean Plugin_008(byte function, char *string)
     display_Name(PSTR("Kambrook"));
     display_IDn((address & 0xFFFFFF), 6); //"%S%06lx"
 
-    char c_SWITCH[4];
+    char c_SWITCH[5];
     sprintf(c_SWITCH, "%c%d", channel, subchan);
     display_SWITCHc(c_SWITCH);
 

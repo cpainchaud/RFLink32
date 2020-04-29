@@ -171,7 +171,7 @@ boolean Plugin_002(byte function, char *string)
    // Output
    // ----------------------------------
    data[2] = (data[2] & B1011); // get sensor type from bitstream
-   char c_ID[4];
+   char c_ID[5];
    sprintf(c_ID, "%02X%02X", data[3], data[4]);
 
    if (data[2] == B0000) // Temperature

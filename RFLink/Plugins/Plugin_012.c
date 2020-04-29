@@ -210,7 +210,7 @@ boolean Plugin_012(byte function, char *string)
    {
       display_IDn(((unitcode << 8) | housecode), 8); // "%02x%02x"
 
-      char c_SWITCH[4];
+      char c_SWITCH[5];
       sprintf(c_SWITCH, "%02x%02x", unitcode, housecode);
       display_SWITCHc(c_SWITCH); // "%02x%02x"
    }

@@ -124,7 +124,7 @@ boolean Plugin_045(byte function, char *string)
    //==================================================================================
    display_Header();
    display_Name(PSTR("Auriol"));
-   char c_ID[2];
+   char c_ID[5];
    sprintf(c_ID, "%02X", rc);
    display_IDc(c_ID);
    display_TEMP(temperature);
