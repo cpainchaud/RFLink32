@@ -184,7 +184,7 @@ boolean Plugin_030(byte function, char *string)
    data[3] = (data[3]) & B0111;    // prepare nibble to contain only the needed bits
    //==================================================================================
    rc = (data[1] << 4) | data[0];
-   char c_ID[4];
+   char c_ID[5];
    sprintf(c_ID, "%04X", (rc & 0x03) << 2 | (rc & 0xFC));
 
    if ((data[2]) != B0110)

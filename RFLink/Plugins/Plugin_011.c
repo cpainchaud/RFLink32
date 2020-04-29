@@ -163,7 +163,7 @@ boolean Plugin_011(byte function, char *string)
    display_Header();
    display_Name(PSTR("HomeConfort"));
    display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
-   char c_SWITCH[4];
+   char c_SWITCH[5];
    sprintf(c_SWITCH, "%c%d", channel, subchan);
    display_SWITCHc(c_SWITCH);
    display_CMD((group & B01), (command & B01)); // #ALL , #ON

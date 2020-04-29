@@ -134,7 +134,7 @@ boolean Plugin_004(byte function, char *string)
    display_Header();
    display_Name(PSTR("NewKaku"));
    display_IDn(((bitstream >> 6) & 0xFFFFFFFF), 8); //"%S%08lx"
-   char c_SWITCH[4];
+   char c_SWITCH[5];
    sprintf(c_SWITCH, "%1x", ((byte)(bitstream & 0x0f) + 1)); // No leading 0
    display_SWITCHc(c_SWITCH);
 

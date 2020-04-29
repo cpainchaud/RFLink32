@@ -183,7 +183,7 @@ boolean Plugin_046(byte function, char *string)
       display_Name(PSTR("Auriol V2"));
    else
       display_Name(PSTR("Xiron"));
-   char c_ID[4];
+   char c_ID[5];
    sprintf(c_ID, "%02X%02X", rc, channel);
    display_IDc(c_ID);
    display_TEMP(temperature);

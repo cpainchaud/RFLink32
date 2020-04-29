@@ -138,7 +138,7 @@ boolean Plugin_040(byte function, char *string)
    //==================================================================================
    display_Header();
    display_Name(PSTR("Mebus"));
-   char c_ID[4];
+   char c_ID[5];
    sprintf(c_ID, "%02x%02x", rc, channel);
    display_IDc(c_ID);
    display_TEMP(temperature);

@@ -175,7 +175,7 @@ boolean Plugin_041(byte function, char *string)
    //==================================================================================
    display_Header();
    display_Name(PSTR("LaCrosseV3"));
-   char c_ID[4];
+   char c_ID[5];
    sprintf(c_ID, "%02X%02X", data[0], data[1]);
    display_IDc(c_ID);
 
