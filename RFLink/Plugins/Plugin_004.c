@@ -151,8 +151,8 @@ boolean Plugin_004(byte function, char *string)
 #endif // Plugin_004
 
 #ifdef PLUGIN_TX_004
-#include "3_Serial.h"
-#include "4_Display.h"
+#include "../3_Serial.h"
+#include "../4_Display.h"
 
 boolean PluginTX_004(byte function, char *string)
 {
