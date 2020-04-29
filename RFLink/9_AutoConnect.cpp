@@ -6,30 +6,25 @@
 // ************************************* //
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include "RFLink.h"
+#ifdef AUTOCONNECT_ENABLED
+
 #include "4_Display.h" // To allow displaying the last message
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 #include "9_AutoConnect.h"
-#ifdef AUTOCONNECT_ENABLED
-
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-//#include <ESP8266WebServer.h> // Replace with WebServer.h for ESP32
-// #include <ESP8266HTTPClient.h>
 typedef ESP8266WebServer WebServer;
+#include <FS.h> // To save plugins parameters
+#include <ArduinoJson.h>
 #elif ESP32
 #include <WiFi.h>
-//#include <WebServer.h>
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
 typedef WebServer WebServer;
 #endif
-
-//#include <SPI.h>              // To acces Flash Memory
-#include <FS.h> // To save MQTT parameters
 #include <AutoConnect.h>
 
 AutoConnect portal;
@@ -54,22 +49,21 @@ String saveParams(AutoConnectAux &aux, PageArgument &args);
 
 void rootPage()
 {
-
     WebServer &webServer = portal.host();
     if (webServer.hasArg("BtnSave"))
     { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
 
         // === Debug Part ===
-        String message = "Number of args received: ";
-        message += webServer.args(); //Get number of parameters
-        message += "\n";             //Add a new line
-        for (int i = 0; i < webServer.args(); i++)
-        {
-            message += "Arg nº" + (String)i + " – > "; //Include the current iteration value
-            message += webServer.argName(i) + ": ";    //Get the name of the parameter
-            message += webServer.arg(i) + "\n";        //Get the value of the parameter
-        }
-        Serial.println(message);
+        // String message = "Number of args received: ";
+        // message += webServer.args(); //Get number of parameters
+        // message += "\n";             //Add a new line
+        // for (int i = 0; i < webServer.args(); i++)
+        // {
+        //     message += "Arg nº" + (String)i + " – > "; //Include the current iteration value
+        //     message += webServer.argName(i) + ": ";    //Get the name of the parameter
+        //     message += webServer.arg(i) + "\n";        //Get the value of the parameter
+        // }
+        // Serial.println(message);
         // ==================
 
         //const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2);
@@ -98,15 +92,20 @@ void rootPage()
             }
         }
 
-        File configFile = SPIFFS.open("/protocols.json", "w");
+        SPIFFS.begin();
+        File configFile = SPIFFS.open(PROTOCOL_FILE, "w");
+        Serial.print(PROTOCOL_FILE);
+
         String configString;
         serializeJson(doc, configString);
         configFile.print(configString);
         // === Debug Part ===
-        Serial.println(configString);
+        // Serial.println(configString);
         // ==================
 
+        Serial.println(F(" saved"));
         configFile.close();
+        SPIFFS.end();
     }
 
     // This is the Home Page - Choose theme here : https://www.bootstrapcdn.com/bootswatch/?theme
@@ -451,7 +450,9 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value += Adv_Power;
     echo.value += F("<br>");
 
+#ifdef MQTT_ENABLED
     setup_MQTT(); // Reload settings
+#endif
 
     return String("");
 }

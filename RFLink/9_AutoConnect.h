@@ -51,6 +51,7 @@
 
 // Adds MQTT tab to Autoconnect
 #define PARAM_FILE "/settings.json"
+#define PROTOCOL_FILE "/protocols.json"
 #define AUX_SETTING_URI "/settings"
 #define AUX_SAVE_URI "/settings_save"
 //#define AUX_CLEAR_URI "/settings_clear"
