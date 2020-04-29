@@ -26,9 +26,6 @@ typedef ESP8266WebServer WebServer;
 #include <SPIFFS.h>
 typedef WebServer WebServer;
 #endif
-
-//#include <SPI.h>              // To acces Flash Memory
-#include <FS.h> // To save MQTT parameters
 #include <AutoConnect.h>
 
 AutoConnect portal;
