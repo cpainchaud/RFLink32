@@ -69,6 +69,9 @@ void setup()
 
   set_Radio_mode(Radio_OFF);
 
+  PluginInit();
+  PluginTXInit();
+
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
   setup_WIFI_OFF();
@@ -106,10 +109,6 @@ void setup()
   splash_OLED();
 #endif
   pbuffer[0] = 0;
-
-  PluginInit();
-  PluginTXInit();
-
   set_Radio_mode(Radio_RX);
 }
 
