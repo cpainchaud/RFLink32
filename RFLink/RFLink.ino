@@ -35,6 +35,13 @@ void sendMsg(); // See at bottom
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 void (*Reboot)(void) = 0; // reset function on adress 0.
+
+void CallReboot(void)
+{
+  sendMsg();
+  delay(1);
+  Reboot();
+}
 #endif
 
 #if (defined(ESP8266) || defined(ESP32))
