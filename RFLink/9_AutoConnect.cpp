@@ -2,6 +2,8 @@
 // * Arduino Project RFLink-esp        * //
 // * https://github.com/couin3/RFLink  * //
 // * 2018..2020 Stormteam - Marc RIVES * //
+// * 2020 Schmutzm, Autoconnect Stuff  * //
+// * 2020 Allexum, Web "Send" button   * //
 // * More details in RFLink.ino file   * //
 // ************************************* //
 
@@ -43,6 +45,7 @@ boolean MQTT_RETAINED;
 String Adv_HostName;
 String Adv_Power;
 String LastMsg;
+String CmdMsg;
 // Radio pins settings
 uint8_t PIN_RF_RX_PMOS;
 uint8_t PIN_RF_RX_NMOS;
@@ -65,6 +68,13 @@ void rootPage()
 {
 
     WebServer &webServer = portal.host();
+
+    if (webServer.hasArg("BtnSend"))
+    {
+        // Récupération de la valeur dans la fenêtre Send
+        CmdMsg = webServer.arg(0);
+    }
+
     if (webServer.hasArg("BtnSave"))
     { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
 
@@ -199,13 +209,25 @@ void rootPage()
     //==========================================
     content += "  </div>";
     content += "</div>";
-
+    content += "<form action='/' method='POST'><button type='button submit' name='BtnTimeBeforeSWoff' value='0' class='btn btn-secondary'>Refresh</button></form>";
     content += "<Br>";
 
-    content += "<form action='/' method='POST'><button type='button submit' name='BtnTimeBeforeSWoff' value='0' class='btn btn-secondary'>Refresh</button></form><Br>";
+    // Zone de saisaie du message à envoyer
+    content += "<form action='/' method='POST'>";
+    content += "<div class='card bg-light mb-3' style='max-width: 50rem;'>";
+    content += "  <div class='card-header'>Send Message</div>";
+    content += "  <div class='card-body'>";
+    if (webServer.hasArg("BtnSend"))
+        content += "<input type='text' id='send' name='send' size='60' value='" + webServer.arg(0) + "'>";
+    else
+        content += "<input type='text' id='send' name='send' size='60' placeholder='10;PING;    '>";
+    content += "  </div>";
+    content += "</div>";
+    content += "<button type='button submit' name='BtnSend' value='0' class='btn btn-secondary'>Send</button></form>";
+    content += "<Br>";
 
     content += "<table class='table table-hover'  style='max-width: 50rem;'>";
-    content += "<thead><tr><th>N&deg;</th><th>Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
+    content += "<thead><tr><th>N&deg;</th><th>Plugin Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
     content += "<tbody>";                                                              // Table content
     content += "<form action='/' method='POST'>";
     for (byte x = 0; x < PLUGIN_MAX; x++)
@@ -236,7 +258,7 @@ void rootPage()
     content += "</tr><tr><td></td><td></td><td></td></tr>"; // we add a last line to bottom of the table
     content += "</tbody></table>";
 
-    content += "<button type='button submit' name='BtnSave' value='0' class='btn btn-success btn-lg'>save</button></form></div>";
+    content += "<button type='button submit' name='BtnSave' value='0' class='btn btn-secondary'>Save</button></form></div>";
 
     content += "</body>";
     content += "</html>";

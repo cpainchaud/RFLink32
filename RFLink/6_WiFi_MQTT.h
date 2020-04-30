@@ -22,7 +22,6 @@ extern String MQTT_TOPIC_IN;
 extern boolean MQTT_RETAINED;
 extern String Adv_HostName;
 extern String Adv_Power;
-extern String LastMsg;
 #else
 #ifdef ESP32
 #include <WiFi.h>

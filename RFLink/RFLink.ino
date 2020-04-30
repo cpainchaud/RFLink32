@@ -129,6 +129,11 @@ void loop()
       sendMsg();
 #endif
 
+#ifdef AUTOCONNECT_ENABLED
+    if(CheckWeb(CmdMsg))
+    sendMsg();
+#endif
+
     if (ScanEvent())
       sendMsg();
 

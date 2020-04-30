@@ -13,6 +13,9 @@
 
 #ifdef AUTOCONNECT_ENABLED
 
+extern String LastMsg;
+extern String CmdMsg;
+
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #elif ESP32

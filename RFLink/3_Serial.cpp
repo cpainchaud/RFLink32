@@ -1,4 +1,4 @@
-/// ************************************* //
+// ************************************* //
 // * Arduino Project RFLink-esp        * //
 // * https://github.com/couin3/RFLink  * //
 // * 2018..2020 Stormteam - Marc RIVES * //
@@ -34,9 +34,9 @@ boolean CheckSerial()
   return false;
 }
 
-boolean CheckMQTT(byte *mqtt_in)
+boolean CheckMQTT(byte *byte_in)
 {
-  if (CopySerial((char *)mqtt_in))
+  if (CopySerial((char *)byte_in))
   {
 #ifdef SERIAL_ENABLED
     Serial.flush();
@@ -45,6 +45,34 @@ boolean CheckMQTT(byte *mqtt_in)
 #endif
     if (CheckCmd())
       return true;
+  }
+  return false;
+}
+
+boolean CheckWeb(String &String_in)
+{
+  if (!String_in.isEmpty())
+  {
+    String_in.trim();
+    char char_in[INPUT_COMMAND_SIZE];
+    String_in.toCharArray(char_in, String_in.length() + 1);
+    char_in[String_in.length() + 1] = 0;
+
+    if (CopySerial(char_in))
+    {
+#ifdef SERIAL_ENABLED
+      Serial.flush();
+      Serial.print(F("Message arrived [Web] "));
+      Serial.println(InputBuffer_Serial);
+#endif
+      if (CheckCmd())
+      {
+        String_in.clear();
+        return true;
+      }
+    }
+    String_in.clear();
+    return false;
   }
   return false;
 }
