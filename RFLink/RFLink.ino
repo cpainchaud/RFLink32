@@ -130,8 +130,8 @@ void loop()
 #endif
 
 #ifdef AUTOCONNECT_ENABLED
-    if(CheckWeb(CmdMsg))
-    sendMsg();
+    if (CheckWeb(CmdMsg))
+      sendMsg();
 #endif
 
     if (ScanEvent())
