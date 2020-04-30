@@ -172,7 +172,8 @@ boolean PluginTX_004(byte function, char *string)
    byte Cmd_bitstream = 0;          // 2 bits Command
    byte Cmd_dimmer = 0;             // 4 bits Alt Command
 
-   if (!retrieve_Init10())
+   retrieve_Init();
+   if (!retrieve_Name("10"))
       return false;
    if (!retrieve_Name("Newkaku"))
       return false;

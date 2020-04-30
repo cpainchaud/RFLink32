@@ -82,7 +82,7 @@ void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
-boolean retrieve_Init10();
+void retrieve_Init();
 boolean retrieve_Name(const char *);
 boolean retrieve_ID(unsigned long &);
 boolean retrieve_Switch(byte &);

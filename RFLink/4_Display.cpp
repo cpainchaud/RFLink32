@@ -345,28 +345,18 @@ char *ptr;
 const char c_delim[2] = ";";
 char c_label[12];
 
-boolean retrieve_Init10()
+void retrieve_Init()
 {
-  // 10
   ptr = strtok(InputBuffer_Serial, c_delim);
-  if (ptr != NULL)
-  {
-    if (strncasecmp(ptr, "10", strlen("10")) != 0)
-      return false;
-    return true;
-  }
-  else
-    return false;
 }
 
 boolean retrieve_Name(const char *c_Name)
 {
-  // Newkaku ... or else!
-  ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
   {
     if (strncasecmp(ptr, c_Name, strlen(c_Name)) != 0)
       return false;
+    ptr = strtok(NULL, c_delim);
     return true;
   }
   else
@@ -378,7 +368,6 @@ boolean retrieve_ID(unsigned long &ul_ID)
   // ID
   char c_ID[10];
 
-  ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
   {
     strcpy(c_label, "ID=");
@@ -398,6 +387,7 @@ boolean retrieve_ID(unsigned long &ul_ID)
     ul_ID = strtoul(c_ID, NULL, HEX);
     ul_ID &= 0x03FFFFFF;
 
+    ptr = strtok(NULL, c_delim);
     return true;
   }
   else
@@ -409,7 +399,6 @@ boolean retrieve_Switch(byte &b_Switch)
   // Switch
   char c_Switch[10];
 
-  ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
   {
     strcpy(c_label, "SWITCH=");
@@ -430,6 +419,7 @@ boolean retrieve_Switch(byte &b_Switch)
     if (b_Switch > 0xF)
       return false; // invalid address
 
+    ptr = strtok(NULL, c_delim);
     return true;
   }
   else
@@ -441,7 +431,6 @@ boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
   // Command
   char c_Cmd[10];
 
-  ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
   {
     strcpy(c_label, "SET_LEVEL=");
@@ -491,6 +480,7 @@ boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
       break;
     }
 
+    ptr = strtok(NULL, c_delim);
     return true;
   }
   else
@@ -500,7 +490,6 @@ boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
 boolean retrieve_End()
 {
   // End
-  ptr = strtok(NULL, c_delim);
   if (ptr != NULL)
     return false;
   return true;
@@ -568,35 +557,35 @@ uint8_t String2GPIO(String sGPIO)
 
   switch (num_part)
   {
-    case 0:
-      return D0;
-      break;
-    case 1:
-      return D1;
-      break;
-    case 2:
-      return D2;
-      break;
-    case 3:
-      return D3;
-      break;
-    case 4:
-      return D4;
-      break;
-    case 5:
-      return D5;
-      break;
-    case 6:
-      return D6;
-      break;
-    case 7:
-      return D7;
-      break;
-    case 8:
-      return D8;
-      break;
-    default:
-      return NOT_A_PIN;
+  case 0:
+    return D0;
+    break;
+  case 1:
+    return D1;
+    break;
+  case 2:
+    return D2;
+    break;
+  case 3:
+    return D3;
+    break;
+  case 4:
+    return D4;
+    break;
+  case 5:
+    return D5;
+    break;
+  case 6:
+    return D6;
+    break;
+  case 7:
+    return D7;
+    break;
+  case 8:
+    return D8;
+    break;
+  default:
+    return NOT_A_PIN;
   }
 }
 
@@ -604,35 +593,35 @@ String GPIO2String(uint8_t uGPIO)
 {
   switch (uGPIO)
   {
-    case D0:
-      return "D0";
-      break;
-    case D1:
-      return "D1";
-      break;
-    case D2:
-      return "D2";
-      break;
-    case D3:
-      return "D3";
-      break;
-    case D4:
-      return "D4";
-      break;
-    case D5:
-      return "D5";
-      break;
-    case D6:
-      return "D6";
-      break;
-    case D7:
-      return "D7";
-      break;
-    case D8:
-      return "D8";
-      break;
-    default:
-      return "NOT_A_PIN";
+  case D0:
+    return "D0";
+    break;
+  case D1:
+    return "D1";
+    break;
+  case D2:
+    return "D2";
+    break;
+  case D3:
+    return "D3";
+    break;
+  case D4:
+    return "D4";
+    break;
+  case D5:
+    return "D5";
+    break;
+  case D6:
+    return "D6";
+    break;
+  case D7:
+    return "D7";
+    break;
+  case D8:
+    return "D8";
+    break;
+  default:
+    return "NOT_A_PIN";
   }
 }
 #endif //AUTOCONNECT_ENABLED
