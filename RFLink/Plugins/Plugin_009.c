@@ -465,10 +465,6 @@ void X10_Send(uint32_t address)
    uint32_t fdatamask = 0x80000000;
    uint32_t fsendbuff;
 
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Disable RF receiver
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable RF transmitter
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = address;
@@ -506,10 +502,6 @@ void X10_Send(uint32_t address)
       digitalWrite(PIN_RF_TX_DATA, LOW);
       delayMicroseconds(fpulse * 20);
    }
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // Disable RF transmitter
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Enable RF receiver
-   RFLinkHW();
    return;
 }
 #endif //PLUGIN_TX_009

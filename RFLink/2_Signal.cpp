@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "1_Radio.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
@@ -256,7 +257,7 @@ boolean FetchSignal()
 */
 /*********************************************************************************************\
    Send rawsignal buffer to RF  * DEPRICATED * DO NOT USE
-  \*********************************************************************************************/
+\*********************************************************************************************/
 /*
   void RawSendRF(void) {                                                    // * DEPRICATED * DO NOT USE *
   int x;
@@ -285,4 +286,126 @@ boolean FetchSignal()
   // RFLinkHW();
   }
 */
+
+/*********************************************************************************************\
+   Send bitstream to RF - Plugin 004 (Newkaku) special version
+\*********************************************************************************************/
+void AC_Send(unsigned long data, byte cmd)
+{
+#define AC_FPULSE 260 // Pulse width in microseconds
+#define AC_FRETRANS 5 // Number of code retransmissions
+
+  // Serial.println("Send AC");
+  // Serial.println(data, HEX);
+  // Serial.println(cmd, HEX);
+
+  unsigned long bitstream = 0L;
+  byte command = 0;
+  // prepare data to send
+  for (unsigned short i = 0; i < 32; i++)
+  { // reverse data bits
+    bitstream <<= 1;
+    bitstream |= (data & B1);
+    data >>= 1;
+  }
+  if (cmd != 0xff)
+  { // reverse dim bits
+    for (unsigned short i = 0; i < 4; i++)
+    {
+      command <<= 1;
+      command |= (cmd & B1);
+      cmd >>= 1;
+    }
+  }
+  // send bits
+  for (byte nRepeat = 0; nRepeat < AC_FRETRANS; nRepeat++)
+  {
+    data = bitstream;
+    if (cmd != 0xff)
+      cmd = command;
+    digitalWrite(PIN_RF_TX_DATA, HIGH);
+    //delayMicroseconds(fpulse);  //335
+    delayMicroseconds(335);
+    digitalWrite(PIN_RF_TX_DATA, LOW);
+    delayMicroseconds(AC_FPULSE * 10 + (AC_FPULSE >> 1)); //335*9=3015 //260*10=2600
+    for (unsigned short i = 0; i < 32; i++)
+    {
+      if (i == 27 && cmd != 0xff)
+      { // DIM command, send special DIM sequence TTTT replacing on/off bit
+        digitalWrite(PIN_RF_TX_DATA, HIGH);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(PIN_RF_TX_DATA, LOW);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(PIN_RF_TX_DATA, HIGH);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(PIN_RF_TX_DATA, LOW);
+        delayMicroseconds(AC_FPULSE);
+      }
+      else
+        switch (data & B1)
+        {
+        case 0:
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300  260*4=1040
+          break;
+        case 1:
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5);
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          break;
+        }
+      //Next bit
+      data >>= 1;
+    }
+    // send dim bits when needed
+    if (cmd != 0xff)
+    { // need to send DIM command bits
+      for (unsigned short i = 0; i < 4; i++)
+      { // 4 bits
+        switch (cmd & B1)
+        {
+        case 0:
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300
+          break;
+        case 1:
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5);
+          digitalWrite(PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          break;
+        }
+        //Next bit
+        cmd >>= 1;
+      }
+    }
+    //Send termination/synchronisation-signal. Total length: 32 periods
+    digitalWrite(PIN_RF_TX_DATA, HIGH);
+    delayMicroseconds(AC_FPULSE);
+    digitalWrite(PIN_RF_TX_DATA, LOW);
+    delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
+  }
+  // End transmit
+}
 /*********************************************************************************************/

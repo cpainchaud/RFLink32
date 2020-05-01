@@ -8,6 +8,7 @@
 #ifndef CREDENTIALS_h
 #define CREDENTIALS_h
 
+#include "RFLink.h"
 #ifndef AUTOCONNECT_ENABLED
 
 // local AP

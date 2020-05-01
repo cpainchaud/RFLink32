@@ -281,9 +281,6 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
      // bitstream1 holds first 24 bits of the RF data, bitstream2 holds last 24 bits of the RF data
      // -------------------------------
     // Prepare transmit
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Turn off power to the RF receiver 
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable the 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
     // send bits
     for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
         data1=bitstream1; 
@@ -338,10 +335,6 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 
 	}
     // End transmit
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Turn thew 433Mhz transmitter off
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Turn the 433Mhz receiver on
-    RFLinkHW();
 }
 
 void HomeConfort_Send(unsigned long data1, unsigned long data2) { 
@@ -366,9 +359,6 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
      // bitstream1 holds first 24 bits of the RF data, bitstream2 holds last 24 bits of the RF data
      // -------------------------------
     // Prepare transmit
-    digitalWrite(PIN_RF_RX_VCC,LOW);                // Turn off power to the RF receiver 
-    digitalWrite(PIN_RF_TX_VCC,HIGH);               // Enable the 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
     // send bits
     for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
         data1=bitstream1; 
@@ -426,10 +416,6 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 
 	}
     // End transmit
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY);    // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC,LOW);                // Turn thew 433Mhz transmitter off
-    digitalWrite(PIN_RF_RX_VCC,HIGH);               // Turn the 433Mhz receiver on
-    RFLinkHW();
 }
 */
 /*

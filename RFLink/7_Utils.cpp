@@ -24,7 +24,8 @@ uint8_t reverse8(uint8_t x)
 
 void reflect_bytes(uint8_t message[], unsigned num_bytes)
 {
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         message[i] = reverse8(message[i]);
     }
 }
@@ -38,7 +39,8 @@ uint8_t reflect4(uint8_t x)
 
 void reflect_nibbles(uint8_t message[], unsigned num_bytes)
 {
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         message[i] = reflect4(message[i]);
     }
 }
@@ -47,7 +49,8 @@ unsigned extract_nibbles_4b1s(uint8_t *message, unsigned offset_bits, unsigned n
 {
     unsigned ret = 0;
 
-    while (num_bits >= 5) {
+    while (num_bits >= 5)
+    {
         uint16_t bits = (message[offset_bits / 8] << 8) | message[(offset_bits / 8) + 1];
         bits >>= 11 - (offset_bits % 8); // align 5 bits to LSB
         if ((bits & 1) != 1)
@@ -67,12 +70,17 @@ uint8_t crc4(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8
     unsigned poly = polynomial << 4;
     unsigned bit;
 
-    while (nBytes--) {
+    while (nBytes--)
+    {
         remainder ^= *message++;
-        for (bit = 0; bit < 8; bit++) {
-            if (remainder & 0x80) {
+        for (bit = 0; bit < 8; bit++)
+        {
+            if (remainder & 0x80)
+            {
                 remainder = (remainder << 1) ^ poly;
-            } else {
+            }
+            else
+            {
                 remainder = (remainder << 1);
             }
         }
@@ -86,12 +94,17 @@ uint8_t crc7(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8
     unsigned poly = polynomial << 1;
     unsigned byte, bit;
 
-    for (byte = 0; byte < nBytes; ++byte) {
+    for (byte = 0; byte < nBytes; ++byte)
+    {
         remainder ^= message[byte];
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 0x80) {
+        for (bit = 0; bit < 8; ++bit)
+        {
+            if (remainder & 0x80)
+            {
                 remainder = (remainder << 1) ^ poly;
-            } else {
+            }
+            else
+            {
                 remainder = (remainder << 1);
             }
         }
@@ -104,12 +117,17 @@ uint8_t crc8(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uint8
     uint8_t remainder = init;
     unsigned byte, bit;
 
-    for (byte = 0; byte < nBytes; ++byte) {
+    for (byte = 0; byte < nBytes; ++byte)
+    {
         remainder ^= message[byte];
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 0x80) {
+        for (bit = 0; bit < 8; ++bit)
+        {
+            if (remainder & 0x80)
+            {
                 remainder = (remainder << 1) ^ polynomial;
-            } else {
+            }
+            else
+            {
                 remainder = (remainder << 1);
             }
         }
@@ -123,12 +141,17 @@ uint8_t crc8le(uint8_t const message[], unsigned nBytes, uint8_t polynomial, uin
     unsigned byte, bit;
     polynomial = reverse8(polynomial);
 
-    for (byte = 0; byte < nBytes; ++byte) {
+    for (byte = 0; byte < nBytes; ++byte)
+    {
         remainder ^= message[byte];
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 1) {
+        for (bit = 0; bit < 8; ++bit)
+        {
+            if (remainder & 1)
+            {
                 remainder = (remainder >> 1) ^ polynomial;
-            } else {
+            }
+            else
+            {
                 remainder = (remainder >> 1);
             }
         }
@@ -141,13 +164,17 @@ uint16_t crc16lsb(uint8_t const message[], unsigned nBytes, uint16_t polynomial,
     uint16_t remainder = init;
     unsigned byte, bit;
 
-    for (byte = 0; byte < nBytes; ++byte) {
+    for (byte = 0; byte < nBytes; ++byte)
+    {
         remainder ^= message[byte];
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 1) {
+        for (bit = 0; bit < 8; ++bit)
+        {
+            if (remainder & 1)
+            {
                 remainder = (remainder >> 1) ^ polynomial;
             }
-            else {
+            else
+            {
                 remainder = (remainder >> 1);
             }
         }
@@ -160,13 +187,17 @@ uint16_t crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, ui
     uint16_t remainder = init;
     unsigned byte, bit;
 
-    for (byte = 0; byte < nBytes; ++byte) {
+    for (byte = 0; byte < nBytes; ++byte)
+    {
         remainder ^= message[byte] << 8;
-        for (bit = 0; bit < 8; ++bit) {
-            if (remainder & 0x8000) {
+        for (bit = 0; bit < 8; ++bit)
+        {
+            if (remainder & 0x8000)
+            {
                 remainder = (remainder << 1) ^ polynomial;
             }
-            else {
+            else
+            {
                 remainder = (remainder << 1);
             }
         }
@@ -177,9 +208,11 @@ uint16_t crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, ui
 uint8_t lfsr_digest8(uint8_t const message[], unsigned bytes, uint8_t gen, uint8_t key)
 {
     uint8_t sum = 0;
-    for (unsigned k = 0; k < bytes; ++k) {
+    for (unsigned k = 0; k < bytes; ++k)
+    {
         uint8_t data = message[k];
-        for (int i = 7; i >= 0; --i) {
+        for (int i = 7; i >= 0; --i)
+        {
             // fprintf(stderr, "key is %02x\n", key);
             // XOR key into sum if data bit is set
             if ((data >> i) & 1)
@@ -200,13 +233,16 @@ uint8_t lfsr_digest8_reflect(uint8_t const message[], int bytes, uint8_t gen, ui
 {
     uint8_t sum = 0;
     // Process message from last byte to first byte (reflected)
-    for (int k = bytes - 1; k >= 0; --k) {
+    for (int k = bytes - 1; k >= 0; --k)
+    {
         uint8_t data = message[k];
         // Process individual bits of each byte (reflected)
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < 8; ++i)
+        {
             // fprintf(stderr, "key is %02x\n", key);
             // XOR key into sum if data bit is set
-            if ((data >> i) & 1) {
+            if ((data >> i) & 1)
+            {
                 sum ^= key;
             }
 
@@ -224,7 +260,8 @@ uint8_t lfsr_digest8_reflect(uint8_t const message[], int bytes, uint8_t gen, ui
 uint16_t lfsr_digest16(uint32_t data, int bits, uint16_t gen, uint16_t key)
 {
     uint16_t sum = 0;
-    for (int bit = bits - 1; bit >= 0; --bit) {
+    for (int bit = bits - 1; bit >= 0; --bit)
+    {
         // fprintf(stderr, "key at bit %d : %04x\n", bit, key);
         // if data bit is set then xor with key
         if ((data >> bit) & 1)
@@ -281,7 +318,8 @@ int parity8(uint8_t byte)
 int parity_bytes(uint8_t const message[], unsigned num_bytes)
 {
     int result = 0;
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         result ^= parity8(message[i]);
     }
     return result;
@@ -290,7 +328,8 @@ int parity_bytes(uint8_t const message[], unsigned num_bytes)
 uint8_t xor_bytes(uint8_t const message[], unsigned num_bytes)
 {
     uint8_t result = 0;
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         result ^= message[i];
     }
     return result;
@@ -299,7 +338,8 @@ uint8_t xor_bytes(uint8_t const message[], unsigned num_bytes)
 int add_bytes(uint8_t const message[], unsigned num_bytes)
 {
     int result = 0;
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         result += message[i];
     }
     return result;
@@ -308,7 +348,8 @@ int add_bytes(uint8_t const message[], unsigned num_bytes)
 int add_nibbles(uint8_t const message[], unsigned num_bytes)
 {
     int result = 0;
-    for (unsigned i = 0; i < num_bytes; ++i) {
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
         result += (message[i] >> 4) + (message[i] & 0x0f);
     }
     return result;
@@ -316,7 +357,8 @@ int add_nibbles(uint8_t const message[], unsigned num_bytes)
 
 // Unit testing
 #ifdef _TEST
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     fprintf(stderr, "util:: test\n");
 
     uint8_t msg[] = {0x08, 0x0a, 0xe8, 0x80};

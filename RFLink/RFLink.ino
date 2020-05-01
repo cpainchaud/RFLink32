@@ -18,7 +18,9 @@
 // ****************************************************************************
 #include <Arduino.h>
 #include "RFLink.h"
+#include "1_Radio.h"
 #include "2_Signal.h"
+#include "3_Serial.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
@@ -29,12 +31,27 @@
 #include <avr/power.h>
 #endif
 //****************************************************************************************************************************************
+void sendMsg(); // See at bottom
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 void (*Reboot)(void) = 0; // reset function on adress 0.
+
+void CallReboot(void)
+{
+  sendMsg();
+  delay(1);
+  Reboot();
+}
 #endif
 
-void sendMsg(); // See at bottom
+#if (defined(ESP8266) || defined(ESP32))
+void CallReboot(void)
+{
+  sendMsg();
+  delay(1);
+  ESP.restart();
+}
+#endif
 
 void setup()
 {
@@ -50,24 +67,10 @@ void setup()
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
-  // RX pins
-  pinMode(PIN_RF_RX_VCC, OUTPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_RX_NA, INPUT);               // Initialise in/output ports
-  pinMode(PIN_RF_RX_DATA, INPUT);             // Initialise in/output ports
-  pinMode(PIN_RF_RX_GND, OUTPUT);             // Initialise in/output ports
-  digitalWrite(PIN_RF_RX_GND, LOW);           // turn GND to RF receiver ON
-  digitalWrite(PIN_RF_RX_VCC, HIGH);          // turn VCC to RF receiver ON
-  digitalWrite(PIN_RF_RX_DATA, INPUT_PULLUP); // pull-up resistor on (to prevent garbage)
-
-  // TX Pins
-  // pinMode(PIN_RF_TX_VCC, OUTPUT);    // Initialise in/output ports
-  // pinMode(PIN_RF_TX_DATA, OUTPUT);   // Initialise in/output ports
-  // pinMode(PIN_RF_TX_GND, OUTPUT);    // Initialise in/output ports
-  // digitalWrite(PIN_RF_TX_GND, LOW);  // turn GND to TX receiver ON
-  // digitalWrite(PIN_RF_TX_VCC, HIGH); // turn VCC to TX receiver ON
-  //delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
+  set_Radio_mode(Radio_OFF);
 
   PluginInit();
+  PluginTXInit();
 
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
@@ -106,23 +109,37 @@ void setup()
   splash_OLED();
 #endif
   pbuffer[0] = 0;
-
-  delay(100);
+  set_Radio_mode(Radio_RX);
 }
 
 void loop()
 {
 #ifdef AUTOCONNECT_ENABLED
   loop_AutoConnect();
-#endif
-#ifdef MQTT_ENABLED
   if (WiFi.status() == WL_CONNECTED)
   {
-  checkMQTTloop();
+#endif
+#ifdef MQTT_ENABLED
+    checkMQTTloop();
+    sendMsg();
+#endif
+
+#ifdef SERIAL_ENABLED
+    if (CheckSerial())
+      sendMsg();
+#endif
+
+#ifdef AUTOCONNECT_ENABLED
+    if (CheckWeb(CmdMsg))
+      sendMsg();
+#endif
+
+    if (ScanEvent())
+      sendMsg();
+
+#ifdef AUTOCONNECT_ENABLED
   }
 #endif
-  if (ScanEvent())
-    sendMsg();
 }
 
 void sendMsg()
@@ -136,7 +153,7 @@ void sendMsg()
     publishMsg();
 #endif
 #ifdef AUTOCONNECT_ENABLED
-  LastMsg = pbuffer;
+    LastMsg = pbuffer;
 #endif
 #ifdef OLED_ENABLED
     print_OLED();
@@ -144,4 +161,5 @@ void sendMsg()
     pbuffer[0] = 0;
   }
 }
+
 /*********************************************************************************************/

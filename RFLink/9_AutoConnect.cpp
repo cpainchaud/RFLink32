@@ -2,6 +2,8 @@
 // * Arduino Project RFLink-esp        * //
 // * https://github.com/couin3/RFLink  * //
 // * 2018..2020 Stormteam - Marc RIVES * //
+// * 2020 Schmutzm, Autoconnect Stuff  * //
+// * 2020 Allexum, Web "Send" button   * //
 // * More details in RFLink.ino file   * //
 // ************************************* //
 
@@ -9,6 +11,7 @@
 #include "RFLink.h"
 #ifdef AUTOCONNECT_ENABLED
 
+#include "1_Radio.h"
 #include "4_Display.h" // To allow displaying the last message
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
@@ -42,6 +45,20 @@ boolean MQTT_RETAINED;
 String Adv_HostName;
 String Adv_Power;
 String LastMsg;
+String CmdMsg;
+// Radio pins settings
+uint8_t PIN_RF_RX_PMOS;
+uint8_t PIN_RF_RX_NMOS;
+uint8_t PIN_RF_RX_VCC;
+uint8_t PIN_RF_RX_GND;
+uint8_t PIN_RF_RX_NA;
+uint8_t PIN_RF_RX_DATA;
+boolean PULLUP_RF_RX_DATA;
+uint8_t PIN_RF_TX_PMOS;
+uint8_t PIN_RF_TX_NMOS;
+uint8_t PIN_RF_TX_VCC;
+uint8_t PIN_RF_TX_GND;
+uint8_t PIN_RF_TX_DATA;
 
 // Prototypes
 String loadParams(AutoConnectAux &aux, PageArgument &args);
@@ -50,6 +67,13 @@ String saveParams(AutoConnectAux &aux, PageArgument &args);
 void rootPage()
 {
     WebServer &webServer = portal.host();
+
+    if (webServer.hasArg("BtnSend"))
+    {
+        // Récupération de la valeur dans la fenêtre Send
+        CmdMsg = webServer.arg(0);
+    }
+
     if (webServer.hasArg("BtnSave"))
     { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
 
@@ -163,14 +187,14 @@ void rootPage()
         "</nav>";
 
     //// Graphical icon to access network config
-    //"	  <li class='nav-item'>" AUTOCONNECT_LINK(COG_32) "</li>";
-    //       "<h1>RFLink-ESP  " AUTOCONNECT_LINK(COG_32) "</h1><Br>";
+    // "<li class='nav-item'>" AUTOCONNECT_LINK(COG_32) "</li>";
+    // "<h1>RFLink-ESP  " AUTOCONNECT_LINK(COG_32) "</h1><Br>";
 
     //// iframe test :
-    //"<iframe width=\"450\" height=\"260\" style=\"transform:scale(0.79);-o-transform:scale(0.79);-webkit-transform:scale(0.79);-moz-transform:scale(0.79);-ms-transform:scale(0.79);transform-origin:0 0;-o-transform-origin:0 0;-webkit-transform-origin:0 0;-moz-transform-origin:0 0;-ms-transform-origin:0 0;border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/454951/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&type=line\"></iframe>"
+    // "<iframe width=\"450\" height=\"260\" style=\"transform:scale(0.79);-o-transform:scale(0.79);-webkit-transform:scale(0.79);-moz-transform:scale(0.79);-ms-transform:scale(0.79);transform-origin:0 0;-o-transform-origin:0 0;-webkit-transform-origin:0 0;-moz-transform-origin:0 0;-ms-transform-origin:0 0;border: 1px solid #cccccc;\" src=\"https://thingspeak.com/channels/454951/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&type=line\"></iframe>"
 
     // content += "Last refresh : "; // Require NTP time, We'll see that later....
-    //content +=          ctime(&now);
+    // content +=          ctime(&now);
     content += "<Br>";
     content += "<div class='card bg-light mb-3' style='max-width: 50rem;'>";
     content += "  <div class='card-header'>Last Message</div>";
@@ -184,13 +208,25 @@ void rootPage()
     //==========================================
     content += "  </div>";
     content += "</div>";
-
+    content += "<form action='/' method='POST'><button type='button submit' name='BtnTimeBeforeSWoff' value='0' class='btn btn-secondary'>Refresh</button></form>";
     content += "<Br>";
 
-    content += "<form action='/' method='POST'><button type='button submit' name='BtnTimeBeforeSWoff' value='0' class='btn btn-secondary'>Refresh</button></form><Br>";
+    // Zone de saisaie du message à envoyer
+    content += "<form action='/' method='POST'>";
+    content += "<div class='card bg-light mb-3' style='max-width: 50rem;'>";
+    content += "  <div class='card-header'>Send Message</div>";
+    content += "  <div class='card-body'>";
+    if (webServer.hasArg("BtnSend"))
+        content += "<input type='text' id='send' name='send' size='60' value='" + webServer.arg(0) + "'>";
+    else
+        content += "<input type='text' id='send' name='send' size='60' placeholder='10;PING;    '>";
+    content += "  </div>";
+    content += "</div>";
+    content += "<button type='button submit' name='BtnSend' value='0' class='btn btn-secondary'>Send</button></form>";
+    content += "<Br>";
 
     content += "<table class='table table-hover'  style='max-width: 50rem;'>";
-    content += "<thead><tr><th>N&deg;</th><th>Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
+    content += "<thead><tr><th>N&deg;</th><th>Plugin Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
     content += "<tbody>";                                                              // Table content
     content += "<form action='/' method='POST'>";
     for (byte x = 0; x < PLUGIN_MAX; x++)
@@ -221,7 +257,7 @@ void rootPage()
     content += "</tr><tr><td></td><td></td><td></td></tr>"; // we add a last line to bottom of the table
     content += "</tbody></table>";
 
-    content += "<button type='button submit' name='BtnSave' value='0' class='btn btn-success btn-lg'>save</button></form></div>";
+    content += "<button type='button submit' name='BtnSave' value='0' class='btn btn-secondary'>Save</button></form></div>";
 
     content += "</body>";
     content += "</html>";
@@ -258,12 +294,13 @@ void setup_AutoConnect()
             Serial.println(F("No SSID recorded, starting soft AP mode"));
             config.immediateStart = true;
             config.autoRise = true;
+            /////////////////
+            Serial.print(F("AP name set to "));
+            Serial.println(config.apid);
         }
         //---------------------------------------------------------------------
         portal.config(config);
         /////////////////
-        Serial.print(F("AP name set to "));
-        Serial.println(config.apid);
         Serial.print(F("hostname set to "));
         Serial.println(config.hostName);
         /////////////////
@@ -296,7 +333,6 @@ void setup_AutoConnect()
             yield();
         }
     }
-    //SPIFFS.end();
 
     WebServer &webServer = portal.host();
     webServer.on("/", rootPage);
@@ -319,7 +355,7 @@ void HandleLastMsg() // Required only for ajax auto-refresh of the last message
 void getParams(AutoConnectAux &aux)
 {
     //////  MQTT  settings //////
-    MQTT_SERVER = aux["MQTT_SERVER"].value;
+    MQTT_SERVER = (aux["MQTT_SERVER"].value);
     MQTT_SERVER.trim();
     MQTT_PORT = aux["MQTT_PORT"].value;
     MQTT_PORT.trim();
@@ -340,6 +376,20 @@ void getParams(AutoConnectAux &aux)
     Adv_HostName.trim();
     Adv_Power = aux["Adv_Power"].value;
     Adv_Power.trim();
+
+    // Radio pins settings
+    PIN_RF_RX_PMOS = String2GPIO(aux["PIN_RF_RX_PMOS"].value);
+    PIN_RF_RX_NMOS = String2GPIO(aux["PIN_RF_RX_NMOS"].value);
+    PIN_RF_RX_VCC = String2GPIO(aux["PIN_RF_RX_VCC"].value);
+    PIN_RF_RX_GND = String2GPIO(aux["PIN_RF_RX_GND"].value);
+    PIN_RF_RX_NA = String2GPIO(aux["PIN_RF_RX_NA"].value);
+    PIN_RF_RX_DATA = String2GPIO(aux["PIN_RF_RX_DATA"].value);
+    PULLUP_RF_RX_DATA = aux["PULLUP_RF_RX_DATA"].as<AutoConnectCheckbox>().checked;
+    PIN_RF_TX_PMOS = String2GPIO(aux["PIN_RF_TX_PMOS"].value);
+    PIN_RF_TX_NMOS = String2GPIO(aux["PIN_RF_TX_NMOS"].value);
+    PIN_RF_TX_VCC = String2GPIO(aux["PIN_RF_TX_VCC"].value);
+    PIN_RF_TX_GND = String2GPIO(aux["PIN_RF_TX_GND"].value);
+    PIN_RF_TX_DATA = String2GPIO(aux["PIN_RF_TX_DATA"].value);
 }
 
 // Load parameters saved with  saveParams from SPIFFS into the
@@ -350,11 +400,11 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     //static boolean initConfig = true;
 
     SPIFFS.begin();
-    File my_file = SPIFFS.open(PARAM_FILE, "r");
     Serial.print(PARAM_FILE);
-    if (my_file)
+    File paramFile = SPIFFS.open(PARAM_FILE, "r");
+    if (paramFile)
     {
-        if (aux.loadElement(my_file))
+        if (aux.loadElement(paramFile))
         {
             getParams(aux);
             Serial.println(F(" loaded"));
@@ -362,9 +412,8 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
         else
         {
             Serial.println(F(" failed to load"));
-            //if (initConfig)
         }
-        my_file.close();
+        paramFile.close();
     }
     else
     {
@@ -374,7 +423,6 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
 #endif // ESP32
     }
     SPIFFS.end();
-    //initConfig = false;
     return String("");
 }
 
@@ -413,7 +461,13 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
         src_aux.saveElement(my_file, {"MQTT_SERVER", "MQTT_PORT",
                                       "MQTT_ID", "MQTT_USER", "MQTT_PSWD",
                                       "MQTT_TOPIC_OUT", "MQTT_TOPIC_IN", "MQTT_RETAINED",
-                                      "Adv_HostName", "Adv_Power"});
+                                      "Adv_HostName", "Adv_Power",
+                                      "PIN_RF_RX_PMOS", "PIN_RF_RX_NMOS",
+                                      "PIN_RF_RX_VCC", "PIN_RF_RX_GND",
+                                      "PIN_RF_RX_NA", "PIN_RF_RX_DATA", "PULLUP_RF_RX_DATA",
+                                      "PIN_RF_TX_PMOS", "PIN_RF_TX_NMOS",
+                                      "PIN_RF_TX_VCC", "PIN_RF_TX_GND",
+                                      "PIN_RF_TX_DATA"});
         Serial.println(F(" saved"));
         my_file.close();
     }
@@ -448,6 +502,33 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value += Adv_HostName;
     echo.value += F("<br>TX Power: ");
     echo.value += Adv_Power;
+    echo.value += F("<br><u><br><b>GPIO settings</b></u>");
+    echo.value += F("<br><b>Radio Receiver</b>");
+    echo.value += F("<br>RX_PMOS: ");
+    echo.value += GPIO2String(PIN_RF_RX_PMOS);
+    echo.value += F("<br>RX_NMOS: ");
+    echo.value += GPIO2String(PIN_RF_RX_NMOS);
+    echo.value += F("<br>RX_VCC: ");
+    echo.value += GPIO2String(PIN_RF_RX_VCC);
+    echo.value += F("<br>RX_GND: ");
+    echo.value += GPIO2String(PIN_RF_RX_GND);
+    echo.value += F("<br>RX_NA: ");
+    echo.value += GPIO2String(PIN_RF_RX_NA);
+    echo.value += F("<br>RX_DATA: ");
+    echo.value += GPIO2String(PIN_RF_RX_DATA);
+    echo.value += F("<br>Pullup on RX_DATA: ");
+    echo.value += String(PULLUP_RF_RX_DATA == true ? "true" : "false");
+    echo.value += F("<br><br><b>Radio Emitter</b>");
+    echo.value += F("<br>TX_PMOS: ");
+    echo.value += GPIO2String(PIN_RF_TX_PMOS);
+    echo.value += F("<br>TX_NMOS: ");
+    echo.value += GPIO2String(PIN_RF_TX_NMOS);
+    echo.value += F("<br>TX_VCC: ");
+    echo.value += GPIO2String(PIN_RF_TX_VCC);
+    echo.value += F("<br>TX_GND: ");
+    echo.value += GPIO2String(PIN_RF_TX_GND);
+    echo.value += F("<br>TX_DATA: ");
+    echo.value += GPIO2String(PIN_RF_TX_DATA);
     echo.value += F("<br>");
 
 #ifdef MQTT_ENABLED

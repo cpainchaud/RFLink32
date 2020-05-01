@@ -145,10 +145,6 @@ void SelectPlus_Send(unsigned long address)
     uint32_t fdatamask = 0x10000;
     uint32_t fsendbuff;
 
-    digitalWrite(PIN_RF_RX_VCC, LOW);            // Power off the RF receiver (if wired that way) to protect against interference
-    digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-
     for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
     {
         fsendbuff = address;
@@ -184,9 +180,5 @@ void SelectPlus_Send(unsigned long address)
             delayMicroseconds(fpulse * 16); // delay between RF transmits
         }
     }
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC, LOW);            // Disable the 433Mhz transmitter
-    digitalWrite(PIN_RF_RX_VCC, HIGH);           // Enable the 433Mhz receiver
-    RFLinkHW();
 }
 #endif // PLUGIN_070

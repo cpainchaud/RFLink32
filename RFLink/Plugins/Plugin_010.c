@@ -246,10 +246,6 @@ void TRC02_Send(unsigned long address, int command)
    uint32_t fdatamask = 0x80000000;
    uint32_t fsendbuff;
 
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Turn off power to the RF receiver
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable the 433Mhz transmitter
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       crc = 0;
@@ -298,9 +294,5 @@ void TRC02_Send(unsigned long address, int command)
          delayMicroseconds(fpulse);
       }
    }
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // Turn thew 433Mhz transmitter off
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Turn the 433Mhz receiver on
-   RFLinkHW();
 }
 #endif //PLUGIN_TX_010

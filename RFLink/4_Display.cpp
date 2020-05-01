@@ -6,6 +6,8 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include "RFLink.h"
+#include "3_Serial.h"
 #include "4_Display.h"
 
 byte PKSequenceNumber = 0;       // 1 byte packet counter
@@ -335,34 +337,291 @@ void display_RGBW(unsigned int input)
   strcat(pbuffer, dbuffer);
 }
 
+// --------------------- //
+// get label shared func //
+// --------------------- //
+
+char *ptr;
+const char c_delim[2] = ";";
+char c_label[12];
+
+void retrieve_Init()
+{
+  ptr = strtok(InputBuffer_Serial, c_delim);
+}
+
+boolean retrieve_Name(const char *c_Name)
+{
+  if (ptr != NULL)
+  {
+    if (strncasecmp(ptr, c_Name, strlen(c_Name)) != 0)
+      return false;
+    ptr = strtok(NULL, c_delim);
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_ID(unsigned long &ul_ID)
+{
+  // ID
+  char c_ID[10];
+
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "ID=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 8)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isxdigit(ptr[i]))
+        return false;
+
+    strcpy(c_ID, ptr);
+    c_ID[8] = 0;
+
+    ul_ID = strtoul(c_ID, NULL, HEX);
+    ul_ID &= 0x03FFFFFF;
+
+    ptr = strtok(NULL, c_delim);
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_Switch(byte &b_Switch)
+{
+  // Switch
+  char c_Switch[10];
+
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "SWITCH=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 1)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isxdigit(ptr[i]))
+        return false;
+
+    strcpy(c_Switch, ptr);
+
+    b_Switch = (byte)strtoul(c_Switch, NULL, HEX);
+    b_Switch--; // 1 to 16 -> 0 to 15 (displayed value is one more)
+    if (b_Switch > 0xF)
+      return false; // invalid address
+
+    ptr = strtok(NULL, c_delim);
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
+{
+  // Command
+  char c_Cmd[10];
+
+  if (ptr != NULL)
+  {
+    strcpy(c_label, "SET_LEVEL=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    strcpy(c_label, "CMD=");
+    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
+      ptr += strlen(c_label);
+
+    if (strlen(ptr) > 7)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isalnum(ptr[i]))
+        return false;
+
+    strcpy(c_Cmd, ptr);
+
+    b_Cmd2 = str2cmd(c_Cmd); // Get ON/OFF etc. command
+    if (b_Cmd2 == false)     // Not a valid command received? ON/OFF/ALLON/ALLOFF
+      b_Cmd2 = (byte)strtoul(c_Cmd, NULL, HEX);
+    // ON
+    switch (b_Cmd2)
+    {
+    case VALUE_ON:
+    case VALUE_ALLON:
+      b_Cmd |= B01;
+      break;
+    }
+    // Group
+    switch (b_Cmd2)
+    {
+    case VALUE_ALLON:
+    case VALUE_ALLOFF:
+      b_Cmd |= B10;
+      break;
+    }
+    // Dimmer
+    switch (b_Cmd2)
+    {
+    case VALUE_ON:
+    case VALUE_OFF:
+    case VALUE_ALLON:
+    case VALUE_ALLOFF:
+      b_Cmd2 = 0xFF;
+      break;
+    }
+
+    ptr = strtok(NULL, c_delim);
+    return true;
+  }
+  else
+    return false;
+}
+
+boolean retrieve_End()
+{
+  // End
+  if (ptr != NULL)
+    return false;
+  return true;
+}
+
 /*********************************************************************************************\
    Convert string to command code
-  \*********************************************************************************************/
-/*
-  int str2cmd(char *command) {
-  if (strcasecmp(command, "ON") == 0) return VALUE_ON;
-  if (strcasecmp(command, "OFF") == 0) return VALUE_OFF;
-  if (strcasecmp(command, "ALLON") == 0) return VALUE_ALLON;
-  if (strcasecmp(command, "ALLOFF") == 0) return VALUE_ALLOFF;
-  if (strcasecmp(command, "PAIR") == 0) return VALUE_PAIR;
-  if (strcasecmp(command, "DIM") == 0) return VALUE_DIM;
-  if (strcasecmp(command, "BRIGHT") == 0) return VALUE_BRIGHT;
-  if (strcasecmp(command, "UP") == 0) return VALUE_UP;
-  if (strcasecmp(command, "DOWN") == 0) return VALUE_DOWN;
-  if (strcasecmp(command, "STOP") == 0) return VALUE_STOP;
-  if (strcasecmp(command, "CONFIRM") == 0) return VALUE_CONFIRM;
-  if (strcasecmp(command, "LIMIT") == 0) return VALUE_LIMIT;
-  return false;
-  }
-*/
-
-void replacechar(char *str, char orig, char rep)
+\*********************************************************************************************/
+int str2cmd(char *command)
 {
-    char *ix = str;
-    int n = 0;
-    while ((ix = strchr(ix, orig)) != NULL)
-    {
-        *ix++ = rep;
-        n++;
-    }
+  if (strcasecmp(command, "ON") == 0)
+    return VALUE_ON;
+  if (strcasecmp(command, "OFF") == 0)
+    return VALUE_OFF;
+  if (strcasecmp(command, "ALLON") == 0)
+    return VALUE_ALLON;
+  if (strcasecmp(command, "ALLOFF") == 0)
+    return VALUE_ALLOFF;
+  if (strcasecmp(command, "PAIR") == 0)
+    return VALUE_PAIR;
+  if (strcasecmp(command, "DIM") == 0)
+    return VALUE_DIM;
+  if (strcasecmp(command, "BRIGHT") == 0)
+    return VALUE_BRIGHT;
+  if (strcasecmp(command, "UP") == 0)
+    return VALUE_UP;
+  if (strcasecmp(command, "DOWN") == 0)
+    return VALUE_DOWN;
+  if (strcasecmp(command, "STOP") == 0)
+    return VALUE_STOP;
+  if (strcasecmp(command, "CONFIRM") == 0)
+    return VALUE_CONFIRM;
+  if (strcasecmp(command, "LIMIT") == 0)
+    return VALUE_LIMIT;
+  return false;
 }
+
+// void replacechar(char *str, char orig, char rep)
+// {
+//   char *ix = str;
+//   int n = 0;
+//   while ((ix = strchr(ix, orig)) != NULL)
+//   {
+//     *ix++ = rep;
+//     n++;
+//   }
+// }
+
+#ifdef AUTOCONNECT_ENABLED
+uint8_t String2GPIO(String sGPIO)
+{
+  byte num_part;
+  char cGPIO[4];
+
+  sGPIO.toCharArray(cGPIO, 4);
+
+  if (strlen(cGPIO) != 2)
+    return NOT_A_PIN;
+  if (cGPIO[0] != 'D')
+    return NOT_A_PIN;
+  if (isdigit(cGPIO[1]))
+    num_part = (cGPIO[1] - '0');
+  else
+    return NOT_A_PIN;
+
+  switch (num_part)
+  {
+  case 0:
+    return D0;
+    break;
+  case 1:
+    return D1;
+    break;
+  case 2:
+    return D2;
+    break;
+  case 3:
+    return D3;
+    break;
+  case 4:
+    return D4;
+    break;
+  case 5:
+    return D5;
+    break;
+  case 6:
+    return D6;
+    break;
+  case 7:
+    return D7;
+    break;
+  case 8:
+    return D8;
+    break;
+  default:
+    return NOT_A_PIN;
+  }
+}
+
+String GPIO2String(uint8_t uGPIO)
+{
+  switch (uGPIO)
+  {
+  case D0:
+    return "D0";
+    break;
+  case D1:
+    return "D1";
+    break;
+  case D2:
+    return "D2";
+    break;
+  case D3:
+    return "D3";
+    break;
+  case D4:
+    return "D4";
+    break;
+  case D5:
+    return "D5";
+    break;
+  case D6:
+    return "D6";
+    break;
+  case D7:
+    return "D7";
+    break;
+  case D8:
+    return "D8";
+    break;
+  default:
+    return "NOT_A_PIN";
+  }
+}
+#endif //AUTOCONNECT_ENABLED

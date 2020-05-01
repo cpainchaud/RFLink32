@@ -7,6 +7,7 @@
 
 #include <Arduino.h>
 #include "RFLink.h"
+#include "8_OLED.h"
 
 #ifdef OLED_ENABLED
 
@@ -46,7 +47,7 @@ void splash_OLED()
     u8x8.draw2x2String(0, 0, "RFLink");
     u8x8.draw2x2String(10, 2, "ESP");
     u8x8.drawString(0, 3, ver);
-    u8x8.drawString(0, 4, "20/04/20");
+    u8x8.drawString(0, 4, "01/05/20");
     u8x8.drawString(6, 6, "github.com");
     u8x8.drawString(2, 7, "/couin3/RFLink");
     u8x8.setPowerSave(0);
