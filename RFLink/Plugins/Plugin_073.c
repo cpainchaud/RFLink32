@@ -141,10 +141,6 @@ void Deltronic_Send(unsigned long address)
     periodLong = 2 * period;
     periodSync = 36 * period;
 
-    digitalWrite(PIN_RF_RX_VCC, LOW);            // Power off the RF receiver (if wired that way) to protect against interference
-    digitalWrite(PIN_RF_TX_VCC, HIGH);           // Enable 433Mhz transmitter
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-
     // Send seperator
     digitalWrite(PIN_RF_TX_DATA, HIGH);
     delayMicroseconds(period);
@@ -184,11 +180,6 @@ void Deltronic_Send(unsigned long address)
         digitalWrite(PIN_RF_TX_DATA, HIGH);
         delayMicroseconds(period);
     }
-
     digitalWrite(PIN_RF_TX_DATA, LOW);
-    delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-    digitalWrite(PIN_RF_TX_VCC, LOW);            // Disable the 433Mhz transmitter
-    digitalWrite(PIN_RF_RX_VCC, HIGH);           // Enable the 433Mhz receiver
-    RFLinkHW();
 }
 #endif // PLUGIN_TX_073

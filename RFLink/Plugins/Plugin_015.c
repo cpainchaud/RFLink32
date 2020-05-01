@@ -229,9 +229,6 @@ void HomeEasyEU_Send(unsigned long address, unsigned long command)
    uint32_t fdatamask = 0x80000000;
    uint32_t fsendbuff;
 
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Spanning naar de RF ontvanger uit om interferentie met de zender te voorkomen.
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // zet de 433Mhz zender aan
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       // -------------- Send Home Easy preamble (0x63c) - 11 bits
@@ -310,9 +307,5 @@ void HomeEasyEU_Send(unsigned long address, unsigned long command)
       digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 26);
    }
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // zet de 433Mhz zender weer uit
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // Spanning naar de RF ontvanger weer aan.
-   RFLinkHW();
 }
 #endif // PLUGIN_TX_015

@@ -241,9 +241,6 @@ void Blyss_Send(unsigned long address, byte devtype)
    uint32_t fsendbuff;
    unsigned char RollingCode[] = {0x98, 0xDA, 0x1E, 0xE6, 0x67, 0x98};
 
-   digitalWrite(PIN_RF_RX_VCC, LOW);            // Power off the RF receiver
-   digitalWrite(PIN_RF_TX_VCC, HIGH);           // Turn on the RF transmitter
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
    byte temp = (millis() & 0xff);               // used for the timestamp at the end of the RF packet
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
@@ -339,9 +336,5 @@ void Blyss_Send(unsigned long address, byte devtype)
       //delayMicroseconds(fpulse * 18);             // delay between RF retransmits
       delay(24); // delay 23.8 ms
    }
-   delayMicroseconds(TRANSMITTER_STABLE_DELAY); // short delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms)
-   digitalWrite(PIN_RF_TX_VCC, LOW);            // turn off the RF transmitter
-   digitalWrite(PIN_RF_RX_VCC, HIGH);           // power on the RF receiver
-   RFLinkHW();
 }
 #endif // PLUGIN_TX_006
