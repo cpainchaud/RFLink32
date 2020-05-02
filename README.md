@@ -46,9 +46,11 @@ So far, in addition of core libraries, we use:
 
 ## 7. Additional info
 ### Pinout
-- We aim to the simplest possible connexion.
+- When WebServer is active (which is default), pin setup has to be done there.
+- For safety & simplicity, default WebServer setup is : all pin inactive.
 - You may add decoupling capacitors and antenna to improve results.
-	
+- This is a simple RX pin wiring :
+
 |  Name         | D1 mini | RXB6  |
 |---------------|---------|-------|
 | PIN_RF_TX_VCC |   D5    | 5 VCC |
@@ -62,7 +64,7 @@ So far, in addition of core libraries, we use:
 - ESP8266 can't draw more than 12mA on a GPIO pin.
 - Some receivers have current spikes bigger than that (eg RXB12).
 - This lead to a non working receiver / non starting ESP.
-- Here is a more classic working wiring
+- Here is a more safe wiring
 
 |  Name (Alt)   | D1 mini | RXB6  |
 |---------------|---------|-------|
