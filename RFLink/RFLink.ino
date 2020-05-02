@@ -63,14 +63,9 @@ void setup()
   power_usart0_enable(); // UART
 #endif
 
-  delay(150);         // Time needed to switch back from Upload to Console
+  delay(250);         // Time needed to switch back from Upload to Console
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
-
-  set_Radio_mode(Radio_OFF);
-
-  PluginInit();
-  PluginTXInit();
 
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
@@ -87,6 +82,14 @@ void setup()
 #ifdef AUTOCONNECT_ENABLED
   setup_AutoConnect();
 #endif
+
+  set_Radio_mode(Radio_OFF);
+#ifdef ESP8266
+  show_Radio_Pin();
+#endif // ESP8266
+
+  PluginInit();
+  PluginTXInit();
 
 #ifdef MQTT_ENABLED
   setup_MQTT();

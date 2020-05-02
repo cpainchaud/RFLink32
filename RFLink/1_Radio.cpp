@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include "RFLink.h"
 #include "1_Radio.h"
+#include "4_Display.h"
 #ifdef AUTOCONNECT_ENABLED
 #include "9_AutoConnect.h"
 #else
@@ -60,6 +61,72 @@ void set_Radio_mode(Radio_State new_State)
     current_State = new_State;
   }
 }
+
+#ifdef ESP8266
+void show_Radio_Pin()
+{
+  if (PIN_RF_RX_PMOS != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_PMOS : "));
+    Serial.println(GPIO2String(PIN_RF_RX_PMOS));
+    Serial.println(PIN_RF_RX_PMOS);
+  }
+  if (PIN_RF_RX_NMOS != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_NMOS : "));
+    Serial.println(GPIO2String(PIN_RF_RX_NMOS));
+  }
+  if (PIN_RF_RX_VCC != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_VCC : "));
+    Serial.println(GPIO2String(PIN_RF_RX_VCC));
+  }
+  if (PIN_RF_RX_GND != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_GND : "));
+    Serial.println(GPIO2String(PIN_RF_RX_GND));
+  }
+  if (PIN_RF_RX_NA != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_NA : "));
+    Serial.println(GPIO2String(PIN_RF_RX_NA));
+  }
+  if (PIN_RF_RX_DATA != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_RX_DATA : "));
+    Serial.println(GPIO2String(PIN_RF_RX_DATA));
+  }
+  if (PULLUP_RF_RX_DATA)
+    Serial.print(F("(Pullup on PIN_RF_RX_DATA)"));
+  //
+  if (PIN_RF_TX_PMOS != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_TX_PMOS : "));
+    Serial.println(GPIO2String(PIN_RF_TX_PMOS));
+  }
+  if (PIN_RF_TX_NMOS != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_TX_NMOS : "));
+    Serial.println(GPIO2String(PIN_RF_TX_NMOS));
+  }
+  if (PIN_RF_TX_VCC != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_TX_VCC : "));
+    Serial.println(GPIO2String(PIN_RF_TX_VCC));
+  }
+  if (PIN_RF_TX_GND != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_TX_GND : "));
+    Serial.println(GPIO2String(PIN_RF_TX_GND));
+  }
+  if (PIN_RF_TX_DATA != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("PIN_RF_TX_DATA : "));
+    Serial.println(GPIO2String(PIN_RF_TX_DATA));
+  }
+}
+#endif //ESP8266
+
 
 void enableRX()
 {

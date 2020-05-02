@@ -94,5 +94,7 @@ enum Radio_State
 };
 
 void set_Radio_mode(Radio_State new_state);
-
+#ifdef ESP8266
+void show_Radio_Pin();
+#endif // ESP8266
 #endif // Radio_h
