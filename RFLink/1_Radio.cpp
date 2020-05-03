@@ -67,66 +67,67 @@ void show_Radio_Pin()
 {
   if (PIN_RF_RX_PMOS != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_PMOS : "));
+    Serial.print(F("Radio pin RF_RX_PMOS :\t"));
     Serial.println(GPIO2String(PIN_RF_RX_PMOS));
     Serial.println(PIN_RF_RX_PMOS);
   }
   if (PIN_RF_RX_NMOS != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_NMOS : "));
+    Serial.print(F("Radio pin RF_RX_NMOS :\t"));
     Serial.println(GPIO2String(PIN_RF_RX_NMOS));
   }
   if (PIN_RF_RX_VCC != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_VCC : "));
+    Serial.print(F("Radio pin RF_RX_VCC :\t"));
     Serial.println(GPIO2String(PIN_RF_RX_VCC));
   }
   if (PIN_RF_RX_GND != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_GND : "));
+    Serial.print(F("Radio pin RF_RX_GND :\t"));
     Serial.println(GPIO2String(PIN_RF_RX_GND));
   }
   if (PIN_RF_RX_NA != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_NA : "));
+    Serial.print(F("Radio pin RF_RX_NA :\t"));
     Serial.println(GPIO2String(PIN_RF_RX_NA));
   }
   if (PIN_RF_RX_DATA != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_RX_DATA : "));
-    Serial.println(GPIO2String(PIN_RF_RX_DATA));
+    Serial.print(F("Radio pin RF_RX_DATA :\t"));
+    Serial.print(GPIO2String(PIN_RF_RX_DATA));
+    if (PULLUP_RF_RX_DATA)
+      Serial.println(F(" (Pullup enabled)"));
+    else
+      Serial.println();
   }
-  if (PULLUP_RF_RX_DATA)
-    Serial.print(F("(Pullup on PIN_RF_RX_DATA)"));
   //
   if (PIN_RF_TX_PMOS != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_TX_PMOS : "));
+    Serial.print(F("Radio pin RF_TX_PMOS :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_PMOS));
   }
   if (PIN_RF_TX_NMOS != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_TX_NMOS : "));
+    Serial.print(F("Radio pin RF_TX_NMOS :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_NMOS));
   }
   if (PIN_RF_TX_VCC != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_TX_VCC : "));
+    Serial.print(F("Radio pin RF_TX_VCC :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_VCC));
   }
   if (PIN_RF_TX_GND != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_TX_GND : "));
+    Serial.print(F("Radio pin RF_TX_GND :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_GND));
   }
   if (PIN_RF_TX_DATA != (uint8_t)NOT_A_PIN)
   {
-    Serial.print(F("PIN_RF_TX_DATA : "));
+    Serial.print(F("Radio pin RF_TX_DATA :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_DATA));
   }
 }
 #endif //ESP8266
-
 
 void enableRX()
 {

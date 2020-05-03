@@ -116,9 +116,11 @@ void rootPage()
             }
         }
 
+        Serial.print("Param ");
+        Serial.print(PROTOCOL_FILE);
+        Serial.print(F(" :\t"));
         SPIFFS.begin();
         File configFile = SPIFFS.open(PROTOCOL_FILE, "w");
-        Serial.print(PROTOCOL_FILE);
 
         String configString;
         serializeJson(doc, configString);
@@ -127,7 +129,7 @@ void rootPage()
         // Serial.println(configString);
         // ==================
 
-        Serial.println(F(" saved"));
+        Serial.println(F("Saved"));
         configFile.close();
         SPIFFS.end();
     }
@@ -291,19 +293,15 @@ void setup_AutoConnect()
         uint8_t SSIDqty = credential.entries();
         if (SSIDqty == 0)
         {
-            Serial.println(F("No SSID recorded, starting soft AP mode"));
+            Serial.println(F("WiFi AP mode :\t\tStarting (No SSID recorded)"));
             config.immediateStart = true;
             config.autoRise = true;
             /////////////////
-            Serial.print(F("AP name set to "));
+            Serial.print(F("WiFi AP name :\t\t"));
             Serial.println(config.apid);
         }
         //---------------------------------------------------------------------
         portal.config(config);
-        /////////////////
-        Serial.print(F("hostname set to "));
-        Serial.println(config.hostName);
-        /////////////////
         portal.on(AUX_SETTING_URI, loadParams);
         portal.on(AUX_SAVE_URI, saveParams);
     }
@@ -313,19 +311,25 @@ void setup_AutoConnect()
     }
     //-------------------------------------
 
+    Serial.print(F("WiFi SSID :\t\t"));
+    Serial.println(WiFi.SSID());
+    Serial.print(F("WiFi Connection :\t"));
+
     if (portal.begin())
     {
         config.bootUri = AC_ONBOOTURI_HOME;
         if (MDNS.begin(config.hostName))
             MDNS.addService("http", "tcp", 80);
-        Serial.print(F("connected: "));
-        Serial.println(WiFi.SSID());
-        Serial.print(F("IP: "));
-        Serial.println(WiFi.localIP().toString());
-    }
+        Serial.println(F("Established"));
+        Serial.print(F("WiFi IP :\t\t"));
+        Serial.println(WiFi.localIP());
+        Serial.print(F("WiFi RSSI :\t\t"));
+        Serial.println(WiFi.RSSI());
+        Serial.print(F("WiFi Hostname :\t\t"));
+        Serial.println(config.hostName);    }
     else
     {
-        Serial.print(F("connection failed:"));
+        Serial.print(F("Failed - "));
         Serial.println(String(WiFi.status()));
         while (1)
         {
@@ -400,24 +404,26 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     //static boolean initConfig = true;
 
     SPIFFS.begin();
+    Serial.print("Param ");
     Serial.print(PARAM_FILE);
+    Serial.print(F(" :\t"));
     File paramFile = SPIFFS.open(PARAM_FILE, "r");
     if (paramFile)
     {
         if (aux.loadElement(paramFile))
         {
             getParams(aux);
-            Serial.println(F(" loaded"));
+            Serial.println(F("Loaded"));
         }
         else
         {
-            Serial.println(F(" failed to load"));
+            Serial.println(F("Failed to load"));
         }
         paramFile.close();
     }
     else
     {
-        Serial.println(F(" open+r failed"));
+        Serial.println(F("Failed to open(+r)"));
 #ifdef ESP32
         Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
 #endif // ESP32
@@ -453,9 +459,11 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     // The entered value is owned by AutoConnectAux of /settings.
     // To retrieve the elements of /settings, it is necessary to get
     // the AutoConnectAux object of /settings.
+    Serial.print("Param ");
+    Serial.print(PARAM_FILE);
+    Serial.print(F(" :\t"));
     SPIFFS.begin();
     File my_file = SPIFFS.open(PARAM_FILE, "w");
-    Serial.print(PARAM_FILE);
     if (my_file)
     {
         src_aux.saveElement(my_file, {"MQTT_SERVER", "MQTT_PORT",
@@ -468,11 +476,11 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
                                       "PIN_RF_TX_PMOS", "PIN_RF_TX_NMOS",
                                       "PIN_RF_TX_VCC", "PIN_RF_TX_GND",
                                       "PIN_RF_TX_DATA"});
-        Serial.println(F(" saved"));
+        Serial.println(F("Saved"));
         my_file.close();
     }
     else
-        Serial.print(F(" open+w failed"));
+        Serial.print(F("Failed to open(+w)"));
     SPIFFS.end();
 
     // Echo back saved parameters to AutoConnectAux page.

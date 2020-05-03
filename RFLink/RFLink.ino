@@ -67,6 +67,16 @@ void setup()
   Serial.begin(BAUD); // Initialise the serial port
   Serial.println();   // ESP "Garbage" message
 
+  Serial.print(F("Arduino IDE Version :\t"));
+  Serial.println(ARDUINO);
+#if (defined(ESP32) || defined(ESP8266))
+  Serial.print(F("ESP CoreVersion :\t"));
+  Serial.println(ESP.getCoreVersion());
+#endif
+  Serial.print(F("Sketch File :\t\t"));
+  Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
+  Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
+
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
 #if (defined(ESP32) || defined(ESP8266))
   setup_WIFI_OFF();

@@ -58,8 +58,9 @@ void setup_WIFI()
   WiFi.config(ipaddr_addr(WIFI_IP.c_str()), ipaddr_addr(WIFI_GATEWAY.c_str()), ipaddr_addr(WIFI_SUBNET.c_str()));
 
   // We start by connecting to a WiFi network
-  Serial.print(F("\nConnecting to "));
-  Serial.print(WIFI_SSID);
+  Serial.print(F("WiFi SSID :\t\t"));
+  Serial.println(WiFi.SSID());
+  Serial.print(F("WiFi Connection :\t"));
   WiFi.begin(WIFI_SSID, WIFI_PSWD);
 
   while (WiFi.status() != WL_CONNECTED)
@@ -68,10 +69,10 @@ void setup_WIFI()
     Serial.print(".");
   }
 
-  Serial.print(F("\nWiFi connected\t"));
-  Serial.print(F("IP address: "));
-  Serial.print(WiFi.localIP());
-  Serial.print(F("\tRSSI "));
+  Serial.println(F("Established"));
+  Serial.print(F("WiFi IP :\t\t"));
+  Serial.println(WiFi.localIP());
+  Serial.print(F("WiFi RSSI :\t\t"));
   Serial.println(WiFi.RSSI());
 }
 #endif
@@ -98,29 +99,23 @@ void reconnect()
   uint8_t retry = 3;
   while (!MQTTClient.connected())
   {
-
-    // MQTTClient.setServer(serverName.c_str(), Mqtt_Port.toInt());
-    Serial.print(F("Attempting MQTT broker : "));
+    Serial.print(F("MQTT Server :\t\t"));
     Serial.println(MQTT_SERVER.c_str());
+    Serial.print(F("MQTT Connection :\t"));
 
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
     {
       // Once connected, resubscribe
       MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
-      Serial.print(F("MQTT connection Established : "));
+      Serial.println(F("Established"));
+      Serial.print(F("MQTT ID :\t\t"));
       Serial.println(MQTT_ID.c_str());
-      MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
+      Serial.print(F("MQTT Username :\t\t"));
+      Serial.println(MQTT_USER.c_str());
     }
     else
     {
-      Serial.print(F("Connection MQTT_Server : "));
-      Serial.println(MQTT_SERVER.c_str());
-      Serial.print(F("Connection MQTT_ID : "));
-      Serial.println(MQTT_ID.c_str());
-      Serial.print(F("Connection MQTT_Username : "));
-      Serial.println(MQTT_USER.c_str());
-      Serial.print(F("Connection MQTT_Password : ********"));
-      Serial.print(F("Connection failed : "));
+      Serial.print(F("Failed - rc="));
       Serial.println(MQTTClient.state());
       if (!--retry)
         break;
@@ -136,19 +131,26 @@ void reconnect()
   // delay(1);
   while (!MQTTClient.connected())
   {
-    Serial.print(F("Attempting MQTT connection..."));
+    Serial.print(F("MQTT Server :\t\t"));
+    Serial.println(MQTT_SERVER.c_str());
+    Serial.print(F("MQTT Connection :\t"));
+
     // Attempt to connect
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
     {
-      Serial.println(F("Connected"));
       // Once connected, resubscribe
       MQTTClient.subscribe(MQTT_TOPIC_IN.c_str());
+      Serial.println(F("Established"));
+      Serial.print(F("MQTT ID :\t\t"));
+      Serial.println(MQTT_ID.c_str());
+      Serial.print(F("MQTT Username :\t\t"));
+      Serial.println(MQTT_USER.c_str());
     }
     else
     {
-      Serial.print(F("\nFailed, rc="));
+      Serial.print(F("Failed - rc="));
       Serial.print(MQTTClient.state());
-      Serial.println(F("\tTry again in 5 seconds"));
+      Serial.println(F("MQTT Retry :\tTry again in 5 seconds"));
       // Wait 5 seconds before retrying
       for (byte i = 0; i < 10; i++)
         delay(500); // delay(5000) may cause hang

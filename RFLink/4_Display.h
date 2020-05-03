@@ -105,7 +105,9 @@ boolean retrieve_End();
 int str2cmd(char *);
 // void replacechar(char *, char, char);
 
+#ifdef ESP8266
 uint8_t String2GPIO(String);
 String GPIO2String(uint8_t uGPIO);
+#endif // ESP8266
 
 #endif

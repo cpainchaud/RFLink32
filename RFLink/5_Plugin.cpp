@@ -1320,14 +1320,16 @@ void PluginInit(void)
 #ifdef AUTOCONNECT_ENABLED
 
   SPIFFS.begin();
+  Serial.print("Param ");
   Serial.print(PROTOCOL_FILE);
+  Serial.print(F(" :\t"));
   File configFile = SPIFFS.open(PROTOCOL_FILE, "r");
   if (configFile)
   {
     StaticJsonDocument<6400> doc;
     if (deserializeJson(doc, configFile))
     {
-      Serial.println(F(" failed to load"));
+      Serial.println(F("Failed to load"));
     }
     else
     {
@@ -1336,13 +1338,13 @@ void PluginInit(void)
         if (doc[x][String(Plugin_id[x])] == 0)
           Plugin_State[x] = P_Disabled;
       }
-      Serial.println(F(" loaded"));
+      Serial.println(F("Loaded"));
     }
     configFile.close();
   }
   else
   {
-    Serial.println(F(" open+r failed"));
+    Serial.println(F("Failed to open(+r)"));
 #ifdef ESP32
     Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
 #endif // ESP32

@@ -538,7 +538,7 @@ int str2cmd(char *command)
 //   }
 // }
 
-#ifdef AUTOCONNECT_ENABLED
+#ifdef ESP8266
 uint8_t String2GPIO(String sGPIO)
 {
   byte num_part;
@@ -624,4 +624,4 @@ String GPIO2String(uint8_t uGPIO)
     return "NOT_A_PIN";
   }
 }
-#endif //AUTOCONNECT_ENABLED
+#endif // ESP8266
