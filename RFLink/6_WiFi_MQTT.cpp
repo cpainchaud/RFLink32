@@ -61,7 +61,7 @@ void setup_WIFI()
   Serial.print(F("WiFi SSID :\t\t"));
   Serial.println(WiFi.SSID());
   Serial.print(F("WiFi Connection :\t"));
-  WiFi.begin(WIFI_SSID, WIFI_PSWD);
+  WiFi.begin(WIFI_SSID.c_str(), WIFI_PSWD.c_str());
 
   while (WiFi.status() != WL_CONNECTED)
   {

@@ -21,28 +21,28 @@ char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for complete message data
 // Common Header
 void display_Header(void)
 {
-  sprintf_P(dbuffer, PSTR("%S%02X"), F("20;"), PKSequenceNumber++);
+  sprintf_P(dbuffer, PSTR("%s%02X"), PSTR("20;"), PKSequenceNumber++);
   strcat(pbuffer, dbuffer);
 }
 
 // Plugin Name
 void display_Name(const char *input)
 {
-  sprintf_P(dbuffer, PSTR(";%S"), input);
+  sprintf_P(dbuffer, PSTR(";%s"), input);
   strcat(pbuffer, dbuffer);
 }
 
 // Common Footer
 void display_Footer(void)
 {
-  sprintf_P(dbuffer, PSTR("%S"), F(";\r\n"));
+  sprintf_P(dbuffer, PSTR("%s"), PSTR(";\r\n"));
   strcat(pbuffer, dbuffer);
 }
 
 // Start message
 void display_Splash(void)
 {
-  sprintf_P(dbuffer, PSTR("%S%d.%d"), F(";RFLink_ESP;VER="), BUILDNR, REVNR);
+  sprintf_P(dbuffer, PSTR("%s%d.%d"), PSTR(";RFLink_ESP;VER="), BUILDNR, REVNR);
   strcat(pbuffer, dbuffer);
 }
 
@@ -52,24 +52,24 @@ void display_IDn(unsigned int input, byte n)
   switch (n)
   {
   case 2:
-    sprintf_P(dbuffer, PSTR("%S%02x"), F(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";ID="), input);
     break;
   case 4:
-    sprintf_P(dbuffer, PSTR("%S%04x"), F(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";ID="), input);
     break;
   case 6:
-    sprintf_P(dbuffer, PSTR("%S%06x"), F(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%06x"), PSTR(";ID="), input);
     break;
   case 8:
   default:
-    sprintf_P(dbuffer, PSTR("%S%08x"), F(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%08x"), PSTR(";ID="), input);
   }
   strcat(pbuffer, dbuffer);
 }
 
 void display_IDc(const char *input)
 {
-  sprintf_P(dbuffer, PSTR("%S"), F(";ID="));
+  sprintf_P(dbuffer, PSTR("%s"), PSTR(";ID="));
   strcat(pbuffer, dbuffer);
   strcat(pbuffer, input);
 }
@@ -77,14 +77,14 @@ void display_IDc(const char *input)
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCH(byte input)
 {
-  sprintf_P(dbuffer, PSTR("%S%02x"), F(";SWITCH="), input);
+  sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";SWITCH="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // SWITCH=A16 => House/Unit code like A1, P2, B16 or a button number etc.
 void display_SWITCHc(const char *input)
 {
-  sprintf_P(dbuffer, PSTR("%S"), F(";SWITCH="));
+  sprintf_P(dbuffer, PSTR("%s"), PSTR(";SWITCH="));
   strcat(pbuffer, dbuffer);
   strcat(pbuffer, input);
 }
@@ -92,32 +92,32 @@ void display_SWITCHc(const char *input)
 // CMD=ON => Command (ON/OFF/ALLON/ALLOFF) Additional for Milight: DISCO+/DISCO-/MODE0 - MODE8
 void display_CMD(boolean all, byte on)
 {
-  sprintf_P(dbuffer, PSTR("%S"), F(";CMD="));
+  sprintf_P(dbuffer, PSTR("%s"), PSTR(";CMD="));
   strcat(pbuffer, dbuffer);
 
   if (all == CMD_All)
   {
-    sprintf_P(dbuffer, PSTR("%S"), F("ALL"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("ALL"));
     strcat(pbuffer, dbuffer);
   }
 
   switch (on)
   {
   case CMD_On:
-    sprintf_P(dbuffer, PSTR("%S"), F("ON"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("ON"));
     break;
   case CMD_Off:
-    sprintf_P(dbuffer, PSTR("%S"), F("OFF"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("OFF"));
     break;
   case CMD_Bright:
-    sprintf_P(dbuffer, PSTR("%S"), F("BRIGHT"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("BRIGHT"));
     break;
   case CMD_Dim:
-    sprintf_P(dbuffer, PSTR("%S"), F("DIM"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("DIM"));
     break;
   case CMD_Unknown:
   default:
-    sprintf_P(dbuffer, PSTR("%S"), F("UNKNOWN"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("UNKNOWN"));
   }
   strcat(pbuffer, dbuffer);
 }
@@ -125,14 +125,14 @@ void display_CMD(boolean all, byte on)
 // SET_LEVEL=15 => Direct dimming level setting value (decimal value: 0-15)
 void display_SET_LEVEL(byte input)
 {
-  sprintf_P(dbuffer, PSTR("%S%02d"), F(";SET_LEVEL="), input);
+  sprintf_P(dbuffer, PSTR("%s%02d"), PSTR(";SET_LEVEL="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // TEMP=9999 => Temperature celcius (hexadecimal), high bit contains negative sign, needs division by 10
 void display_TEMP(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";TEMP="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";TEMP="), input);
   strcat(pbuffer, dbuffer);
 }
 
@@ -140,44 +140,44 @@ void display_TEMP(unsigned int input)
 void display_HUM(byte input, boolean bcd)
 {
   if (bcd == HUM_BCD)
-    sprintf_P(dbuffer, PSTR("%S%02x"), F(";HUM="), input);
+    sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";HUM="), input);
   else
-    sprintf_P(dbuffer, PSTR("%S%02d"), F(";HUM="), input);
+    sprintf_P(dbuffer, PSTR("%s%02d"), PSTR(";HUM="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // BARO=9999 => Barometric pressure (hexadecimal)
 void display_BARO(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";BARO="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";BARO="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // HSTATUS=99 => 0=Normal, 1=Comfortable, 2=Dry, 3=Wet
 void display_HSTATUS(byte input)
 {
-  sprintf_P(dbuffer, PSTR("%S%02x"), F(";HSTATUS="), input);
+  sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";HSTATUS="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // BFORECAST=99 => 0=No Info/Unknown, 1=Sunny, 2=Partly Cloudy, 3=Cloudy, 4=Rain
 void display_BFORECAST(byte input)
 {
-  sprintf_P(dbuffer, PSTR("%S%02x"), F(";BFORECAST="), input);
+  sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";BFORECAST="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // UV=9999 => UV intensity (hexadecimal)
 void display_UV(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";UV="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";UV="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // LUX=9999 => Light intensity (hexadecimal)
 void display_LUX(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";LUX="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";LUX="), input);
   strcat(pbuffer, dbuffer);
 }
 
@@ -185,72 +185,72 @@ void display_LUX(unsigned int input)
 void display_BAT(boolean input)
 {
   if (input == true)
-    sprintf_P(dbuffer, PSTR("%S"), F(";BAT=OK"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";BAT=OK"));
   else
-    sprintf_P(dbuffer, PSTR("%S"), F(";BAT=LOW"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";BAT=LOW"));
   strcat(pbuffer, dbuffer);
 }
 
 // RAIN=1234 => Total rain in mm. (hexadecimal) 0x8d = 141 decimal = 14.1 mm (needs division by 10)
 void display_RAIN(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";RAIN="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";RAIN="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // RAINRATE=1234 => Rain rate in mm. (hexadecimal) 0x8d = 141 decimal = 14.1 mm (needs division by 10)
 void display_RAINRATE(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";RAINRATE="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";RAINRATE="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WINSP=9999 => Wind speed in km. p/h (hexadecimal) needs division by 10
 void display_WINSP(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";WINSP="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";WINSP="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // AWINSP=9999 => Average Wind speed in km. p/h (hexadecimal) needs division by 10
 void display_AWINSP(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";AWINSP="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";AWINSP="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WINGS=9999 => Wind Gust in km. p/h (hexadecimal)
 void display_WINGS(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";WINGS="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";WINGS="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WINDIR=123 => Wind direction (integer value from 0-15) reflecting 0-360 degrees in 22.5 degree steps
 void display_WINDIR(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%03d"), F(";WINDIR="), input);
+  sprintf_P(dbuffer, PSTR("%s%03d"), PSTR(";WINDIR="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WINCHL => wind chill (hexadecimal, see TEMP)
 void display_WINCHL(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";WINCHL="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";WINCHL="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WINTMP=1234 => Wind meter temperature reading (hexadecimal, see TEMP)
 void display_WINTMP(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";WINTMP="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";WINTMP="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // CHIME=123 => Chime/Doorbell melody number
 void display_CHIME(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%03d"), F(";CHIME="), input);
+  sprintf_P(dbuffer, PSTR("%s%03d"), PSTR(";CHIME="), input);
   strcat(pbuffer, dbuffer);
 }
 
@@ -258,9 +258,9 @@ void display_CHIME(unsigned int input)
 void display_SMOKEALERT(boolean input)
 {
   if (input == SMOKE_On)
-    sprintf_P(dbuffer, PSTR("%S"), F(";SMOKEALERT=ON"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";SMOKEALERT=ON"));
   else
-    sprintf_P(dbuffer, PSTR("%S"), F(";SMOKEALERT=OFF"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";SMOKEALERT=OFF"));
   strcat(pbuffer, dbuffer);
 }
 
@@ -268,72 +268,72 @@ void display_SMOKEALERT(boolean input)
 void display_PIR(boolean input)
 {
   if (input == PIR_On)
-    sprintf_P(dbuffer, PSTR("%S"), F(";PIR=ON"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";PIR=ON"));
   else
-    sprintf_P(dbuffer, PSTR("%S"), F(";PIR=OFF"));
+    sprintf_P(dbuffer, PSTR("%s"), PSTR(";PIR=OFF"));
   strcat(pbuffer, dbuffer);
 }
 
 // CO2=1234 => CO2 air quality
 void display_CO2(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";CO2="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";CO2="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // SOUND=1234 => Noise level
 void display_SOUND(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";SOUND="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";SOUND="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // KWATT=9999 => KWatt (hexadecimal)
 void display_KWATT(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";KWATT="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";KWATT="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // WATT=9999 => Watt (hexadecimal)
 void display_WATT(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";WATT="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";WATT="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // CURRENT=1234 => Current phase 1
 void display_CURRENT(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";CURRENT="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";CURRENT="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // DIST=1234 => Distance
 void display_DIST(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";DIST="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";DIST="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // METER=1234 => Meter values (water/electricity etc.)
 void display_METER(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";METER="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";METER="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // VOLT=1234 => Voltage
 void display_VOLT(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04d"), F(";VOLT="), input);
+  sprintf_P(dbuffer, PSTR("%s%04d"), PSTR(";VOLT="), input);
   strcat(pbuffer, dbuffer);
 }
 
 // RGBW=9999 => Milight: provides 1 byte color and 1 byte brightness value
 void display_RGBW(unsigned int input)
 {
-  sprintf_P(dbuffer, PSTR("%S%04x"), F(";RGBW="), input);
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";RGBW="), input);
   strcat(pbuffer, dbuffer);
 }
 

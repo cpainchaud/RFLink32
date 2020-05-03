@@ -69,10 +69,10 @@ void setup()
 
   Serial.print(F("Arduino IDE Version :\t"));
   Serial.println(ARDUINO);
-#if (defined(ESP32) || defined(ESP8266))
+#ifdef ESP8266
   Serial.print(F("ESP CoreVersion :\t"));
   Serial.println(ESP.getCoreVersion());
-#endif
+#endif // ESP8266
   Serial.print(F("Sketch File :\t\t"));
   Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
