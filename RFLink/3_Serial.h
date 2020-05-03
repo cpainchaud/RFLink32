@@ -18,6 +18,7 @@ extern char InputBuffer_Serial[INPUT_COMMAND_SIZE];
 
 boolean CheckSerial();
 boolean CheckMQTT(byte *);
+#ifdef AUTOCONNECT_ENABLED
 boolean CheckWeb(String &);
-
+#endif // AUTOCONNECT_ENABLED
 #endif

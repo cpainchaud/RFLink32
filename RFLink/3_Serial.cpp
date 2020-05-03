@@ -49,6 +49,7 @@ boolean CheckMQTT(byte *byte_in)
   return false;
 }
 
+#ifdef AUTOCONNECT_ENABLED
 boolean CheckWeb(String &String_in)
 {
   if (!String_in.isEmpty())
@@ -76,6 +77,7 @@ boolean CheckWeb(String &String_in)
   }
   return false;
 }
+#endif // AUTOCONNECT_ENABLED
 
 boolean CopySerial(char *src)
 {
