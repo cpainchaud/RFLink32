@@ -59,7 +59,7 @@ boolean Plugin_004(byte function, char *string)
       return false;
    if (RawSignal.Pulses[0] == 15)
       return true; // Home Easy, skip KAKU
-   boolean Bit;
+   boolean Bit = 0;
    int i;
    //int P0,P1,P2,P3;
    byte P0, P1, P2, P3;
