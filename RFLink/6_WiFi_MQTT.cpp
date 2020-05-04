@@ -59,7 +59,7 @@ void setup_WIFI()
 
   // We start by connecting to a WiFi network
   Serial.print(F("WiFi SSID :\t\t"));
-  Serial.println(WiFi.SSID());
+  Serial.println(WIFI_SSID.c_str());
   Serial.print(F("WiFi Connection :\t"));
   WiFi.begin(WIFI_SSID.c_str(), WIFI_PSWD.c_str());
 

@@ -625,3 +625,33 @@ String GPIO2String(uint8_t uGPIO)
   }
 }
 #endif // ESP8266
+
+#ifdef ESP32
+uint8_t String2GPIO(String sGPIO)
+{
+  char cGPIO[4];
+
+  sGPIO.trim();
+  sGPIO.toCharArray(cGPIO, 4);
+
+  switch (strlen(cGPIO))
+  {
+  case 1:
+    if (isdigit(cGPIO[0]))
+      return (cGPIO[0] - '0');
+  case 2:
+    if ((isdigit(cGPIO[0])) && (isdigit(cGPIO[1])))
+      return ((cGPIO[0] - '0') * 10 + (cGPIO[1] - '0'));
+  default:
+    return NOT_A_PIN;
+  }
+}
+
+String GPIO2String(uint8_t uGPIO)
+{
+  if (uGPIO < 40)
+    return String(uGPIO);
+  else
+    return "NOT_A_PIN";
+}
+#endif // ESP32
