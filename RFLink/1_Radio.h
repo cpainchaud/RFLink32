@@ -25,6 +25,7 @@ extern uint8_t PIN_RF_TX_PMOS;
 extern uint8_t PIN_RF_TX_NMOS;
 extern uint8_t PIN_RF_TX_VCC;
 extern uint8_t PIN_RF_TX_GND;
+extern uint8_t PIN_RF_TX_NA;
 extern uint8_t PIN_RF_TX_DATA;
 extern boolean PULLUP_RF_RX_DATA;
 
@@ -40,6 +41,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_NMOS_0 D7        // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
 #define PIN_RF_TX_DATA_0 D4        // Data to the 433Mhz transmitter on this pin
 #endif
 
@@ -55,6 +57,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
 #define PIN_RF_TX_DATA_0 NOT_A_PIN // Data to the 433Mhz transmitter on this pin
+#define PIN_RF_TX_NA_0 21          // Spare RX pin. Forced as input
 #endif
 
 #ifdef __AVR_ATmega328P__
@@ -68,6 +71,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
 #define PIN_RF_TX_DATA_0 NOT_A_PIN // Data to the 433Mhz transmitter on this pin
 #endif
 
@@ -82,6 +86,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 15         // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
+#define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
 #define PIN_RF_TX_DATA_0 14        // Data to the 433Mhz transmitter on this pin
 #endif
 

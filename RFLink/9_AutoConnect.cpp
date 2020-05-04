@@ -58,6 +58,7 @@ uint8_t PIN_RF_TX_PMOS;
 uint8_t PIN_RF_TX_NMOS;
 uint8_t PIN_RF_TX_VCC;
 uint8_t PIN_RF_TX_GND;
+uint8_t PIN_RF_TX_NA;
 uint8_t PIN_RF_TX_DATA;
 
 // Prototypes
@@ -393,6 +394,7 @@ void getParams(AutoConnectAux &aux)
     PIN_RF_TX_NMOS = String2GPIO(aux["PIN_RF_TX_NMOS"].value);
     PIN_RF_TX_VCC = String2GPIO(aux["PIN_RF_TX_VCC"].value);
     PIN_RF_TX_GND = String2GPIO(aux["PIN_RF_TX_GND"].value);
+    PIN_RF_TX_NA = String2GPIO(aux["PIN_RF_TX_NA"].value);
     PIN_RF_TX_DATA = String2GPIO(aux["PIN_RF_TX_DATA"].value);
 }
 
@@ -475,7 +477,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
                                       "PIN_RF_RX_NA", "PIN_RF_RX_DATA", "PULLUP_RF_RX_DATA",
                                       "PIN_RF_TX_PMOS", "PIN_RF_TX_NMOS",
                                       "PIN_RF_TX_VCC", "PIN_RF_TX_GND",
-                                      "PIN_RF_TX_DATA"});
+                                      "PIN_RF_TX_NA", "PIN_RF_TX_DATA"});
         Serial.println(F("Saved"));
         my_file.close();
     }
@@ -535,6 +537,8 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     echo.value += GPIO2String(PIN_RF_TX_VCC);
     echo.value += F("<br>TX_GND: ");
     echo.value += GPIO2String(PIN_RF_TX_GND);
+    echo.value += F("<br>TX_NA: ");
+    echo.value += GPIO2String(PIN_RF_TX_NA);
     echo.value += F("<br>TX_DATA: ");
     echo.value += GPIO2String(PIN_RF_TX_DATA);
     echo.value += F("<br>");

@@ -318,6 +318,12 @@ static const char AUX_settings[] PROGMEM = R"raw(
           "placeholder": "NOT_A_PIN"
         },
         {
+          "name": "PIN_RF_TX_NA",
+          "type": "ACInput",
+          "label": "TX_NA",
+          "placeholder": "NOT_A_PIN"
+        },
+        {
           "name": "PIN_RF_TX_DATA",
           "type": "ACInput",
           "label": "TX_DATA",

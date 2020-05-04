@@ -18,12 +18,13 @@ uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
 uint8_t PIN_RF_RX_GND = PIN_RF_RX_GND_0;
 uint8_t PIN_RF_RX_NA = PIN_RF_RX_NA_0;
 uint8_t PIN_RF_RX_DATA = PIN_RF_RX_DATA_0;
+boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
 uint8_t PIN_RF_TX_PMOS = PIN_RF_TX_PMOS_0;
 uint8_t PIN_RF_TX_NMOS = PIN_RF_TX_NMOS_0;
 uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
 uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
+uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
 uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
-boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
 #endif //AUTOCONNECT_ENABLED
 
 // Prototype
@@ -62,7 +63,7 @@ void set_Radio_mode(Radio_State new_State)
   }
 }
 
-#ifdef ESP8266
+#if (defined(ESP8266) || defined(ESP32))
 void show_Radio_Pin()
 {
   if (PIN_RF_RX_PMOS != (uint8_t)NOT_A_PIN)
@@ -126,8 +127,13 @@ void show_Radio_Pin()
     Serial.print(F("Radio pin RF_TX_DATA :\t"));
     Serial.println(GPIO2String(PIN_RF_TX_DATA));
   }
+  if (PIN_RF_TX_NA != (uint8_t)NOT_A_PIN)
+  {
+    Serial.print(F("Radio pin RF_TX_NA :\t"));
+    Serial.println(GPIO2String(PIN_RF_TX_NA));
+  }
 }
-#endif //ESP8266
+#endif // ESP8266 || ESP32
 
 void enableRX()
 {
@@ -163,6 +169,7 @@ void disableRX()
 void enableTX()
 {
   // TX Pins
+  pinMode(PIN_RF_TX_NA, INPUT);       // Initialise in/output ports
   pinMode(PIN_RF_TX_DATA, OUTPUT);    // Initialise in/output ports
   digitalWrite(PIN_RF_TX_DATA, LOW);  // No signal yet
   pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
@@ -182,6 +189,7 @@ void disableTX()
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
   digitalWrite(PIN_RF_TX_DATA, LOW);  // No more signal
   pinMode(PIN_RF_TX_DATA, INPUT);     //
+  pinMode(PIN_RF_TX_NA, INPUT);       //
   pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
   pinMode(PIN_RF_TX_PMOS, OUTPUT);    // MOSFET, always output
   digitalWrite(PIN_RF_TX_PMOS, HIGH); // turn VCC to TX receiver OFF
