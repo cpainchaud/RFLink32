@@ -398,7 +398,7 @@ void getParams(AutoConnectAux &aux)
     PIN_RF_TX_DATA = String2GPIO(aux["PIN_RF_TX_DATA"].value);
 }
 
-// Load parameters saved with  saveParams from SPIFFS into the
+// Load parameters saved with saveParams from SPIFFS into the
 // elements defined in /settings JSON.
 String loadParams(AutoConnectAux &aux, PageArgument &args)
 {
