@@ -38,10 +38,6 @@ boolean QRFUDebug = QRFUDebug_0; // debug RF signals with plugin 254 but no mult
 \*********************************************************************************************/
 #include "./Plugins/_Plugin_Config_01.h"
 
-#define SKETCH_PATH ./
-#define stringify(x) #x
-#define PLUGINFILE(a, b) stringify(a/Plugins/b) // no space in "stringify(a/Plugins/b)"
-
 #ifdef PLUGIN_001
 #include PLUGINFILE(SKETCH_PATH, Plugin_001.c)
 #endif
