@@ -19,7 +19,6 @@ extern String CmdMsg;
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #elif ESP32
-#error "AutoConnect for ESP32 not implemented... Yet"
 #endif // ESP8266
 
 #include <AutoConnect.h>

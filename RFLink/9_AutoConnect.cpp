@@ -24,9 +24,9 @@ typedef ESP8266WebServer WebServer;
 #elif ESP32
 #include <WiFi.h>
 #include <ESPmDNS.h>
-#include <SPIFFS.h>
 typedef WebServer WebServer;
-#endif
+#include <SPIFFS.h>
+#endif // ESP8266
 #include <ArduinoJson.h>
 #include <AutoConnect.h>
 
@@ -104,6 +104,7 @@ void rootPage()
         Serial.print("Param ");
         Serial.print(PROTOCOL_FILE);
         Serial.print(F(" :\t"));
+
         SPIFFS.begin();
         File configFile = SPIFFS.open(PROTOCOL_FILE, "w");
         serializeJson(doc, configFile);
@@ -115,7 +116,6 @@ void rootPage()
     }
 
     // This is the Home Page - Choose theme here : https://www.bootstrapcdn.com/bootswatch/?theme
-
     String content =
         "<html>"
         "<title>RFLink-ESP</title>"
@@ -384,7 +384,13 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     (void)(args);
     //static boolean initConfig = true;
 
+#ifdef ESP32
+    // To prevent error 'SPIFFS: mount failed, -10025', activate formatOnFail option
+    SPIFFS.begin(true);
+#else // ESP32
     SPIFFS.begin();
+#endif // ESP32
+
     Serial.print("Param ");
     Serial.print(PARAM_FILE);
     Serial.print(F(" :\t"));
@@ -405,9 +411,6 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     else
     {
         Serial.println(F("Failed to open(+r)"));
-#ifdef ESP32
-        Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
-#endif // ESP32
     }
     SPIFFS.end();
     return String("");

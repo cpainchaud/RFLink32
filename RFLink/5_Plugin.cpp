@@ -1345,9 +1345,6 @@ void PluginInit(void)
   else
   {
     Serial.println(F("Failed to open(+r)"));
-#ifdef ESP32
-    Serial.println(F("If you get error as 'SPIFFS: mount failed, -10025', Please modify with 'SPIFFS.begin(true)'."));
-#endif // ESP32
   }
   SPIFFS.end();
 
