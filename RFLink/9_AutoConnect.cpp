@@ -21,13 +21,13 @@
 #include <ESP8266mDNS.h>
 typedef ESP8266WebServer WebServer;
 #include <FS.h> // To save plugins parameters
-#include <ArduinoJson.h>
 #elif ESP32
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
 typedef WebServer WebServer;
 #endif
+#include <ArduinoJson.h>
 #include <AutoConnect.h>
 
 AutoConnect portal;
@@ -76,34 +76,18 @@ void rootPage()
     }
 
     if (webServer.hasArg("BtnSave"))
-    { // On n'enregistre les values que si ce n'est pas le bouton "test" qui a été appuyé
-
-        // === Debug Part ===
-        // String message = "Number of args received: ";
-        // message += webServer.args(); //Get number of parameters
-        // message += "\n";             //Add a new line
-        // for (int i = 0; i < webServer.args(); i++)
-        // {
-        //     message += "Arg nº" + (String)i + " – > "; //Include the current iteration value
-        //     message += webServer.argName(i) + ": ";    //Get the name of the parameter
-        //     message += webServer.arg(i) + "\n";        //Get the value of the parameter
-        // }
-        // Serial.println(message);
-        // ==================
-
-        //const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2);
-        StaticJsonDocument<6400> doc;
-        //JsonObject obj = doc.createNestedObject();
+    {
+        // const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2);
+        // StaticJsonDocument<4128> doc;
+        DynamicJsonDocument doc(4128);
 
         for (byte x = 0; x < PLUGIN_MAX; x++)
         {
             if (Plugin_id[x] != 0)
             {
-                // pour chaque plugin activé lors de la compilation du firmware, on créé un enregistrement dans le fichier protocols.json
+                // pour chaque plugin activé lors de la compilation du firmware,
+                // on créé un enregistrement dans le fichier protocols.json
                 // si le serveur a un argument c'est que la checkbox est cochée
-
-                // doc[x]["protocol"] = Plugin_id[x];
-                // webServer.hasArg(Plugin_id[x] + "_ProtocolState") ? doc[x]["state"] = 1 : doc[x]["state"] = 0;
                 if (webServer.hasArg(String(Plugin_id[x]) + "_ProtocolState"))
                 {
                     doc[x][String(Plugin_id[x])] = 1;
@@ -122,15 +106,10 @@ void rootPage()
         Serial.print(F(" :\t"));
         SPIFFS.begin();
         File configFile = SPIFFS.open(PROTOCOL_FILE, "w");
-
-        String configString;
-        serializeJson(doc, configString);
-        configFile.print(configString);
-        // === Debug Part ===
-        // Serial.println(configString);
-        // ==================
+        serializeJson(doc, configFile);
 
         Serial.println(F("Saved"));
+        doc.clear();
         configFile.close();
         SPIFFS.end();
     }

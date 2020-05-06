@@ -13,11 +13,11 @@
 #include "9_AutoConnect.h"
 #ifdef ESP8266
 #include <FS.h> // To save plugins parameters
-#include <ArduinoJson.h>
 #elif ESP32
 #include <SPIFFS.h>
-#endif
-#endif
+#endif // ESP8266
+#include <ArduinoJson.h>
+#endif // AUTOCONNECT
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
@@ -1322,7 +1322,10 @@ void PluginInit(void)
   File configFile = SPIFFS.open(PROTOCOL_FILE, "r");
   if (configFile)
   {
-    StaticJsonDocument<6400> doc;
+    // const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2); // 4128
+    // StaticJsonDocument<4128> doc;
+    DynamicJsonDocument doc(4128);
+
     if (deserializeJson(doc, configFile))
     {
       Serial.println(F("Failed to load"));
@@ -1336,6 +1339,7 @@ void PluginInit(void)
       }
       Serial.println(F("Loaded"));
     }
+    doc.clear();
     configFile.close();
   }
   else
