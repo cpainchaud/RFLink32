@@ -92,26 +92,26 @@ void setup()
 #ifdef AUTOCONNECT_ENABLED
   setup_AutoConnect();
 #endif
-
   set_Radio_mode(Radio_OFF);
-#ifdef ESP8266
+#if (defined(ESP8266) || defined(ESP32))
   show_Radio_Pin();
-#endif // ESP8266
+#endif // ESP8266 || ESP32
 
   PluginInit();
   PluginTXInit();
 
+#ifdef OLED_ENABLED
+  setup_OLED();
+#endif
 #ifdef MQTT_ENABLED
   setup_MQTT();
   reconnect();
 #endif
 
-#ifdef OLED_ENABLED
-  setup_OLED();
-#endif
   display_Header();
   display_Splash();
   display_Footer();
+
 #ifdef SERIAL_ENABLED
   Serial.print(pbuffer);
 #endif
