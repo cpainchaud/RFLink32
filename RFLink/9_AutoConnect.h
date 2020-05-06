@@ -19,10 +19,15 @@ extern String CmdMsg;
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #elif ESP32
+#include <WiFi.h>
 #endif // ESP8266
 
 #include <AutoConnect.h>
+#ifdef ESP8266
 #define GET_CHIPID() (ESP.getChipId())
+#elif ESP32
+#define GET_CHIPID() ((uint32_t)ESP.getEfuseMac())
+#endif //ESP8266
 
 // --------- These labels can be renamed (Need clean-up before re-build) ---------
 //  https://hieromon.github.io/AutoConnect/changelabel.html#label-text-replacement-header-file

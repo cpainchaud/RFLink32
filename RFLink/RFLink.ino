@@ -115,11 +115,11 @@ void setup()
 #ifdef SERIAL_ENABLED
   Serial.print(pbuffer);
 #endif
-#ifdef MQTT_ENABLED
-  publishMsg();
-#endif
 #ifdef OLED_ENABLED
   splash_OLED();
+#endif
+#ifdef MQTT_ENABLED
+  publishMsg();
 #endif
   pbuffer[0] = 0;
   set_Radio_mode(Radio_RX);

@@ -209,7 +209,7 @@ void rootPage()
 
     content += "<table class='table table-hover'  style='max-width: 50rem;'>";
     content += "<thead><tr><th>N&deg;</th><th>Plugin Name</th><th>Enabled</th></tr></thead>"; // Table Header    // é = &eacute;
-    content += "<tbody>";                                                              // Table content
+    content += "<tbody>";                                                                     // Table content
     content += "<form action='/' method='POST'>";
     for (byte x = 0; x < PLUGIN_MAX; x++)
     {
@@ -290,23 +290,23 @@ void setup_AutoConnect()
         Serial.println(F("Impossible to load settings web page"));
     }
     //-------------------------------------
-
-    Serial.print(F("WiFi SSID :\t\t"));
-    Serial.println(WiFi.SSID());
     Serial.print(F("WiFi Connection :\t"));
 
     if (portal.begin())
     {
         config.bootUri = AC_ONBOOTURI_HOME;
-        if (MDNS.begin(config.hostName))
+        if (MDNS.begin(config.hostName.c_str()))
             MDNS.addService("http", "tcp", 80);
         Serial.println(F("Established"));
+        Serial.print(F("WiFi SSID :\t\t"));
+        Serial.println(WiFi.SSID());
         Serial.print(F("WiFi IP :\t\t"));
         Serial.println(WiFi.localIP());
         Serial.print(F("WiFi RSSI :\t\t"));
         Serial.println(WiFi.RSSI());
         Serial.print(F("WiFi Hostname :\t\t"));
-        Serial.println(config.hostName);    }
+        Serial.println(config.hostName);
+    }
     else
     {
         Serial.print(F("Failed - "));
@@ -326,7 +326,9 @@ void setup_AutoConnect()
 
 void loop_AutoConnect()
 {
+#ifdef ESP8266
     MDNS.update();
+#endif // ESP8266
     portal.handleClient();
 }
 
