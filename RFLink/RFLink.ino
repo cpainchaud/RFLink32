@@ -65,8 +65,9 @@ void setup()
 
   delay(250);         // Time needed to switch back from Upload to Console
   Serial.begin(BAUD); // Initialise the serial port
-  Serial.println();   // ESP "Garbage" message
 
+#if (defined(ESP32) || defined(ESP8266))
+  Serial.println(); // ESP "Garbage" message
   Serial.print(F("Arduino IDE Version :\t"));
   Serial.println(ARDUINO);
 #ifdef ESP8266
@@ -78,7 +79,6 @@ void setup()
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
-#if (defined(ESP32) || defined(ESP8266))
   setup_WIFI_OFF();
 #endif
 #endif
@@ -138,8 +138,10 @@ void loop()
 #endif
 
 #ifdef SERIAL_ENABLED
+#if PIN_RF_TX_DATA_0 != NOT_A_PIN
     if (CheckSerial())
       sendMsg();
+#endif
 #endif
 
 #ifdef AUTOCONNECT_ENABLED
