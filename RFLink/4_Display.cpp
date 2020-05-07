@@ -527,16 +527,16 @@ int str2cmd(char *command)
   return false;
 }
 
-// void replacechar(char *str, char orig, char rep)
-// {
-//   char *ix = str;
-//   int n = 0;
-//   while ((ix = strchr(ix, orig)) != NULL)
-//   {
-//     *ix++ = rep;
-//     n++;
-//   }
-// }
+void replacechar(char *str, char orig, char rep)
+{
+  char *ix = str;
+  int n = 0;
+  while ((ix = strchr(ix, orig)) != NULL)
+  {
+    *ix++ = rep;
+    n++;
+  }
+}
 
 #ifdef ESP8266
 uint8_t String2GPIO(String sGPIO)

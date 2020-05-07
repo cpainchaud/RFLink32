@@ -103,7 +103,7 @@ boolean retrieve_End();
 #define VALUE_ALLON 141
 
 int str2cmd(char *);
-// void replacechar(char *, char, char);
+void replacechar(char *, char, char);
 
 #if (defined(ESP8266) || defined(ESP32))
 uint8_t String2GPIO(String);
