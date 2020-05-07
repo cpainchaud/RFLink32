@@ -54,10 +54,10 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_RX_DATA_0 12        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
 #define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_TX_VCC_0 18         // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND_0 19         // Ground power to the transmitter on this pin
-#define PIN_RF_TX_NA_0 21          // Spare RX pin. Forced as input
-#define PIN_RF_TX_DATA_0 5         // Data to the 433Mhz transmitter on this pin
+#define PIN_RF_TX_VCC_0 4          // +5 volt / Vcc power to the transmitter on this pin
+#define PIN_RF_TX_GND_0 16         // Ground power to the transmitter on this pin
+#define PIN_RF_TX_NA_0 17          // Spare RX pin. Forced as input
+#define PIN_RF_TX_DATA_0 2         // Data to the 433Mhz transmitter on this pin
 #endif
 
 #ifdef __AVR_ATmega328P__
