@@ -18,6 +18,10 @@ char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for complete message data
 // Display shared func //
 // ------------------- //
 
+#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
+#error "For AVR plaforms, in all sprintf_P above, please replace %s with %s"
+#endif
+
 // Common Header
 void display_Header(void)
 {
