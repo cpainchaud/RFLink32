@@ -12,7 +12,9 @@
 #define REVNR 0x01   // 0X42       // shown in version and startup string
 
 // OLED display, 0.91" SSD1306 I2C
-// #define OLED_ENABLED
+#define OLED_ENABLED
+#define OLED_CONTRAST 255 // default 255 (max)
+#define OLED_FLIP false   // default false
 
 // WIFI
 #if (defined(ESP32) || defined(ESP8266))

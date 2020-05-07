@@ -13,7 +13,7 @@
 
 #include "4_Display.h"
 #include "8_OLED.h"
-//#include <U8x8lib.h> // Comment to avoid dependency graph inclusion
+#include <U8x8lib.h> // Comment to avoid dependency graph inclusion
 
 #define U8X8_PIN_NONE 255
 // 0.91" I2C 128x32 Display
@@ -31,7 +31,8 @@ void setup_OLED()
 {
     u8x8.begin();
     u8x8.setPowerSave(1);
-    u8x8.setContrast(255);
+    u8x8.setContrast(OLED_CONTRAST);
+    u8x8.setFlipMode(OLED_FLIP);
 
     u8x8log.begin(u8x8, U8LOG_WIDTH, U8LOG_HEIGHT, u8log_buffer);
     u8x8log.setRedrawMode(0); // 0: Update screen with newline, 1: Update screen for every char
@@ -42,12 +43,11 @@ void splash_OLED()
 {
     char ver[7];
     sprintf_P(ver, PSTR("v%d.%d"), BUILDNR, REVNR);
-
     u8x8.setFont(u8x8_font_amstrad_cpc_extended_r);
     u8x8.draw2x2String(0, 0, "RFLink");
     u8x8.draw2x2String(10, 2, "ESP");
     u8x8.drawString(0, 3, ver);
-    u8x8.drawString(0, 4, "01/05/20");
+    u8x8.drawString(0, 4, "07/05/20");
     u8x8.drawString(6, 6, "github.com");
     u8x8.drawString(2, 7, "/couin3/RFLink");
     u8x8.setPowerSave(0);

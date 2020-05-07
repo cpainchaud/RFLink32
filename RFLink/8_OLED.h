@@ -15,8 +15,13 @@
 
 #define PIN_OLED_GND NOT_A_PIN // Ground power on this pin
 #define PIN_OLED_VCC NOT_A_PIN // +3 volt / Vcc power on this pin#
+#ifdef ESP8266
 #define PIN_OLED_SCL D1        // I2C SCL
 #define PIN_OLED_SDA D2        // I2C SDA
+#elif ESP32
+#define PIN_OLED_SCL 22        // I2C SCL
+#define PIN_OLED_SDA 21        // I2C SDA
+#endif
 
 void setup_OLED();
 void splash_OLED();
