@@ -208,7 +208,7 @@ boolean CheckCmd()
       }
       else if (strncasecmp(InputBuffer_Serial + 3, "QRFUDEBUG=O", 11) == 0)
       {
-        if (InputBuffer_Serial[13] == 'N' || InputBuffer_Serial[13] == 'n')
+        if (InputBuffer_Serial[14] == 'N' || InputBuffer_Serial[14] == 'n')
         {
           RFDebug = false;  // full debug off
           QRFDebug = false; // q debug off
