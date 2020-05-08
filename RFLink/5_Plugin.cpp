@@ -12,9 +12,11 @@
 #ifdef AUTOCONNECT_ENABLED
 #include "9_AutoConnect.h"
 #ifdef ESP8266
-#include <FS.h> // To save plugins parameters
+#include <FS.h>
+#include <LittleFS.h>
 #elif ESP32
 #include <SPIFFS.h>
+#define LittleFS SPIFFS
 #endif // ESP8266
 #include <ArduinoJson.h>
 #endif // AUTOCONNECT
@@ -1314,12 +1316,11 @@ void PluginInit(void)
 
 // read config file to desactivated protocols
 #ifdef AUTOCONNECT_ENABLED
-
-  SPIFFS.begin();
+  LittleFS.begin();
   Serial.print("Param ");
   Serial.print(PROTOCOL_FILE);
   Serial.print(F(" :\t"));
-  File configFile = SPIFFS.open(PROTOCOL_FILE, "r");
+  File configFile = LittleFS.open(PROTOCOL_FILE, "r");
   if (configFile)
   {
     // const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2); // 4128
@@ -1346,7 +1347,7 @@ void PluginInit(void)
   {
     Serial.println(F("Failed to open(+r)"));
   }
-  SPIFFS.end();
+  LittleFS.end();
 
 #endif // AUTOCONNECT_ENABLED
 

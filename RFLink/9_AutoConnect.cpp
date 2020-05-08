@@ -20,12 +20,14 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 typedef ESP8266WebServer WebServer;
-#include <FS.h> // To save plugins parameters
+#include <FS.h>
+#include <LittleFS.h>
 #elif ESP32
 #include <WiFi.h>
 #include <ESPmDNS.h>
 typedef WebServer WebServer;
 #include <SPIFFS.h>
+#define LittleFS SPIFFS
 #endif // ESP8266
 #include <ArduinoJson.h>
 #include <AutoConnect.h>
@@ -105,14 +107,14 @@ void rootPage()
         Serial.print(PROTOCOL_FILE);
         Serial.print(F(" :\t"));
 
-        SPIFFS.begin();
-        File configFile = SPIFFS.open(PROTOCOL_FILE, "w");
+        LittleFS.begin();
+        File configFile = LittleFS.open(PROTOCOL_FILE, "w");
         serializeJson(doc, configFile);
 
         Serial.println(F("Saved"));
         doc.clear();
         configFile.close();
-        SPIFFS.end();
+        LittleFS.end();
     }
 
     // This is the Home Page - Choose theme here : https://www.bootstrapcdn.com/bootswatch/?theme
@@ -390,13 +392,13 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     // To prevent error 'SPIFFS: mount failed, -10025', activate formatOnFail option
     SPIFFS.begin(true);
 #else // ESP32
-    SPIFFS.begin();
+    LittleFS.begin();
 #endif // ESP32
 
     Serial.print("Param ");
     Serial.print(PARAM_FILE);
     Serial.print(F(" :\t"));
-    File paramFile = SPIFFS.open(PARAM_FILE, "r");
+    File paramFile = LittleFS.open(PARAM_FILE, "r");
     if (paramFile)
     {
         if (aux.loadElement(paramFile))
@@ -414,7 +416,7 @@ String loadParams(AutoConnectAux &aux, PageArgument &args)
     {
         Serial.println(F("Failed to open(+r)"));
     }
-    SPIFFS.end();
+    LittleFS.end();
     return String("");
 }
 
@@ -448,8 +450,8 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     Serial.print("Param ");
     Serial.print(PARAM_FILE);
     Serial.print(F(" :\t"));
-    SPIFFS.begin();
-    File my_file = SPIFFS.open(PARAM_FILE, "w");
+    LittleFS.begin();
+    File my_file = LittleFS.open(PARAM_FILE, "w");
     if (my_file)
     {
         src_aux.saveElement(my_file, {"MQTT_SERVER", "MQTT_PORT",
@@ -467,7 +469,7 @@ String saveParams(AutoConnectAux &aux, PageArgument &args)
     }
     else
         Serial.print(F("Failed to open(+w)"));
-    SPIFFS.end();
+    LittleFS.end();
 
     // Echo back saved parameters to AutoConnectAux page.
     AutoConnectText &echo = aux["parameters"].as<AutoConnectText>();
