@@ -61,6 +61,8 @@ void setup()
   power_all_disable();   // turn off all modules
   power_timer0_enable(); // Timer 0
   power_usart0_enable(); // UART
+#elif defined(ESP32)
+  btStop();
 #endif
 
   delay(250);         // Time needed to switch back from Upload to Console
@@ -81,7 +83,7 @@ void setup()
 #if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
   setup_WIFI_OFF();
 #endif
-#endif
+#endif // ESP32 || ESP8266
 
 #if (!defined(AUTOCONNECT_ENABLED) && defined(MQTT_ENABLED))
   setup_WIFI();
