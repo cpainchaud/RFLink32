@@ -27,13 +27,59 @@ uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
 uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
 #endif //AUTOCONNECT_ENABLED
 
+Radio_State current_State = Radio_NA;
+
+#ifdef RFM69_ENABLED
+
+#include <SPI.h>
+#include <RFM69OOK.h>
+#include <RFM69OOKregisters.h>
+RFM69OOK radio;
+
+void set_Radio_mode(Radio_State new_State)
+{
+  if (current_State != new_State)
+  {
+    switch (new_State)
+    {
+    case Radio_OFF:
+      radio.initialize();
+      radio.setHighPower(true); // for RFM69HW
+      radio.setFrequency(433920000);
+      radio.setBitrate(32768 / 4);
+      // radio.sleep();
+      break;
+
+    case Radio_RX:
+      radio.transmitEnd();
+      PIN_RF_TX_DATA = NOT_A_PIN;
+      radio.receiveBegin();
+      PIN_RF_RX_DATA = RF69OOK_IRQ_PIN;
+      radio.attachUserInterrupt(NULL);
+      detachInterrupt(0);
+      detachInterrupt(1);
+      break;
+
+    case Radio_TX:
+      radio.receiveEnd();
+      PIN_RF_RX_DATA = NOT_A_PIN;
+      radio.transmitBegin();
+      PIN_RF_TX_DATA = RF69OOK_IRQ_PIN;
+      radio.setPowerLevel(20);
+      break;
+
+    case Radio_NA:
+      break;
+    }
+    current_State = new_State;
+  }
+}
+#else
 // Prototype
 void enableRX();
 void disableRX();
 void enableTX();
 void disableTX();
-
-Radio_State current_State = Radio_NA;
 
 void set_Radio_mode(Radio_State new_State)
 {
@@ -197,3 +243,4 @@ void disableTX()
   pinMode(PIN_RF_TX_VCC, INPUT);
   pinMode(PIN_RF_TX_GND, INPUT);
 }
+#endif // RFM69_ENABLED
