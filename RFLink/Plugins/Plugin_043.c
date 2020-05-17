@@ -92,11 +92,11 @@
 
 #define LACROSSE43_PULSECOUNT 88 // also handles 84 to 92 pulses!
 
-#define LACROSSE43_MIDLO 736 / RAWSIGNAL_SAMPLE_RATE        //900 //630
-#define LACROSSE43_MIDHI 1120 / RAWSIGNAL_SAMPLE_RATE       //1500 //1050
-#define LACROSSE43_PULSEMINMAX 576 / RAWSIGNAL_SAMPLE_RATE  //810 //570
-#define LACROSSE43_PULSEMAXMIN 1120 / RAWSIGNAL_SAMPLE_RATE //1410 //990
-#define LACROSSE43_PULSEMAX 1440 / RAWSIGNAL_SAMPLE_RATE    //2100 //1500
+#define LACROSSE43_MIDLO 640 / RAWSIGNAL_SAMPLE_RATE       //900 //630
+#define LACROSSE43_MIDHI 1056 / RAWSIGNAL_SAMPLE_RATE      //1500 //1050
+#define LACROSSE43_PULSEMINMAX 576 / RAWSIGNAL_SAMPLE_RATE //810 //570
+#define LACROSSE43_PULSEMAXMIN 992 / RAWSIGNAL_SAMPLE_RATE //1410 //990
+#define LACROSSE43_PULSEMAX 1440 / RAWSIGNAL_SAMPLE_RATE   //2100 //1500
 
 #ifdef PLUGIN_043
 #include "../4_Display.h"
@@ -197,7 +197,10 @@ boolean Plugin_043(byte function, char *string)
 
    checksumcalc = checksumcalc & 0xF;
    if (checksumcalc != data[10])
+   {
+      Serial.println("CRC");
       return false;
+   }
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================

@@ -61,6 +61,9 @@ void setup()
   power_all_disable();   // turn off all modules
   power_timer0_enable(); // Timer 0
   power_usart0_enable(); // UART
+#ifdef RFM69_ENABLED
+  power_spi_enable(); // SPI
+#endif
 #elif defined(ESP32)
   btStop();
 #endif
