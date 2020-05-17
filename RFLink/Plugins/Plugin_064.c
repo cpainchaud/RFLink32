@@ -23,7 +23,7 @@
  \*********************************************************************************************/
 
 #define ATLANTIC_PLUGIN_ID 064
-#define PLUGIN_DESC_064 "ATLANTIC"
+#define PLUGIN_DESC_064 "Atlantic"
 #define ATLANTIC_PULSECOUNT 74
 
 #define ATLANTIC_PULSE_MID 600 / RAWSIGNAL_SAMPLE_RATE
