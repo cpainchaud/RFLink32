@@ -1,0 +1,105 @@
+//#######################################################################################################
+//##                    This Plugin is only for use with the RFLink software package                   ##
+//##                                     Plugin-064: Atlantic PIR/ALARM                                ##
+//#######################################################################################################
+/*********************************************************************************************\
+ * This plugin provides support for Atlantic and Visonic PIR/ALARM devices
+ *
+ * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3) - Cyril PAWELKO
+ * Support (present)  : https://github.com/couin3/RFLink 
+ * Author  (original) : StuntTeam 2015..2016
+ * Support (original) : http://sourceforge.net/projects/rflink/
+ * License            : This code is free for use in any open source project when this header is included.
+ *                      Usage of any parts of this code in a commercial application is prohibited!
+ *********************************************************************************************
+ * Protocol information : 
+ *      https://forum.arduino.cc/index.php?topic=289554.0
+ *      Visonic Sensors Documentation Annex
+ * 
+ * Sample data:
+ * 20;XX;DEBUG;Pulses=370;Pulses(uSec)=352,416,768,832,352,416,768,832,352,832,352,416,768,832,352,832,352,832,352,416,768,832,352,832,352,416,768,448,736,448,768,416,768,832,352,832,352,832,352,416,768,832,352,832,352,832,352,416,736,832,352,832,352,832,352,416,768,832,352,832,352,416,768,416,736,416,768,832,352,832,352,832,352,4160,352,416,768,832,352,416,768,832,352,832,352,416,768,832,352,832,352,832,352,448,736,832,352,832,352,416,768,416,736,448,736,416,768,832,352,864,352,832,352,448,736,832,352,832,352,832,352,416,768,832,352,832,352,832,352,448,736,832,352,832,352,416,768,416,736,448,736,832,352,832,352,832,352,4160,352,416,768,832,352,416,768,832,352,832,352,416,768,832,352,832,352,832,352,416,768,832,352,832,352,416,768,416,736,448,768,448,736,832,352,832,352,832,352,448,736,864,352,832,352,832,352,448,736,832,352,832,352,832,352,416,768,832,352,832,352,416,736,448,736,448,736,832,352,832,352,832,352,4160,352,416,768,832,352,416,768,832,352,832,352,416,768,832,352,832,352,800,352,416,768,832,352,832,352,416,768,416,768,448,736,448,736,832,352,832,352,832,352,416,768,832,352,832,352,832,352,416,736,832,352,832,352,832,352,416,768,832,352,832,352,416,768,448,736,416,736,832,352,832,352,832,352,4160,384,416,768,832,352,416,768,832,352,832,352,416,768,832,352,832,352,832,352,416,768,832,352,832,352,416,768,416,768,448,736,416,736,832,352,832,352,832,352,416,736,832,352,832,352,832,352,416,768,832,352,832,352,832,352,416,768,832,352,832,352,448,736,448,736,448,736,832,352,832,352,832,352,0;
+ * 
+ * Only tested with Visonic 433 Mhz (Europe) devices : MCT-302, K-980MCW
+ * Not tested with real Atlantic devices. Feedback is welcome.
+ \*********************************************************************************************/
+
+#define ATLANTIC_PLUGIN_ID 064
+#define PLUGIN_DESC_064 "ATLANTIC"
+#define ATLANTIC_PULSECOUNT 74
+
+#define ATLANTIC_PULSE_MID 600 / RAWSIGNAL_SAMPLE_RATE
+#define ATLANTIC_PULSE_MIN 300 / RAWSIGNAL_SAMPLE_RATE
+#define ATLANTIC_PULSE_MAX 900 / RAWSIGNAL_SAMPLE_RATE
+
+#ifdef PLUGIN_064
+#include "../4_Display.h"
+
+boolean Plugin_064(byte function, char *string)
+{
+   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number != (ATLANTIC_PULSECOUNT * 4) && RawSignal.Number != (ATLANTIC_PULSECOUNT * 5) )
+      return false;
+ 
+   unsigned long bitstream = 0L;       // Only the 32 first bits are processed
+
+   //==================================================================================
+   // Get first 32 bits : Sensor ID (24 bits) + 8 first bits of data
+   // Bits are inverted !
+   //==================================================================================
+
+   for (byte x = 2; x <= 64; x += 2)
+   {
+      if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MID)
+      { // long pulse = 1 
+         if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MAX)
+            return false; // pulse too long
+         if (RawSignal.Pulses[x + 1] > ATLANTIC_PULSE_MAX)
+            return false; // invalid manchester code
+         bitstream = (bitstream << 1) | 0x1;
+      }
+      else
+      { // short pulse = 0
+         if (RawSignal.Pulses[x] < ATLANTIC_PULSE_MIN)
+            return false; // pulse too short
+         if (RawSignal.Pulses[x + 1] < ATLANTIC_PULSE_MID)
+            return false; // invalid manchester code
+         bitstream = bitstream << 1;
+      }
+
+   }
+   //==================================================================================
+   // Extract data
+   //==================================================================================
+
+   byte alarm = (bitstream >> 6 ) & 0x01;
+
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer) + 700 < millis()) || (SignalCRC != bitstream))
+   { 
+      SignalCRC = bitstream;
+
+   }
+   else
+   {
+      return true;
+   }
+
+   // Output
+   // ----------------------------------
+   display_Header();
+   display_Name(PSTR("Atlantic")); 
+   display_IDn(((bitstream >> 8) & 0xFFFFFF), 6); 
+   display_SWITCH(1);
+   if (alarm == 1)
+        display_CMD(CMD_Single, CMD_On);
+   else
+        display_CMD(CMD_Single, CMD_Off);
+   display_Footer();
+
+   //==================================================================================
+   RawSignal.Repeats = true; // suppress repeats of the same RF packet
+   RawSignal.Number = 0;
+   return true;
+}
+#endif // Plugin_064
