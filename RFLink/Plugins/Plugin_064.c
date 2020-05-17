@@ -35,7 +35,7 @@
 
 boolean Plugin_064(byte function, char *string)
 {
-   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number != (ATLANTIC_PULSECOUNT * 4) && RawSignal.Number != (ATLANTIC_PULSECOUNT * 5) )
+   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number )
       return false;
  
    unsigned long bitstream = 0L;       // Only the 32 first bits are processed
@@ -63,13 +63,7 @@ boolean Plugin_064(byte function, char *string)
             return false; // invalid manchester code
          bitstream = bitstream << 1;
       }
-
    }
-   //==================================================================================
-   // Extract data
-   //==================================================================================
-
-   byte alarm = (bitstream >> 6 ) & 0x01;
 
    //==================================================================================
    // Prevent repeating signals from showing up
@@ -77,13 +71,19 @@ boolean Plugin_064(byte function, char *string)
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer) + 700 < millis()) || (SignalCRC != bitstream))
    { 
       SignalCRC = bitstream;
-
    }
    else
-   {
+   { // packet already seen
       return true;
    }
 
+   //==================================================================================
+   // Extract data
+   //==================================================================================
+
+   byte alarm = (bitstream >> 6 ) & 0x01;
+
+   // ----------------------------------
    // Output
    // ----------------------------------
    display_Header();
