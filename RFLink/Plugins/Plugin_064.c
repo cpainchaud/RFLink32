@@ -73,12 +73,13 @@ boolean Plugin_064(byte function, char *string)
    // Extract data
    //==================================================================================
    byte alarm = (bitstream >> 6 ) & 0x01;
+   unsigned int ID = (bitstream >> 8) & 0xFFFFFF;
    // ----------------------------------
    // Output
    // ----------------------------------
    display_Header();
-   display_Name(PSTR("Atlantic")); 
-   display_IDn(((bitstream >> 8) & 0xFFFFFF), 6); 
+   display_Name(PSTR("Atlantic"));
+   display_IDn(ID, 6);
    display_SWITCH(1);
    if (alarm == 1)
         display_CMD(CMD_Single, CMD_On);
