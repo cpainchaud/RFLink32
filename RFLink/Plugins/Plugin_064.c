@@ -73,7 +73,7 @@ boolean Plugin_064(byte function, char *string)
    // Extract data
    //==================================================================================
    boolean alarm = (bitstream >> 6) & 0x01;
-   unsigned int ID = (bitstream >> 8) & 0xFFFFFF;
+   unsigned long ID = (bitstream >> 8) & 0xFFFFFF;
    // ----------------------------------
    // Output
    // ----------------------------------
