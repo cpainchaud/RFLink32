@@ -58,6 +58,7 @@
 #define PLUGIN_061 // Chinese PIR motion door and window sensors
 #define PLUGIN_062 // Chuango Alarm Devices
 #define PLUGIN_063 // Oregon PIR/ALARM/LIGHT
+#define PLUGIN_064 // Atlantic (and Visonic)
 // -------------------
 // Doorbells
 // -------------------

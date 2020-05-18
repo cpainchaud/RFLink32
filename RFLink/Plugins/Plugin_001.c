@@ -442,6 +442,25 @@ boolean Plugin_001(byte function, char *string)
    // **************************************************************************
    // Full buffer size checks, >>>> SCANNING checks <<<<<  sorted by packet size
    // **************************************************************************
+   
+   
+   // ==========================================================================
+   // Beginning of Signal translation for Atlantic/Visonic alarm detectors
+   // 74 pulses sent 1, 4 or 5 times. Pulse 74 = 3968
+   // ==========================================================================
+   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   {
+      if ((RawSignal.Pulses[74] > PULSE3300) && (RawSignal.Pulses[148] > PULSE3300) && (RawSignal.Pulses[222] > PULSE3300))
+      {
+         RawSignal.Number = 74;   // New packet length
+         RawSignal.Pulses[0] = 64; // signal the plugin number that should process this packet
+         return false;             // packet detected, conversion done
+      }
+   }
+   // ==========================================================================
+   // End of Signal translation for Atlantic/Visonic
+   // ==========================================================================
+
    // ==========================================================================
    // Beginning of Signal translation for Auriol & Xiron
    // ==========================================================================
