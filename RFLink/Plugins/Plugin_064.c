@@ -72,7 +72,7 @@ boolean Plugin_064(byte function, char *string)
    //==================================================================================
    // Extract data
    //==================================================================================
-   byte alarm = (bitstream >> 6 ) & 0x01;
+   boolean alarm = (bitstream >> 6) & 0x01;
    unsigned int ID = (bitstream >> 8) & 0xFFFFFF;
    // ----------------------------------
    // Output
@@ -81,10 +81,7 @@ boolean Plugin_064(byte function, char *string)
    display_Name(PSTR("Atlantic"));
    display_IDn(ID, 6);
    display_SWITCH(1);
-   if (alarm == 1)
-        display_CMD(CMD_Single, CMD_On);
-   else
-        display_CMD(CMD_Single, CMD_Off);
+   display_CMD(CMD_Single, alarm ? CMD_On : CMD_Off);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
