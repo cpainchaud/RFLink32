@@ -19,7 +19,7 @@ void display_Header(void);
 void display_Name(const char *);
 void display_Footer(void);
 void display_Splash(void);
-void display_IDn(unsigned int, byte);
+void display_IDn(unsigned long, byte);
 void display_IDc(const char *);
 void display_SWITCH(byte);
 void display_SWITCHc(const char *);

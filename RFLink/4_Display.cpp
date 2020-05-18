@@ -51,7 +51,7 @@ void display_Splash(void)
 }
 
 // ID=9999 => device ID (often a rolling code and/or device channel number) (Hexadecimal)
-void display_IDn(unsigned int input, byte n)
+void display_IDn(unsigned long input, byte n)
 {
   switch (n)
   {
