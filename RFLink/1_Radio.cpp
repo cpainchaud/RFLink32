@@ -43,10 +43,10 @@ void set_Radio_mode(Radio_State new_State)
     switch (new_State)
     {
     case Radio_OFF:
+      PIN_RF_RX_DATA = NOT_A_PIN;
+      PIN_RF_TX_DATA = NOT_A_PIN;
       radio.initialize();
       radio.setHighPower(true); // for RFM69HW
-      radio.setFrequency(433920000);
-      radio.setBitrate(32768 / 4);
       // radio.sleep();
       break;
 
@@ -65,7 +65,7 @@ void set_Radio_mode(Radio_State new_State)
       PIN_RF_RX_DATA = NOT_A_PIN;
       radio.transmitBegin();
       PIN_RF_TX_DATA = RF69OOK_IRQ_PIN;
-      radio.setPowerLevel(20);
+      radio.setPowerLevel(10);
       break;
 
     case Radio_NA:

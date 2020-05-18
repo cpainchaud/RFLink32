@@ -5,12 +5,10 @@
 /*********************************************************************************************\
  * This plugin provides support for Atlantic and Visonic PIR/ALARM devices
  *
- * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3) - Cyril PAWELKO
- * Support (present)  : https://github.com/couin3/RFLink 
- * Author  (original) : StuntTeam 2015..2016
- * Support (original) : http://sourceforge.net/projects/rflink/
- * License            : This code is free for use in any open source project when this header is included.
- *                      Usage of any parts of this code in a commercial application is prohibited!
+ * Author  : StormTeam 2020 - Cyril PAWELKO - Marc RIVES (aka Couin3)
+ * Support : https://github.com/couin3/RFLink 
+ * License : This code is free for use in any open source project when this header is included.
+ *           Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
  * Protocol information : 
  *      https://forum.arduino.cc/index.php?topic=289554.0
@@ -35,10 +33,10 @@
 
 boolean Plugin_064(byte function, char *string)
 {
-   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number )
+   if (RawSignal.Number != ATLANTIC_PULSECOUNT)
       return false;
- 
-   unsigned long bitstream = 0L;       // Only the 32 first bits are processed
+
+   unsigned long bitstream = 0L; // Only the 32 first bits are processed
 
    //==================================================================================
    // Get first 32 bits : Sensor ID (24 bits) + 8 first bits of data
@@ -48,7 +46,7 @@ boolean Plugin_064(byte function, char *string)
    for (byte x = 2; x <= 64; x += 2)
    {
       if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MID)
-      { // long pulse = 1 
+      { // long pulse = 1
          if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MAX)
             return false; // pulse too long
          if (RawSignal.Pulses[x + 1] > ATLANTIC_PULSE_MAX)
@@ -64,38 +62,27 @@ boolean Plugin_064(byte function, char *string)
          bitstream = bitstream << 1;
       }
    }
-
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer) + 700 < millis()) || (SignalCRC != bitstream))
-   { 
       SignalCRC = bitstream;
-   }
    else
-   { // packet already seen
-      return true;
-   }
-
+      return true; // packet already seen
    //==================================================================================
    // Extract data
    //==================================================================================
-
-   byte alarm = (bitstream >> 6 ) & 0x01;
-
+   boolean alarm = (bitstream >> 6) & 0x01;
+   unsigned int ID = (bitstream >> 8) & 0xFFFFFF;
    // ----------------------------------
    // Output
    // ----------------------------------
    display_Header();
-   display_Name(PSTR("Atlantic")); 
-   display_IDn(((bitstream >> 8) & 0xFFFFFF), 6); 
+   display_Name(PSTR("Atlantic"));
+   display_IDn(ID, 6);
    display_SWITCH(1);
-   if (alarm == 1)
-        display_CMD(CMD_Single, CMD_On);
-   else
-        display_CMD(CMD_Single, CMD_Off);
+   display_CMD(CMD_Single, alarm ? CMD_On : CMD_Off);
    display_Footer();
-
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
