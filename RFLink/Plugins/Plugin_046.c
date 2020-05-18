@@ -61,7 +61,7 @@
 
 boolean Plugin_046(byte function, char *string)
 {
-   if ((RawSignal.Number) != AURIOLV2_PULSECOUNT)
+   if (RawSignal.Number != AURIOLV2_PULSECOUNT)
       return false;
 
    unsigned long bitstream1 = 0L; // holds first 6x4=24 bits
