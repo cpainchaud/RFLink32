@@ -33,7 +33,7 @@
 
 boolean Plugin_064(byte function, char *string)
 {
-   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number )
+   if (RawSignal.Number != ATLANTIC_PULSECOUNT)
       return false;
 
    unsigned long bitstream = 0L; // Only the 32 first bits are processed
