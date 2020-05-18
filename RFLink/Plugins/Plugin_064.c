@@ -35,8 +35,8 @@ boolean Plugin_064(byte function, char *string)
 {
    if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number )
       return false;
- 
-   unsigned long bitstream = 0L;       // Only the 32 first bits are processed
+
+   unsigned long bitstream = 0L; // Only the 32 first bits are processed
 
    //==================================================================================
    // Get first 32 bits : Sensor ID (24 bits) + 8 first bits of data
@@ -46,7 +46,7 @@ boolean Plugin_064(byte function, char *string)
    for (byte x = 2; x <= 64; x += 2)
    {
       if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MID)
-      { // long pulse = 1 
+      { // long pulse = 1
          if (RawSignal.Pulses[x] > ATLANTIC_PULSE_MAX)
             return false; // pulse too long
          if (RawSignal.Pulses[x + 1] > ATLANTIC_PULSE_MAX)
@@ -62,25 +62,17 @@ boolean Plugin_064(byte function, char *string)
          bitstream = bitstream << 1;
       }
    }
-
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
    if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer) + 700 < millis()) || (SignalCRC != bitstream))
-   { 
       SignalCRC = bitstream;
-   }
    else
-   { // packet already seen
-      return true;
-   }
-
+      return true; // packet already seen
    //==================================================================================
    // Extract data
    //==================================================================================
-
    byte alarm = (bitstream >> 6 ) & 0x01;
-
    // ----------------------------------
    // Output
    // ----------------------------------
@@ -93,7 +85,6 @@ boolean Plugin_064(byte function, char *string)
    else
         display_CMD(CMD_Single, CMD_Off);
    display_Footer();
-
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
