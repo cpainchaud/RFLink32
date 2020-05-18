@@ -445,23 +445,10 @@ boolean Plugin_001(byte function, char *string)
 
    // ==========================================================================
    // Beginning of Signal translation for Atlantic/Visonic alarm detectors
-   // 74 pulses sent 1, 4 or 5 times. Pulse 74 = 3968
+   // 74 pulses sent 1, 4 or 5 times. Pulse 74 = 3968 (064)
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {
-      if ((RawSignal.Pulses[74] > PULSE3300) && (RawSignal.Pulses[148] > PULSE3300) && (RawSignal.Pulses[222] > PULSE3300))
-      {
-         RawSignal.Number = 74;    // New packet length
-         RawSignal.Pulses[0] = 64; // signal the plugin number that should process this packet
-         return false;             // packet detected, conversion done
-      }
-   }
    // ==========================================================================
-   // End of Signal translation for Atlantic/Visonic
-   // ==========================================================================
-
-   // ==========================================================================
-   // Beginning of Signal translation for Auriol & Xiron
+   // Also Beginning of Signal translation for Auriol & Xiro (046)
    // ==========================================================================
    if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
    {
@@ -473,9 +460,10 @@ boolean Plugin_001(byte function, char *string)
             {
                RawSignal.Pulses[1 + i] = RawSignal.Pulses[offset + i + 1]; // reorder pulse array
             }
-            RawSignal.Number = 74;    // New packet length
-            RawSignal.Pulses[0] = 46; // signal the plugin number that should process this packet
-            return false;             // Conversion done, stop plugin 1 and continue with regular plugins
+            RawSignal.Number = 74; // New packet length
+            // RawSignal.Pulses[0] = 46; // signal the plugin number that should process this packet, unused for Auriol/Xiron
+            // RawSignal.Pulses[0] = 64; // signal the plugin number that should process this packet, unused for Atlantic/Visonic
+            return false;  // Conversion done, stop plugin 1 and continue with regular plugins
          }
       }
    }
