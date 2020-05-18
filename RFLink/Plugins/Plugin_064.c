@@ -5,12 +5,10 @@
 /*********************************************************************************************\
  * This plugin provides support for Atlantic and Visonic PIR/ALARM devices
  *
- * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3) - Cyril PAWELKO
- * Support (present)  : https://github.com/couin3/RFLink 
- * Author  (original) : StuntTeam 2015..2016
- * Support (original) : http://sourceforge.net/projects/rflink/
- * License            : This code is free for use in any open source project when this header is included.
- *                      Usage of any parts of this code in a commercial application is prohibited!
+ * Author  : StormTeam 2020 - Cyril PAWELKO - Marc RIVES (aka Couin3)
+ * Support : https://github.com/couin3/RFLink 
+ * License : This code is free for use in any open source project when this header is included.
+ *           Usage of any parts of this code in a commercial application is prohibited!
  *********************************************************************************************
  * Protocol information : 
  *      https://forum.arduino.cc/index.php?topic=289554.0
