@@ -444,6 +444,28 @@ boolean Plugin_001(byte function, char *string)
    // **************************************************************************
 
    // ==========================================================================
+   // Beginning of Signal translation for F007_TH weather sensors (plugin 036)
+   // Data is manchester encoded and sent 3 times in a row, with no transition
+   // The long final pulse (6990 us) is truncated by the buffer size. 
+   // ==========================================================================
+
+   #define PULSE600 600 / RAWSIGNAL_SAMPLE_RATE
+   #define PULSE700 700 / RAWSIGNAL_SAMPLE_RATE
+
+   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   {  
+      for (int i=1 ; i<25 ; i++)
+      {
+         if ( (i <= 19) && (RawSignal.Pulses[i]) > PULSE600 )
+            break;
+         if ( (i >= 20) && (RawSignal.Pulses[i]) < PULSE700 )
+            break;
+         RawSignal.Number = 111;       // New packet length, (too) long enough to handle at least one third of the pulses
+         return false;
+      }
+   }
+
+   // ==========================================================================
    // Beginning of Signal translation for Atlantic/Visonic alarm detectors
    // 74 pulses sent 1, 4 or 5 times. Pulse 74 = 3968 (064)
    // ==========================================================================

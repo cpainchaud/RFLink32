@@ -43,6 +43,7 @@
 #define PLUGIN_033 // Conrad Pool Thermometer
 #define PLUGIN_034 // Cresta
 #define PLUGIN_035 // Imagintronix
+#define PLUGIN_036 // F007_TH
 #define PLUGIN_040 // Mebus
 #define PLUGIN_041 // LaCrosse v3 ws7000
 #define PLUGIN_042 // UPM/Esic
