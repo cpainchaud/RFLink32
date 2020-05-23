@@ -15,7 +15,6 @@
 
 #define SKETCH_PATH ./
 #define stringify(x) #x
-#define PLUGINFILE(a, b) stringify(a/Plugins/b) // no space in "stringify(a/Plugins/b)"
 
 enum PState
 {
