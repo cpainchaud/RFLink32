@@ -13,9 +13,6 @@
 #define PLUGIN_MAX 55   // 55         // Maximum number of Receive plugins
 #define PLUGIN_TX_MAX 5 // 26         // Maximum number of Transmit plugins
 
-#define SKETCH_PATH ./
-#define stringify(x) #x
-
 enum PState
 {
     P_Forbidden,
