@@ -453,15 +453,18 @@ boolean Plugin_001(byte function, char *string)
    #define PULSE700 700 / RAWSIGNAL_SAMPLE_RATE
 
    if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
-   {  
-      for (int i=1 ; i<25 ; i++)
+   {
+      for (byte i = 1; i < 25; i++)
       {
-         if ( (i <= 19) && (RawSignal.Pulses[i]) > PULSE600 )
+         if ((i <= 19) && (RawSignal.Pulses[i]) > PULSE600)
             break;
-         if ( (i >= 20) && (RawSignal.Pulses[i]) < PULSE700 )
+         if ((i >= 20) && (RawSignal.Pulses[i]) < PULSE700)
             break;
-         RawSignal.Number = 111;       // New packet length, (too) long enough to handle at least one third of the pulses
-         return false;
+         if (i == 24)
+         {
+            RawSignal.Number = 111; // New packet length, (too) long enough to handle at least one third of the pulses
+            return false;
+         }
       }
    }
 
@@ -485,7 +488,7 @@ boolean Plugin_001(byte function, char *string)
             RawSignal.Number = 74; // New packet length
             // RawSignal.Pulses[0] = 46; // signal the plugin number that should process this packet, unused for Auriol/Xiron
             // RawSignal.Pulses[0] = 64; // signal the plugin number that should process this packet, unused for Atlantic/Visonic
-            return false;  // Conversion done, stop plugin 1 and continue with regular plugins
+            return false; // Conversion done, stop plugin 1 and continue with regular plugins
          }
       }
    }
