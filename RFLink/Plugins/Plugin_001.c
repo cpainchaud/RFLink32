@@ -236,6 +236,8 @@ boolean Plugin_001(byte function, char *string)
       RawSignal.Number = 0; // Last plugin, kill packet
       return true;          // stop processing
    }
+   
+   #ifdef PLUGIN_061
    // ==========================================================================
    // Beginning of Signal translation for Impuls
    // ==========================================================================
@@ -258,6 +260,9 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_011
    // ==========================================================================
    // Beginning of Signal translation for Home Confort Switches/Remotes
    // ==========================================================================
@@ -279,6 +284,9 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_005
    // ==========================================================================
    // Beginning of Signal translation for Intertek Unitec Switches/Remotes
    // ==========================================================================
@@ -303,6 +311,9 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_015
    // ==========================================================================
    // Beginning of Signal translation for HomeEasy HE844 mode 4 - compatibility mode
    // ==========================================================================
@@ -318,6 +329,7 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal translation HomeEasy HE842
    // ==========================================================================
+   #endif
 
    // ==========================================================================
    // END plugin 001 if the incoming packet is not oversized and resume normal processing of plugins
@@ -330,6 +342,7 @@ boolean Plugin_001(byte function, char *string)
    // Beginning of Signal translation for oversized packets (more pulses than handled by any plugin)
    // ==========================================================================
 
+   #ifdef PLUGIN_058
    // ==========================================================================
    // Beginning of Signal translation for Flamingo FA500R
    // ==========================================================================
@@ -351,6 +364,9 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal Translation
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_007
    // ==========================================================================
    // Beginning of Signal translation for Conrad RSL
    // ==========================================================================
@@ -368,6 +384,9 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal Translation
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_007
    // ==========================================================================
    // Beginning of Signal translation for HomeEasy HE842/HE852/HE863
    // ==========================================================================
@@ -401,11 +420,13 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // End of Signal translation HomeEasy HE842
    // ==========================================================================
+   #endif
 
    // **************************************************************************
    // Full buffer size checks, >>>>>> STATIC checks <<<<<
    // **************************************************************************
 
+   #ifdef PLUGIN_076
    // ==========================================================================
    // Beginning of Signal translation for Forrinx
    // ==========================================================================
@@ -423,6 +444,9 @@ boolean Plugin_001(byte function, char *string)
    //    }
    // }
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_0xx
    // ==========================================================================
    // Beginning of Signal translation for bofu
    // ==========================================================================
@@ -438,11 +462,13 @@ boolean Plugin_001(byte function, char *string)
    //    }
    // }
    // ==========================================================================
+   #endif
 
    // **************************************************************************
    // Full buffer size checks, >>>> SCANNING checks <<<<<  sorted by packet size
    // **************************************************************************
 
+   #ifdef PLUGIN_036
    // ==========================================================================
    // Beginning of Signal translation for F007_TH weather sensors (plugin 036)
    // Data is manchester encoded and sent 3 times in a row, with no transition
@@ -463,11 +489,14 @@ boolean Plugin_001(byte function, char *string)
          if (i == 24)
          {
             RawSignal.Number = 111; // New packet length, (too) long enough to handle at least one third of the pulses
+            // RawSignal.Pulses[0] = 36;
             return false;
          }
       }
    }
+   #endif
 
+   #if (defined(PLUGIN_046) ||  defined(PLUGIN_064))
    // ==========================================================================
    // Beginning of Signal translation for Atlantic/Visonic alarm detectors
    // 74 pulses sent 1, 4 or 5 times. Pulse 74 = 3968 (064)
@@ -493,7 +522,9 @@ boolean Plugin_001(byte function, char *string)
       }
    }
    // ==========================================================================
+   #endif
 
+   #ifdef PLUGIN_075
    // ==========================================================================
    // Beginning of Signal translation for Silvercrest Doorbell
    // ==========================================================================
@@ -519,7 +550,9 @@ boolean Plugin_001(byte function, char *string)
    //    }
    // }
    // ==========================================================================
+   #endif
 
+   #ifdef PLUGIN_011
    // ==========================================================================
    // Beginning of Signal translation for Home Confort Switches/Remotes
    // ==========================================================================
@@ -563,7 +596,9 @@ boolean Plugin_001(byte function, char *string)
    //    }
    // }
    // ==========================================================================
+   #endif
 
+   #ifdef PLUGIN_063
    // ==========================================================================
    // Beginning of Signal translation for Oregon
    // ==========================================================================
@@ -594,6 +629,9 @@ boolean Plugin_001(byte function, char *string)
    //    }
    // }
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_070
    // ==========================================================================
    // Beginning of Signal translation for SelectPlus
    // ==========================================================================
@@ -624,6 +662,9 @@ boolean Plugin_001(byte function, char *string)
       }
    }
    // ==========================================================================
+   #endif
+
+   #ifdef PLUGIN_072
    // ==========================================================================
    // Beginning of Signal translation for Byron Doorbell
    // ==========================================================================
@@ -652,6 +693,7 @@ boolean Plugin_001(byte function, char *string)
       }
    }
    // ==========================================================================
+   #endif
 
    // ==========================================================================
    // End of Signal translation
