@@ -95,6 +95,9 @@ void setup()
   reconnect();
 #endif
 
+  PluginInit();
+  PluginTXInit();
+
 #ifdef AUTOCONNECT_ENABLED
   setup_AutoConnect();
 #endif
@@ -103,12 +106,10 @@ void setup()
   show_Radio_Pin();
 #endif // ESP8266 || ESP32
 
-  PluginInit();
-  PluginTXInit();
-
 #ifdef OLED_ENABLED
   setup_OLED();
 #endif
+
 #ifdef MQTT_ENABLED
   setup_MQTT();
   reconnect();
