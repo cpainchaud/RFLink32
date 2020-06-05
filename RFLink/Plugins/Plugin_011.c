@@ -1,8 +1,11 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                  Plugin-011: Home Confort Smart Home - TEL-010                    ##
+//##                                  Plugin-011: Home Confort Smart Home                              ##
 //#######################################################################################################
 /*********************************************************************************************\
+ *
+ * IMPORTANT WARNING : Does not works correctly on ESP8266 if SIGNAL_MIN_PREAMBLE_US is too short (< 768 us for)
+ * 
  * Decodes signals from a Home Confort Smart Home - TEL-010 
  * http://idk.home-confort.net/divers/t%C3%A9l%C3%A9commande-rf-pour-produits-smart-home
  *
@@ -12,11 +15,9 @@
  * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
  *                      Usage of any parts of this code in a commercial application is prohibited!
+ *
  *********************************************************************************************
- * Changelog: v1.0 initial release
- *********************************************************************************************
- * Technical information:
- * Decodes signals from Home Confort Smart Home - TEL-010 devices
+ * Technical information: Home Confort Smart Home - TEL-010 devices
  * --------------------------------------------------------------------------------------------
  * _Byte 0_ _Byte 1_ _Byte 2_ _Byte 3_ _Byte 4_ _Byte 5_ _Bits_
  * AAAAAAAA BBBBBBBB CCCDDDDD EEEEEEEE FFFFFFFF GGHHHHHH II
@@ -53,19 +54,45 @@
  * 550,250,550,250,550,750,50,250,50; =99
  *
  * 2675,200,600,200,600,700,100,700,100,200,600,700,100,700,100,200,600,700,100,225,600,725,75,225,600,225,575,725,75,225,575,225,575,225,575,725,75,725,75,725,75,725,75,225,575,725,75,225,575,225,575,225,575,225,575,225,575,250,575,250,575,250,575,250,575,250,550,250,550,250,550,250,550,250,550,250,550,250,550,250,575,725,75,250,550,250,550,250,550,250,550,250,550,250,550,750,50,250,50
+ * --------------------------------------------------------------------------------------------
+ * Technical information: Home Confort Smart Home - STHI-100 devices
+ * --------------------------------------------------------------------------------------------
+ * https://uploads.entrepot-du-bricolage.fr/PDF/609492_sthi-100___sthi-100x2.pdf
+ * First 24 bits (bitstream1) : Random ID
+ * 
+ * Last 24 bits (bitstream2) :
+ * Temperature and humidity are sent separetely, in different frames. 
+ * Last 7 bits are function :
+ *    0x41 : Temperature
+ *    0x42 : Humidity
+ * 
+ *    Temperature :
+ *    1100 1000 0100 0100 0001
+ *    TTTT Tttt tttt tFFF FFFF
+ *    T : Temperature ones, in Celsius
+ *    t : Temperature digists
+ *    F : Function
+ * Samples : 
+ * 20;XX;DEBUG;Pulses=100;Pulses(uSec)=2752,300,640,640,300,640,300,640,300,300,640,640,300,640,300,640,300,640,300,640,300,300,640,300,640,300,640,640,300,640,300,640,300,300,640,300,640,300,640,640,300,300,640,640,300,640,300,640,300,300,640,300,640,300,640,640,300,640,300,300,640,640,300,300,640,300,640,300,640,300,640,300,640,300,640,300,640,300,640,300,640,640,300,300,640,300,640,300,640,300,640,300,640,640,300,640,300,640,300,448;
+ * 20;XX;DEBUG;Pulses=100;Pulses(uSec)=2752,300,640,640,300,640,300,640,300,300,640,640,300,640,300,640,300,640,300,640,300,300,640,300,640,300,640,640,300,640,300,640,300,300,640,300,640,300,640,640,300,300,640,640,300,640,300,640,300,300,640,300,640,300,640,640,300,640,300,300,640,640,300,300,640,300,640,300,640,300,640,300,640,300,640,300,640,300,640,300,640,640,300,300,640,300,640,300,640,300,640,300,640,640,300,640,300,640,300,448;
+ 
  \*********************************************************************************************/
+
 #define HC_PLUGIN_ID 011
 #define PLUGIN_DESC_011 "HomeConfort"
 #define HC_PULSECOUNT 100
+#define HC_PULSE_PREAMBLE 2400 / RAWSIGNAL_SAMPLE_RATE
+#define HC_PULSE_MID       500 / RAWSIGNAL_SAMPLE_RATE
+#define HC_PULSE_MAX       800 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_011
 #include "../4_Display.h"
 
 boolean Plugin_011(byte function, char *string)
 {
-   if (RawSignal.Number != HC_PULSECOUNT)
+  if (RawSignal.Number != HC_PULSECOUNT) // Incorrect pulse count
       return false;
-   if (RawSignal.Pulses[1] * RawSignal.Multiply < 2000)
+  if (RawSignal.Pulses[1] < HC_PULSE_PREAMBLE )
       return false; // First (start) pulse needs to be long
 
    unsigned long bitstream1 = 0; // holds first 24 bits
@@ -75,16 +102,17 @@ boolean Plugin_011(byte function, char *string)
    byte channel = 0;
    byte subchan = 0;
    byte group = 0;
+
    //==================================================================================
    // Get all 48 bits
    //==================================================================================
-   for (int x = 2; x < HC_PULSECOUNT - 2; x += 2)
+   for (int x = 2; x < 96 ; x += 2) // Go through pulses
    { // get bytes
-      if (RawSignal.Pulses[x] * RawSignal.Multiply > 500)
+      if (RawSignal.Pulses[x] > HC_PULSE_MID )
       { // long pulse
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 800)
+         if (RawSignal.Pulses[x] > HC_PULSE_MAX )
             return false; // Pulse range check
-         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 400)
+         if (RawSignal.Pulses[x + 1] > HC_PULSE_MID )
             return false; // Manchester check
          if (bitcounter < 24)
          {
@@ -96,42 +124,23 @@ boolean Plugin_011(byte function, char *string)
             bitstream2 <<= 1;
             bitstream2 |= 0x1;
          }
-         bitcounter++; // only need to count the first 10 bits
       }
       else
       { // short pulse
-         if (RawSignal.Pulses[x] * RawSignal.Multiply > 300)
+         if (RawSignal.Pulses[x] > HC_PULSE_MID)
             return false; // pulse range check
-         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply < 400)
+         if (RawSignal.Pulses[x + 1] < HC_PULSE_MID )
             return false; // Manchester check
          if (bitcounter < 24)
-         {
             bitstream1 <<= 1;
-         }
          else
-         {
             bitstream2 <<= 1;
-         }
-         bitcounter++; // only need to count the first 10 bits
       }
-      if (bitcounter > 50)
+      bitcounter++;
+      if (bitcounter == 47)
          break;
    }
-   if (RawSignal.Pulses[98] * RawSignal.Multiply > 300)
-      return false; // pulse range check, last two pulses should be short
-   if (RawSignal.Pulses[99] * RawSignal.Multiply > 300)
-      return false; // pulse range check
-   //==================================================================================
-   // first perform a check to make sure the packet is valid
-   byte tempbyte = (bitstream2 >> 8) & 0xFF;
-   if (tempbyte != 0x0)
-      return false; // always 0x00?
-   tempbyte = (bitstream2 >> 16) & 0xFF;
-   if (tempbyte != 0x0)
-      return false; // always 0x00?
-   tempbyte = bitstream2 & 0x3F;
-   if (tempbyte != 0x01)
-      return false; // low 6 bits are always '000001'?
+
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
@@ -139,36 +148,69 @@ boolean Plugin_011(byte function, char *string)
       SignalCRC = bitstream2; // not seen the RF packet recently
    else
       return true; // already seen the RF packet recently
-   //==================================================================================
-   // now process the command / switch settings
-   //==================================================================================
-   tempbyte = (bitstream1 >> 3) & 0x03; // determine switch setting (a/b/c/d)
-   channel = 0x41;
-   if (tempbyte == 2)
-      channel = 0x42;
-   if (tempbyte == 1)
-      channel = 0x43;
-   if (tempbyte == 3)
-      channel = 0x44;
 
-   subchan = (bitstream1 & 0x03) + 1; // determine button number
+   //==================================================================================
+   // Find function in bistream 2 :
+   // 0x40 or 0x00 (all bits) : Switch
+   // 0x42 (7 bits)           : Humidity
+   // 0x41 (7 bits)           : Temperature
+   //==================================================================================
+   if ( (bitstream2 & 0x7F) == 0x41 ) 
+      { // Temperature
+         int tempunits = bitstream2 >> 15 & 0x1F;
+         int tempdecs = bitstream2 >> 7 & 0xF;
+         int temperature = tempunits * 10 + tempdecs;
 
-   command = (bitstream2 >> 7) & 0x01; // on/off command
-   group = (bitstream2 >> 6) & 0x01;   // group setting
+         display_Header();
+         display_Name(PSTR("HomeConfort"));
+         display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
+         display_TEMP(temperature);
+         display_Footer();
+      }
+   else if ( (bitstream2 & 0x7F) == 0x42 )  
+      { // Humidity
+         byte hygro = bitstream2 >>15;
 
-   bitstream1 = bitstream1 >> 5;
-   //==================================================================================
-   // Output
-   //==================================================================================
-   display_Header();
-   display_Name(PSTR("HomeConfort"));
-   display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
-   char c_SWITCH[5];
-   sprintf(c_SWITCH, "%c%d", channel, subchan);
-   display_SWITCHc(c_SWITCH);
-   display_CMD((group & B01), (command & B01)); // #ALL , #ON
-   display_Footer();
-   //==================================================================================
+         display_Header();
+         display_Name(PSTR("HomeConfort"));
+         display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
+         display_HUM(hygro, HUM_HEX);
+         display_Footer();
+      }
+   else if ( (bitstream2 & 0xFFFFBF) == 0x0 ) 
+      {  // Switch code - Taken from Original RFLink R29 code
+         //==================================================================================
+         // now process the command / switch settings
+         //==================================================================================
+         byte tempbyte = (bitstream1 >> 3) & 0x03; // determine switch setting (a/b/c/d)
+         channel = 0x41;
+         if (tempbyte == 2)
+            channel = 0x42;
+         if (tempbyte == 1)
+            channel = 0x43;
+         if (tempbyte == 3)
+            channel = 0x44;
+
+         subchan = (bitstream1 & 0x03) + 1; // determine button number
+         command = (bitstream2 >> 7) & 0x01; // on/off command
+         group = (bitstream2 >> 6) & 0x01;   // group setting
+         bitstream1 = bitstream1 >> 5;
+         //==================================================================================
+         // Output
+         //==================================================================================
+         display_Header();
+         display_Name(PSTR("HomeConfort"));
+         display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
+         char c_SWITCH[5];
+         sprintf(c_SWITCH, "%c%d", channel, subchan);
+         display_SWITCHc(c_SWITCH);
+         display_CMD((group & B01), (command & B01)); // #ALL , #ON
+         display_Footer();
+         //==================================================================================
+      }
+   else // Unknow protocol or function
+      return false;
+       
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
    return true;
@@ -418,7 +460,7 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
     // End transmit
 }
 */
-/*
+/* Switch sample :
 20;E4;DEBUG;Pulses=511;Pulses(uSec)=
 330,2760,180,600,180,600,630,180,630,180,180,600,630,180,630,150,210,600,630,150,210,600,630,180,180,600,180,600,630,180,180,600,180,600,180,600,630,180,630,180,630,180,630,180,180,600,630,180,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,180,600,630,180,180,600,180,600,180,600,180,600,210,600,210,600,630,150,210,180,
 270,2760,180,600,180,600,630,180,630,180,180,600,630,180,630,180,180,600,630,180,180,600,630,180,180,600,180,600,630,180,180,600,180,600,180,600,630,180,630,180,630,180,630,180,180,600,630,150,210,600,210,600,210,600,210,600,180,600,180,600,180,600,180,600,180,600,180,600,180,630,180,630,180,630,180,630,180,630,180,600,180,600,630,180,180,600,180,600,180,600,180,600,180,600,180,600,630,180,180,150,     
