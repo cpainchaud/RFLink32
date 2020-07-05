@@ -102,7 +102,7 @@ void setup()
   setup_AutoConnect();
 #endif
   set_Radio_mode(Radio_OFF);
-#if (defined(ESP8266) || defined(ESP32))
+#if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
   show_Radio_Pin();
 #endif // ESP8266 || ESP32
 
