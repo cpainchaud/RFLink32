@@ -45,7 +45,11 @@ void set_Radio_mode(Radio_State new_State)
     case Radio_OFF:
       PIN_RF_RX_DATA = NOT_A_PIN;
       PIN_RF_TX_DATA = NOT_A_PIN;
+      radio.reset();
       radio.initialize();
+      radio.setFrequency(433920000);
+      Serial.print("Freq = "); Serial.println(radio.getFrequency());
+      //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       radio.setHighPower(true); // for RFM69HW
       // radio.sleep();
       break;

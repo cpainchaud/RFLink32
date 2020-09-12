@@ -55,8 +55,10 @@ void setup_WIFI()
 #endif // ESP8266
   WiFi.mode(WIFI_STA);
 
-  // Comment out for Dynamic IP
+  // For Static IP
+#ifndef USE_DHCP
   WiFi.config(ipaddr_addr(WIFI_IP.c_str()), ipaddr_addr(WIFI_GATEWAY.c_str()), ipaddr_addr(WIFI_SUBNET.c_str()));
+#endif // USE_DHCP
 
   // We start by connecting to a WiFi network
   Serial.print(F("WiFi SSID :\t\t"));
@@ -108,13 +110,20 @@ void reconnect()
     Serial.println(MQTT_SERVER.c_str());
     Serial.print(F("MQTT Connection :\t"));
 
+  #ifdef MQTT_LWT
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str(), (MQTT_TOPIC_OUT+"/LWT").c_str(), 2, true, "Offline"))
+  #else
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
+  #endif
     {
       Serial.println(F("Established"));
       Serial.print(F("MQTT ID :\t\t"));
       Serial.println(MQTT_ID.c_str());
       Serial.print(F("MQTT Username :\t\t"));
       Serial.println(MQTT_USER.c_str());
+    #ifdef MQTT_LWT
+      MQTTClient.publish((MQTT_TOPIC_OUT+"/LWT").c_str(), "Online", true);
+    #endif
     }
     else
     {
