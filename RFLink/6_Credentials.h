@@ -9,17 +9,19 @@
 #define CREDENTIALS_h
 
 #include "RFLink.h"
-#ifndef AUTOCONNECT_ENABLED
 
 // local AP
 String WIFI_SSID = "your_AP_ssid";
 String WIFI_PSWD = "your_AP_passwd";
 
-// static IP
+// DHCP or Static IP
+#define USE_DHCP
+#ifndef USE_DHCP
 String WIFI_IP = "192.168.0.199";
 String WIFI_DNS = "8.8.8.8";
 String WIFI_GATEWAY = "192.168.0.1";
 String WIFI_SUBNET = "255.255.255.0";
+#endif
 
 // MQTT Server
 String MQTT_SERVER = "raspberrypi.local";
@@ -31,6 +33,6 @@ String MQTT_PSWD = "your_mqtt_pswd";
 // MQTT Topic
 String MQTT_TOPIC_OUT = "/RFLink/msg";
 String MQTT_TOPIC_IN = "/RFLink/cmd";
+String MQTT_TOPIC_LWT = "/RFLink/lwt";
 
-#endif
 #endif

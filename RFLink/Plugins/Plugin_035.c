@@ -128,7 +128,7 @@ boolean Plugin_035(byte function, char *string)
    display_Name(PSTR("Imagintronix"));
    display_IDn(rc, 4);
    display_TEMP(temperature);
-   display_HUM(data[2], HUM_BCD);
+   display_HUM(data[2], HUM_HEX);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

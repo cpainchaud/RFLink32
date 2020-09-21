@@ -11,42 +11,27 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
-#ifdef AUTOCONNECT_ENABLED
-extern String MQTT_SERVER;
-extern String MQTT_PORT;
-extern String MQTT_ID;
-extern String MQTT_USER;
-extern String MQTT_PSWD;
-extern String MQTT_TOPIC_OUT;
-extern String MQTT_TOPIC_IN;
-extern boolean MQTT_RETAINED;
-extern String Adv_HostName;
-extern String Adv_Power;
-#else
 #ifdef ESP32
 #include <WiFi.h>
 #elif ESP8266
 #include <ESP8266WiFi.h>
 #endif
-#endif // AUTOCONNECT_ENABLED
 
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#ifndef AUTOCONNECT_ENABLED
 void setup_WIFI();
-#endif // !AUTOCONNECT_ENABLED
-
 void setup_MQTT();
 void reconnect();
 void publishMsg();
 void checkMQTTloop();
-#endif // MQTT_ENABLED
 
-#if (!defined(AUTOCONNECT_ENABLED) && !defined(MQTT_ENABLED))
+#else // MQTT_ENABLED
+
 #if (defined(ESP32) || defined(ESP8266))
 void setup_WIFI_OFF();
 #endif
-#endif
+
+#endif // MQTT_ENABLED
 
 #endif // WiFi_MQTT_h

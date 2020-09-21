@@ -10,8 +10,8 @@
 
 #include <Arduino.h>
 
-#define PLUGIN_MAX 55   // 55         // Maximum number of Receive plugins
-#define PLUGIN_TX_MAX 5 // 26         // Maximum number of Transmit plugins
+#define PLUGIN_MAX 84    // Maximum number of Receive plugins
+#define PLUGIN_TX_MAX 84 // Maximum number of Transmit plugins
 
 enum PState
 {
@@ -24,7 +24,9 @@ enum PState
 extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 extern byte Plugin_id[PLUGIN_MAX];
 extern byte Plugin_State[PLUGIN_MAX];
+#ifndef ARDUINO_AVR_UNO // Optimize memory limite to 2048 bytes on arduino uno
 extern String Plugin_Description[PLUGIN_MAX];
+#endif
 
 extern boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char *); // Transmit plugins
 extern byte PluginTX_id[PLUGIN_TX_MAX];

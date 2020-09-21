@@ -9,9 +9,7 @@
 #include "RFLink.h"
 #include "1_Radio.h"
 #include "4_Display.h"
-#ifdef AUTOCONNECT_ENABLED
-#include "9_AutoConnect.h"
-#else
+
 uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
 uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
 uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
@@ -25,7 +23,6 @@ uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
 uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
 uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
 uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
-#endif //AUTOCONNECT_ENABLED
 
 Radio_State current_State = Radio_NA;
 
@@ -45,7 +42,12 @@ void set_Radio_mode(Radio_State new_State)
     case Radio_OFF:
       PIN_RF_RX_DATA = NOT_A_PIN;
       PIN_RF_TX_DATA = NOT_A_PIN;
+      radio.reset();
       radio.initialize();
+      radio.setFrequency(433920000);
+      Serial.print("Freq = ");
+      Serial.println(radio.getFrequency());
+      //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       radio.setHighPower(true); // for RFM69HW
       // radio.sleep();
       break;
