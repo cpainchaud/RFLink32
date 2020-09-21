@@ -8,8 +8,8 @@
 #ifndef RFLink_h
 #define RFLink_h
 
-#define BUILDNR 0x04 // 0x07       // shown in version
-#define REVNR 0x02   // 0X42       // shown in version and startup string
+#define BUILDNR 0x05 // 0x07       // shown in version
+#define REVNR 0x01   // 0X42       // shown in version and startup string
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 
@@ -20,7 +20,6 @@
 #define OLED_FLIP true   // default false
 
 // WIFI
-#define AUTOCONNECT_ENABLED
 #define WIFI_PWR_0 20 // 0~20.5dBm
 
 // MQTT messages

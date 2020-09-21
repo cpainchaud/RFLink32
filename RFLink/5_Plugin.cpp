@@ -9,17 +9,6 @@
 #include "RFLink.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
-#ifdef AUTOCONNECT_ENABLED
-#include "9_AutoConnect.h"
-#ifdef ESP8266
-#include <FS.h>
-#include <LittleFS.h>
-#elif ESP32
-#include <SPIFFS.h>
-#define LittleFS SPIFFS
-#endif // ESP8266
-#include <ArduinoJson.h>
-#endif // AUTOCONNECT
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
@@ -1694,43 +1683,6 @@ void PluginInit(void)
   Plugin_State[x] = P_Enabled;
   Plugin_ptr[x++] = &Plugin_255;
 #endif
-
-// read config file to desactivated protocols
-#ifdef AUTOCONNECT_ENABLED
-  LittleFS.begin();
-  Serial.print("Param ");
-  Serial.print(PROTOCOL_FILE);
-  Serial.print(F(" :\t"));
-  File configFile = LittleFS.open(PROTOCOL_FILE, "r");
-  if (configFile)
-  {
-    // const int capacity = JSON_ARRAY_SIZE(254) + 2 * JSON_OBJECT_SIZE(2); // 4128
-    // StaticJsonDocument<4128> doc;
-    DynamicJsonDocument doc(4128);
-
-    if (deserializeJson(doc, configFile))
-    {
-      Serial.println(F("Failed to load"));
-    }
-    else
-    {
-      for (x = 0; x < PLUGIN_MAX; x++)
-      {
-        if (doc[x][String(Plugin_id[x])] == 0)
-          Plugin_State[x] = P_Disabled;
-      }
-      Serial.println(F("Loaded"));
-    }
-    doc.clear();
-    configFile.close();
-  }
-  else
-  {
-    Serial.println(F("Failed to open(+r)"));
-  }
-  LittleFS.end();
-
-#endif // AUTOCONNECT_ENABLED
 
   // Initialiseer alle plugins door aanroep met verwerkingsparameter PLUGIN_INIT
   PluginInitCall(0, 0);

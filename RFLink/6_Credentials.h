@@ -9,7 +9,6 @@
 #define CREDENTIALS_h
 
 #include "RFLink.h"
-#ifndef AUTOCONNECT_ENABLED
 
 // local AP
 String WIFI_SSID = "your_AP_ssid";
@@ -36,5 +35,4 @@ String MQTT_TOPIC_OUT = "/RFLink/msg";
 String MQTT_TOPIC_IN = "/RFLink/cmd";
 String MQTT_TOPIC_LWT = "/RFLink/lwt";
 
-#endif
 #endif
