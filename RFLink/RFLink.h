@@ -20,8 +20,8 @@
 #define OLED_FLIP true   // default false
 
 // WIFI
-#define WIFI_PWR_0 10 // 0~20.5dBm
 #define AUTOCONNECT_ENABLED
+#define WIFI_PWR_0 20 // 0~20.5dBm
 
 // MQTT messages
 #define MQTT_ENABLED          // Send RFLink messages over MQTT

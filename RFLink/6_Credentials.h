@@ -34,6 +34,7 @@ String MQTT_PSWD = "your_mqtt_pswd";
 // MQTT Topic
 String MQTT_TOPIC_OUT = "/RFLink/msg";
 String MQTT_TOPIC_IN = "/RFLink/cmd";
+String MQTT_TOPIC_LWT = "/RFLink/lwt";
 
 #endif
 #endif

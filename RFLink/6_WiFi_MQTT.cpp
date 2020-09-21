@@ -110,20 +110,20 @@ void reconnect()
     Serial.println(MQTT_SERVER.c_str());
     Serial.print(F("MQTT Connection :\t"));
 
-  #ifdef MQTT_LWT
-    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str(), (MQTT_TOPIC_OUT+"/LWT").c_str(), 2, true, "Offline"))
-  #else
+#ifdef MQTT_LWT
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str(), (MQTT_TOPIC_LWT).c_str(), 2, true, PSTR("Offline")))
+#else
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
-  #endif
+#endif
     {
       Serial.println(F("Established"));
       Serial.print(F("MQTT ID :\t\t"));
       Serial.println(MQTT_ID.c_str());
       Serial.print(F("MQTT Username :\t\t"));
       Serial.println(MQTT_USER.c_str());
-    #ifdef MQTT_LWT
-      MQTTClient.publish((MQTT_TOPIC_OUT+"/LWT").c_str(), "Online", true);
-    #endif
+#ifdef MQTT_LWT
+      MQTTClient.publish((MQTT_TOPIC_LWT).c_str(), PSTR("Online"), true);
+#endif
     }
     else
     {
@@ -191,4 +191,4 @@ void setup_WIFI_OFF()
 #endif
 }
 #endif
-#endif
+#endif // MQTT_ENABLED

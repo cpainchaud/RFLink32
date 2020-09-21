@@ -48,7 +48,8 @@ void set_Radio_mode(Radio_State new_State)
       radio.reset();
       radio.initialize();
       radio.setFrequency(433920000);
-      Serial.print("Freq = "); Serial.println(radio.getFrequency());
+      Serial.print("Freq = ");
+      Serial.println(radio.getFrequency());
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       radio.setHighPower(true); // for RFM69HW
       // radio.sleep();

@@ -37,7 +37,6 @@ boolean QRFDebug = QRFDebug_0;   // debug RF signals with plugin 001 but no mult
 boolean RFUDebug = RFUDebug_0;   // debug RF signals with plugin 254 (decode 1st)
 boolean QRFUDebug = QRFUDebug_0; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
-
 /**********************************************************************************************\
  * Load plugins
 \*********************************************************************************************/
@@ -564,7 +563,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_001
   Plugin_id[x] = 1;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_001;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -573,7 +572,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_002
   Plugin_id[x] = 2;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_002;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -582,7 +581,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_003
   Plugin_id[x] = 3;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_003;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -600,7 +599,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_005
   Plugin_id[x] = 5;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_005;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -609,7 +608,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_006
   Plugin_id[x] = 6;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_006;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -618,7 +617,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_007
   Plugin_id[x] = 7;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_007;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -627,7 +626,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_008
   Plugin_id[x] = 8;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_008;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -636,7 +635,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_009
   Plugin_id[x] = 9;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_009;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -645,7 +644,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_010
   Plugin_id[x] = 10;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_010;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -654,7 +653,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_011
   Plugin_id[x] = 11;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_011;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -663,7 +662,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_012
   Plugin_id[x] = 12;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_012;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -672,7 +671,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_013
   Plugin_id[x] = 13;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_013;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -681,7 +680,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_014
   Plugin_id[x] = 14;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_014;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -690,7 +689,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_015
   Plugin_id[x] = 15;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_015;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -699,7 +698,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_016
   Plugin_id[x] = 16;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_016;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -708,7 +707,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_017
   Plugin_id[x] = 17;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_017;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -717,7 +716,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_018
   Plugin_id[x] = 18;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_018;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -726,7 +725,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_019
   Plugin_id[x] = 19;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_019;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -735,7 +734,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_020
   Plugin_id[x] = 20;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_020;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -744,7 +743,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_021
   Plugin_id[x] = 21;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_021;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -753,7 +752,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_022
   Plugin_id[x] = 22;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_022;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -762,7 +761,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_023
   Plugin_id[x] = 23;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_023;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -771,7 +770,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_024
   Plugin_id[x] = 24;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_024;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -780,7 +779,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_025
   Plugin_id[x] = 25;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_025;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -789,7 +788,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_026
   Plugin_id[x] = 26;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_026;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -798,7 +797,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_027
   Plugin_id[x] = 27;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_027;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -807,7 +806,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_028
   Plugin_id[x] = 28;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_028;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -816,7 +815,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_029
   Plugin_id[x] = 29;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_029;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -825,7 +824,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_030
   Plugin_id[x] = 30;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_030;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -834,7 +833,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_031
   Plugin_id[x] = 31;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_031;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -843,7 +842,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_032
   Plugin_id[x] = 32;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_032;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -852,7 +851,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_033
   Plugin_id[x] = 33;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_033;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -861,7 +860,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_034
   Plugin_id[x] = 34;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_034;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -870,7 +869,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_035
   Plugin_id[x] = 35;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_035;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -879,7 +878,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_036
   Plugin_id[x] = 36;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_036;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -888,7 +887,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_037
   Plugin_id[x] = 37;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_037;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -897,7 +896,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_038
   Plugin_id[x] = 38;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_038;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -906,7 +905,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_039
   Plugin_id[x] = 39;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_039;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -915,7 +914,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_040
   Plugin_id[x] = 40;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_040;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -924,7 +923,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_041
   Plugin_id[x] = 41;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_041;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -933,7 +932,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_042
   Plugin_id[x] = 42;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_042;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -942,7 +941,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_043
   Plugin_id[x] = 43;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_043;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -951,7 +950,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_044
   Plugin_id[x] = 44;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_044;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -960,7 +959,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_045
   Plugin_id[x] = 45;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_045;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -969,7 +968,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_046
   Plugin_id[x] = 46;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_046;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -978,7 +977,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_047
   Plugin_id[x] = 47;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_047;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -987,7 +986,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_048
   Plugin_id[x] = 48;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_048;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -996,7 +995,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_049
   Plugin_id[x] = 49;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_049;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1005,7 +1004,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_050
   Plugin_id[x] = 50;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_050;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1014,7 +1013,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_051
   Plugin_id[x] = 51;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_051;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1023,7 +1022,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_052
   Plugin_id[x] = 52;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_052;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1032,7 +1031,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_053
   Plugin_id[x] = 53;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_053;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1041,7 +1040,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_054
   Plugin_id[x] = 54;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_054;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1050,7 +1049,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_055
   Plugin_id[x] = 55;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_055;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1059,7 +1058,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_056
   Plugin_id[x] = 56;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_056;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1068,7 +1067,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_057
   Plugin_id[x] = 57;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_057;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1077,7 +1076,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_058
   Plugin_id[x] = 58;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_058;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1086,7 +1085,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_059
   Plugin_id[x] = 59;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_059;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1095,7 +1094,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_060
   Plugin_id[x] = 60;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_060;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1104,7 +1103,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_061
   Plugin_id[x] = 61;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_061;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1113,7 +1112,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_062
   Plugin_id[x] = 62;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_062;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1122,7 +1121,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_063
   Plugin_id[x] = 63;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_063;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1131,7 +1130,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_064
   Plugin_id[x] = 64;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_064;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1140,7 +1139,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_065
   Plugin_id[x] = 65;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_065;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1149,7 +1148,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_066
   Plugin_id[x] = 66;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_066;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1158,7 +1157,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_067
   Plugin_id[x] = 67;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_067;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1167,7 +1166,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_068
   Plugin_id[x] = 68;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_068;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1176,7 +1175,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_069
   Plugin_id[x] = 69;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_069;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1185,7 +1184,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_070
   Plugin_id[x] = 70;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_070;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1194,7 +1193,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_071
   Plugin_id[x] = 71;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_071;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1203,7 +1202,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_072
   Plugin_id[x] = 72;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_072;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1212,7 +1211,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_073
   Plugin_id[x] = 73;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_073;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1221,7 +1220,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_074
   Plugin_id[x] = 74;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_074;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1230,7 +1229,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_075
   Plugin_id[x] = 75;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_075;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1239,7 +1238,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_076
   Plugin_id[x] = 76;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_076;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1248,7 +1247,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_077
   Plugin_id[x] = 77;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_077;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1257,7 +1256,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_078
   Plugin_id[x] = 78;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_078;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1266,7 +1265,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_079
   Plugin_id[x] = 79;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_079;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1275,7 +1274,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_080
   Plugin_id[x] = 80;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_080;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1284,7 +1283,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_081
   Plugin_id[x] = 81;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_081;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1293,7 +1292,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_082
   Plugin_id[x] = 82;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_082;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1302,7 +1301,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_083
   Plugin_id[x] = 83;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_083;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1311,7 +1310,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_084
   Plugin_id[x] = 84;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_084;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1320,7 +1319,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_085
   Plugin_id[x] = 85;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_085;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1329,7 +1328,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_086
   Plugin_id[x] = 86;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_086;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1338,7 +1337,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_087
   Plugin_id[x] = 87;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_087;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1347,7 +1346,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_088
   Plugin_id[x] = 88;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_088;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1356,7 +1355,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_089
   Plugin_id[x] = 89;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_089;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1365,7 +1364,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_090
   Plugin_id[x] = 90;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_090;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1374,7 +1373,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_091
   Plugin_id[x] = 91;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_091;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1383,7 +1382,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_092
   Plugin_id[x] = 92;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_092;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1392,7 +1391,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_093
   Plugin_id[x] = 93;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_093;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1401,7 +1400,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_094
   Plugin_id[x] = 94;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_094;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1410,7 +1409,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_095
   Plugin_id[x] = 95;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_095;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1419,7 +1418,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_096
   Plugin_id[x] = 96;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_096;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1428,7 +1427,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_097
   Plugin_id[x] = 97;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_097;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1437,7 +1436,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_098
   Plugin_id[x] = 98;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_098;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1446,7 +1445,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_099
   Plugin_id[x] = 99;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_099;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1455,7 +1454,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_100
   Plugin_id[x] = 100;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_100;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1464,7 +1463,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_101
   Plugin_id[x] = 101;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_101;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1473,7 +1472,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_102
   Plugin_id[x] = 102;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_102;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1482,7 +1481,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_103
   Plugin_id[x] = 103;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_103;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1491,7 +1490,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_104
   Plugin_id[x] = 104;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_104;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1500,7 +1499,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_105
   Plugin_id[x] = 105;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_105;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1509,7 +1508,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_106
   Plugin_id[x] = 106;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_106;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1518,7 +1517,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_107
   Plugin_id[x] = 107;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_107;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1527,7 +1526,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_108
   Plugin_id[x] = 108;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_108;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1536,7 +1535,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_109
   Plugin_id[x] = 109;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_109;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1545,7 +1544,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_110
   Plugin_id[x] = 110;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_110;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1554,7 +1553,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_111
   Plugin_id[x] = 111;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_111;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1563,7 +1562,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_112
   Plugin_id[x] = 112;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_112;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1572,7 +1571,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_113
   Plugin_id[x] = 113;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_113;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1581,7 +1580,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_114
   Plugin_id[x] = 114;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_114;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1590,7 +1589,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_115
   Plugin_id[x] = 115;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_115;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1599,7 +1598,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_116
   Plugin_id[x] = 116;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_116;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1608,7 +1607,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_117
   Plugin_id[x] = 117;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_117;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1617,7 +1616,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_118
   Plugin_id[x] = 118;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_118;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1626,7 +1625,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_119
   Plugin_id[x] = 119;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_119;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1635,7 +1634,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_120
   Plugin_id[x] = 120;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_120;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1644,7 +1643,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_250
   Plugin_id[x] = 250;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_250;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1653,7 +1652,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_251
   Plugin_id[x] = 251;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_251;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1662,7 +1661,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_252
   Plugin_id[x] = 252;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_252;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1671,7 +1670,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_253
   Plugin_id[x] = 253;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_253;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1680,7 +1679,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_254
   Plugin_id[x] = 254;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_254;
 #endif
   Plugin_State[x] = P_Enabled;
@@ -1689,7 +1688,7 @@ void PluginInit(void)
 
 #ifdef PLUGIN_255
   Plugin_id[x] = 255;
-#ifndef ARDUINO_AVR_UNO  
+#ifndef ARDUINO_AVR_UNO
   Plugin_Description[x] = PLUGIN_DESC_255;
 #endif
   Plugin_State[x] = P_Enabled;
