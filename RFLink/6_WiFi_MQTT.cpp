@@ -98,10 +98,14 @@ void reconnect()
     Serial.print(F("MQTT Connection :\t"));
 
 #ifdef MQTT_LWT
+#ifdef ESP32
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str(), (MQTT_TOPIC_LWT).c_str(), 2, true, PSTR("Offline")))
-#else
+#elif ESP8266
+    if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str(), (MQTT_TOPIC_LWT).c_str(), 2, true, "Offline"))
+#endif // ESP
+#else  // MQTT_LWT
     if (MQTTClient.connect(MQTT_ID.c_str(), MQTT_USER.c_str(), MQTT_PSWD.c_str()))
-#endif
+#endif // MQTT_LWT
     {
       Serial.println(F("Established"));
       Serial.print(F("MQTT ID :\t\t"));
@@ -109,8 +113,12 @@ void reconnect()
       Serial.print(F("MQTT Username :\t\t"));
       Serial.println(MQTT_USER.c_str());
 #ifdef MQTT_LWT
+#ifdef ESP32
       MQTTClient.publish((MQTT_TOPIC_LWT).c_str(), PSTR("Online"), true);
-#endif
+#elif ESP8266
+      MQTTClient.publish((MQTT_TOPIC_LWT).c_str(), "Online", true);
+#endif // ESP
+#endif // MQTT_LWT
     }
     else
     {
