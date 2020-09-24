@@ -49,36 +49,6 @@ boolean CheckMQTT(byte *byte_in)
   return false;
 }
 
-#ifdef AUTOCONNECT_ENABLED
-boolean CheckWeb(String &String_in)
-{
-  if (!String_in.isEmpty())
-  {
-    String_in.trim();
-    char char_in[INPUT_COMMAND_SIZE];
-    String_in.toCharArray(char_in, String_in.length() + 1);
-    char_in[String_in.length() + 1] = 0;
-
-    if (CopySerial(char_in))
-    {
-#ifdef SERIAL_ENABLED
-      Serial.flush();
-      Serial.print(F("Message arrived [Web] "));
-      Serial.println(InputBuffer_Serial);
-#endif
-      if (CheckCmd())
-      {
-        String_in.clear();
-        return true;
-      }
-    }
-    String_in.clear();
-    return false;
-  }
-  return false;
-}
-#endif // AUTOCONNECT_ENABLED
-
 boolean CopySerial(char *src)
 {
   return (strncpy(InputBuffer_Serial, src, INPUT_COMMAND_SIZE - 2));

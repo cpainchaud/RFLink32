@@ -8,8 +8,8 @@
 #ifndef RFLink_h
 #define RFLink_h
 
-#define BUILDNR 0x04 // 0x07       // shown in version
-#define REVNR 0x02   // 0X42       // shown in version and startup string
+#define BUILDNR 0x05 // 0x07       // shown in version
+#define REVNR 0x00   // 0X42       // shown in version and startup string
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 
@@ -20,13 +20,13 @@
 #define OLED_FLIP true   // default false
 
 // WIFI
-#define WIFI_PWR_0 10 // 0~20.5dBm
-#define AUTOCONNECT_ENABLED
+#define WIFI_PWR_0 20 // 0~20.5dBm
 
 // MQTT messages
 #define MQTT_ENABLED          // Send RFLink messages over MQTT
 #define MQTT_LOOP_MS 1000     // MQTTClient.loop(); call period (in mSec)
 #define MQTT_RETAINED_0 false // Retained option
+#define MQTT_LWT              // Let know if Module is Online or Offline via MQTT Last Will message
 #endif
 
 // Debug default

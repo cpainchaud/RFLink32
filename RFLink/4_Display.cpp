@@ -19,7 +19,7 @@ char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for complete message data
 // ------------------- //
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
-#error "For AVR plaforms, in all sprintf_P above, please replace %s with %s"
+#error "For AVR plaforms, in all sprintf_P above, please replace %s with %S"
 #endif
 
 // Common Header
@@ -51,22 +51,22 @@ void display_Splash(void)
 }
 
 // ID=9999 => device ID (often a rolling code and/or device channel number) (Hexadecimal)
-void display_IDn(unsigned int input, byte n)
+void display_IDn(unsigned long input, byte n)
 {
   switch (n)
   {
   case 2:
-    sprintf_P(dbuffer, PSTR("%s%02x"), PSTR(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%02lx"), PSTR(";ID="), input);
     break;
   case 4:
-    sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%04lx"), PSTR(";ID="), input);
     break;
   case 6:
-    sprintf_P(dbuffer, PSTR("%s%06x"), PSTR(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%06lx"), PSTR(";ID="), input);
     break;
   case 8:
   default:
-    sprintf_P(dbuffer, PSTR("%s%08x"), PSTR(";ID="), input);
+    sprintf_P(dbuffer, PSTR("%s%08lx"), PSTR(";ID="), input);
   }
   strcat(pbuffer, dbuffer);
 }

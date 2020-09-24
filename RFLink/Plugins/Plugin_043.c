@@ -197,10 +197,7 @@ boolean Plugin_043(byte function, char *string)
 
    checksumcalc = checksumcalc & 0xF;
    if (checksumcalc != data[10])
-   {
-      Serial.println("CRC");
       return false;
-   }
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
