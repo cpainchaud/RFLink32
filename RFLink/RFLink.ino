@@ -104,11 +104,6 @@ void setup()
   setup_OLED();
 #endif
 
-#ifdef MQTT_ENABLED
-  setup_MQTT();
-  reconnect();
-#endif
-
   display_Header();
   display_Splash();
   display_Footer();
