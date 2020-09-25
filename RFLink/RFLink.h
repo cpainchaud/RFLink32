@@ -9,13 +9,13 @@
 #define RFLink_h
 
 #define BUILDNR 0x05 // 0x07       // shown in version
-#define REVNR 0x00   // 0X42       // shown in version and startup string
+#define REVNR 0x01   // 0X42       // shown in version and startup string
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 
 #if (defined(ESP32) || defined(ESP8266))
 // OLED display, 0.91" SSD1306 I2C
-#define OLED_ENABLED
+// #define OLED_ENABLED
 #define OLED_CONTRAST 32 // default 255 (max)
 #define OLED_FLIP true   // default false
 

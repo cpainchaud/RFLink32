@@ -82,7 +82,6 @@ void setup()
   Serial.print(F("Sketch File :\t\t"));
   Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
-#endif // ESP32 || ESP8266
 
 #ifdef MQTT_ENABLED
   setup_WIFI();
@@ -90,7 +89,8 @@ void setup()
   reconnect();
 #else
   setup_WIFI_OFF();
-#endif
+#endif // MQTT_ENABLED
+#endif // ESP32 || ESP8266
 
   PluginInit();
   PluginTXInit();
@@ -102,11 +102,6 @@ void setup()
 
 #ifdef OLED_ENABLED
   setup_OLED();
-#endif
-
-#ifdef MQTT_ENABLED
-  setup_MQTT();
-  reconnect();
 #endif
 
   display_Header();
