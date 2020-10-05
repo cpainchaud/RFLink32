@@ -31,7 +31,14 @@ boolean bResub; // uplink reSubscribe after setup only
 
 // Update these with values suitable for your network.
 
+#ifdef MQTT_SSL
+#include <WiFiClientSecure.h>
+WiFiClientSecure WIFIClient;
+#else //SSL
+#include <WiFiClient.h>
 WiFiClient WIFIClient;
+#endif //SSL
+
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
 void callback(char *, byte *, unsigned int);
@@ -74,8 +81,22 @@ void setup_WIFI()
 
 void setup_MQTT()
 {
+  Serial.print(F("SSL :\t\t\t"));
+#ifdef MQTT_SSL
+  if (MQTT_PORT == "")
+    MQTT_PORT = "8883"; // just in case ....
+#ifdef CHECK_CACERT
+  Serial.println(F("Using ca_cert"));
+  WIFIClient.setCACert(ca_cert);
+#else
+  Serial.println(F("Insecure (No Key/Cert/Fp)"));
+#endif // MQTT_CACERT
+#else
   if (MQTT_PORT == "")
     MQTT_PORT = "1883"; // just in case ....
+  Serial.println(F("Not Set"));
+#endif //SSL
+
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
   MQTTClient.setCallback(callback);
