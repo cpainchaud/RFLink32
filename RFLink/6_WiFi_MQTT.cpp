@@ -49,10 +49,12 @@ void setup_WIFI()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
-#ifdef ESP8266
+#ifdef ESP32
+  WiFi.setTxPower(WIFI_POWER_11dBm);
+#elif ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
   WiFi.setOutputPower(WIFI_PWR.toInt());
-#endif // ESP8266
+#endif // ESP
   WiFi.mode(WIFI_STA);
 
   // For Static IP
