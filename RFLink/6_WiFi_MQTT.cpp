@@ -55,12 +55,16 @@ void setup_WIFI()
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
   WiFi.setOutputPower(WIFI_PWR.toInt());
 #endif // ESP
-  WiFi.mode(WIFI_STA);
 
   // For Static IP
 #ifndef USE_DHCP
   WiFi.config(ipaddr_addr(WIFI_IP.c_str()), ipaddr_addr(WIFI_GATEWAY.c_str()), ipaddr_addr(WIFI_SUBNET.c_str()));
 #endif // USE_DHCP
+}
+
+void start_WIFI()
+{
+  WiFi.mode(WIFI_STA);
 
   // We start by connecting to a WiFi network
   Serial.print(F("WiFi SSID :\t\t"));
@@ -79,6 +83,13 @@ void setup_WIFI()
   Serial.println(WiFi.localIP());
   Serial.print(F("WiFi RSSI :\t\t"));
   Serial.println(WiFi.RSSI());
+}
+
+void stop_WIFI()
+{
+  WiFi.disconnect();
+  WiFi.mode(WIFI_OFF);
+  delay(500);
 }
 
 void setup_MQTT()
@@ -114,8 +125,15 @@ void callback(char *topic, byte *payload, unsigned int length)
 void reconnect()
 {
   bResub = true;
+
   while (!MQTTClient.connected())
   {
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      stop_WIFI();
+      start_WIFI();
+    }
+
     Serial.print(F("MQTT Server :\t\t"));
     Serial.println(MQTT_SERVER.c_str());
     Serial.print(F("MQTT Connection :\t"));

@@ -21,6 +21,8 @@
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
 void setup_WIFI();
+void start_WIFI();
+void stop_WIFI();
 void setup_MQTT();
 void reconnect();
 void publishMsg();

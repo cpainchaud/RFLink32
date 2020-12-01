@@ -85,6 +85,7 @@ void setup()
 
 #ifdef MQTT_ENABLED
   setup_WIFI();
+  start_WIFI();
   setup_MQTT();
   reconnect();
 #else
