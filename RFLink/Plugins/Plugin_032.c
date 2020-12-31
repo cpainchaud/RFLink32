@@ -28,8 +28,8 @@
      01011111 1101 1000 0000 1111 0001 00001110
      01000101 1000 0010
  *
- *   A = Rolling Code
- *   B = 1 (fixed value)
+ *   A = Rolling Code      --- In rtl_433 the first 4 bits are type
+ *   B = 1 (fixed value) --- This is the battery level ( 1 = Ok, 0 = low battery)
  *   C = 0=scheduled transmission, 1=requested transmission (button press)
  *   D = Channel number (00=ch1 01=ch2 10=ch3)
  *   E = Temperature (two's complement)
@@ -61,6 +61,7 @@ boolean Plugin_032(byte function, char *string)
    byte humidity = 0; //bitstream2 !
    byte rc = 0;
    byte rc2 = 0;
+   byte battery = 0;
    //==================================================================================
    // Get all 36 bits
    //==================================================================================
@@ -113,22 +114,16 @@ boolean Plugin_032(byte function, char *string)
 
    if (humidity == 0)
       return false; // Sanity check
-   //==================================================================================
-   // Prevent repeating signals from showing up
-   //==================================================================================
-   unsigned long tmpval = (((bitstream << 8) & 0xFFF0) | humidity); // All but 8 1st ID bits ...
 
-   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != tmpval))
-      SignalCRC = tmpval; // not seen this RF packet recently
-   else
-      return true; // already seen the RF packet recently
    //==================================================================================
    // Now process the various sensor types
    //==================================================================================
    rc = (bitstream >> 20) & 0xFF;
-   rc2 = (bitstream >> 12) & 0xFF;
+   rc2 = (bitstream >> 12) & 0xF3; //  Remove battery and button from ID
+   /* 
    if (((rc2)&0x08) != 0x08)
       return false; // needs to be 1
+   */
    temperature = (bitstream & 0xFFF);
    //fix 12 bit signed number conversion
    if ((temperature & 0x800) == 0x800)
@@ -144,7 +139,17 @@ boolean Plugin_032(byte function, char *string)
          return false; // temperature out of range ( > 60.0 degrees)
    }
    if (humidity > 99)
-      return false; // Humidity out of range
+      return false;                       // Humidity out of range
+   battery = ((bitstream >> 12) & B1000); // get battery indicator
+   //==================================================================================
+   // Prevent repeating signals from showing up
+   //==================================================================================
+   unsigned long tmpval = (((bitstream << 8) & 0xFFF0) | humidity); // All but 8 1st ID bits ...
+
+   if ((SignalHash != SignalHashPrevious) || ((RepeatingTimer + 500) < millis()) || (SignalCRC != tmpval))
+      SignalCRC = tmpval; // not seen this RF packet recently
+   else
+      return true; // already seen the RF packet recently
    //==================================================================================
    // Output
    //==================================================================================
@@ -156,6 +161,7 @@ boolean Plugin_032(byte function, char *string)
    display_TEMP(temperature);
    if (humidity < 99) // Only report valid humidty values
       display_HUM(humidity, HUM_HEX);
+   display_BAT(battery);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
