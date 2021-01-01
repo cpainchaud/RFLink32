@@ -333,7 +333,7 @@ boolean Plugin_001(byte function, char *string)
 
    #ifdef PLUGIN_037
    // ==========================================================================
-   // Beginning of Signal translation for Accurite
+   // Beginning of Signal translation for AcuRite 986 Sensors
    // ==========================================================================
    // Serial.print("RawSignal.Number: ");
    // Serial.println(RawSignal.Number);  
