@@ -56,19 +56,18 @@ boolean Plugin_037(byte function, char *string)
       return false;
 
    unsigned long bitstream = 0L;
-   uint8_t bitstream2 = 0;
+   byte bitstream2 = 0;
    byte data[8];
    int temperature = 0;
-   // byte humidity = 0; //bitstream2 !
    unsigned long rc = 0;
    byte rc2 = 0;
    byte battery = 0;
-   uint8_t status = 0;
-   uint8_t crcc;
+   byte status = 0;
+   byte crcc;
    //==================================================================================
    // Get all 36 bits
    //==================================================================================
-   Serial.print("Bitstream: ");
+   // Serial.print("Bitstream: ");
    for (byte x = 0; x < 64; x += 2)
    {
       if (RawSignal.Pulses[x + 1] > ACURITE_MIDHI)
@@ -77,14 +76,14 @@ boolean Plugin_037(byte function, char *string)
       if (RawSignal.Pulses[x + 1] > ACURITE_PULSEMAXMIN)
       {
          bitstream |= 0x1;
-         Serial.print("1");
+         // Serial.print("1");
       }
       else
       {
-         Serial.print("0");
+         // Serial.print("0");
       }
    }
-   Serial.print(" ");
+   // Serial.print(" ");
    for (byte x = 64; x < 80; x = x + 2)
    {
       bitstream2 <<= 1;
@@ -92,18 +91,18 @@ boolean Plugin_037(byte function, char *string)
       if (RawSignal.Pulses[x + 1] > ACURITE_PULSEMAXMIN)
       {
          bitstream2 |= 0x1;
-         Serial.print("1");
+         // Serial.print("1");
       }
       else
       {
-         Serial.print("0");
+         // Serial.print("0");
       }
    }
    char dataPrint[9];
-   sprintf(dataPrint, "%04lx %01x", bitstream, bitstream2);
-   Serial.println("");
-   Serial.print("Datastream: ");
-   Serial.println(dataPrint);
+   //sprintf(dataPrint, "%04lx %01x", bitstream, bitstream2);
+   //Serial.println("");
+   //Serial.print("Datastream: ");
+   //Serial.println(dataPrint);
    //==================================================================================
    // Perform a quick sanity check
    //==================================================================================
@@ -146,7 +145,13 @@ boolean Plugin_037(byte function, char *string)
       temperature = data[0];
    }
    temperature = ((temperature - 32) * 5 / 9 * 10);   // ACURITE sensors are in Farenheit
-   //fix 12 bit signed number conversion
+   Serial.print("temperature: ");
+   Serial.println(temperature);
+   if ( temperature < 0 ) 
+      {
+         temperature = (temperature * -1 ) | 0x8000;
+      }
+
    rc = (data[1] << 8) + data[2];
    status = data[3];
    rc2 = (status & 0x01) + 1;
@@ -156,8 +161,6 @@ boolean Plugin_037(byte function, char *string)
    Serial.println(rc);
    Serial.print("unit: ");
    Serial.println(rc2);
-   Serial.print("temperature: ");
-   Serial.println(temperature);
    Serial.print("battery: ");
    Serial.println(battery);
    Serial.print("data[3]: ");
