@@ -103,13 +103,13 @@ boolean CheckCmd()
       // -------------------------------------------------------
       // Handle Device Management Commands
       // -------------------------------------------------------
-      if (strcasecmp(InputBuffer_Serial + 3, "PING;") == 0)
+      if (strncasecmp(InputBuffer_Serial + 3, "PING;",5) == 0)
       {
         display_Header();
         display_Name(PSTR("PONG"));
         display_Footer();
       }
-      else if (strcasecmp(InputBuffer_Serial + 3, "REBOOT;") == 0)
+      else if (strncasecmp(InputBuffer_Serial + 3, "REBOOT;",7) == 0)
       {
         display_Header();
         display_Name(PSTR("REBOOT"));

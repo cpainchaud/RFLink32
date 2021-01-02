@@ -145,16 +145,6 @@ boolean Plugin_030(byte function, char *string)
    if (bitstream == 0)
       return false;
    //==================================================================================
-   // Prevent repeating signals from showing up
-   //==================================================================================
-   if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || ((SignalCRC != bitstream) && (SignalCRC_1 != bitstream)))
-   {
-      SignalCRC_1 = SignalCRC; // for mixed message burst prevention
-      SignalCRC = bitstream;   // not seen the RF packet recently
-   }
-   else
-      return true; // already seen the RF packet recently
-   //==================================================================================
    // Prepare nibbles from bit stream
    //==================================================================================
    for (byte i = 0; i < 8; i++)
@@ -209,6 +199,16 @@ boolean Plugin_030(byte function, char *string)
       humidity = (data[7] << 4) | data[6];
       if (humidity > 0x99)
          return false; // Humidity out of range, assume ALL data is bad?
+                       //==================================================================================
+      // Prevent repeating signals from showing up
+      //==================================================================================
+      if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || ((SignalCRC != bitstream) && (SignalCRC_1 != bitstream)))
+      {
+         SignalCRC_1 = SignalCRC; // for mixed message burst prevention
+         SignalCRC = bitstream;   // not seen the RF packet recently
+      }
+      else
+         return true; // already seen the RF packet recently
       //==================================================================================
       // Output
       //==================================================================================
@@ -227,6 +227,16 @@ boolean Plugin_030(byte function, char *string)
    }
    else
    {
+      //==================================================================================
+      // Prevent repeating signals from showing up
+      //==================================================================================
+      if ((SignalHash != SignalHashPrevious) || (RepeatingTimer + 1000 < millis()) || ((SignalCRC != bitstream) && (SignalCRC_1 != bitstream)))
+      {
+         SignalCRC_1 = SignalCRC; // for mixed message burst prevention
+         SignalCRC = bitstream;   // not seen the RF packet recently
+      }
+      else
+         return true; // already seen the RF packet recently
       display_Header();
       display_Name(PSTR("Alecto V1"));
       display_IDc(c_ID);
