@@ -57,7 +57,7 @@ boolean Plugin_037(byte function, char *string)
 
    unsigned long bitstream = 0L;
    byte bitstream2 = 0;
-   byte data[8];
+   byte data[4];
    int temperature = 0;
    unsigned long rc = 0;
    byte rc2 = 0;
@@ -98,7 +98,7 @@ boolean Plugin_037(byte function, char *string)
          // Serial.print("0");
       }
    }
-   char dataPrint[9];
+   // char dataPrint[9];
    //sprintf(dataPrint, "%04lx %01x", bitstream, bitstream2);
    //Serial.println("");
    //Serial.print("Datastream: ");
@@ -145,8 +145,8 @@ boolean Plugin_037(byte function, char *string)
       temperature = data[0];
    }
    temperature = ((temperature - 32) * 5 / 9 * 10);   // ACURITE sensors are in Farenheit
-   Serial.print("temperature: ");
-   Serial.println(temperature);
+   // Serial.print("temperature: ");
+   // Serial.println(temperature);
    if ( temperature < 0 ) 
       {
          temperature = (temperature * -1 ) | 0x8000;
@@ -157,14 +157,14 @@ boolean Plugin_037(byte function, char *string)
    rc2 = (status & 0x01) + 1;
    status = status >> 1;
    battery = ((status & 1) == 0);
-   Serial.print("id: ");
-   Serial.println(rc);
-   Serial.print("unit: ");
-   Serial.println(rc2);
-   Serial.print("battery: ");
-   Serial.println(battery);
-   Serial.print("data[3]: ");
-   Serial.println(data[3]);
+   // Serial.print("id: ");
+   // Serial.println(rc);
+   // Serial.print("unit: ");
+   // Serial.println(rc2);
+   // Serial.print("battery: ");
+   // Serial.println(battery);
+   // Serial.print("data[3]: ");
+   // Serial.println(data[3]);
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
