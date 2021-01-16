@@ -27,6 +27,8 @@
 #define MQTT_LOOP_MS 1000     // MQTTClient.loop(); call period (in mSec)
 #define MQTT_RETAINED_0 false // Retained option
 #define MQTT_LWT              // Let know if Module is Online or Offline via MQTT Last Will message
+// #define MQTT_SSL           // Send MQTT messages over SSL
+// #define CHECK_CACERT       // Send MQTT SSL CA Certificate
 #endif
 
 // Debug default

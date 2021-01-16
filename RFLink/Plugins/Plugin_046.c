@@ -1,6 +1,6 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                  lugin-046: Auriol v2 / Xiron                                     ##
+//##                                  Plugin-046: Auriol v2 / Xiron                                     ##
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the Auriol protocol for sensor type Z31055A-TX and Xiron 

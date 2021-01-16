@@ -129,7 +129,7 @@ boolean Plugin_029(byte function, char *string)
   // Now process the various sensor types
   //==================================================================================
   rc = (data[0] << 4) | (data[1] >> 4); // rolling code
-  byte bat = !((data[1] >> 3) & 0x1); // supposed bat bit
+  byte bat = !((data[1] >> 3) & 0x1);   // supposed bat bit
   int temp = 0;
   unsigned int rain = 0;
   byte hum = 0;
@@ -138,6 +138,11 @@ boolean Plugin_029(byte function, char *string)
   unsigned int wgust = 0;
 
   temp = (((data[1] & 0x3) << 8 | data[2]) - 400);
+  if (temp < 0)
+  {
+    temp *= -1;
+    temp += 0x8000;
+  }
   hum = data[3];
   wspeed = data[4] * 245;
   wspeed /= 20;

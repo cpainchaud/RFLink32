@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+// #include <ArduinoOTA.h>
 #include "RFLink.h"
 #include "3_Serial.h"
 #include "4_Display.h"
@@ -31,7 +32,14 @@ boolean bResub; // uplink reSubscribe after setup only
 
 // Update these with values suitable for your network.
 
+#ifdef MQTT_SSL
+#include <WiFiClientSecure.h>
+WiFiClientSecure WIFIClient;
+#else //SSL
+#include <WiFiClient.h>
 WiFiClient WIFIClient;
+#endif //SSL
+
 PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
 void callback(char *, byte *, unsigned int);
@@ -42,16 +50,22 @@ void setup_WIFI()
 {
   WiFi.persistent(false);
   WiFi.setAutoReconnect(true);
-#ifdef ESP8266
+#ifdef ESP32
+  WiFi.setTxPower(WIFI_POWER_11dBm);
+#elif ESP8266
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
   WiFi.setOutputPower(WIFI_PWR.toInt());
-#endif // ESP8266
-  WiFi.mode(WIFI_STA);
+#endif // ESP
 
   // For Static IP
 #ifndef USE_DHCP
   WiFi.config(ipaddr_addr(WIFI_IP.c_str()), ipaddr_addr(WIFI_GATEWAY.c_str()), ipaddr_addr(WIFI_SUBNET.c_str()));
 #endif // USE_DHCP
+}
+
+void start_WIFI()
+{
+  WiFi.mode(WIFI_STA);
 
   // We start by connecting to a WiFi network
   Serial.print(F("WiFi SSID :\t\t"));
@@ -70,12 +84,66 @@ void setup_WIFI()
   Serial.println(WiFi.localIP());
   Serial.print(F("WiFi RSSI :\t\t"));
   Serial.println(WiFi.RSSI());
+
+  /*
+  ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
+
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR)
+      Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR)
+      Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR)
+      Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR)
+      Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR)
+      Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
+  */
+}
+
+void stop_WIFI()
+{
+  WiFi.disconnect();
+  WiFi.mode(WIFI_OFF);
+  delay(500);
 }
 
 void setup_MQTT()
 {
+  Serial.print(F("SSL :\t\t\t"));
+#ifdef MQTT_SSL
+  if (MQTT_PORT == "")
+    MQTT_PORT = "8883"; // just in case ....
+#ifdef CHECK_CACERT
+  Serial.println(F("Using ca_cert"));
+  WIFIClient.setCACert(ca_cert);
+#else
+  Serial.println(F("Insecure (No Key/Cert/Fp)"));
+#endif // MQTT_CACERT
+#else
   if (MQTT_PORT == "")
     MQTT_PORT = "1883"; // just in case ....
+  Serial.println(F("Not Set"));
+#endif //SSL
+
   MQTTClient.setClient(WIFIClient);
   MQTTClient.setServer(MQTT_SERVER.c_str(), MQTT_PORT.toInt());
   MQTTClient.setCallback(callback);
@@ -91,8 +159,15 @@ void callback(char *topic, byte *payload, unsigned int length)
 void reconnect()
 {
   bResub = true;
+
   while (!MQTTClient.connected())
   {
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      stop_WIFI();
+      start_WIFI();
+    }
+
     Serial.print(F("MQTT Server :\t\t"));
     Serial.println(MQTT_SERVER.c_str());
     Serial.print(F("MQTT Connection :\t"));
@@ -160,6 +235,7 @@ void checkMQTTloop()
     MQTTClient.loop();
     lastCheck = millis();
   }
+  // ArduinoOTA.handle();
 }
 
 #else // MQTT_ENABLED
