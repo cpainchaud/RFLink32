@@ -17,12 +17,21 @@
 #include <ESP8266WiFi.h>
 #endif
 
+#define USE_WIFIMANAGER
+#ifdef USE_WIFIMANAGER
+#include "WifiManager.h"
+#endif
+
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
+#ifndef USE_WIFIMANAGER
 void setup_WIFI();
 void start_WIFI();
 void stop_WIFI();
+#else // USE_WIFIMANAGER
+void start_WifiManager();
+#endif // USE_WIFIMANAGER
 void setup_MQTT();
 void reconnect();
 void publishMsg();

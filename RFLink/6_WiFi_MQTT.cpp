@@ -46,6 +46,7 @@ void callback(char *, byte *, unsigned int);
 
 static String WIFI_PWR = String(WIFI_PWR_0);
 
+#ifndef USE_WIFIMANAGER
 void setup_WIFI()
 {
   WiFi.persistent(false);
@@ -125,6 +126,41 @@ void stop_WIFI()
   WiFi.mode(WIFI_OFF);
   delay(500);
 }
+#else //USE_WIFIMANAGER
+WiFiManager wifiManager;
+
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+}
+
+void start_WifiManager(){
+
+  WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
+  wifiManager.addParameter(&mqtt_s_param);
+
+  WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
+  wifiManager.addParameter(&mqtt_p_param);
+
+  WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
+  wifiManager.addParameter(&mqtt_u_param);
+    
+  WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
+  wifiManager.addParameter(&mqtt_sec_param);
+
+  wifiManager.setAPCallback(configModeCallback);
+  wifiManager.autoConnect();
+
+  MQTT_SERVER = mqtt_s_param.getValue();
+  MQTT_PORT = mqtt_p_param.getValue();
+  MQTT_USER = mqtt_u_param.getValue();
+  MQTT_PSWD = mqtt_sec_param.getValue();
+
+}
+#endif //USE_WIFIMANAGER
+
 
 void setup_MQTT()
 {
@@ -164,8 +200,10 @@ void reconnect()
   {
     if (WiFi.status() != WL_CONNECTED)
     {
+      #ifndef USE_WIFIMANAGER
       stop_WIFI();
       start_WIFI();
+      #endif // USE_WIFIMANAGER
     }
 
     Serial.print(F("MQTT Server :\t\t"));

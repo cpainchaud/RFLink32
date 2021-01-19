@@ -84,8 +84,11 @@ void setup()
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
 #ifdef MQTT_ENABLED
+  #ifndef USE_WIFIMANAGER
   setup_WIFI();
   start_WIFI();
+  #else // USE_WIFIMANAGER
+  #endif // USE_WIFIMANAGER
   setup_MQTT();
   reconnect();
 #else
