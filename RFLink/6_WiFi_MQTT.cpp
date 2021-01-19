@@ -136,28 +136,31 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-void start_WifiManager(){
+WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
+WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
+WiFiManagerParameter mqtt_id_param("mqtt_id", "id", "", 20);
+WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
+WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
 
-  WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
+void setup_WifiManager(){
+  
   wifiManager.addParameter(&mqtt_s_param);
-
-  WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
   wifiManager.addParameter(&mqtt_p_param);
-
-  WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
+  wifiManager.addParameter(&mqtt_id_param);
   wifiManager.addParameter(&mqtt_u_param);
-    
-  WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
   wifiManager.addParameter(&mqtt_sec_param);
 
   wifiManager.setAPCallback(configModeCallback);
+}
+
+void start_WifiManager(){
   wifiManager.autoConnect();
 
   MQTT_SERVER = mqtt_s_param.getValue();
   MQTT_PORT = mqtt_p_param.getValue();
   MQTT_USER = mqtt_u_param.getValue();
   MQTT_PSWD = mqtt_sec_param.getValue();
-
+  MQTT_ID = mqtt_id_param.getValue();
 }
 #endif //USE_WIFIMANAGER
 

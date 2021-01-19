@@ -88,6 +88,8 @@ void setup()
   setup_WIFI();
   start_WIFI();
   #else // USE_WIFIMANAGER
+  setup_WifiManager();
+  start_WifiManager();
   #endif // USE_WIFIMANAGER
   setup_MQTT();
   reconnect();
