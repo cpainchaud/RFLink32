@@ -17,7 +17,6 @@
 #include <ESP8266WiFi.h>
 #endif
 
-#define USE_WIFIMANAGER
 #ifdef USE_WIFIMANAGER
 #include "WifiManager.h"
 #endif
