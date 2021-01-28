@@ -19,6 +19,44 @@
 #include <ESP8266WiFi.h>
 #endif
 
+#ifdef USE_WIFIMANAGER
+WiFiManager wifiManager;
+
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+}
+
+WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
+WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
+WiFiManagerParameter mqtt_id_param("mqtt_id", "id", "", 20);
+WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
+WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
+
+void setup_WifiManager(){
+  
+  wifiManager.addParameter(&mqtt_s_param);
+  wifiManager.addParameter(&mqtt_p_param);
+  wifiManager.addParameter(&mqtt_id_param);
+  wifiManager.addParameter(&mqtt_u_param);
+  wifiManager.addParameter(&mqtt_sec_param);
+
+  wifiManager.setAPCallback(configModeCallback);
+}
+
+void start_WifiManager(){
+  wifiManager.autoConnect();
+
+  MQTT_SERVER = mqtt_s_param.getValue();
+  MQTT_PORT = mqtt_p_param.getValue();
+  MQTT_USER = mqtt_u_param.getValue();
+  MQTT_PSWD = mqtt_sec_param.getValue();
+  MQTT_ID = mqtt_id_param.getValue();
+}
+#endif // USE_WIFIMANAGER
+
 #ifdef MQTT_ENABLED
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -125,42 +163,6 @@ void stop_WIFI()
   WiFi.disconnect();
   WiFi.mode(WIFI_OFF);
   delay(500);
-}
-#else //USE_WIFIMANAGER
-WiFiManager wifiManager;
-
-void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-}
-
-WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
-WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
-WiFiManagerParameter mqtt_id_param("mqtt_id", "id", "", 20);
-WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
-WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
-
-void setup_WifiManager(){
-  
-  wifiManager.addParameter(&mqtt_s_param);
-  wifiManager.addParameter(&mqtt_p_param);
-  wifiManager.addParameter(&mqtt_id_param);
-  wifiManager.addParameter(&mqtt_u_param);
-  wifiManager.addParameter(&mqtt_sec_param);
-
-  wifiManager.setAPCallback(configModeCallback);
-}
-
-void start_WifiManager(){
-  wifiManager.autoConnect();
-
-  MQTT_SERVER = mqtt_s_param.getValue();
-  MQTT_PORT = mqtt_p_param.getValue();
-  MQTT_USER = mqtt_u_param.getValue();
-  MQTT_PSWD = mqtt_sec_param.getValue();
-  MQTT_ID = mqtt_id_param.getValue();
 }
 #endif //USE_WIFIMANAGER
 

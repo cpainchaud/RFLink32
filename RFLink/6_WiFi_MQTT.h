@@ -19,7 +19,11 @@
 
 #ifdef USE_WIFIMANAGER
 #include "WifiManager.h"
-#endif
+void setup_WifiManager();
+void start_WifiManager();
+#endif // USE_WIFIMANAGER
+
+
 
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
@@ -28,9 +32,6 @@ extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 void setup_WIFI();
 void start_WIFI();
 void stop_WIFI();
-#else // USE_WIFIMANAGER
-void setup_WifiManager();
-void start_WifiManager();
 #endif // USE_WIFIMANAGER
 void setup_MQTT();
 void reconnect();

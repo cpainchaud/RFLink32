@@ -25,6 +25,9 @@
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 #include "8_OLED.h"
+#ifdef USE_WIFIMANAGER
+  #include "ArduinoOTA.h"
+#endif // USE_WIFIMANAGER
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -83,18 +86,27 @@ void setup()
   Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
+#ifdef USE_WIFIMANAGER
+  setup_WifiManager();
+  start_WifiManager();
+  //ArduinoOTA.setPassword("ThatIsMyPassword!!%75184");
+  //#ifdef OTA_PASSSWORD
+    ArduinoOTA.setPassword(OTA_PASSWORD);
+  //#endif
+  ArduinoOTA.begin();
+#endif // USE_WIFIMANAGER
+
 #ifdef MQTT_ENABLED
   #ifndef USE_WIFIMANAGER
   setup_WIFI();
   start_WIFI();
-  #else // USE_WIFIMANAGER
-  setup_WifiManager();
-  start_WifiManager();
   #endif // USE_WIFIMANAGER
   setup_MQTT();
   reconnect();
 #else
+  #ifndef USE_WIFIMANAGER
   setup_WIFI_OFF();
+  #endif // USE_WIFIMANAGER
 #endif // MQTT_ENABLED
 #endif // ESP32 || ESP8266
 
@@ -132,6 +144,10 @@ void loop()
 #ifdef MQTT_ENABLED
   checkMQTTloop();
   sendMsg();
+#endif
+
+#ifdef USE_WIFIMANAGER
+  ArduinoOTA.handle();
 #endif
 
 #ifdef SERIAL_ENABLED
