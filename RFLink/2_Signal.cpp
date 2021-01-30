@@ -81,6 +81,8 @@ boolean FetchSignal()
     if (!CHECK_TIMEOUT)
       return false;
   }
+
+  RESET_TIMESTART; // next pulse starts now before we do anything else
   //Serial.print ("PulseLength: "); Serial.println (PulseLength);
   STORE_PULSE;
 
@@ -89,15 +91,16 @@ boolean FetchSignal()
   // ************************
   while (RawCodeLength < RAW_BUFFER_SIZE)
   {
-
-    // ***   Time Pulse   ***
-    RESET_TIMESTART;
+   
     while (CHECK_RF)
     {
       GET_PULSELENGTH;
       if (PulseLength_us > SIGNAL_END_TIMEOUT_US)
         break;
     }
+
+    // next Pulse starts now (while we are busy doing calculation) 
+    RESET_TIMESTART;
 
     // ***   Too short Pulse Check   ***
     if (PulseLength_us < MIN_PULSE_LENGTH_US)
