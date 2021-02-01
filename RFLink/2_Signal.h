@@ -12,7 +12,7 @@
 
 //#define USE_ASYNC_RECEIVER          // enable if you prefer interrupt based receiver over 'loop' based one
 #define RAW_BUFFER_SIZE 292        // 292        // Maximum number of pulses that is received in one go.
-#define MIN_RAW_PULSES 36          // 36         // Minimal number of bits that need to have been received before we spend CPU time on decoding the signal.
+#define MIN_RAW_PULSES 24          // 24         // Minimal number of bits that need to have been received before we spend CPU time on decoding the signal.
 #define RAWSIGNAL_SAMPLE_RATE 32   // 32         // =8 bits. Sample width / resolution in uSec for raw RF pulses.
 #define SIGNAL_SEEK_TIMEOUT_MS 25  // 25         // After this time in mSec, RF signal will be considered absent.
 #define SIGNAL_MIN_PREAMBLE_US 400 // 400        // After this time in uSec, a RF signal will be considered to have started.
