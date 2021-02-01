@@ -12,7 +12,7 @@
 
 #ifdef USE_ASYNC_RECEIVER
 using namespace AsyncSignalScanner;
-#endif USE_ASYNC_RECEIVER
+#endif //USE_ASYNC_RECEIVER
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
