@@ -22,12 +22,15 @@ unsigned long RepeatingTimer = 0L;
 #ifdef USE_ASYNC_RECEIVER
 namespace AsyncSignalScanner {
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false};
-    hw_timer_t * nextPulseTimeoutTimer =  timerBegin(3, ESP.getCpuFreqMHz()/1000000000, true);
+    unsigned long int lastChangedState_us = 0;
+    unsigned long int nextPulseTimeoutTime_us = 0;
 
     void startScanning() {
       RawSignal.Number = 0;
       RawSignal.Time = 0;
       RawSignal.readyForDecoder = false;
+      lastChangedState_us = 0;
+      nextPulseTimeoutTime_us = 0;
       attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
     }
 
@@ -36,24 +39,22 @@ namespace AsyncSignalScanner {
       RawSignal.Number = 0;
       RawSignal.Time = 0;
       RawSignal.readyForDecoder = false;
-      timerStop(nextPulseTimeoutTimer);
+      lastChangedState_us = 0;
+      nextPulseTimeoutTime_us = 0;
     }
 
     void IRAM_ATTR RX_pin_changed_state() {
-      static unsigned long previousPulseTime_us = 0;
+      static unsigned long lastChangedState_us = 0;
       unsigned long changeTime_us = micros();
-
-      //Serial.println("changed state!");
-
 
       if (RawSignal.readyForDecoder) // it means previous packet has not been decoded yet, let's forget about it
         return; 
 
-      unsigned long pulseLength_us = changeTime_us - previousPulseTime_us;
-      previousPulseTime_us = changeTime_us;
+      unsigned long pulseLength_us = changeTime_us - lastChangedState_us;
+      lastChangedState_us = changeTime_us;
 
       if(pulseLength_us < MIN_PULSE_LENGTH_US){ // this is too short, noise?
-        timerStop(nextPulseTimeoutTimer);
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
         RawSignal.Number = 0;
         RawSignal.Time = 0;
       }
@@ -65,15 +66,13 @@ namespace AsyncSignalScanner {
           return;
         
         RawSignal.Time = millis();          // record when this signal started
-        timerAttachInterrupt(nextPulseTimeoutTimer, &onPulseTimerTimeout, true);
-        timerAlarmWrite(nextPulseTimeoutTimer, SIGNAL_END_TIMEOUT_US, true);
-        timerAlarmEnable(nextPulseTimeoutTimer);
-        timerStart(nextPulseTimeoutTimer);
+        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+        nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
 
         return;
       }
 
-      if ( pulseLength_us > SIGNAL_END_TIMEOUT_US ) {
+      if ( pulseLength_us > SIGNAL_END_TIMEOUT_US ) { // signal timedout but was not caught by main loop! We will do its job
         onPulseTimerTimeout();
         return;
       }
@@ -81,31 +80,31 @@ namespace AsyncSignalScanner {
       RawSignal.Number++;
 
       if (RawSignal.Number >= RAW_BUFFER_SIZE ) {      // this signal has too many pulses and will be dicarded
-        timerStop(nextPulseTimeoutTimer);
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
         RawSignal.Number = 0;
         RawSignal.Time = 0;
-        Serial.println("this signal has too many pulses and will be dicarded");
+        //Serial.println("this signal has too many pulses and will be dicarded");
         return;
       }
 
       if (RawSignal.Number == 0 && pulseLength_us < SIGNAL_MIN_PREAMBLE_US) {   // too short preamnble, let's drop it
-        timerStop(nextPulseTimeoutTimer);
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
         RawSignal.Number = 0;
         RawSignal.Time = 0;
-        Serial.print("too short preamnble, let's drop it:");Serial.println(pulseLength_us);
+        //Serial.print("too short preamnble, let's drop it:");Serial.println(pulseLength_us);
         return;
       }
 
       //Serial.print("found pulse #");Serial.println(RawSignal.Number);
-      timerAlarmWrite(nextPulseTimeoutTimer, SIGNAL_END_TIMEOUT_US, true);    // reset the pulse timeout value
       RawSignal.Pulses[RawSignal.Number] = pulseLength_us / RAWSIGNAL_SAMPLE_RATE;
-
+      nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
 
     }
 
     void onPulseTimerTimeout() {
       if (RawSignal.readyForDecoder){  // it means previous packet has not been decoded yet, let's forget about it
-        Serial.println("previous signal not decoded yet, discarding this one");
+        //Serial.println("previous signal not decoded yet, discarding this one");
+        nextPulseTimeoutTime_us = 0;
         return;
       }
 
@@ -113,29 +112,30 @@ namespace AsyncSignalScanner {
         Serial.println("corrupted signal ends with HIGH");
         RawSignal.Number = 0;
         RawSignal.Time = 0;
-        timerStop(nextPulseTimeoutTimer);
+        nextPulseTimeoutTime_us = 0;
         return;
       }*/
 
       if ( RawSignal.Number == 0) {  // timeout on preamble!
-        Serial.println("timeout on preamble");
-        timerStop(nextPulseTimeoutTimer);
+        //Serial.println("timeout on preamble");
+        nextPulseTimeoutTime_us = 0;
         RawSignal.Number = 0;
         RawSignal.Time = 0;
         return;
       }
 
        if ( RawSignal.Number < MIN_RAW_PULSES) {  // not enough pulses, we ignore it
-        timerStop(nextPulseTimeoutTimer);
+        nextPulseTimeoutTime_us = 0;
         RawSignal.Number = 0;
         RawSignal.Time = 0;
         return;
       }
       
       // finally we have one!
+      nextPulseTimeoutTime_us = 0;
       RawSignal.Number++;
       RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / RAWSIGNAL_SAMPLE_RATE;
-      Serial.print("found one packet, marking now for decoding. Pulses = ");Serial.println(RawSignal.Number);
+      //Serial.print("found one packet, marking now for decoding. Pulses = ");Serial.println(RawSignal.Number);
       RawSignal.readyForDecoder = true;
     }
 };
@@ -143,8 +143,18 @@ namespace AsyncSignalScanner {
 using namespace AsyncSignalScanner;
 
 boolean ScanEvent(void) {
-  if (!AsyncSignalScanner::RawSignal.readyForDecoder)
-    return false;
+  if (!AsyncSignalScanner::RawSignal.readyForDecoder) {
+    if( AsyncSignalScanner::nextPulseTimeoutTime_us > 0
+        && AsyncSignalScanner::nextPulseTimeoutTime_us < micros() ) { // may be current pulse has now timedout so we have a signal?
+      
+      AsyncSignalScanner::onPulseTimerTimeout();   // refresh signal properties
+
+      if(!AsyncSignalScanner::RawSignal.readyForDecoder) // still dont have a valid signal?
+        return false;
+    }
+    else
+      return false;
+  }
   if (PluginRXCall(0, 0))
   { // Check all plugins to see which plugin can handle the received signal.
       RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
