@@ -21,6 +21,8 @@
 
 // WIFI
 #define WIFI_PWR_0 20 // 0~20.5dBm
+//#define USE_WIFIMANAGER // Enable if you want easy setup vs having it all hardcoded in your code
+//#define SHOW_CONFIG_PORTAL_PIN_BUTTON 32 // if you want start the configuration portal with a button/pin
 
 // MQTT messages
 #define MQTT_ENABLED          // Send RFLink messages over MQTT

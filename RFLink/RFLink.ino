@@ -25,9 +25,9 @@
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 #include "8_OLED.h"
-#ifdef USE_WIFIMANAGER
+#if defined(USE_OTA)
   #include "ArduinoOTA.h"
-#endif // USE_WIFIMANAGER
+#endif // USE_OTA
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -89,17 +89,24 @@ void setup()
 #ifdef USE_WIFIMANAGER
   setup_WifiManager();
   start_WifiManager();
-  //ArduinoOTA.setPassword("ThatIsMyPassword!!%75184");
-  //#ifdef OTA_PASSSWORD
-    ArduinoOTA.setPassword(OTA_PASSWORD);
-  //#endif
-  ArduinoOTA.begin();
+  #ifdef USE_OTA
+    #ifdef OTA_PASSWORD
+      ArduinoOTA.setPassword(OTA_PASSWORD);
+    #endif
+    ArduinoOTA.begin();
+  #endif // USE_OTA
 #endif // USE_WIFIMANAGER
 
 #ifdef MQTT_ENABLED
   #ifndef USE_WIFIMANAGER
-  setup_WIFI();
-  start_WIFI();
+    setup_WIFI();
+    start_WIFI();
+    #ifdef USE_OTA
+      #ifdef OTA_PASSWORD
+        ArduinoOTA.setPassword(OTA_PASSWORD);
+      #endif
+      ArduinoOTA.begin();
+    #endif // USE_OTA
   #endif // USE_WIFIMANAGER
   setup_MQTT();
   reconnect();
@@ -155,8 +162,25 @@ void loop()
   sendMsg();
 #endif
 
-#ifdef USE_WIFIMANAGER
+#if defined(USE_OTA) && ( defined(USE_WIFIMANAGER) || defined(MQTT_ENABLED))
   ArduinoOTA.handle();
+#endif
+
+#if defined(USE_WIFIMANAGER) && defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+  if (!wifiManager.getConfigPortalActive()) {
+    if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+      Serial.println("Config portal requested");
+      wifiManager.setConfigPortalBlocking(false);
+      wifiManager.startConfigPortal();
+      Serial.println("Config portal started");
+      sleep(4);
+    }
+  } else if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+    Serial.println("shutting down portal");
+    wifiManager.stopConfigPortal();
+    Serial.println("done");
+    sleep(4);
+  }
 #endif
 
 #ifdef SERIAL_ENABLED
