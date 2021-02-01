@@ -79,6 +79,7 @@
 // -------------------
 // Misc
 // -------------------
+#define PLUGIN_076 // CAME-TOP432 Gate/Door opener
 // -------------------
 // 868 MHZ
 // -------------------
@@ -119,6 +120,12 @@
 // -------------------
 // #define PLUGIN_TX_080           // Flamingo FA20 / KD101 smoke detector
 // #define PLUGIN_TX_082           // Mertik Maxitrol / Dru fireplace
+// -------------------
+// -------------------
+// -------------------
+// Misc
+// -------------------
+#define PLUGIN_TX_076               // CAME TOP-432 Door Opener
 // -------------------
 //       -=#=-
 // -------------------
