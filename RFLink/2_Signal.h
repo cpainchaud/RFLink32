@@ -27,11 +27,27 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
   byte Delay;                       // Delay in ms. after transmit of a single RF pulse packet
   byte Multiply;                    // Pulses[] * Multiply is the real pulse time in microseconds
   unsigned long Time;               // Timestamp indicating when the signal was received (millis())
+  bool readyForDecoder;             // indicates if packet can be processed by decoders
   byte Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (halves RAM usage)
   // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
 };
 
+#ifdef USE_ASYNC_RECEIVER
+namespace AsyncSignalScanner {
+    extern RawSignalStruct RawSignal; // Currently proccessed signal
+
+    extern hw_timer_t * nextPulseTimeoutTimer;
+
+    void startScanning();
+    void stopScanning();
+    void clearAllTimers();
+    void IRAM_ATTR RX_pin_changed_state();
+    void onPulseTimerTimeout();
+};
+#else
 extern RawSignalStruct RawSignal;
+#endif // USE_ASYNC_RECEIVER
+
 extern unsigned long SignalCRC;   // holds the bitstream value for some plugins to identify RF repeats
 extern unsigned long SignalCRC_1; // holds the previous SignalCRC (for mixed burst protocols)
 extern byte SignalHash;           // holds the processed plugin number

@@ -10,6 +10,10 @@
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
+#ifdef USE_ASYNC_RECEIVER
+using namespace AsyncSignalScanner;
+#endif USE_ASYNC_RECEIVER
+
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
 byte Plugin_State[PLUGIN_MAX];

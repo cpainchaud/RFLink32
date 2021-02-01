@@ -137,6 +137,15 @@ void setup()
 #endif
   pbuffer[0] = 0;
   set_Radio_mode(Radio_RX);
+
+#ifdef USE_ASYNC_RECEIVER
+AsyncSignalScanner::startScanning();
+  #ifdef USE_OTA
+  ArduinoOTA.onStart( [](){AsyncSignalScanner::stopScanning();} );
+  ArduinoOTA.onError( [](ota_error_t error){AsyncSignalScanner::startScanning();} );
+  #endif // USE_OTA
+#endif // USE_ASYNC_RECEIVER
+
 }
 
 void loop()
