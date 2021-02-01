@@ -24,23 +24,22 @@ namespace AsyncSignalScanner {
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false};
     unsigned long int lastChangedState_us = 0;
     unsigned long int nextPulseTimeoutTime_us = 0;
+    bool scanningEnabled = false;
 
     void startScanning() {
+      RawSignal.readyForDecoder = false;
       RawSignal.Number = 0;
       RawSignal.Time = 0;
-      RawSignal.readyForDecoder = false;
+      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
       lastChangedState_us = 0;
       nextPulseTimeoutTime_us = 0;
+      scanningEnabled = true;
       attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
     }
 
     void stopScanning() {
+      scanningEnabled = false;
       detachInterrupt(PIN_RF_RX_DATA);
-      RawSignal.Number = 0;
-      RawSignal.Time = 0;
-      RawSignal.readyForDecoder = false;
-      lastChangedState_us = 0;
-      nextPulseTimeoutTime_us = 0;
     }
 
     void IRAM_ATTR RX_pin_changed_state() {
@@ -132,6 +131,7 @@ namespace AsyncSignalScanner {
       }
       
       // finally we have one!
+      stopScanning();
       nextPulseTimeoutTime_us = 0;
       RawSignal.Number++;
       RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / RAWSIGNAL_SAMPLE_RATE;
@@ -155,18 +155,15 @@ boolean ScanEvent(void) {
     else
       return false;
   }
-  if (PluginRXCall(0, 0))
+  
+  byte signalWasDecoded = PluginRXCall(0, 0); // Check all plugins to see which plugin can handle the received signal.
+  //Serial.println("check2");
+  if (signalWasDecoded)
   { // Check all plugins to see which plugin can handle the received signal.
       RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
-      AsyncSignalScanner::RawSignal.Number = 0;
-      AsyncSignalScanner::RawSignal.Time = 0;
-      AsyncSignalScanner::RawSignal.readyForDecoder = false;
-      return true;
   }
-  AsyncSignalScanner::RawSignal.Number = 0;
-  AsyncSignalScanner::RawSignal.Time = 0;
-  AsyncSignalScanner::RawSignal.readyForDecoder = false;
-  return false;
+  startScanning();
+  return (signalWasDecoded != 0);
 }
 #else
 /*********************************************************************************************/

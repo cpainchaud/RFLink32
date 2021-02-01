@@ -35,9 +35,10 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
 
 #ifdef USE_ASYNC_RECEIVER
 namespace AsyncSignalScanner {
-    extern RawSignalStruct RawSignal; // Currently proccessed signal
-
-    extern hw_timer_t * nextPulseTimeoutTimer;
+    extern RawSignalStruct RawSignal;                 // Currently proccessed signal
+    extern unsigned long int lastChangedState_us;     // time last state change occured
+    extern unsigned long int nextPulseTimeoutTime_us; // when current pulse will timeout
+    extern bool scanningEnabled;                      // 
 
     void startScanning();
     void stopScanning();
