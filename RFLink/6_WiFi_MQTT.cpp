@@ -29,11 +29,11 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip", "", 40);
-WiFiManagerParameter mqtt_p_param("mqtt_p", "port", "", 6);
-WiFiManagerParameter mqtt_id_param("mqtt_id", "id", "", 20);
-WiFiManagerParameter mqtt_u_param("mqtt_u", "user", "", 20);
-WiFiManagerParameter mqtt_sec_param("mqtt_sec", "password", "", 20);
+WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip",  MQTT_SERVER.c_str(), 40);
+WiFiManagerParameter mqtt_p_param("mqtt_p", "port",  MQTT_PORT.c_str(), 6);
+WiFiManagerParameter mqtt_id_param("mqtt_id", "id", MQTT_ID.c_str(), 20);
+WiFiManagerParameter mqtt_u_param("mqtt_u", "user", MQTT_USER.c_str(), 20);
+WiFiManagerParameter mqtt_sec_param("mqtt_sec", "mqtt password", MQTT_PSWD.c_str(), 20);
 
 void setup_WifiManager(){
   
@@ -54,6 +54,10 @@ void start_WifiManager(){
   MQTT_USER = mqtt_u_param.getValue();
   MQTT_PSWD = mqtt_sec_param.getValue();
   MQTT_ID = mqtt_id_param.getValue();
+
+  #if defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+    pinMode(SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);
+  #endif
 }
 #endif // USE_WIFIMANAGER
 

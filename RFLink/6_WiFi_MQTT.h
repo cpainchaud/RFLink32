@@ -18,9 +18,10 @@
 #endif
 
 #ifdef USE_WIFIMANAGER
-#include "WifiManager.h"
-void setup_WifiManager();
-void start_WifiManager();
+    #include "WifiManager.h"
+    extern WiFiManager wifiManager;
+    void setup_WifiManager();
+    void start_WifiManager();
 #endif // USE_WIFIMANAGER
 
 
