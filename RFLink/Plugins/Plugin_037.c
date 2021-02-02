@@ -126,11 +126,11 @@ boolean Plugin_037(byte function, char *string)
    crcc = crc8le(data, 4, 0x07, 0);
    if (crcc != reverse8(bitstream2))
    {
-      Serial.println("ERROR: crc failed.");
-      Serial.print("crcc le: ");
-      Serial.println(crcc);
-      Serial.print("crc: ");
-      Serial.println(reverse8(bitstream2));
+      //Serial.println("ERROR: crc failed.");
+      //Serial.print("crcc le: ");
+      //Serial.println(crcc);
+      //Serial.print("crc: ");
+      //Serial.println(reverse8(bitstream2));
       return false;
    }
    //==================================================================================
