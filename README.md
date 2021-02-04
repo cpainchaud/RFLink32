@@ -43,6 +43,8 @@ So far, in addition of core libraries, we use:
 - PubSubClient for MQTT messaging https://github.com/knolleary/pubsubclient
 - u8g2/u8x8 library for OLED display https://github.com/olikraus/u8g2
 - AutoConnect for simplified configuration (incomming v2.0) https://hieromon.github.io/AutoConnect
+- WifiManager (optional) for easy Wifi and RFlink related configurations https://github.com/tzapu/WiFiManager
+- ArduinoOTA (optional)for easy remote firmware updates https://github.com/jandrassy/ArduinoOTA
 
 ## 7. Additional info
 ### Pinout
