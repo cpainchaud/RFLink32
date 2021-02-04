@@ -46,7 +46,13 @@ So far, in addition of core libraries, we use:
 - WifiManager (optional) for easy Wifi and RFlink related configurations https://github.com/tzapu/WiFiManager
 - ArduinoOTA (optional)for easy remote firmware updates https://github.com/jandrassy/ArduinoOTA
 
-## 7. Additional info
+## 7. COMPILE OPTIONS AND FLAGS
+Many features are not enabled by default or can be disabled for various reasons : firmware size, compability etc etc. Here is a listing with some instructions:
+### MQTT Server (disabled by default)
+- Define compilation flag MQTT_ENABLED or define it in 6_WIFI_MQTT.h
+- If you have not enabled WifiManager, make sure you update Wifi settings in 6_Credentials.h
+
+## 8. Additional info
 ### Pinout
 - When WebServer is active (which is default), pin setup has to be done there.
 - For safety & simplicity, default WebServer setup is : all pin inactive.
