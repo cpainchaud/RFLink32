@@ -35,19 +35,18 @@ const String mqtt_id_paramid("mqtt_id");
 const String mqtt_u_paramid("mqtt_u");
 const String mqtt_sec_paramid("mqtt_sec");
 
+#if (defined(ESP32) || defined(ESP8266)) && defined(MQTT_ENABLED) // to store configuration in Flash
+#include "ArduinoNvs.h"
+
 WiFiManagerParameter mqtt_s_param(mqtt_s_paramid.c_str(), "hostname or ip",  MQTT_SERVER.c_str(), 40);
 WiFiManagerParameter mqtt_p_param(mqtt_p_paramid.c_str(), "port",  MQTT_PORT.c_str(), 6);
 WiFiManagerParameter mqtt_id_param(mqtt_id_paramid.c_str(), "id", MQTT_ID.c_str(), 20);
 WiFiManagerParameter mqtt_u_param(mqtt_u_paramid.c_str(), "user", MQTT_USER.c_str(), 20);
 WiFiManagerParameter mqtt_sec_param(mqtt_sec_paramid.c_str(), "mqtt password", MQTT_PSWD.c_str(), 20);
 
-#if defined(ESP32) || defined(ESP8266) // to store configuration in Flash
-#include "ArduinoNvs.h"
-
 void copyParamsFromWM_to_MQTT(){
   auto params = wifiManager.getParameters();
   for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    WiFiManagerParameter* currentParameter = params[i];
     auto currentId =  params[i]->getID();
     
     if(mqtt_s_paramid == currentId) {
@@ -99,15 +98,15 @@ void paramsUpdatedCallback(){
 
 void setup_WifiManager(){
 
-  const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"};
-  
+  const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"}; 
+
+  #if (defined(ESP32) || defined(ESP8266)) && defined(MQTT_ENABLED) // Get MQTT from Flash storage if they exist 
   wifiManager.addParameter(&mqtt_s_param);
   wifiManager.addParameter(&mqtt_p_param);
   wifiManager.addParameter(&mqtt_id_param);
   wifiManager.addParameter(&mqtt_u_param);
-  wifiManager.addParameter(&mqtt_sec_param); 
+  wifiManager.addParameter(&mqtt_sec_param);
 
-  #if defined(ESP32) || defined(ESP8266) // Get MQTT from Flash storage if they exist 
   NVS.begin();
   auto params = wifiManager.getParameters();
   for(int i=0; i<wifiManager.getParametersCount(); i++) {
@@ -129,11 +128,13 @@ void setup_WifiManager(){
 void start_WifiManager(){
   wifiManager.autoConnect();
 
+  #if (defined(ESP32) || defined(ESP8266)) && defined(MQTT_ENABLED)
   MQTT_SERVER = mqtt_s_param.getValue();
   MQTT_PORT = mqtt_p_param.getValue();
   MQTT_USER = mqtt_u_param.getValue();
   MQTT_PSWD = mqtt_sec_param.getValue();
   MQTT_ID = mqtt_id_param.getValue();
+  #endif
 
   #if defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
     pinMode(SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);

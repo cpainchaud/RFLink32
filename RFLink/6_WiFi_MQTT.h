@@ -25,7 +25,6 @@
 #endif // USE_WIFIMANAGER
 
 
-
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
