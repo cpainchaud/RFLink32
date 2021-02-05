@@ -6,12 +6,12 @@
 // ************************************* //
 
 #include <Arduino.h>
-// #include <ArduinoOTA.h>
 #include "RFLink.h"
 #include "3_Serial.h"
 #include "4_Display.h"
 #include "6_WiFi_MQTT.h"
 #include "6_Credentials.h"
+
 
 #ifdef ESP32
 #include <WiFi.h>
@@ -29,19 +29,99 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-WiFiManagerParameter mqtt_s_param("mqtt_s", "hostname or ip",  MQTT_SERVER.c_str(), 40);
-WiFiManagerParameter mqtt_p_param("mqtt_p", "port",  MQTT_PORT.c_str(), 6);
-WiFiManagerParameter mqtt_id_param("mqtt_id", "id", MQTT_ID.c_str(), 20);
-WiFiManagerParameter mqtt_u_param("mqtt_u", "user", MQTT_USER.c_str(), 20);
-WiFiManagerParameter mqtt_sec_param("mqtt_sec", "mqtt password", MQTT_PSWD.c_str(), 20);
+const String mqtt_s_paramid("mqtt_s");
+const String mqtt_p_paramid("mqtt_p");
+const String mqtt_id_paramid("mqtt_id");
+const String mqtt_u_paramid("mqtt_u");
+const String mqtt_sec_paramid("mqtt_sec");
+
+WiFiManagerParameter mqtt_s_param(mqtt_s_paramid.c_str(), "hostname or ip",  MQTT_SERVER.c_str(), 40);
+WiFiManagerParameter mqtt_p_param(mqtt_p_paramid.c_str(), "port",  MQTT_PORT.c_str(), 6);
+WiFiManagerParameter mqtt_id_param(mqtt_id_paramid.c_str(), "id", MQTT_ID.c_str(), 20);
+WiFiManagerParameter mqtt_u_param(mqtt_u_paramid.c_str(), "user", MQTT_USER.c_str(), 20);
+WiFiManagerParameter mqtt_sec_param(mqtt_sec_paramid.c_str(), "mqtt password", MQTT_PSWD.c_str(), 20);
+
+#if defined(ESP32) || defined(ESP8266) // to store configuration in Flash
+#include "ArduinoNvs.h"
+
+void copyParamsFromWM_to_MQTT(){
+  auto params = wifiManager.getParameters();
+  for(int i=0; i<wifiManager.getParametersCount(); i++) {
+    WiFiManagerParameter* currentParameter = params[i];
+    auto currentId =  params[i]->getID();
+    
+    if(mqtt_s_paramid == currentId) {
+      MQTT_SERVER =  params[i]->getValue();
+      continue;
+    }
+
+    if(mqtt_p_paramid == currentId) {
+      MQTT_PORT =  params[i]->getValue();
+      continue;
+    }
+
+    if(mqtt_id_paramid == currentId) {
+      MQTT_ID =  params[i]->getValue();
+      continue;
+    }
+
+    if(mqtt_u_paramid == currentId) {
+      MQTT_USER =  params[i]->getValue();
+      continue;
+    }
+
+    if(mqtt_sec_paramid == currentId) {
+      MQTT_PSWD =  params[i]->getValue();
+      continue;
+    }
+  }
+}
+
+void paramsUpdatedCallback(){
+  bool someParamsChanged = false;
+  NVS.begin();
+  auto params = wifiManager.getParameters();
+  for(int i=0; i<wifiManager.getParametersCount(); i++) {
+    WiFiManagerParameter* currentParameter = params[i];
+    if(NVS.getString(currentParameter->getID())!=currentParameter->getValue())
+      someParamsChanged = true;
+    NVS.setString(currentParameter->getID(), currentParameter->getValue());
+  }
+  NVS.commit();
+
+  if(someParamsChanged) {
+    copyParamsFromWM_to_MQTT();
+    Serial.println("Some parameters have changed, restart MQTT Client is requested");
+    reconnect(1, true);
+  }
+}
+#endif
 
 void setup_WifiManager(){
+
+  const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"};
   
   wifiManager.addParameter(&mqtt_s_param);
   wifiManager.addParameter(&mqtt_p_param);
   wifiManager.addParameter(&mqtt_id_param);
   wifiManager.addParameter(&mqtt_u_param);
-  wifiManager.addParameter(&mqtt_sec_param);
+  wifiManager.addParameter(&mqtt_sec_param); 
+
+  #if defined(ESP32) || defined(ESP8266) // Get MQTT from Flash storage if they exist 
+  NVS.begin();
+  auto params = wifiManager.getParameters();
+  for(int i=0; i<wifiManager.getParametersCount(); i++) {
+    auto currentParameter = params[i];
+    auto currentId = currentParameter->getID();
+    auto value = NVS.getString(currentId);
+    if(value.length() > 0)
+      currentParameter->setValue(value.c_str(), currentParameter->getValueLength());
+  }
+
+  wifiManager.setSaveParamsCallback(paramsUpdatedCallback); // if Config portal is used to change paramaters, we must know about it
+  #endif
+
+  wifiManager.setMenu(menu, sizeof(menu));
 
   wifiManager.setAPCallback(configModeCallback);
 }
@@ -201,12 +281,19 @@ void callback(char *topic, byte *payload, unsigned int length)
   CheckMQTT(payload);
 }
 
-void reconnect()
+
+void reconnect(int retryCount, bool force)
 {
+  int retryLeft = retryCount;
   bResub = true;
 
-  while (!MQTTClient.connected())
+  if(force && MQTTClient.connected()) {
+    MQTTClient.disconnect();
+  }
+
+  while (!MQTTClient.connected() && (retryCount<=0 || retryLeft>0))
   {
+    retryLeft--;
     if (WiFi.status() != WL_CONNECTED)
     {
       #ifndef USE_WIFIMANAGER
@@ -215,9 +302,9 @@ void reconnect()
       #endif // USE_WIFIMANAGER
     }
 
-    Serial.print(F("MQTT Server :\t\t"));
-    Serial.println(MQTT_SERVER.c_str());
-    Serial.print(F("MQTT Connection :\t"));
+    Serial.print(F("Trying to connect to MQTT Server '"));
+    Serial.print(MQTT_SERVER.c_str());
+    Serial.print(F("' ... "));
 
 #ifdef MQTT_LWT
 #ifdef ESP32
@@ -246,10 +333,6 @@ void reconnect()
     {
       Serial.print(F("Failed - rc="));
       Serial.println(MQTTClient.state());
-      Serial.println(F("MQTT Retry :\tTry again in 5 seconds"));
-      // Wait 5 seconds before retrying
-      for (byte i = 0; i < 10; i++)
-        delay(500); // delay(5000) may cause hang
     }
   }
 }
@@ -259,7 +342,7 @@ void publishMsg()
   static boolean MQTT_RETAINED = MQTT_RETAINED_0;
 
   if (!MQTTClient.connected())
-    reconnect();
+    reconnect(1);
   MQTTClient.publish(MQTT_TOPIC_OUT.c_str(), pbuffer, MQTT_RETAINED);
 }
 
@@ -269,8 +352,10 @@ void checkMQTTloop()
 
   if (millis() > lastCheck + MQTT_LOOP_MS)
   {
-    if (!MQTTClient.connected())
-      reconnect();
+    if (!MQTTClient.connected()) {
+      Serial.println("MQTT Client is disconnected");
+      reconnect(1);
+    }
 
     if (bResub)
     {

@@ -35,7 +35,7 @@ void start_WIFI();
 void stop_WIFI();
 #endif // USE_WIFIMANAGER
 void setup_MQTT();
-void reconnect();
+void reconnect(int retryCount=-1, bool force=false);
 void publishMsg();
 void checkMQTTloop();
 
