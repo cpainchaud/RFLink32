@@ -26,6 +26,7 @@
 #include "5_Plugin.h"
 #include "6_WiFi_MQTT.h"
 #include "8_OLED.h"
+#include "9_Serial2Net.h"
 #if defined(USE_OTA)
   #include "ArduinoOTA.h"
 #endif // USE_OTA
@@ -154,6 +155,10 @@ AsyncSignalScanner::startScanning();
   #endif // USE_OTA
 #endif // USE_ASYNC_RECEIVER
 
+#ifdef SERIAL2NET_ENABLED
+RFLink::Serial2Net::startServer();
+#endif // SERIAL2NET_ENABLED
+
 }
 
 void loop()
@@ -170,6 +175,10 @@ wifiManager.process();
 #if defined(USE_OTA) && ( defined(USE_WIFIMANAGER) || defined(MQTT_ENABLED))
   ArduinoOTA.handle();
 #endif
+
+#ifdef SERIAL2NET_ENABLED
+RFLink::Serial2Net::serverLoop();
+#endif // SERIAL2NET_ENABLED
 
 #if defined(USE_WIFIMANAGER) && defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
   if (!wifiManager.getConfigPortalActive()) {
@@ -208,6 +217,9 @@ void sendMsg()
 #ifdef MQTT_ENABLED
     publishMsg();
 #endif
+#ifdef SERIAL2NET_ENABLED
+RFLink::Serial2Net::broadcastMessage(pbuffer);
+#endif // SERIAL2NET_ENABLED
 #ifdef OLED_ENABLED
     print_OLED();
 #endif
