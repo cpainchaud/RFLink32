@@ -20,6 +20,7 @@
 #endif
 
 #ifdef USE_WIFIMANAGER
+namespace RFLink { namespace Wifi {
 WiFiManager wifiManager;
 
 void configModeCallback (WiFiManager *myWiFiManager) {
@@ -141,6 +142,8 @@ void start_WifiManager(){
   #endif
 }
 #endif // USE_WIFIMANAGER
+
+}}
 
 #ifdef MQTT_ENABLED
 

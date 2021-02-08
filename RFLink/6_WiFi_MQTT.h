@@ -18,10 +18,12 @@
 #endif
 
 #ifdef USE_WIFIMANAGER
-    #include "WifiManager.h"
+#include "WifiManager.h"
+namespace RFLink { namespace Wifi {
     extern WiFiManager wifiManager;
     void setup_WifiManager();
     void start_WifiManager();
+}}
 #endif // USE_WIFIMANAGER
 
 
