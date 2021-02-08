@@ -41,12 +41,6 @@ namespace params {
 #ifdef RFLINK_WIFIMANAGER_ENABLED
 #if defined(MQTT_ENABLED) // to store MQTT configuration in Flash
 
-void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-}
 
 const String mqtt_s_paramid("mqtt_s");
 const String mqtt_p_paramid("mqtt_p");
@@ -138,8 +132,6 @@ void setup_WIFI(){
   #endif
 
   wifiManager.setMenu(menu, sizeof(menu));
-
-  wifiManager.setAPCallback(configModeCallback);
 }
 
 void start_WIFI(){
