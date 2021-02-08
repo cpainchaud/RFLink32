@@ -19,7 +19,13 @@
 #include <ESP8266WiFi.h>
 #endif
 
+#if defined(USE_OTA)
+  #include "ArduinoOTA.h"
+#endif // USE_OTA
+
+
 #ifdef USE_WIFIMANAGER
+
 namespace RFLink { namespace Wifi {
 WiFiManager wifiManager;
 
@@ -95,7 +101,7 @@ void paramsUpdatedCallback(){
     reconnect(1, true);
   }
 }
-#endif
+#endif // MQTT_ENABLED
 
 void setup_WifiManager(){
 
@@ -141,9 +147,42 @@ void start_WifiManager(){
     pinMode(SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);
   #endif
 }
+
+void setup() {
+  setup_WifiManager();
+  start_WifiManager();
+  #ifdef USE_OTA
+    #ifdef OTA_PASSWORD
+    ArduinoOTA.setPassword(OTA_PASSWORD);
+    #endif
+    ArduinoOTA.begin();
+  #endif // USE_OTA
+}
+
+void mainLoop() {
+  wifiManager.process();
+  #if defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+    if (!RFLink::Wifi::wifiManager.getConfigPortalActive()) {
+      if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+        Serial.println("Config portal requested");
+        RFLink::Wifi::wifiManager.setConfigPortalBlocking(false);
+        RFLink::Wifi::wifiManager.startWebPortal();
+        Serial.println("Config portal started");
+        sleep(4);
+      }
+    } else if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+      Serial.println("shutting down portal");
+      RFLink::Wifi::wifiManager.stopConfigPortal();
+      Serial.println("done");
+      sleep(4);
+    }
+  #endif // SHOW_CONFIG_PORTAL_PIN_BUTTON && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+}
+
+}} // end of Wifi namespace
+
 #endif // USE_WIFIMANAGER
 
-}}
 
 #ifdef MQTT_ENABLED
 

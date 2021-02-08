@@ -17,12 +17,13 @@
 #include <ESP8266WiFi.h>
 #endif
 
+
 #ifdef USE_WIFIMANAGER
 #include "WifiManager.h"
 namespace RFLink { namespace Wifi {
     extern WiFiManager wifiManager;
-    void setup_WifiManager();
-    void start_WifiManager();
+    void setup();
+    void mainLoop();
 }}
 #endif // USE_WIFIMANAGER
 
