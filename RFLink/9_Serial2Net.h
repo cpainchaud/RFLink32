@@ -1,13 +1,13 @@
 #ifndef _9_Serial2Net_H_
 #define  _9_Serial2Net_H_
 
-#ifdef SERIAL2NET_ENABLED
+#ifdef RFLINK_SERIAL2NET_ENABLED
 
 #ifndef SERIAL2NET_PORT
 #define SERIAL2NET_PORT 1900
 #endif
 
-//#define SERIAL2NET_DEBUG
+//#define RFLINK_SERIAL2NET_DEBUG
 
 
 #include <WifiServer.h>
@@ -31,5 +31,5 @@ namespace RFLink {
     }
 }
 
-#endif // SERIAL2NET_ENABLED
+#endif // RFLINK_SERIAL2NET_ENABLED
 #endif // _9_Serial2Net_H_

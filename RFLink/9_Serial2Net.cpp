@@ -29,7 +29,7 @@ namespace RFLink { namespace Serial2Net {
              * @return -1 if not found or error, index of last character of the commeand if found
              * */
             int hasCommandAvailable() {
-                #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+                #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
                 String debugmsg;
                 #endif
 
@@ -43,7 +43,7 @@ namespace RFLink { namespace Serial2Net {
                 if(newBytesCount < 1)
                     return -1;
 
-                #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+                #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
                     debugmsg += "Serial2Net: client has " + String(newBytesCount) + " more bytes to available to read";
                     Serial.println(debugmsg);
                 #endif
@@ -60,7 +60,7 @@ namespace RFLink { namespace Serial2Net {
                 for(int i=end; i< end+newBytesCount; i++) {
                     if(buffer[i] == 0x0d) {
                         result = i-1;
-                        #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+                        #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
                             debugmsg += "Serial2Net: end of command found at position " + String(result) ;
                             Serial.println(debugmsg);
                         #endif
@@ -132,14 +132,14 @@ namespace RFLink { namespace Serial2Net {
     }
 
     void serverLoop(){
-        #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+        #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
         String debugmsg;
         #endif
 
         WiFiClient client = server.available();
 
         if( isNewClient(client) ) {
-            #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+            #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
             debugmsg += "Serial2Net: new client detected IP=" + client.remoteIP().toString() + " port=" + client.remotePort();
             Serial.println(debugmsg);
             #endif
@@ -153,7 +153,7 @@ namespace RFLink { namespace Serial2Net {
                 int commandLastCharPos = clients[i].hasCommandAvailable();
                 if (commandLastCharPos >=0) {
                     String command = clients[i].consumeCommand(commandLastCharPos);
-                    #if defined(SERIAL2NET_DEBUG) || defined(DEBUG)
+                    #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
                     debugmsg += "Serial2Net: client has sent a command >>>> " + command + " <<<<<<";
                     Serial.println(debugmsg);
                     #endif

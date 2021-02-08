@@ -149,9 +149,9 @@ AsyncSignalScanner::startScanning();
   #endif // USE_OTA
 #endif // USE_ASYNC_RECEIVER
 
-#ifdef SERIAL2NET_ENABLED
+#ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::startServer();
-#endif // SERIAL2NET_ENABLED
+#endif // RFLINK_SERIAL2NET_ENABLED
 
 }
 
@@ -170,9 +170,9 @@ RFLink::Wifi::mainLoop();
   ArduinoOTA.handle();
 #endif
 
-#ifdef SERIAL2NET_ENABLED
+#ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::serverLoop();
-#endif // SERIAL2NET_ENABLED
+#endif // RFLINK_SERIAL2NET_ENABLED
 
 
 #ifdef SERIAL_ENABLED
@@ -195,9 +195,9 @@ void sendMsg()
 #ifdef MQTT_ENABLED
     publishMsg();
 #endif
-#ifdef SERIAL2NET_ENABLED
+#ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::broadcastMessage(pbuffer);
-#endif // SERIAL2NET_ENABLED
+#endif // RFLINK_SERIAL2NET_ENABLED
 #ifdef OLED_ENABLED
     print_OLED();
 #endif
