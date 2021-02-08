@@ -19,12 +19,12 @@
 #include <ESP8266WiFi.h>
 #endif
 
-#if defined(USE_OTA)
+#if defined(RFLINK_OTA_ENABLED)
   #include "ArduinoOTA.h"
-#endif // USE_OTA
+#endif // RFLINK_OTA_ENABLED
 
 
-#ifdef USE_WIFIMANAGER
+#ifdef RFLINK_WIFIMANAGER_ENABLED
 
 namespace RFLink { namespace Wifi {
 WiFiManager wifiManager;
@@ -143,45 +143,45 @@ void start_WifiManager(){
   MQTT_ID = mqtt_id_param.getValue();
   #endif
 
-  #if defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    pinMode(SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);
+  #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);
   #endif
 }
 
 void setup() {
   setup_WifiManager();
   start_WifiManager();
-  #ifdef USE_OTA
-    #ifdef OTA_PASSWORD
-    ArduinoOTA.setPassword(OTA_PASSWORD);
+  #ifdef RFLINK_OTA_ENABLED
+    #ifdef RFLINK_OTA_PASSWORD
+    ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
     #endif
     ArduinoOTA.begin();
-  #endif // USE_OTA
+  #endif // RFLINK_OTA_ENABLED
 }
 
 void mainLoop() {
   wifiManager.process();
-  #if defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+  #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
     if (!RFLink::Wifi::wifiManager.getConfigPortalActive()) {
-      if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+      if(digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
         Serial.println("Config portal requested");
         RFLink::Wifi::wifiManager.setConfigPortalBlocking(false);
         RFLink::Wifi::wifiManager.startWebPortal();
         Serial.println("Config portal started");
         sleep(4);
       }
-    } else if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
+    } else if(digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
       Serial.println("shutting down portal");
       RFLink::Wifi::wifiManager.stopConfigPortal();
       Serial.println("done");
       sleep(4);
     }
-  #endif // SHOW_CONFIG_PORTAL_PIN_BUTTON && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+  #endif // RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
 }
 
 }} // end of Wifi namespace
 
-#endif // USE_WIFIMANAGER
+#endif // RFLINK_WIFIMANAGER_ENABLED
 
 
 #ifdef MQTT_ENABLED
@@ -211,7 +211,7 @@ void callback(char *, byte *, unsigned int);
 
 static String WIFI_PWR = String(WIFI_PWR_0);
 
-#ifndef USE_WIFIMANAGER
+#ifndef RFLINK_WIFIMANAGER_ENABLED
 void setup_WIFI()
 {
   WiFi.persistent(false);
@@ -291,7 +291,7 @@ void stop_WIFI()
   WiFi.mode(WIFI_OFF);
   delay(500);
 }
-#endif //USE_WIFIMANAGER
+#endif //RFLINK_WIFIMANAGER_ENABLED
 
 
 void setup_MQTT()
@@ -339,10 +339,10 @@ void reconnect(int retryCount, bool force)
     retryLeft--;
     if (WiFi.status() != WL_CONNECTED)
     {
-      #ifndef USE_WIFIMANAGER
+      #ifndef RFLINK_WIFIMANAGER_ENABLED
       stop_WIFI();
       start_WIFI();
-      #endif // USE_WIFIMANAGER
+      #endif // RFLINK_WIFIMANAGER_ENABLED
     }
 
     Serial.print(F("Trying to connect to MQTT Server '"));

@@ -18,24 +18,24 @@
 #endif
 
 
-#ifdef USE_WIFIMANAGER
+#ifdef RFLINK_WIFIMANAGER_ENABLED
 #include "WifiManager.h"
 namespace RFLink { namespace Wifi {
     extern WiFiManager wifiManager;
     void setup();
     void mainLoop();
 }}
-#endif // USE_WIFIMANAGER
+#endif // RFLINK_WIFIMANAGER_ENABLED
 
 
 #ifdef MQTT_ENABLED
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#ifndef USE_WIFIMANAGER
+#ifndef RFLINK_WIFIMANAGER_ENABLED
 void setup_WIFI();
 void start_WIFI();
 void stop_WIFI();
-#endif // USE_WIFIMANAGER
+#endif // RFLINK_WIFIMANAGER_ENABLED
 void setup_MQTT();
 void reconnect(int retryCount=-1, bool force=false);
 void publishMsg();

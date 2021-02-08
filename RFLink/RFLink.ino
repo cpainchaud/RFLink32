@@ -27,9 +27,9 @@
 #include "6_WiFi_MQTT.h"
 #include "8_OLED.h"
 #include "9_Serial2Net.h"
-#if defined(USE_OTA)
+#if defined(RFLINK_OTA_ENABLED)
   #include "ArduinoOTA.h"
-#endif // USE_OTA
+#endif // RFLINK_OTA_ENABLED
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -88,34 +88,28 @@ void setup()
   Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
-#ifdef USE_WIFIMANAGER
-  RFLink::Wifi::setup_WifiManager();
-  RFLink::Wifi::start_WifiManager();
-  #ifdef USE_OTA
-    #ifdef OTA_PASSWORD
-      ArduinoOTA.setPassword(OTA_PASSWORD);
-    #endif
-    ArduinoOTA.begin();
-  #endif // USE_OTA
-#endif // USE_WIFIMANAGER
+
+#ifdef RFLINK_WIFIMANAGER_ENABLED
+RFLink::Wifi::setup();
+#endif // RFLINK_WIFIMANAGER_ENABLED
 
 #ifdef MQTT_ENABLED
-  #ifndef USE_WIFIMANAGER
+  #ifndef RFLINK_WIFIMANAGER_ENABLED
     setup_WIFI();
     start_WIFI();
-    #ifdef USE_OTA
-      #ifdef OTA_PASSWORD
-        ArduinoOTA.setPassword(OTA_PASSWORD);
+    #ifdef RFLINK_OTA_ENABLED
+      #ifdef RFLINK_OTA_PASSWORD
+        ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
       #endif
       ArduinoOTA.begin();
-    #endif // USE_OTA
-  #endif // USE_WIFIMANAGER
+    #endif // RFLINK_OTA_ENABLED
+  #endif // RFLINK_WIFIMANAGER_ENABLED
   setup_MQTT();
   reconnect(1);
 #else
-  #ifndef USE_WIFIMANAGER
+  #ifndef RFLINK_WIFIMANAGER_ENABLED
   setup_WIFI_OFF();
-  #endif // USE_WIFIMANAGER
+  #endif // RFLINK_WIFIMANAGER_ENABLED
 #endif // MQTT_ENABLED
 #endif // ESP32 || ESP8266
 
@@ -168,11 +162,11 @@ void loop()
   sendMsg();
 #endif
 
-#ifdef USE_WIFIMANAGER
-RFLink::Wifi::wifiManager.process();
+#ifdef RFLINK_WIFIMANAGER_ENABLED
+RFLink::Wifi::mainLoop();
 #endif
 
-#if defined(USE_OTA) && ( defined(USE_WIFIMANAGER) || defined(MQTT_ENABLED))
+#if defined(RFLINK_OTA_ENABLED) && ( defined(RFLINK_WIFIMANAGER_ENABLED) || defined(MQTT_ENABLED))
   ArduinoOTA.handle();
 #endif
 
@@ -180,22 +174,6 @@ RFLink::Wifi::wifiManager.process();
 RFLink::Serial2Net::serverLoop();
 #endif // SERIAL2NET_ENABLED
 
-#if defined(USE_WIFIMANAGER) && defined(SHOW_CONFIG_PORTAL_PIN_BUTTON) && SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-  if (!RFLink::Wifi::wifiManager.getConfigPortalActive()) {
-    if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
-      Serial.println("Config portal requested");
-      RFLink::Wifi::wifiManager.setConfigPortalBlocking(false);
-      RFLink::Wifi::wifiManager.startWebPortal();
-      Serial.println("Config portal started");
-      sleep(4);
-    }
-  } else if(digitalRead(SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
-    Serial.println("shutting down portal");
-    RFLink::Wifi::wifiManager.stopConfigPortal();
-    Serial.println("done");
-    sleep(4);
-  }
-#endif
 
 #ifdef SERIAL_ENABLED
 #if PIN_RF_TX_DATA_0 != NOT_A_PIN
