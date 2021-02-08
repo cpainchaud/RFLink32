@@ -146,7 +146,9 @@ void start_WIFI(){
   #endif
 
   #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);
+    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT_PULLDOWN);
+    Serial.print("Config portal can be started on demand via PIN #");
+    Serial.println(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
   #endif
 }
 #else // Regular wifi is used
