@@ -10,16 +10,16 @@
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
-#ifndef USE_ASYNC_RECEIVER
+#ifndef RFLINK_ASYNC_RECEIVER_ENABLED
 RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
-#endif // USE_ASYNC_RECEIVER
+#endif // RFLINK_ASYNC_RECEIVER_ENABLED
 unsigned long SignalCRC = 0L;   // holds the bitstream value for some plugins to identify RF repeats
 unsigned long SignalCRC_1 = 0L; // holds the previous SignalCRC (for mixed burst protocols)
 byte SignalHash = 0L;           // holds the processed plugin number
 byte SignalHashPrevious = 0L;   // holds the last processed plugin number
 unsigned long RepeatingTimer = 0L;
 
-#ifdef USE_ASYNC_RECEIVER
+#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
 namespace AsyncSignalScanner {
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false};
     unsigned long int lastChangedState_us = 0;
@@ -185,7 +185,7 @@ boolean ScanEvent(void)
   } // while
   return false;
 }
-#endif // USE_ASYNC_RECEIVER_CALL
+#endif // RFLINK_ASYNC_RECEIVER_ENABLED_CALL
 
 #if (defined(ESP32) || defined(ESP8266))
 // ***********************************************************************************

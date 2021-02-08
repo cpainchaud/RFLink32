@@ -200,16 +200,16 @@ void enableRX()
   if (PULLUP_RF_RX_DATA)
     pinMode(PIN_RF_RX_DATA, INPUT_PULLUP); // Initialise in/output ports
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
-  #ifdef USE_ASYNC_RECEIVER
+  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
   AsyncSignalScanner::startScanning();
-  #endif // USE_ASYNC_RECEIVER
+  #endif // RFLINK_ASYNC_RECEIVER_ENABLED
 }
 
 void disableRX()
 {
-  #ifdef USE_ASYNC_RECEIVER
+  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
   AsyncSignalScanner::stopScanning();
-  #endif // USE_ASYNC_RECEIVER
+  #endif // RFLINK_ASYNC_RECEIVER_ENABLED
   // RX pins
   pinMode(PIN_RF_RX_DATA, INPUT);
   pinMode(PIN_RF_RX_NA, INPUT);
