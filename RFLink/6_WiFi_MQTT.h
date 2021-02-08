@@ -11,42 +11,34 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
+#ifdef MQTT_ENABLED
+
 #ifdef ESP32
 #include <WiFi.h>
+#include "10_Wifi.h"
 #elif ESP8266
 #include <ESP8266WiFi.h>
+#include "10_Wifi.h"
 #endif
-
-
-#ifdef RFLINK_WIFIMANAGER_ENABLED
-#include "WifiManager.h"
-namespace RFLink { namespace Wifi {
-    extern WiFiManager wifiManager;
-    void setup();
-    void mainLoop();
-}}
-#endif // RFLINK_WIFIMANAGER_ENABLED
-
-
-#ifdef MQTT_ENABLED
+#include "4_Display.h"
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
-#ifndef RFLINK_WIFIMANAGER_ENABLED
-void setup_WIFI();
-void start_WIFI();
-void stop_WIFI();
-#endif // RFLINK_WIFIMANAGER_ENABLED
+namespace RFLink { namespace Mqtt {
+
+    namespace params {
+        extern String SERVER;
+        extern String PORT;
+        extern String ID;
+        extern String USER;
+        extern String PSWD;
+    }
+
 void setup_MQTT();
 void reconnect(int retryCount=-1, bool force=false);
 void publishMsg();
 void checkMQTTloop();
 
-#else // MQTT_ENABLED
-
-#if (defined(ESP32) || defined(ESP8266))
-void setup_WIFI_OFF();
-#endif
+}} // end of MQTT namespace
 
 #endif // MQTT_ENABLED
-
 #endif // WiFi_MQTT_h

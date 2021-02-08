@@ -11,29 +11,29 @@
 #include "RFLink.h"
 
 // local AP
-String WIFI_SSID = "xxx";
-String WIFI_PSWD = "xxx";
+#define WIFI_SSID "xxx";
+#define WIFI_PSWD "xxx";
 
 // DHCP or Static IP
 // #define USE_DHCP
 #ifndef USE_DHCP
-String WIFI_IP = "192.168.1.xxx";
-String WIFI_DNS = "192.168.1.xxx";
-String WIFI_GATEWAY = "192.168.1.xxx";
-String WIFI_SUBNET = "255.255.255.0";
+#define WIFI_IP "192.168.1.xxx";
+#define WIFI_DNS "192.168.1.xxx";
+#define WIFI_GATEWAY "192.168.1.xxx";
+#define WIFI_SUBNET "255.255.255.0";
 #endif
 
 // MQTT Server
-String MQTT_SERVER = "192.168.1.xxx";
-String MQTT_PORT = "1883";
-String MQTT_ID = "ESP8266-RFLink_xxx";
-String MQTT_USER = "xxx";
-String MQTT_PSWD = "xxx";
+#define  MQTT_SERVER "192.168.1.xxx"
+#define  MQTT_PORT "1883";
+#define  MQTT_ID "ESP8266-RFLink_xxx";
+#define  MQTT_USER "xxx";
+#define  MQTT_PSWD "xxx";
 
 // MQTT Topic
-String MQTT_TOPIC_OUT = "/ESP00/msg";
-String MQTT_TOPIC_IN = "/ESP00/cmd";
-String MQTT_TOPIC_LWT = "/ESP00/lwt";
+#define MQTT_TOPIC_OUT "/ESP00/msg";
+#define MQTT_TOPIC_IN "/ESP00/cmd";
+#define MQTT_TOPIC_LWT "/ESP00/lwt";
 
 #ifdef CHECK_CACERT
 static const char ca_cert[] PROGMEM = R"EOF(

@@ -27,9 +27,7 @@
 #include "6_WiFi_MQTT.h"
 #include "8_OLED.h"
 #include "9_Serial2Net.h"
-#if defined(RFLINK_OTA_ENABLED)
-  #include "ArduinoOTA.h"
-#endif // RFLINK_OTA_ENABLED
+#include "10_Wifi.h"
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -80,6 +78,7 @@ void setup()
   Serial.println(); // ESP "Garbage" message
   Serial.print(F("Arduino IDE Version :\t"));
   Serial.println(ARDUINO);
+#endif
 #ifdef ESP8266
   Serial.print(F("ESP CoreVersion :\t"));
   Serial.println(ESP.getCoreVersion());
@@ -89,33 +88,18 @@ void setup()
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
+#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
 RFLink::Wifi::setup();
 #endif // RFLINK_WIFIMANAGER_ENABLED
 
 #ifdef MQTT_ENABLED
-  #ifndef RFLINK_WIFIMANAGER_ENABLED
-    setup_WIFI();
-    start_WIFI();
-    #ifdef RFLINK_OTA_ENABLED
-      #ifdef RFLINK_OTA_PASSWORD
-        ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
-      #endif
-      ArduinoOTA.begin();
-    #endif // RFLINK_OTA_ENABLED
-  #endif // RFLINK_WIFIMANAGER_ENABLED
-  setup_MQTT();
-  reconnect(1);
-#else
-  #ifndef RFLINK_WIFIMANAGER_ENABLED
-  setup_WIFI_OFF();
-  #endif // RFLINK_WIFIMANAGER_ENABLED
+  RFLink::Mqtt::setup_MQTT();
+  RFLink::Mqtt::reconnect(1);
 #endif // MQTT_ENABLED
-#endif // ESP32 || ESP8266
 
-  PluginInit();
-  PluginTXInit();
-  set_Radio_mode(Radio_OFF);
+PluginInit();
+PluginTXInit();
+set_Radio_mode(Radio_OFF);
 
 #if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
   show_Radio_Pin();
@@ -136,28 +120,10 @@ RFLink::Wifi::setup();
   splash_OLED();
 #endif
 #ifdef MQTT_ENABLED
-  publishMsg();
+  RFLink::Mqtt::publishMsg();
 #endif
   pbuffer[0] = 0;
   set_Radio_mode(Radio_RX);
-
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-  #ifdef RFLINK_OTA_ENABLED
-  // we must stop the Receiver from interrupting the OTA process
-  ArduinoOTA.onStart( [](){
-    Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
-    AsyncSignalScanner::stopScanning();
-    }
-  );
-  ArduinoOTA.onError( [](ota_error_t error){
-    Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
-    Serial.print(error);
-    Serial.println(" ,turning on Receiver");
-    AsyncSignalScanner::startScanning();
-    }
-  );
-  #endif // RFLINK_OTA_ENABLED
-#endif // RFLINK_ASYNC_RECEIVER_ENABLED
 
 #ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::startServer();
@@ -168,22 +134,17 @@ RFLink::Serial2Net::startServer();
 void loop()
 {
 #ifdef MQTT_ENABLED
-  checkMQTTloop();
+  RFLink::Mqtt::checkMQTTloop();
   sendMsg();
 #endif
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
+#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
 RFLink::Wifi::mainLoop();
-#endif
-
-#if defined(RFLINK_OTA_ENABLED) && ( defined(RFLINK_WIFIMANAGER_ENABLED) || defined(MQTT_ENABLED))
-  ArduinoOTA.handle();
 #endif
 
 #ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::serverLoop();
 #endif // RFLINK_SERIAL2NET_ENABLED
-
 
 #ifdef SERIAL_ENABLED
 #if PIN_RF_TX_DATA_0 != NOT_A_PIN
@@ -203,7 +164,7 @@ void sendMsg()
     Serial.print(pbuffer);
 #endif
 #ifdef MQTT_ENABLED
-    publishMsg();
+    RFLink::Mqtt::publishMsg();
 #endif
 #ifdef RFLINK_SERIAL2NET_ENABLED
 RFLink::Serial2Net::broadcastMessage(pbuffer);
