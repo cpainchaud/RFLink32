@@ -88,7 +88,7 @@
 #ifdef PLUGIN_011
 #include "../4_Display.h"
 
-boolean Plugin_011(byte function, char *string)
+boolean Plugin_011(byte function, const char *string)
 {
   if (RawSignal.Number != HC_PULSECOUNT) // Incorrect pulse count
       return false;
@@ -220,7 +220,7 @@ boolean Plugin_011(byte function, char *string)
 #ifdef PLUGIN_TX_011
 void HomeConfort_Send(unsigned long bitstream1, unsigned long bitstream2);
 
-boolean PluginTX_011(byte function, char *string)
+boolean  PluginTX_011(byte function, const char *string)
 {
    boolean success = false;
    //10;HomeConfort;01b523;D3;ON;

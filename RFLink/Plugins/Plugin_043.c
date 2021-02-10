@@ -101,7 +101,7 @@
 #ifdef PLUGIN_043
 #include "../4_Display.h"
 
-boolean Plugin_043(byte function, char *string)
+boolean Plugin_043(byte function, const char *string)
 {
    if ((RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4))
       return false;

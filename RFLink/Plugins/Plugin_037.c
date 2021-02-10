@@ -50,7 +50,7 @@
 #ifdef PLUGIN_037
 #include "../4_Display.h"
 
-boolean Plugin_037(byte function, char *string)
+boolean Plugin_037(byte function, const char *string)
 {
    if (RawSignal.Number < ACURITE_PULSECOUNT || RawSignal.Number > (ACURITE_PULSECOUNT + 4))
       return false;

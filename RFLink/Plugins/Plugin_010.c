@@ -60,7 +60,7 @@
 #ifdef PLUGIN_010
 #include "../4_Display.h"
 
-boolean Plugin_010(byte function, char *string)
+boolean Plugin_010(byte function, const char *string)
 {
    if (RawSignal.Number < RGB_MIN_PULSECOUNT || RawSignal.Number > RGB_MAX_PULSECOUNT)
       return false;
@@ -224,7 +224,7 @@ boolean Plugin_010(byte function, char *string)
 #ifdef PLUGIN_TX_010
 void TRC02_Send(unsigned long address, int command);
 
-boolean PluginTX_010(byte function, char *string)
+boolean  PluginTX_010(byte function, const char *string)
 {
    //10;TRC02RGB;03023c;00;
    //012345678901234567890123456

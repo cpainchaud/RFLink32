@@ -21,14 +21,14 @@ enum PState
     P_Mandatory
 };
 
-extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
+extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, const char *); // Receive plugins
 extern byte Plugin_id[PLUGIN_MAX];
 extern byte Plugin_State[PLUGIN_MAX];
 #ifndef ARDUINO_AVR_UNO // Optimize memory limite to 2048 bytes on arduino uno
 extern String Plugin_Description[PLUGIN_MAX];
 #endif
 
-extern boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char *); // Transmit plugins
+extern boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, const char *); // Transmit plugins
 extern byte PluginTX_id[PLUGIN_TX_MAX];
 extern byte PluginTX_State[PLUGIN_TX_MAX];
 
@@ -42,7 +42,7 @@ void PluginInit(void);
 void PluginTXInit(void);
 byte PluginInitCall(byte Function, char *str);
 byte PluginTXInitCall(byte Function, char *str);
-byte PluginRXCall(byte Function, char *str);
-byte PluginTXCall(byte Function, char *str);
+byte PluginRXCall(byte Function, const char *str);
+byte PluginTXCall(byte Function, const char *str);
 
 #endif

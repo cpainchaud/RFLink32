@@ -41,7 +41,7 @@
 #ifdef PLUGIN_073
 #include "../4_Display.h"
 
-boolean Plugin_073(byte function, char *string)
+boolean Plugin_073(byte function, const char *string)
 {
     if (RawSignal.Number != DELTRONIC_PULSECOUNT)
         return false;
@@ -111,7 +111,7 @@ boolean Plugin_073(byte function, char *string)
 #ifdef PLUGIN_TX_073
 void Deltronic_Send(unsigned long address);
 
-boolean PluginTX_073(byte function, char *string)
+boolean  PluginTX_073(byte function, const char *string)
 {
     boolean success = false;
     unsigned long bitstream = 0L;

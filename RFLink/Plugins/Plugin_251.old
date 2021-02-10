@@ -38,12 +38,12 @@ volatile unsigned long PulseTimer[4] = {0, 0, 0, 0};
 volatile unsigned long PulseTimerPrevious[4] = {0, 0, 0, 0};
 volatile byte PulseState[4] = {0, 0, 0, 0};
 
-boolean Plugin_251(byte function, char *string)
+boolean Plugin_251(byte function, const char *string)
 {
   return false;
 }
 
-boolean PluginTX_251(byte function, char *string)
+boolean  PluginTX_251(byte function, const char *string)
 {
   boolean success = false;
   char TmpStr1[80];

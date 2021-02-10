@@ -48,7 +48,7 @@
 #ifdef PLUGIN_080
 #include "../4_Display.h"
 
-boolean Plugin_080(byte function, char *string)
+boolean Plugin_080(byte function, const char *string)
 {
    if (RawSignal.Number != FA20_PULSECOUNT)
       return false;
@@ -109,7 +109,7 @@ boolean Plugin_080(byte function, char *string)
 #define FA20RFLOW 1250   // 1300
 #define FA20RFHIGH 2550  // 2600
 
-boolean PluginTX_080(byte function, char *string)
+boolean  PluginTX_080(byte function, const char *string)
 {
    boolean success = false;
    //10;FA20RF;67f570;1;ON;

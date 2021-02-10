@@ -49,7 +49,7 @@
 #ifdef PLUGIN_005
 #include "../4_Display.h"
 
-boolean Plugin_005(byte function, char *string)
+boolean Plugin_005(byte function, const char *string)
 {
    if (RawSignal.Number != EURODOMEST_PulseLength)
       return false;
@@ -144,7 +144,7 @@ boolean Plugin_005(byte function, char *string)
 #ifdef PLUGIN_TX_005
 void Eurodomest_Send(unsigned long address);
 
-boolean PluginTX_005(byte function, char *string)
+boolean PluginTX_005(byte function, const char *string)
 {
    //10;EURODOMEST;03696b;0;ON;
    //012345678901234567890123456

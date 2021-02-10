@@ -42,7 +42,7 @@
 #ifdef PLUGIN_083
 #include "../4_Display.h"
 
-boolean Plugin_083(byte function, char *string)
+boolean Plugin_083(byte function, const char *string)
 {
    char dbuffer[64];
 
@@ -258,7 +258,7 @@ void addSinglePulse(unsigned long value, int *currrentPulses)
    RawSignal.Pulses[(*currrentPulses)++] = value / RawSignal.Multiply;
 }
 
-boolean PluginTX_083(byte function, char *string)
+boolean  PluginTX_083(byte function, const char *string)
 {
 #ifdef PLUGIN_083_DEBUG
    Serial.println(F("PluginTX_083"));

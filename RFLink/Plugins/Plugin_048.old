@@ -509,7 +509,7 @@ byte checksum(byte type, int count, byte check)
    return 1;
 }
 // =====================================================================================================
-boolean Plugin_048(byte function, char *string)
+boolean Plugin_048(byte function, const char *string)
 {
    if ((RawSignal.Number < OSV3_PULSECOUNT_MIN) || (RawSignal.Number > OSV3_PULSECOUNT_MAX))
       return false;

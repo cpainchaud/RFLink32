@@ -48,7 +48,7 @@
 #include "../4_Display.h"
 #include "../7_Utils.h"
 
-boolean Plugin_047(byte function, char *string)
+boolean Plugin_047(byte function, const char *string)
 {
    if ((RawSignal.Number < AURIOLV4_PULSECOUNT - 4) || (RawSignal.Number > AURIOLV4_PULSECOUNT + 2))
       return false;

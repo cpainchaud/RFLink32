@@ -42,7 +42,7 @@
 #ifdef PLUGIN_072
 #include "../4_Display.h"
 
-boolean Plugin_072(byte function, char *string)
+boolean Plugin_072(byte function, const char *string)
 {
    if (RawSignal.Number != BYRON_PULSECOUNT)
       return false;
@@ -107,7 +107,7 @@ boolean Plugin_072(byte function, char *string)
 #endif // PLUGIN_072
 
 #ifdef PLUGIN_TX_072
-boolean PluginTX_072(byte function, char *string)
+boolean  PluginTX_072(byte function, const char *string)
 {
    boolean success = false;
    //10;BYRON;112233;01;OFF;

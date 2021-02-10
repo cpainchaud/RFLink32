@@ -45,7 +45,7 @@
 #ifdef PLUGIN_014
 #include "../4_Display.h"
 
-boolean Plugin_014(byte function, char *string)
+boolean Plugin_014(byte function, const char *string)
 {
    if ((RawSignal.Number < KOPPLA_PulseLength_MIN) || (RawSignal.Number > KOPPLA_PulseLength_MAX))
       return false;

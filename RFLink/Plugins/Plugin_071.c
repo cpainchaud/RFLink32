@@ -46,7 +46,7 @@
 #ifdef PLUGIN_071
 #include "../4_Display.h"
 
-boolean Plugin_071(byte function, char *string)
+boolean Plugin_071(byte function, const char *string)
 {
    if (RawSignal.Number != PLIEGER_PULSECOUNT)
       return false;

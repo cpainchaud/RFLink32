@@ -14,14 +14,14 @@
 using namespace AsyncSignalScanner;
 #endif //RFLINK_ASYNC_RECEIVER_ENABLED
 
-boolean (*Plugin_ptr[PLUGIN_MAX])(byte, char *); // Receive plugins
+boolean (*Plugin_ptr[PLUGIN_MAX])(byte, const char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];
 byte Plugin_State[PLUGIN_MAX];
 #ifndef ARDUINO_AVR_UNO // Optimize memory limite to 2048 bytes on arduino uno
 String Plugin_Description[PLUGIN_MAX];
 #endif
 
-boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, char *); // Trasmit plugins
+boolean (*PluginTX_ptr[PLUGIN_TX_MAX])(byte, const char *); // Trasmit plugins
 byte PluginTX_id[PLUGIN_TX_MAX];
 byte PluginTX_State[PLUGIN_TX_MAX];
 
@@ -2273,7 +2273,7 @@ byte PluginTXInitCall(byte Function, char *str)
 /*********************************************************************************************\
  * With this function plugins are called that have Receive functionality. 
  \*********************************************************************************************/
-byte PluginRXCall(byte Function, char *str)
+byte PluginRXCall(byte Function, const char *str)
 {
   for (byte x = 0; x < PLUGIN_MAX; x++)
   {
@@ -2292,7 +2292,7 @@ byte PluginRXCall(byte Function, char *str)
 /*********************************************************************************************\
  * With this function plugins are called that have Transmit functionality. 
  \*********************************************************************************************/
-byte PluginTXCall(byte Function, char *str)
+byte PluginTXCall(byte Function, const char *str)
 {
   int x;
 

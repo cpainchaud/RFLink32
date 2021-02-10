@@ -225,7 +225,7 @@
 #ifdef PLUGIN_003
 #include "../4_Display.h"
 
-boolean Plugin_003(byte function, char *string)
+boolean Plugin_003(byte function, const char *string)
 {
    if (RawSignal.Number != (KAKU_CodeLength * 4) + 2)
       return false; // conventionele KAKU bestaat altijd uit 12 data bits plus stop. Ongelijk, dan geen KAKU!
@@ -620,7 +620,7 @@ void Arc_Send(unsigned long address);        // sends 0 and float
 void NArc_Send(unsigned long bitstream);     // sends 0 and 1
 void TriState_Send(unsigned long bitstream); // sends 0, 1 and float
 
-boolean PluginTX_003(byte function, char *string)
+boolean  PluginTX_003(byte function, const char *string)
 {
    boolean success = false;
    unsigned long bitstream = 0L;

@@ -41,7 +41,7 @@
 #ifdef PLUGIN_033
 #include "../4_Display.h"
 
-boolean Plugin_033(byte function, char *string)
+boolean Plugin_033(byte function, const char *string)
 {
    if (RawSignal.Number != CONRAD_PULSECOUNT)
       return false;

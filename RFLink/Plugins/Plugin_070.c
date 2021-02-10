@@ -52,7 +52,7 @@
 #ifdef PLUGIN_070
 #include "../4_Display.h"
 
-boolean Plugin_070(byte function, char *string)
+boolean Plugin_070(byte function, const char *string)
 {
     if (RawSignal.Number != SELECTPLUS_PULSECOUNT)
         return false;
@@ -118,7 +118,7 @@ boolean Plugin_070(byte function, char *string)
 #ifdef PLUGIN_TX_070
 void SelectPlus_Send(unsigned long address);
 
-boolean PluginTX_070(byte function, char *string)
+boolean  PluginTX_070(byte function, const char *string)
 {
     boolean success = false;
     unsigned long bitstream = 0L;

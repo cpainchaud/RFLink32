@@ -99,7 +99,7 @@
 #ifdef PLUGIN_013
 #include "../4_Display.h"
 
-boolean Plugin_013(byte function, char *string)
+boolean Plugin_013(byte function, const char *string)
 {
    if (RawSignal.Number != POWERFIX_PulseLength)
       return false;
@@ -213,7 +213,7 @@ boolean Plugin_013(byte function, char *string)
 #ifdef PLUGIN_TX_013
 void Powerfix_Send(unsigned long bitstream);
 
-boolean PluginTX_013(byte function, char *string)
+boolean  PluginTX_013(byte function, const char *string)
 {
    boolean success = false;
    //10;POWERFIX;000080;0;ON;

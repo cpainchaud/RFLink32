@@ -48,7 +48,7 @@
 #ifdef PLUGIN_061
 #include "../4_Display.h"
 
-boolean Plugin_061(byte function, char *string)
+boolean Plugin_061(byte function, const char *string)
 {
    if (RawSignal.Number != ALARMPIRV1_PULSECOUNT)
       return false;

@@ -39,7 +39,7 @@
 
 byte Plugin_034_WindDirSeg(byte data);
 
-boolean Plugin_034(byte function, char *string)
+boolean Plugin_034(byte function, const char *string)
 {
    if ((RawSignal.Number < CRESTA_MIN_PULSECOUNT) || (RawSignal.Number > CRESTA_MAX_PULSECOUNT))
       return false;

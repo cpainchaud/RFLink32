@@ -40,7 +40,7 @@
 #ifdef PLUGIN_008
 #include "../4_Display.h"
 
-boolean Plugin_008(byte function, char *string)
+boolean Plugin_008(byte function, const char *string)
 {
     if (RawSignal.Number != KAMBROOK_PULSECOUNT)
         return false;
@@ -154,7 +154,7 @@ boolean Plugin_008(byte function, char *string)
 #ifdef PLUGIN_TX_008
 void Kambrook_Send(unsigned long address);
 
-boolean PluginTX_008(byte function, char *string)
+boolean  PluginTX_008(byte function, const char *string)
 {
     boolean success = false;
     //10;kambrook;050325;a1;ON;

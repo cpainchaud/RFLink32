@@ -80,7 +80,7 @@
 #ifdef PLUGIN_002
 #include "../4_Display.h"
 
-boolean Plugin_002(byte function, char *string)
+boolean Plugin_002(byte function, const char *string)
 {
    if ((RawSignal.Number != LACROSSE_PULSECOUNT) && (RawSignal.Number != (LACROSSE_PULSECOUNT - 2)))
       return false;

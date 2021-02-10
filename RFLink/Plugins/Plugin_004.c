@@ -52,7 +52,7 @@
 #ifdef PLUGIN_004
 #include "../4_Display.h"
 
-boolean Plugin_004(byte function, char *string)
+boolean Plugin_004(byte function, const char *string)
 {
    // nieuwe KAKU bestaat altijd uit start bit + 32 bits + evt 4 dim bits. Ongelijk, dan geen NewKAKU
    if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength))
@@ -154,7 +154,7 @@ boolean Plugin_004(byte function, char *string)
 #include "../3_Serial.h"
 #include "../4_Display.h"
 
-boolean PluginTX_004(byte function, char *string)
+boolean  PluginTX_004(byte function, const char *string)
 {
    // ON, OFF, ALLON, ALLOFF, ALL 99, 99
    //10;NewKaku;123456;3;ON;

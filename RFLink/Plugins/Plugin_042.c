@@ -100,7 +100,7 @@
 #ifdef PLUGIN_042
 #include "../4_Display.h"
 
-boolean Plugin_042(byte function, char *string)
+boolean Plugin_042(byte function, const char *string)
 {
    if (RawSignal.Number < UPM_MIN_PULSECOUNT || RawSignal.Number > UPM_MAX_PULSECOUNT)
       return false;

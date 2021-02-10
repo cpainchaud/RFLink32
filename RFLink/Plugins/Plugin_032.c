@@ -51,7 +51,7 @@
 #ifdef PLUGIN_032
 #include "../4_Display.h"
 
-boolean Plugin_032(byte function, char *string)
+boolean Plugin_032(byte function, const char *string)
 {
    if (RawSignal.Number < ALECTOV4_PULSECOUNT || RawSignal.Number > (ALECTOV4_PULSECOUNT + 4))
       return false;

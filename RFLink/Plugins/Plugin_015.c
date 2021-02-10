@@ -56,7 +56,7 @@
 #ifdef PLUGIN_015
 #include "../4_Display.h"
 
-boolean Plugin_015(byte function, char *string)
+boolean Plugin_015(byte function, const char *string)
 {
    if (RawSignal.Number != HomeEasy_PulseLength)
       return false;
@@ -140,7 +140,7 @@ boolean Plugin_015(byte function, char *string)
 #ifdef PLUGIN_TX_015
 void HomeEasyEU_Send(unsigned long address, unsigned long command);
 
-boolean PluginTX_015(byte function, char *string)
+boolean  PluginTX_015(byte function, const char *string)
 {
    boolean success = false;
    //10;HomeEasy;7900b200;b;ON;

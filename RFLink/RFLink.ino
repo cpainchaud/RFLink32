@@ -33,14 +33,14 @@
 #include <avr/power.h>
 #endif
 //****************************************************************************************************************************************
-void sendMsg(); // See at bottom
+void sendMsgFromBuffer(); // See at bottom
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 void (*Reboot)(void) = 0; // reset function on adress 0.
 
 void CallReboot(void)
 {
-  sendMsg();
+  RFLink::sendMsgFromBuffer();
   delay(1);
   Reboot();
 }
@@ -49,7 +49,7 @@ void CallReboot(void)
 #if (defined(ESP8266) || defined(ESP32))
 void CallReboot(void)
 {
-  sendMsg();
+  RFLink::sendMsgFromBuffer();
   delay(1);
   ESP.restart();
 }
@@ -133,47 +133,194 @@ RFLink::Serial2Net::startServer();
 
 void loop()
 {
-#ifdef MQTT_ENABLED
+  #ifdef MQTT_ENABLED
   RFLink::Mqtt::checkMQTTloop();
-  sendMsg();
-#endif
+  RFLink::sendMsgFromBuffer();
+  #endif
 
-#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
-RFLink::Wifi::mainLoop();
-#endif
+  #if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+  RFLink::Wifi::mainLoop();
+  #endif
 
-#ifdef RFLINK_SERIAL2NET_ENABLED
-RFLink::Serial2Net::serverLoop();
-#endif // RFLINK_SERIAL2NET_ENABLED
+  #ifdef RFLINK_SERIAL2NET_ENABLED
+  RFLink::Serial2Net::serverLoop();
+  #endif // RFLINK_SERIAL2NET_ENABLED
 
-#ifdef SERIAL_ENABLED
-#if PIN_RF_TX_DATA_0 != NOT_A_PIN
-  if (CheckSerial())
-    sendMsg();
-#endif
-#endif
+  #if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
+  readSerialAndExecute();
+  #endif
+
   if (ScanEvent())
-    sendMsg();
+    RFLink::sendMsgFromBuffer();
 }
 
-void sendMsg()
-{
-  if (pbuffer[0] != 0)
+namespace RFLink {
+
+  void sendMsgFromBuffer()
   {
-#ifdef SERIAL_ENABLED
-    Serial.print(pbuffer);
-#endif
-#ifdef MQTT_ENABLED
-    RFLink::Mqtt::publishMsg();
-#endif
-#ifdef RFLINK_SERIAL2NET_ENABLED
-RFLink::Serial2Net::broadcastMessage(pbuffer);
-#endif // RFLINK_SERIAL2NET_ENABLED
-#ifdef OLED_ENABLED
-    print_OLED();
-#endif
-    pbuffer[0] = 0;
+    if (pbuffer[0] != 0)
+    {
+
+    #ifdef SERIAL_ENABLED
+        Serial.print(pbuffer);
+    #endif
+
+    #ifdef MQTT_ENABLED
+        RFLink::Mqtt::publishMsg();
+    #endif
+
+    #ifdef RFLINK_SERIAL2NET_ENABLED
+      RFLink::Serial2Net::broadcastMessage(pbuffer);
+    #endif // RFLINK_SERIAL2NET_ENABLED
+
+    #ifdef OLED_ENABLED
+        print_OLED();
+    #endif
+
+      pbuffer[0] = 0;
+    }
   }
+
+  bool executeCliCommand(const char *cmd) {
+    static byte ValidCommand = 0;
+    if (strlen(cmd) > 7)
+    { // need to see minimal 8 characters on the serial port
+      // 10;....;..;ON;
+      if (strncmp(cmd, "10;", 3) == 0)
+      { // Command from Master to RFLink
+        // -------------------------------------------------------
+        // Handle Device Management Commands
+        // -------------------------------------------------------
+        if (strncasecmp(cmd + 3, "PING;",5) == 0)
+        {
+          display_Header();
+          display_Name(PSTR("PONG"));
+          display_Footer();
+        }
+        else if (strncasecmp(cmd + 3, "REBOOT;",7) == 0)
+        {
+          display_Header();
+          display_Name(PSTR("REBOOT"));
+          display_Footer();
+          CallReboot();
+        }
+        else if (strncasecmp(cmd + 3, "RFDEBUG=O", 9) == 0)
+        {
+          if (cmd[12] == 'N' || cmd[12] == 'n')
+          {
+            RFDebug = true;    // full debug on
+            QRFDebug = false;  // q full debug off
+            RFUDebug = false;  // undecoded debug off
+            QRFUDebug = false; // q undecoded debug off
+            display_Header();
+            display_Name(PSTR("RFDEBUG=ON"));
+            display_Footer();
+          }
+          else
+          {
+            RFDebug = false; // full debug off
+            display_Header();
+            display_Name(PSTR("RFDEBUG=OFF"));
+            display_Footer();
+          }
+        }
+        else if (strncasecmp(cmd + 3, "RFUDEBUG=O", 10) == 0)
+        {
+          if (cmd[13] == 'N' || cmd[13] == 'n')
+          {
+            RFDebug = false;   // full debug off
+            QRFDebug = false;  // q debug off
+            RFUDebug = true;   // undecoded debug on
+            QRFUDebug = false; // q undecoded debug off
+            display_Header();
+            display_Name(PSTR("RFUDEBUG=ON"));
+            display_Footer();
+          }
+          else
+          {
+            RFUDebug = false; // undecoded debug off
+            display_Header();
+            display_Name(PSTR("RFUDEBUG=OFF"));
+            display_Footer();
+          }
+        }
+        else if (strncasecmp(cmd + 3, "QRFDEBUG=O", 10) == 0)
+        {
+          if (cmd[13] == 'N' || cmd[13] == 'n')
+          {
+            RFDebug = false;   // full debug off
+            QRFDebug = true;   // q debug on
+            RFUDebug = false;  // undecoded debug off
+            QRFUDebug = false; // q undecoded debug off
+            display_Header();
+            display_Name(PSTR("QRFDEBUG=ON"));
+            display_Footer();
+          }
+          else
+          {
+            QRFDebug = false; // q debug off
+            display_Header();
+            display_Name(PSTR("QRFDEBUG=OFF"));
+            display_Footer();
+          }
+        }
+        else if (strncasecmp(cmd + 3, "QRFUDEBUG=O", 11) == 0)
+        {
+          if (cmd[14] == 'N' || cmd[14] == 'n')
+          {
+            RFDebug = false;  // full debug off
+            QRFDebug = false; // q debug off
+            RFUDebug = false; // undecoded debug off
+            QRFUDebug = true; // q undecoded debug on
+            display_Header();
+            display_Name(PSTR("QRFUDEBUG=ON"));
+            display_Footer();
+          }
+          else
+          {
+            QRFUDebug = false; // q undecode debug off
+            display_Header();
+            display_Name(PSTR("QRFUDEBUG=OFF"));
+            display_Footer();
+          }
+        }
+        else if (strncasecmp(cmd + 3, "VERSION", 7) == 0)
+        {
+          display_Header();
+          display_Splash();
+          display_Footer();
+        }
+        else
+        {
+          // -------------------------------------------------------
+          // Handle Generic Commands / Translate protocol data into Nodo text commands
+          // -------------------------------------------------------
+          set_Radio_mode(Radio_TX);
+
+          if (PluginTXCall(0, cmd))
+            ValidCommand = 1;
+          else // Answer that an invalid command was received?
+            ValidCommand = 2;
+
+          set_Radio_mode(Radio_RX);
+        }
+      }
+    } // if > 7
+    if (ValidCommand != 0)
+    {
+      display_Header();
+      if (ValidCommand == 1)
+        display_Name(PSTR("OK"));
+      else
+        display_Name(PSTR("CMD UNKNOWN"));
+      display_Footer();
+    }
+    ValidCommand = 0;
+    sendMsgFromBuffer(); // in case there is a response waiting to be sent
+    return true;
+  }
+
+
 }
 
 /*********************************************************************************************/

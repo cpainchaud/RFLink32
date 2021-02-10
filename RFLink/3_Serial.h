@@ -16,6 +16,6 @@
 
 extern char InputBuffer_Serial[INPUT_COMMAND_SIZE];
 
-boolean CheckSerial();
+boolean readSerialAndExecute();
 boolean CheckMQTT(byte *);
 #endif

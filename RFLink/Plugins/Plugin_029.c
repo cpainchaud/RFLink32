@@ -64,7 +64,7 @@
 
 uint8_t Plugin_029_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 
-boolean Plugin_029(byte function, char *string)
+boolean Plugin_029(byte function, const char *string)
 {
   if (!(
           ((RawSignal.Number >= ACH2010_MIN_PULSECOUNT) &&

@@ -43,7 +43,7 @@
 #ifdef PLUGIN_074
 #include "../4_Display.h"
 
-boolean Plugin_074(byte function, char *string)
+boolean Plugin_074(byte function, const char *string)
 {
     if (RawSignal.Number != (RL02_CodeLength * 4) + 2)
         return false;
@@ -121,7 +121,7 @@ boolean Plugin_074(byte function, char *string)
 #ifdef PLUGIN_TX_074
 void RL02_Send(unsigned long address);
 
-boolean PluginTX_074(byte function, char *string)
+boolean  PluginTX_074(byte function, const char *string)
 {
     boolean success = false;
     unsigned long bitstream = 0;

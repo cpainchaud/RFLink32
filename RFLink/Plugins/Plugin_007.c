@@ -51,7 +51,7 @@
 #ifdef PLUGIN_007
 #include "../4_Display.h"
 
-boolean Plugin_007(byte function, char *string)
+boolean Plugin_007(byte function, const char *string)
 {
    if ((RawSignal.Number != CONRADRSL2_PULSECOUNT) && (RawSignal.Number != CONRADRSL2_PULSECOUNT + 2))
       return false;
@@ -240,7 +240,7 @@ boolean Plugin_007(byte function, char *string)
 #ifdef PLUGIN_TX_007
 void RSL2_Send(unsigned long address);
 
-boolean PluginTX_007(byte function, char *string)
+boolean  PluginTX_007(byte function, const char *string)
 {
    boolean success = false;
    //10;CONRAD;000fa0;0;OFF;

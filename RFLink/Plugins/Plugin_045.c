@@ -45,7 +45,7 @@
 #ifdef PLUGIN_045
 #include "../4_Display.h"
 
-boolean Plugin_045(byte function, char *string)
+boolean Plugin_045(byte function, const char *string)
 {
    if (RawSignal.Number != AURIOL_PULSECOUNT)
       return false;

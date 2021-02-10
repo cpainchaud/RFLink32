@@ -76,7 +76,7 @@
 uint8_t Plugin_031_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 // unsigned int Plugin_031_ProtocolAlectoRainBase = 0;
 
-boolean Plugin_031(byte function, char *string)
+boolean Plugin_031(byte function, const char *string)
 {
    if ((RawSignal.Number != WS1100_PULSECOUNT) && (RawSignal.Number != WS1200_PULSECOUNT))
       return false;

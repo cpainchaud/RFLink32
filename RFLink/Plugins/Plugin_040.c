@@ -56,7 +56,7 @@
 #ifdef PLUGIN_040
 #include "../4_Display.h"
 
-boolean Plugin_040(byte function, char *string)
+boolean Plugin_040(byte function, const char *string)
 {
    if (RawSignal.Number != MEBUS_PULSECOUNT)
       return false;

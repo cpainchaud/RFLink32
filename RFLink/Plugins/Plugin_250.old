@@ -22,12 +22,12 @@ byte Plugin_250_GetArgv(char *, char *, int);
 unsigned long Plugin_250_FreeMem(void);
 void Plugin_250_Beep(int, int);
 
-boolean Plugin_250(byte function, char *string)
+boolean Plugin_250(byte function, const char *string)
 {
   return false;
 }
 
-boolean PluginTX_250(byte function, char *string)
+boolean  PluginTX_250(byte function, const char *string)
 {
   boolean success = false;
   char TmpStr1[80];

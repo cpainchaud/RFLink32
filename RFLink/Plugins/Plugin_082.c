@@ -52,7 +52,7 @@
 #ifdef PLUGIN_082
 #include "../4_Display.h"
 
-boolean Plugin_082(byte function, char *string)
+boolean Plugin_082(byte function, const char *string)
 {
    if (RawSignal.Number != MAXITROL2_PULSECOUNT)
       return false;
@@ -178,7 +178,7 @@ boolean Plugin_082(byte function, char *string)
 #define MAXITROL2_RFLOW 400
 #define MAXITROL2_RFHIGH 750
 
-boolean PluginTX_082(byte function, char *string)
+boolean  PluginTX_082(byte function, const char *string)
 {
    boolean success = false;
    unsigned long bitstream = 0L;

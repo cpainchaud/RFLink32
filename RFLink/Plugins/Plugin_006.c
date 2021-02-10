@@ -43,7 +43,7 @@
 #ifdef PLUGIN_006
 #include "../4_Display.h"
 
-boolean Plugin_006(byte function, char *string)
+boolean Plugin_006(byte function, const char *string)
 {
    if (RawSignal.Number != BLYSS_PULSECOUNT)
       return false;
@@ -153,7 +153,7 @@ boolean Plugin_006(byte function, char *string)
 #ifdef PLUGIN_TX_006
 void Blyss_Send(unsigned long address, byte devtype);
 
-boolean PluginTX_006(byte function, char *string)
+boolean  PluginTX_006(byte function, const char *string)
 {
    boolean success = false;
    //10;Avidsen;00ff98;A1;OFF;

@@ -19,7 +19,10 @@ boolean CheckCmd();
 boolean CopySerial(char *);
 /*********************************************************************************************/
 
-boolean CheckSerial()
+/**
+ * @return False if Serial has no data to read and fails to execute command. 
+ * */
+boolean readSerialAndExecute()
 {
   if (ReadSerial())
   {
@@ -28,7 +31,9 @@ boolean CheckSerial()
     Serial.print(F("Message arrived [Serial] "));
     Serial.println(InputBuffer_Serial);
 #endif
-    if (CheckCmd())
+    bool success = RFLink::executeCliCommand(InputBuffer_Serial);
+    InputBuffer_Serial[0] = 0; // empty buffers s it's ready for next command
+    if(success)
       return true;
   }
   return false;

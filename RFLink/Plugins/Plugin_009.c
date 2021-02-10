@@ -52,7 +52,7 @@
 #ifdef PLUGIN_009
 #include "../4_Display.h"
 
-boolean Plugin_009(byte function, char *string)
+boolean Plugin_009(byte function, const char *string)
 {
    if ((RawSignal.Number != (X10_PulseLength)) && (RawSignal.Number != (X10_PulseLength + 2)))
       return false;
@@ -289,7 +289,7 @@ boolean Plugin_009(byte function, char *string)
 #ifdef PLUGIN_TX_009
 void X10_Send(uint32_t address);
 
-boolean PluginTX_009(byte function, char *string)
+boolean  PluginTX_009(byte function, const char *string)
 {
    boolean success = false;
    //10;X10;000041;1;OFF;

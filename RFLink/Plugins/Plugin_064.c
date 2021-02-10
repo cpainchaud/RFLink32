@@ -31,7 +31,7 @@
 #ifdef PLUGIN_064
 #include "../4_Display.h"
 
-boolean Plugin_064(byte function, char *string)
+boolean Plugin_064(byte function, const char *string)
 {
    if (RawSignal.Number != ATLANTIC_PULSECOUNT)
       return false;

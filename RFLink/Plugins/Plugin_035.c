@@ -47,7 +47,7 @@
 #ifdef PLUGIN_035
 #include "../4_Display.h"
 
-boolean Plugin_035(byte function, char *string)
+boolean Plugin_035(byte function, const char *string)
 {
    if (RawSignal.Number != IMAGINTRONIX_PULSECOUNT)
       return false;

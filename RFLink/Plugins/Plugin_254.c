@@ -25,7 +25,7 @@
 #ifdef PLUGIN_254
 #include "../4_Display.h"
 
-boolean Plugin_254(byte function, char *string)
+boolean Plugin_254(byte function, const char *string)
 {
    int i;
 

@@ -92,7 +92,7 @@
 #ifdef PLUGIN_041
 #include "../4_Display.h"
 
-boolean Plugin_041(byte function, char *string)
+boolean Plugin_041(byte function, const char *string)
 {
    if ((RawSignal.Number != LACROSSE41_PULSECOUNT1) && (RawSignal.Number != LACROSSE41_PULSECOUNT2) &&
        (RawSignal.Number != LACROSSE41_PULSECOUNT3) && (RawSignal.Number != LACROSSE41_PULSECOUNT4))

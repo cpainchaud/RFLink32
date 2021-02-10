@@ -86,7 +86,7 @@
 #ifdef PLUGIN_012
 #include "../4_Display.h"
 
-boolean Plugin_012(byte function, char *string)
+boolean Plugin_012(byte function, const char *string)
 {
    if (RawSignal.Number != (FA500RM3_PulseLength) && RawSignal.Number != (FA500RM1_PulseLength))
       return false;
@@ -239,7 +239,7 @@ boolean Plugin_012(byte function, char *string)
 #ifdef PLUGIN_TX_012
 void Flamingo_Send(int funitc, int fcmd);
 
-boolean PluginTX_012(byte function, char *string)
+boolean  PluginTX_012(byte function, const char *string)
 {
    boolean success = false;
    //10;FA500;001b523;D3;ON;

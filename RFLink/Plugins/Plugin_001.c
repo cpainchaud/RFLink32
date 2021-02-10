@@ -87,7 +87,7 @@
 #ifdef PLUGIN_001
 #include "../4_Display.h"
 
-boolean Plugin_001(byte function, char *string)
+boolean Plugin_001(byte function, const char *string)
 {
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
 
@@ -189,16 +189,6 @@ boolean Plugin_001(byte function, char *string)
    // ==========================================================================
    // Kill ALL Short RF packets
    // ==========================================================================
-   if (RawSignal.Number < 24)
-   { // Less than 24 pulses?
-      if ((RFDebug == true) || (QRFDebug == true))
-      {
-         RawSignal.Number = 0; // Kill packet
-         return true;          // abort further processing
-      }
-      else
-         return false; // abort this processing only
-   }
    // ==========================================================================
    // DEBUG
    // ==========================================================================
@@ -743,6 +733,7 @@ boolean Plugin_001(byte function, char *string)
       return true;          // abort processing completely
    }                        // as there is no support for it anyway
    return false;
+
 }
 #endif //PLUGIN_001
 /*********************************************************************************************\

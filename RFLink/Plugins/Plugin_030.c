@@ -102,7 +102,7 @@
 #ifdef PLUGIN_030
 #include "../4_Display.h"
 
-boolean Plugin_030(byte function, char *string)
+boolean Plugin_030(byte function, const char *string)
 {
    if (RawSignal.Number != ALECTOV1_PULSECOUNT)
       return false;

@@ -27,7 +27,7 @@
 #ifdef PLUGIN_063
 #include "../4_Display.h"
 
-boolean Plugin_063(byte function, char *string)
+boolean Plugin_063(byte function, const char *string)
 {
    if ((RawSignal.Number < OREGON_PLA_PULSECOUNT - 2) || (RawSignal.Number > OREGON_PLA_PULSECOUNT))
       return false;

@@ -1,6 +1,7 @@
 #include "9_Serial2Net.h"
+#include "RFLink.h"
 
-
+#ifdef RFLINK_SERIAL2NET_ENABLED
 
 namespace RFLink { namespace Serial2Net {
 
@@ -157,6 +158,10 @@ namespace RFLink { namespace Serial2Net {
                     debugmsg += "Serial2Net: client has sent a command >>>> " + command + " <<<<<<";
                     Serial.println(debugmsg);
                     #endif
+
+                    if(command.length() > 0) { // Let's request RFLink to parse this command
+                        RFLink::executeCliCommand(command.c_str());
+                    }
                 }
             }
         }
@@ -171,3 +176,5 @@ namespace RFLink { namespace Serial2Net {
     }
 
 }}
+
+#endif //RFLINK_SERIAL2NET_ENABLED

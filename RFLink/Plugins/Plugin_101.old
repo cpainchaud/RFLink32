@@ -355,7 +355,7 @@ byte checksum(byte type, int count, byte check) {
      return 1;
 }
 // =====================================================================================================
-boolean Plugin_048(byte function, char *string) {
+boolean Plugin_048(byte function, const char *string) {
   boolean success=false;
 
 #ifdef PLUGIN_048_CORE

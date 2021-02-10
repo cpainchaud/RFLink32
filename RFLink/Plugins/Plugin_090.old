@@ -89,7 +89,7 @@ struct DataBlockStruct
    byte Checksum;
 };
 
-boolean Plugin_090(byte function, char *string)
+boolean Plugin_090(byte function, const char *string)
 {
    if (RawSignal.Number != NodoSlave_PULSECOUNT)
       return false; // Per byte twee posities + startbit.
