@@ -11,12 +11,12 @@ cache:
 
 env:
     - PLATFORMIO_CI_SRC=RFLink
-    - PLATFORMIO_CI_SRC=RFLink/
 
 
 install:
     - pip install -U platformio
     - pio update
+    - platformio lib install
 
 script:
-    - pio ci --board=esp32doit-devkit-v1
+    - pio ci --board=esp32doit-devkit-v1 --project-option="lib_deps=PubSubClient,Wire,SPI"
