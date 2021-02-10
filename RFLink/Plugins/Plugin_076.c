@@ -28,10 +28,11 @@
  * 10;rfdebug=on;
  \*********************************************************************************************/
 
- #ifdef PLUGIN_076
- #define PLUGIN_DESC_076 "CAME-TOP432"
+#if defined(PLUGIN_076) || defined(PLUGIN_TX_076)
 
-#define PLUGIN_076_PULSECOUNT 26
+#define PLUGIN_DESC_076 "CAME-TOP432"
+
+#define PLUGIN_076_PULSE_COUNT 26
 
 #define PLUGIN_076_PREAMBLE 400
 #define PLUGIN_076_PREAMBLE_MIN 368
@@ -45,6 +46,12 @@
 #define PLUGIN_076_LONG_PULSE_MIN 570
 #define PLUGIN_076_LONG_PULSE_MAX 800
 
+#include "1_Radio.h"
+#include "2_Signal.h"
+
+#endif
+
+#if defined(PLUGIN_076)
 inline short pulse_type_76(byte pulse) {
     
     int pulse_len = pulse*RawSignal.Multiply;
@@ -65,7 +72,7 @@ boolean Plugin_076(byte function, char *string)
     char tmpbuf[60];
     uint16_t code = 0;
 
-    if (RawSignal.Number != PLUGIN_076_PULSECOUNT)
+    if (RawSignal.Number != PLUGIN_076_PULSE_COUNT)
         return false;
 
     unsigned long duration = ((unsigned long)RawSignal.Pulses[1])*RawSignal.Multiply;
@@ -81,7 +88,7 @@ boolean Plugin_076(byte function, char *string)
 
 #ifdef PLUGIN_TX_076
 
-#include "1_Radio.h"
+
 boolean PluginTX_076(byte function, char *string)
 {
     RawSignalStruct signal;
@@ -105,4 +112,4 @@ boolean PluginTX_076(byte function, char *string)
     return true;
 }
 
-#endif PLUGIN_TX_076;
+#endif // PLUGIN_TX_076;
