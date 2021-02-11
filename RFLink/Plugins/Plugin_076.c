@@ -67,7 +67,7 @@ inline short pulse_type_76(byte pulse) {
     return 1;
 }
 
-boolean Plugin_076(byte function, char *string)
+boolean Plugin_076(byte function, const char *string)
 {
     char tmpbuf[60];
     uint16_t code = 0;
@@ -89,7 +89,7 @@ boolean Plugin_076(byte function, char *string)
 #ifdef PLUGIN_TX_076
 
 
-boolean PluginTX_076(byte function, char *string)
+boolean  PluginTX_076(byte function, const char *string)
 {
     RawSignalStruct signal;
     if (strncasecmp(InputBuffer_Serial + 3, "CAME-TOP432;", 8) == 0){

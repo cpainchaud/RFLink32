@@ -76,6 +76,7 @@
 #define PLUGIN_080 // Flamingo FA20 / KD101 smoke detector
 #define PLUGIN_081 // Mertik Maxitrol / Dru fireplace
 #define PLUGIN_082 // Mertik Maxitrol / Dru fireplace
+#define PLUGIN_087 // NOX Alarm
 // -------------------
 // Misc
 // -------------------
@@ -122,10 +123,13 @@
 // #define PLUGIN_TX_082           // Mertik Maxitrol / Dru fireplace
 // -------------------
 // -------------------
+// Alarm Systems
+// -------------------
+#define PLUGIN_TX_087
 // -------------------
 // Misc
 // -------------------
-#define PLUGIN_TX_076               // CAME TOP-432 Door Opener
+//#define PLUGIN_TX_076               // CAME TOP-432 Door Opener
 // -------------------
 //       -=#=-
 // -------------------

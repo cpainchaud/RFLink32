@@ -1,80 +1,79 @@
 //#######################################################################################################
 //##                    This Plugin is only for use with the RFLink software package                   ##
-//##                                     Plugin-083: CAME TOP-432  door/gate opener                    ##
+//##                       Plugin-087: NOX Security Alarm  Control+Sensors                             ##
 //#######################################################################################################
 
 
-#define OXOALARMPLUGIN_ID 087
-#define PLUGIN_DESC_087 PSTR("OXOALARM")
+#define NOXALARMPLUGIN_ID 087
+#define PLUGIN_DESC_087 PSTR("NOXALARM")
 
-#define OXO_HEADER_PULSE_LEN 2000 
-#define OXO_HEADER_PULSE_LEN_MIN 1900
-#define OXO_HEADER_PULSE_LEN_MAX 2250
+#define NOX_HEADER_PULSE_LEN 2000 
+#define NOX_HEADER_PULSE_LEN_MIN 1900
+#define NOX_HEADER_PULSE_LEN_MAX 2250
 
-#define OXO_PULSE_SHORT_LEN 430
-#define OXO_PULSE_SHORT_LEN_MIN 380
-#define OXO_PULSE_SHORT_LEN_MAX 530
+#define NOX_PULSE_SHORT_LEN 430
+#define NOX_PULSE_SHORT_LEN_MIN 380
+#define NOX_PULSE_SHORT_LEN_MAX 530
 
-#define OXO_PULSE_LONG_LEN 800
-#define OXO_PULSE_LONG_LEN_MIN 740
-#define OXO_PULSE_LONG_LEN_MAX 1050
+#define NOX_PULSE_LONG_LEN 800
+#define NOX_PULSE_LONG_LEN_MIN 740
+#define NOX_PULSE_LONG_LEN_MAX 1050
 
-#define OXO_CONTROL_PULSECOUNT 66
+#define NOX_CONTROL_PULSECOUNT 66
 
 
 #ifdef PLUGIN_087
-
-char plugin_087_tmpbuf[50];
 
 inline short pulse_type(byte pulse) {
     
     int pulse_len = pulse*RawSignal.Multiply;
 
-    if(pulse_len < OXO_PULSE_SHORT_LEN_MIN)
+    if(pulse_len < NOX_PULSE_SHORT_LEN_MIN)
         return -1;
-    if(pulse_len <= OXO_PULSE_SHORT_LEN_MAX)
+    if(pulse_len <= NOX_PULSE_SHORT_LEN_MAX)
         return 0;
-    if(pulse_len < OXO_PULSE_LONG_LEN_MIN)
+    if(pulse_len < NOX_PULSE_LONG_LEN_MIN)
         return -1;
-    if(pulse_len > OXO_PULSE_LONG_LEN_MAX)
+    if(pulse_len > NOX_PULSE_LONG_LEN_MAX)
         return -1;
     return 1;
 }
 
-boolean Plugin_087(byte function, char *string)
+boolean Plugin_087(byte function, const char *string)
 {
+    char tmpbuf[60];
     uint32_t code = 0;
 
-    if (RawSignal.Number != OXO_CONTROL_PULSECOUNT)
+    if (RawSignal.Number != NOX_CONTROL_PULSECOUNT)
         return false;
 
-     Serial.println("OXO check2");
-
-    //Serial.println("OXO check");
+    //Serial.println("NOX check");
     //sprintf(plugin_087_tmpbuf, "%i %i %i", RawSignal.Multiply, RawSignal.Pulses[1]*RawSignal.Multiply, RawSignal.Pulses[2]*RawSignal.Multiply );
     //Serial.println(plugin_087_tmpbuf);
 
-    long duration = RawSignal.Pulses[1]*RawSignal.Multiply;
-    if(duration <= OXO_PULSE_LONG_LEN_MIN || duration >= OXO_PULSE_LONG_LEN_MAX)
+    unsigned long duration = ((unsigned long)RawSignal.Pulses[1])*RawSignal.Multiply;
+    if(duration <= NOX_PULSE_LONG_LEN_MIN || duration >= NOX_PULSE_LONG_LEN_MAX) {
+        //Serial.print("failed on check2 duration=");Serial.print(RawSignal.Pulses[1]);Serial.print("  multiply=");Serial.println(duration);
         return false;
+    }
 
-         Serial.println("OXO check3");
+    //Serial.println("NOX check3");
     
     duration = RawSignal.Pulses[2]*RawSignal.Multiply;
-    if(duration <= OXO_HEADER_PULSE_LEN_MIN || duration >= OXO_HEADER_PULSE_LEN_MAX)
+    if(duration <= NOX_HEADER_PULSE_LEN_MIN || duration >= NOX_HEADER_PULSE_LEN_MAX)
         return false;
 
-    Serial.println("OXO found");
+    //Serial.println("NOX found");
 
     int i=0;
-    for(; i<OXO_CONTROL_PULSECOUNT-4;i+=2){
+    for(; i<NOX_CONTROL_PULSECOUNT-4;i+=2){
         int x=i+3;
         short first_type = pulse_type(RawSignal.Pulses[x]);
         short second_type = pulse_type(RawSignal.Pulses[x+1]);
 
         if(first_type == -1 || second_type == -1 || second_type == 0) {
-            sprintf(plugin_087_tmpbuf, "OXO decoding error at pair #%u = %u %u", i, RawSignal.Pulses[x]*RawSignal.Multiply, RawSignal.Pulses[x+1]*RawSignal.Multiply );
-            Serial.println(plugin_087_tmpbuf);
+            //sprintf(plugin_087_tmpbuf, "NOX decoding error at pair #%u = %u %u", i, RawSignal.Pulses[x]*RawSignal.Multiply, RawSignal.Pulses[x+1]*RawSignal.Multiply );
+            //Serial.println(plugin_087_tmpbuf);
             return false;
         }
 
@@ -84,8 +83,8 @@ boolean Plugin_087(byte function, char *string)
         code = code << 1;
     }
 
-    sprintf(plugin_087_tmpbuf, "***** code= 0x%04x  %u+%u ********", code, RawSignal.Pulses[i+3]*RawSignal.Multiply, RawSignal.Pulses[i+4]*RawSignal.Multiply );
-    Serial.println(plugin_087_tmpbuf);
+    sprintf(tmpbuf, "***** code= 0x%04x  %u+%u ********", code, RawSignal.Pulses[i+3]*RawSignal.Multiply, RawSignal.Pulses[i+4]*RawSignal.Multiply );
+    Serial.println(tmpbuf);
 
     RawSignal.Repeats = true;
 
@@ -99,23 +98,25 @@ boolean Plugin_087(byte function, char *string)
 #ifdef PLUGIN_TX_087
 
 #include "1_Radio.h"
+#include "2_Signal.h"
 
-boolean PluginTX_087(byte function, char *string)
+boolean PluginTX_087(byte function, const char *string)
 {
-   boolean success = false;
-   //10;BYRON;112233;01;OFF;
-   //01234567890123456789012
-   if (strncasecmp(InputBuffer_Serial + 3, "OXOALARM;", 8) == 0){
-       Serial.println("OXO TX Requested");
+    char tmpbuf[60];
+    boolean success = false;
+    RawSignalStruct signal;
+
+    if (strncasecmp(InputBuffer_Serial + 3, "NOXALARM;", 8) == 0){
+       Serial.println("NOX TX Requested");
        //RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
 
-       RawSignal.Number = OXO_CONTROL_PULSECOUNT;
-       RawSignal.Repeats = 3;
-       RawSignal.Delay = 20;
-       RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE; 
+       signal.Number = NOX_CONTROL_PULSECOUNT;
+       signal.Repeats = 3;
+       signal.Delay = 15;
+       signal.Multiply = 10; 
        
-       RawSignal.Pulses[1] = OXO_PULSE_LONG_LEN / RawSignal.Multiply;
-       RawSignal.Pulses[2] = OXO_HEADER_PULSE_LEN / RawSignal.Multiply;
+       signal.Pulses[1] = NOX_PULSE_LONG_LEN / signal.Multiply;
+       signal.Pulses[2] = NOX_HEADER_PULSE_LEN / signal.Multiply;
 
        //uint32_t code = 0xb2b4b0e0;
        uint32_t code= 0x10101a8;
@@ -123,54 +124,31 @@ boolean PluginTX_087(byte function, char *string)
        for(int i=3; i < 65; i+=2) {
 
             if( (code & 0x80000000) == 0 )
-                RawSignal.Pulses[i] = OXO_PULSE_SHORT_LEN / RawSignal.Multiply;
+                signal.Pulses[i] = NOX_PULSE_SHORT_LEN / signal.Multiply;
             else
-                RawSignal.Pulses[i] = OXO_PULSE_LONG_LEN / RawSignal.Multiply;
+                signal.Pulses[i] = NOX_PULSE_LONG_LEN / signal.Multiply;
 
-            RawSignal.Pulses[i+1] = OXO_PULSE_LONG_LEN / RawSignal.Multiply;
+            signal.Pulses[i+1] = NOX_PULSE_LONG_LEN / signal.Multiply;
 
-            sprintf(plugin_087_tmpbuf, "writing pair #%u: %u,%u", (i-1)/2, RawSignal.Pulses[i]*RawSignal.Multiply, RawSignal.Pulses[i+1]*RawSignal.Multiply );
-            Serial.println(plugin_087_tmpbuf);
+            sprintf(tmpbuf, "writing pair #%u: %u,%u", (i-1)/2, signal.Pulses[i]*signal.Multiply, signal.Pulses[i+1]*signal.Multiply );
+            Serial.println(tmpbuf);
 
-            itoa (code, plugin_087_tmpbuf, 2);
-            Serial.println(plugin_087_tmpbuf);
+            itoa (code, tmpbuf, 2);
+            Serial.println(tmpbuf);
 
             code = code << 1;
        }
 
-       RawSignal.Pulses[65] = OXO_PULSE_SHORT_LEN / RawSignal.Multiply;
-       RawSignal.Pulses[66] = OXO_PULSE_SHORT_LEN / RawSignal.Multiply;
+       signal.Pulses[65] = NOX_PULSE_SHORT_LEN / signal.Multiply;
+       signal.Pulses[66] = NOX_PULSE_SHORT_LEN / signal.Multiply;
 
-       Serial.println(RawSignal.Number);
+       //Serial.println(signal.Number);
 
        //Plugin_087(0,"");
        //enableTX();
-       RawSendRF();
+       RawSendRF(&signal);
        
-       /*delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, LOW);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, HIGH);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, LOW);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, HIGH);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, LOW);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, HIGH);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, LOW);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, HIGH);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, LOW);
-       delay(2000);
-       digitalWrite(PIN_RF_TX_DATA, HIGH);
-       disableTX();
-       Serial.println("** pushed ***");*/
-
-       RawSignal.Number=0;
+       signal.Number=0;
        success = true;
    }
 
