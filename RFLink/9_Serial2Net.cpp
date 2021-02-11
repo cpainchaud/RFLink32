@@ -3,6 +3,9 @@
 
 #ifdef RFLINK_SERIAL2NET_ENABLED
 
+#include <WiFiClient.h>
+#include <WiFiServer.h>
+
 namespace RFLink { namespace Serial2Net {
 
     class Serial2NetClient : public WiFiClient {

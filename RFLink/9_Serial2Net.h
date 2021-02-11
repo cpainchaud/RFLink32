@@ -9,10 +9,6 @@
 
 //#define RFLINK_SERIAL2NET_DEBUG
 
-
-#include <WifiServer.h>
-
-
 namespace RFLink {
     namespace Serial2Net {
         /**
