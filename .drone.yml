@@ -1,0 +1,29 @@
+---
+kind: pipeline
+type: docker
+name: build_tests
+
+steps:
+
+- name: install_and_build
+  image: python:3.8
+  volumes:
+    - name: cache
+      path: /root/.platformio
+  env:
+    - PLATFORMIO_CI_SRC=RFLink
+  commands:
+  - pip install -U platformio
+  - pio update
+#  - platformio lib install
+  - pwd
+  - ls -la
+  - pio run --project-conf .travis.platformio.ini --environment ESP32_all_enabled
+
+
+volumes:
+- name: cache
+  host:
+    path: /tmp/drone/pio_cache
+
+
