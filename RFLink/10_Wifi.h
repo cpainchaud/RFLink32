@@ -4,7 +4,7 @@
 #include "RFLink.h"
 
 #ifdef RFLINK_WIFIMANAGER_ENABLED
-#include <WifiManager.h>
+#include <WiFiManager.h>
 #elif RFLINK_WIFI_ENABLED
 #include "Wifi.h"
 #endif
