@@ -57,7 +57,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_RX_VCC_0 NOT_A_PIN         // Power to the receiver on this pin
 #define PIN_RF_RX_GND_0 NOT_A_PIN         // Ground to the receiver on this pin
 #define PIN_RF_RX_NA_0 NOT_A_PIN          // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA_0 12        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_DATA_0 13        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
 #define PIN_RF_TX_NMOS_0 4         // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 NOT_A_PIN          // +5 volt / Vcc power to the transmitter on this pin
@@ -103,6 +103,11 @@ enum Radio_State
     Radio_TX,
     Radio_NA
 };
+
+void enableRX();
+void disableRX();
+void enableTX();
+void disableTX();
 
 void set_Radio_mode(Radio_State new_state);
 #if (defined(ESP8266) || defined(ESP32))
