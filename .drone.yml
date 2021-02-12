@@ -21,6 +21,18 @@ steps:
   - pio run --project-conf .travis.platformio.ini --environment ESP32_all_enabled
 
 
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github_token
+    files: .pio/build/ESP32_all_enabled/firmware.elf
+    checksum:
+      - sha256
+  when:
+    event: tag
+
+
 volumes:
 - name: cache
   host:
