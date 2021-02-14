@@ -20,7 +20,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -U platformio
         pio update
+        pio lib install
     - name: Build
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_all_enabled
+        pio run --project-conf .travis.platformio.ini --environment ESP32_none_enabled
 
