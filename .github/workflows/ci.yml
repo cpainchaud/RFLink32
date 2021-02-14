@@ -24,4 +24,5 @@ jobs:
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_all_enabled
         pio run --project-conf .travis.platformio.ini --environment ESP32_none_enabled
+        pio run --project-conf .travis.platformio.ini --environment ESP32_simplewifi_enabled
 
