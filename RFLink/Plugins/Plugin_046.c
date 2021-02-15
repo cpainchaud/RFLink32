@@ -152,7 +152,7 @@ boolean Plugin_046(byte function, char *string)
 
    channel = ((bitstream1 >> 12) & 0x3) + 1; // channel indicator
 
-   if ((type == 0) && (channel > 1))
+   if ((type == 0) && (channel > 3))
       return false; // Auriol : channel out of range
    if ((type == 1) && (channel > 3))
       return false; // Xiron : channel out of range
@@ -190,6 +190,7 @@ boolean Plugin_046(byte function, char *string)
    if (type == 1)
       display_HUM(humidity, HUM_HEX);
    display_BAT(bat);
+   display_CHAN(channel);
    display_Footer();
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet

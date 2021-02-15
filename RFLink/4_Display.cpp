@@ -341,6 +341,14 @@ void display_RGBW(unsigned int input)
   strcat(pbuffer, dbuffer);
 }
 
+
+// Channel
+void display_CHAN(byte channel)
+{
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";CHN="), channel);
+  strcat(pbuffer, dbuffer);
+}
+
 // --------------------- //
 // get label shared func //
 // --------------------- //
