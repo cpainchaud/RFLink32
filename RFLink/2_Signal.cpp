@@ -419,8 +419,8 @@ boolean FetchSignal()
 
   void RawSendRF(RawSignalStruct *signal) {                                                    
     int x;
-    disableRX();
-    enableTX();
+    
+    set_Radio_mode(Radio_State::Radio_TX);
 
     //RawSignal.Pulses[RawSignal.Number]=1;                                   // due to a bug in Arduino 1.0.1
 
@@ -437,8 +437,7 @@ boolean FetchSignal()
       if (y+1 < signal->Repeats) delay(signal->Delay);                 // Delay buiten het gebied waar de interrupts zijn uitgeschakeld! Anders werkt deze funktie niet.
     }
 
-      disableTX();
-      enableRX();
+    set_Radio_mode(Radio_State::Radio_RX);
   }
 
 /*********************************************************************************************\

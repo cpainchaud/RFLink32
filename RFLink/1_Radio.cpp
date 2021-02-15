@@ -30,8 +30,8 @@ Radio_State current_State = Radio_NA;
 #ifdef RFM69_ENABLED
 
 #include <SPI.h>
-#include <RFM69OOK.h>
-#include <RFM69OOKregisters.h>
+#include "RFM69/RFM69OOK.h"
+#include "RFM69/RFM69OOKregisters.h"
 RFM69OOK radio;
 
 void set_Radio_mode(Radio_State new_State)
