@@ -107,6 +107,48 @@ void paramsUpdatedCallback(){
 
 #endif // MQTT_ENABLED
 
+namespace types {
+  enum portalActions {
+    None, webRequested, CaptiveRequested, shutdownRequested
+  };
+}
+namespace vars {
+  types::portalActions portalAction = types::portalActions::None;
+}
+
+void managePortalPinInterrupt() {
+  static int previousState = 0;                 // track button state
+  static unsigned long buttonPressedTime = 0;   // track when button was pressed
+
+  unsigned long now = millis();
+
+  auto state = digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
+
+  if(previousState == state)
+    return;
+
+  if( previousState == 0 ) {
+    buttonPressedTime = now;
+  }
+  else {
+    unsigned long pressDuration = now - buttonPressedTime;
+
+    if(pressDuration > 5) {
+      if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
+        vars::portalAction = types::shutdownRequested;
+      }
+      else if(pressDuration > RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS ) {
+        vars::portalAction = types::CaptiveRequested;
+      }else{
+        vars::portalAction = types::webRequested;
+      }
+      detachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
+    }
+  }
+
+  previousState = state;
+}
+
 void setup_WIFI(){
 
   const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"}; 
@@ -149,6 +191,7 @@ void start_WIFI(){
     pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT_PULLDOWN);
     Serial.print("Config portal can be started on demand via PIN #");
     Serial.println(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
+    attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
   #endif
 }
 #else // Regular wifi is used
@@ -246,19 +289,34 @@ void mainLoop() {
     #ifdef RFLINK_WIFIMANAGER_ENABLED
     wifiManager.process(); // required for non blocking portal
         #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-        if (!wifiManager.getConfigPortalActive()) {
-            if(digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
-                Serial.println("Config portal requested");
-                wifiManager.setConfigPortalBlocking(false);
-                wifiManager.startWebPortal();
-                Serial.println("Config portal started");
-                sleep(4);
-            }
-        } else if(digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) == HIGH) {
-            Serial.println("shutting down portal");
+        if( vars::portalAction != types::portalActions::None ) { 
+          if(vars::portalAction == types::portalActions::shutdownRequested) {
+            Serial.println("Button pressed, WifiManager portal will be shutdown");
             wifiManager.stopConfigPortal();
-            Serial.println("done");
-            sleep(4);
+            wifiManager.stopWebPortal();
+          }
+          else if(vars::portalAction == types::portalActions::webRequested) {
+            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
+              Serial.println("Button pressed (short) but portal is already running so no actions required");
+            }
+            else {
+              Serial.println("Button pressed (short), WebPortal will be started");
+              wifiManager.setConfigPortalBlocking(false);
+              wifiManager.startWebPortal();
+            }
+          }
+          else if(vars::portalAction == types::portalActions::CaptiveRequested) {
+            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
+              Serial.println("Button pressed (long) but portal is already running so no actions required");
+            }
+            else {
+              Serial.println("Button pressed (long), CaptivePortal will be started");
+              wifiManager.setConfigPortalBlocking(false);
+              wifiManager.startConfigPortal();
+            }
+          }
+          vars::portalAction = types::portalActions::None;
+          attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
         }
         #endif // RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
     #endif // RFLINK_WIFIMANAGER_ENABLED
