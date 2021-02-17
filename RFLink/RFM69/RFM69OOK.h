@@ -130,7 +130,7 @@ class RFM69OOK {
     void unselect();
 
   protected:
-    static void isr0();
+    static void IRAM_ATTR isr0();
     void virtual interruptHandler();
 
     static RFM69OOK* selfPointer;

@@ -240,7 +240,7 @@ void RFM69OOK::setPowerLevel(byte powerLevel)
   writeReg(REG_PALEVEL, (readReg(REG_PALEVEL) & 0xE0) | (_powerLevel > 31 ? 31 : _powerLevel));
 }
 
-void RFM69OOK::isr0() { selfPointer->interruptHandler(); }
+void IRAM_ATTR RFM69OOK::isr0() { selfPointer->interruptHandler(); }
 
 int8_t RFM69OOK::readRSSI(bool forceTrigger) {
   if (forceTrigger)
