@@ -144,7 +144,7 @@ namespace vars {
   types::portalActions portalAction = types::portalActions::None;
 }
 
-void managePortalPinInterrupt() {
+void IRAM_ATTR managePortalPinInterrupt() {
   static int previousState = 0;                 // track button state
   static unsigned long buttonPressedTime = 0;   // track when button was pressed
 
