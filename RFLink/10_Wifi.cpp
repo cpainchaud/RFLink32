@@ -18,13 +18,15 @@
 #ifdef RFLINK_AUTOOTA_ENABLED
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
-#include "ArduinoNvs.h"
 #endif
 
 
 #ifdef RFLINK_WIFIMANAGER_ENABLED
 #include "WiFiManager.h"
 WiFiManager wifiManager;
+  #ifdef ESP32
+  #include "ArduinoNvs.h"
+  #endif
 #endif
 
 #if defined(ESP32) && defined(MQTT_ENABLED) && defined(RFLINK_WIFIMANAGER_ENABLED) // to store MQTT configuration in Flash
@@ -101,7 +103,7 @@ void copyParamsFromWM_to_MQTT(){
 WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  AutoOTA_URL, 60);
 #endif
 
-#if defined(MQTT_ENABLED) || defined(RFLINK_AUTOOTA_ENABLED)
+
 #if defined(ESP32)
 void paramsUpdatedCallback(){
   bool someParamsChanged = false;
@@ -125,13 +127,13 @@ void paramsUpdatedCallback(){
 }
 #else
 void paramsUpdatedCallback(){
+  #if defined(MQTT_ENABLED)
   copyParamsFromWM_to_MQTT();
   Serial.println("Some parameters have changed, restart Mqtt Client is requested");
   RFLink::Mqtt::reconnect(1, true);
+  #endif
 }
 #endif
-
-#endif // MQTT_ENABLED
 
 namespace types {
   enum portalActions {
@@ -179,24 +181,38 @@ void setup_WIFI(){
 
   const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"}; 
 
-  #if defined(RFLINK_WIFIMANAGER_ENABLED) && defined(MQTT_ENABLED)  
-  wifiManager.addParameter(&mqtt_s_param);
-  wifiManager.addParameter(&mqtt_p_param);
-  wifiManager.addParameter(&mqtt_id_param);
-  wifiManager.addParameter(&mqtt_u_param);
-  wifiManager.addParameter(&mqtt_sec_param);
+  #if defined(RFLINK_WIFIMANAGER_ENABLED)
+    #if defined(MQTT_ENABLED)  
+    wifiManager.addParameter(&mqtt_s_param);
+    wifiManager.addParameter(&mqtt_p_param);
+    wifiManager.addParameter(&mqtt_id_param);
+    wifiManager.addParameter(&mqtt_u_param);
+    wifiManager.addParameter(&mqtt_sec_param);
 
-  #if defined(ESP32) // ESP8266 doesn't support NVS
-  NVS.begin();
-  auto params = wifiManager.getParameters();
-  for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    auto currentParameter = params[i];
-    auto currentId = currentParameter->getID();
-    auto value = NVS.getString(currentId);
-    if(value.length() > 0)
-      currentParameter->setValue(value.c_str(), currentParameter->getValueLength());
-  }
-  #endif
+      #if defined(ESP32) // ESP8266 doesn't support NVS
+      NVS.begin();
+      auto params = wifiManager.getParameters();
+      for(int i=0; i<wifiManager.getParametersCount(); i++) {
+        auto currentParameter = params[i];
+        auto currentId = currentParameter->getID();
+        auto value = NVS.getString(currentId);
+        if(value.length() > 0)
+          currentParameter->setValue(value.c_str(), currentParameter->getValueLength());
+      }
+      NVS.close();
+      #endif
+    #endif // MQTT_ENABLED
+
+    #if defined(RFLINK_AUTOOTA_ENABLED)
+    wifiManager.addParameter(&autoota_url_param);
+      #if defined(ESP32) // ESP8266 doesn't support NVS
+        NVS.begin();
+        auto value = NVS.getString(autoota_url_paramid);
+        if(value.length() > 0)
+          autoota_url_param.setValue(value.c_str(), autoota_url_param.getValueLength());
+        NVS.close();
+      #endif
+    #endif
 
   wifiManager.setSaveParamsCallback(paramsUpdatedCallback); // if Config portal is used to change paramaters, we must know about it
   #endif
