@@ -198,13 +198,19 @@ void start_WIFI(){
   #endif
 
   #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
+    #ifdef ESP8266
+    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);           // ESP8266 doesnt support PULLDOWN/UP
+    #else
     pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT_PULLDOWN);
+    #endif
     Serial.print("Config portal can be started on demand via PIN #");
     Serial.println(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
     attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
   #endif
 }
 #else // Regular wifi is used
+static String WIFI_PWR = String(WIFI_PWR_0);
+
 void setup_WIFI()
 {
     WiFi.persistent(false);

@@ -59,8 +59,6 @@ PubSubClient MQTTClient; // MQTTClient(WIFIClient);
 
 void callback(char *, byte *, unsigned int);
 
-static String WIFI_PWR = String(WIFI_PWR_0);
-
 
 void setup_MQTT()
 {

@@ -6,7 +6,11 @@
 #ifdef RFLINK_WIFIMANAGER_ENABLED
 #include <WiFiManager.h>
 #elif RFLINK_WIFI_ENABLED
+#ifdef ESP8266
+#include "ESP8266WiFi.h"
+#else
 #include "WiFi.h"
+#endif
 #endif
 
 
