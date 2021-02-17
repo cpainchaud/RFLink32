@@ -22,6 +22,10 @@ namespace RFLink {
         void stop_WIFI();
         void start_WIFI();
     }
+
+    namespace AutoOTA {
+        void checkForUpdateAndApply();
+    }
 }
 
 #endif //_10_WiFi_H

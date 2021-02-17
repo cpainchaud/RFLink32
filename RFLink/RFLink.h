@@ -12,6 +12,8 @@
 #define REVNR 0x01   // 0X42       // shown in version and startup string
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial
+//#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
+                          // dont forget to set the URL in Crendentials.h  
 
 #if (defined(ESP32) || defined(ESP8266))
 // OLED display, 0.91" SSD1306 I2C

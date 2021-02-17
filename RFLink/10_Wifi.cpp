@@ -15,6 +15,17 @@
 #include "6_WiFi_MQTT.h"
 #endif
 
+#ifdef RFLINK_AUTOOTA_ENABLED
+#include <HTTPClient.h>
+#include <HTTPUpdate.h>
+#include "ArduinoNvs.h"
+#endif
+
+#ifdef RFLINK_WIFI_ENABLED
+#include "WiFi.h"
+#endif
+
+
 #ifdef RFLINK_WIFIMANAGER_ENABLED
 #include "WiFiManager.h"
 WiFiManager wifiManager;
@@ -22,6 +33,10 @@ WiFiManager wifiManager;
 
 #if defined(ESP32) && defined(MQTT_ENABLED) && defined(RFLINK_WIFIMANAGER_ENABLED) // to store MQTT configuration in Flash
 #include "ArduinoNvs.h"
+#endif
+
+#ifdef RFLINK_AUTOOTA_ENABLED
+const String autoota_url_paramid("autoota_url");
 #endif
 
 namespace RFLink { namespace Wifi {
@@ -39,15 +54,13 @@ namespace params {
 
 
 #ifdef RFLINK_WIFIMANAGER_ENABLED
+
 #if defined(MQTT_ENABLED) // to store MQTT configuration in Flash
-
-
 const String mqtt_s_paramid("mqtt_s");
 const String mqtt_p_paramid("mqtt_p");
 const String mqtt_id_paramid("mqtt_id");
 const String mqtt_u_paramid("mqtt_u");
 const String mqtt_sec_paramid("mqtt_sec");
-
 WiFiManagerParameter mqtt_s_param(mqtt_s_paramid.c_str(), "hostname or ip",  Mqtt::params::SERVER.c_str(), 40);
 WiFiManagerParameter mqtt_p_param(mqtt_p_paramid.c_str(), "port",  Mqtt::params::PORT.c_str(), 6);
 WiFiManagerParameter mqtt_id_param(mqtt_id_paramid.c_str(), "id", Mqtt::params::ID.c_str(), 20);
@@ -85,7 +98,14 @@ void copyParamsFromWM_to_MQTT(){
     }
   }
 }
+#endif
 
+
+#if defined(RFLINK_AUTOOTA_ENABLED)
+WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  Mqtt::params::SERVER.c_str(), 60);
+#endif
+
+#if defined(MQTT_ENABLED) || defined(RFLINK_AUTOOTA_ENABLED)
 #if defined(ESP32)
 void paramsUpdatedCallback(){
   bool someParamsChanged = false;
@@ -100,9 +120,11 @@ void paramsUpdatedCallback(){
   NVS.commit();
 
   if(someParamsChanged) {
+    #if defined(MQTT_ENABLED)
     copyParamsFromWM_to_MQTT();
     Serial.println("Some parameters have changed, restart Mqtt Client is requested");
     RFLink::Mqtt::reconnect(1, true);
+    #endif
   }
 }
 #else
@@ -342,8 +364,85 @@ void mainLoop() {
     #endif
 }
 
+} // end of Wifi namespace
 
-}} // end of Wifi namespace
+#ifdef RFLINK_AUTOOTA_ENABLED
+namespace AutoOTA {
+
+  void checkForUpdateAndApply()
+  {
+    NVS.begin();
+    String CurrentFirmware = NVS.getString("FirmWare");
+    String url = NVS.getString(autoota_url_paramid);
+    if(url.length() < 1)
+     url = AutoOTA_URL;
+    NVS.close();
+
+    // Return if WiFi not connected
+    if (WiFi.status() != WL_CONNECTED) return;
+    Serial.println();
+    Serial.println("FOTA : "+ url);
+    // Read Reference of installed Firmware
+    
+    HTTPClient http;
+    WiFiClient client;
+
+    //Look for FirmWare Update
+    String FirmWareDispo="";
+    const char * headerKeys[] = {"Last-Modified"};
+    const size_t numberOfHeaders = 1;
+    http.begin(url);
+    http.collectHeaders(headerKeys, numberOfHeaders);
+    int httpCode = http.GET();
+    if (httpCode != HTTP_CODE_OK)
+      {
+        Serial.println("FOTA : No file available (" + http.errorToString(httpCode) + ")");
+        http.end();
+        return;
+      }
+    FirmWareDispo=http.header((size_t)0);
+    http.end();
+
+    // Check Date of UpDate
+    Serial.println("FOTA : Firware available = " + FirmWareDispo);
+    if (CurrentFirmware=="" || CurrentFirmware==FirmWareDispo)
+      {
+      Serial.println("FOTA : no new UpDate !");
+      return;
+      }
+
+    //Download process
+    //httpUpdate.setLedPin(Led_Pin, LOW); // Value for LED ON
+    t_httpUpdate_return ret;
+    Serial.println();
+    Serial.println("*********************");
+    Serial.println("FOTA : DOWNLOADING...");
+    httpUpdate.rebootOnUpdate(false);
+    ret = httpUpdate.update(client, url);
+    switch (ret) {
+      case HTTP_UPDATE_FAILED:
+        Serial.println(String("FOTA : Uploading Error !") + httpUpdate.getLastError() + httpUpdate.getLastErrorString().c_str());
+        break;
+      case HTTP_UPDATE_NO_UPDATES:
+       Serial.println("FOTA : UpDate not Available");
+        break;
+      case HTTP_UPDATE_OK:
+        Serial.println("FOTA : Update OK !!!");
+        Serial.println("*********************");
+        Serial.println();
+        NVS.begin();
+        NVS.setString("FirmWare", FirmWareDispo);
+        NVS.close();
+        WiFi.persistent(true);
+        delay(1000);
+        ESP.restart();
+        break;
+      }
+  }
+} // end of AutoOTA namespace
+#endif // RFLINK_AUTOOTA_ENABLED
+
+} // end RFLink namespace
 
 
 #endif // RFLINK_WIFIMANAGER_ENABLED || RFLINK_WIFI_ENABLED

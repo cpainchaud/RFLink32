@@ -35,6 +35,9 @@
 #define MQTT_TOPIC_IN "/ESP00/cmd";
 #define MQTT_TOPIC_LWT "/ESP00/lwt";
 
+// OTA
+#define AutoOTA_URL "http://domain.com/firmware.bin"
+
 #ifdef CHECK_CACERT
 static const char ca_cert[] PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
