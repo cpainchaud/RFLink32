@@ -20,13 +20,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -U platformio
         pio update
+
+
     - name: ESP32_none_enabled
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_none_enabled
     - name: ESP32_sw
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_sw
-    
     - name: ESP32_wm
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_wm
@@ -36,3 +37,21 @@ jobs:
     - name: ESP32_wm_mqtt
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_wm_mqtt
+
+
+    - name: D1_none_enabled
+      run: |
+        pio run --project-conf .travis.platformio.ini --environment D1_none_enabled
+    - name: D1_sw
+      run: |
+        pio run --project-conf .travis.platformio.ini --environment D1_sw
+    - name: D1_wm
+      run: |
+        pio run --project-conf .travis.platformio.ini --environment D1_wm
+    - name: D1_sw_mqtt
+      run: |
+        pio run --project-conf .travis.platformio.ini --environment D1_sw_mqtt
+    - name: D1_wm_mqtt
+      run: |
+        pio run --project-conf .travis.platformio.ini --environment D1_wm_mqtt
+
