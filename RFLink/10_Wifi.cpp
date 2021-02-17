@@ -102,7 +102,7 @@ void copyParamsFromWM_to_MQTT(){
 
 
 #if defined(RFLINK_AUTOOTA_ENABLED)
-WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  Mqtt::params::SERVER.c_str(), 60);
+WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  AutoOTA_URL, 60);
 #endif
 
 #if defined(MQTT_ENABLED) || defined(RFLINK_AUTOOTA_ENABLED)
