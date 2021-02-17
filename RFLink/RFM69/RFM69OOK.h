@@ -63,7 +63,7 @@
   #define RF69OOK_IRQ_PIN          6
   #define RF69OOK_IRQ_NUM          0
   #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(ESP32)
+#elif defined(ESP32) || defined(ESP8266)
   #define RF69OOK_IRQ_PIN          25 // Previously 26
   #define RF69OOK_IRQ_NUM          digitalPinToInterrupt(RF69OOK_IRQ_PIN)
   #define RF69OOK_RST_PIN          4

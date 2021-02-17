@@ -273,7 +273,7 @@ void RFM69OOK::writeReg(byte addr, byte value)
 void RFM69OOK::select() {
   noInterrupts();
   // save current SPI settings
-  #ifndef ESP32
+  #if !defined(ESP32) && !defined(ESP8266)
   _SPCR = SPCR;
   _SPSR = SPSR;
   #endif
@@ -288,7 +288,7 @@ void RFM69OOK::select() {
 void RFM69OOK::unselect() {
   digitalWrite(_slaveSelectPin, HIGH);
   // restore SPI settings to what they were before talking to RFM69
-  #ifndef ESP32
+   #if !defined(ESP32) && !defined(ESP8266)
   SPCR = _SPCR;
   SPSR = _SPSR;
   #endif
