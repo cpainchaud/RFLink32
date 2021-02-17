@@ -51,6 +51,22 @@ Many features are not enabled by default or can be disabled for various reasons 
 ### MQTT Server (disabled by default)
 - Define compilation flag MQTT_ENABLED or define it in 6_WIFI_MQTT.h
 - If you have not enabled WifiManager, make sure you update Wifi settings in 6_Credentials.h
+### WifiManager (disabled by default)
+- RFLINK_WIFIMANAGER_ENABLED
+- RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON defines the PIN used to start the Config Portal on demand. This portal can be used to reconfigure MQTT, Wifi and various others settings.
+- WM_NODEBUG it is recommended to define this flag if you want WifiManager to leak your Wifi password over Serial
+### OTA (disabled by default)
+There are 3 types of OTA tp update your firwware
+#### Arduino/ESP's classic push over UDP (disabled by default)
+- RFLINK_OTA_ENABLED we recommaend that you enable a password for this method or anyone on your network could push a new firmware
+- RFLINK_OTA_PASSWORD="my_password_here" or RFLINK_OTA_PASSWORD='"'${sysenv.OTA_SEC}'"' in platforomio.ini with an environement variable called OTA_SEC
+#### AutoOTA
+Your device will download new firmware from a specific URL you specify.
+- RFLINK_AUTOOTA_ENABLED
+- AutoOTA_URL in Credentials.h or in platformio.ini
+#### Config Portal Web Upload
+Via WifiManager's Config Portal you can upload a new firmware
+**insert screenshot here**
 
 ## 8. Additional info
 ### Pinout
