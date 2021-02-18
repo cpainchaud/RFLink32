@@ -144,6 +144,7 @@ namespace vars {
   types::portalActions portalAction = types::portalActions::None;
 }
 
+#if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) and (RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN)
 void IRAM_ATTR managePortalPinInterrupt() {
   static int previousState = 0;                 // track button state
   static unsigned long buttonPressedTime = 0;   // track when button was pressed
@@ -176,6 +177,7 @@ void IRAM_ATTR managePortalPinInterrupt() {
 
   previousState = state;
 }
+#endif
 
 void setup_WIFI(){
 
