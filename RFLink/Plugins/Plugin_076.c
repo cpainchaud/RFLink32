@@ -28,7 +28,6 @@
  * 10;rfdebug=on;
  \*********************************************************************************************/
 
-#if defined(PLUGIN_076) || defined(PLUGIN_TX_076)
 
 #define PLUGIN_DESC_076 "CAME-TOP432"
 
@@ -39,22 +38,26 @@
 #define PLUGIN_076_PREAMBLE_MAX 432
 
 #define PLUGIN_076_SHORT_PULSE = 270
-#define PLUGIN_076_SHORT_PULSE_MIN 192
+#define PLUGIN_076_SHORT_PULSE_MIN 180
 #define PLUGIN_076_SHORT_PULSE_MAX 464
 
 #define PLUGIN_078_LONG_PULSE 730
 #define PLUGIN_076_LONG_PULSE_MIN 570
-#define PLUGIN_076_LONG_PULSE_MAX 800
+#define PLUGIN_076_LONG_PULSE_MAX 850
 
+#define PLUGIN_076_REPEAT_IGNORE_TIME_MS 1500
+
+#if defined(PLUGIN_076)
 #include "1_Radio.h"
 #include "2_Signal.h"
 
+#if defined(DEBUG) || defined(RFLINK_DEBUG)
+#define PLUGIN_076_DEBUG
 #endif
 
-#if defined(PLUGIN_076)
-inline short pulse_type_76(byte pulse) {
+inline short pulse_type_76(uint16_t pulse) {
     
-    int pulse_len = pulse*RawSignal.Multiply;
+    uint32_t pulse_len = pulse*RawSignal.Multiply;
 
     if(pulse_len < PLUGIN_076_SHORT_PULSE_MIN)
         return -1;
@@ -67,6 +70,9 @@ inline short pulse_type_76(byte pulse) {
     return 1;
 }
 
+uint16_t lastSeenID = 0;
+unsigned long lastSeenTime = 0;
+
 boolean Plugin_076(byte function, const char *string)
 {
     char tmpbuf[60];
@@ -77,12 +83,84 @@ boolean Plugin_076(byte function, const char *string)
 
     unsigned long duration = ((unsigned long)RawSignal.Pulses[1])*RawSignal.Multiply;
     if(duration <= PLUGIN_076_PREAMBLE_MIN || duration >= PLUGIN_076_PREAMBLE_MAX) {
-        //Serial.print("failed on check2 duration=");Serial.print(RawSignal.Pulses[1]);Serial.print("  multiply=");Serial.println(duration);
+        #ifdef PLUGIN_076_DEBUG
+        Serial.print("failed on check2 duration=");Serial.print(RawSignal.Pulses[1]);Serial.print("  multiply=");Serial.println(duration);
+        #endif
         return false;
     }
 
+    for(int i=0; i < 12*2; i+=2) { // 12bits,
+        code = code << 1;
 
-    return false;
+        #ifdef PLUGIN_076_DEBUG
+        sprintf(tmpbuf, "Pulse pair: %u / %u", RawSignal.Pulses[2+i], RawSignal.Pulses[2+i+1]);
+        Serial.println(tmpbuf);
+        #endif
+        
+        short firstPulseType = pulse_type_76(RawSignal.Pulses[2+i]);
+        if(firstPulseType < 0){
+            #ifdef PLUGIN_076_DEBUG
+            Serial.print("failed on check3 duration=");Serial.print(RawSignal.Pulses[2+i]);Serial.print("  multiply=");Serial.println(RawSignal.Multiply);
+            #endif
+            return false;
+        }
+        short secondPulseType = pulse_type_76(RawSignal.Pulses[2+i+1]);
+        if(secondPulseType < 0){
+            #ifdef PLUGIN_076_DEBUG
+            Serial.print("failed on check4 duration=");Serial.print(RawSignal.Pulses[2+i+1]);Serial.print("  multiply=");Serial.println(RawSignal.Multiply);
+            #endif
+            return false;
+        }
+
+        if( firstPulseType == secondPulseType){
+            #ifdef PLUGIN_076_DEBUG
+            Serial.print("failed on check5 durations are equal:");Serial.print(RawSignal.Pulses[2+i]);Serial.print(" / "); Serial.println(RawSignal.Pulses[2+i+1]);
+            Serial.print("failed on check5 durations types:");Serial.print(firstPulseType);Serial.print(" / "); Serial.println(secondPulseType);
+            Serial.print("failed on check5 durations multiply:");Serial.print(RawSignal.Multiply);Serial.print(" at loop #");Serial.println(i);
+            #endif
+            return false;
+        }
+
+        if(firstPulseType == 0) {
+            code += 1;
+             #ifdef PLUGIN_076_DEBUG
+             Serial.println("Pair is a 1");
+             #endif
+        }
+        else {
+            #ifdef PLUGIN_076_DEBUG
+            Serial.println("Pair is a 0");
+            #endif
+        }
+    }
+
+    #ifdef PLUGIN_076_DEBUG
+    sprintf(tmpbuf, "***** CAME-TOP432 code= 0x%02x ********", code );
+    Serial.println(tmpbuf);
+    #endif
+
+    auto now = millis();
+
+    if(lastSeenID == code) {
+        if(now - lastSeenTime < PLUGIN_076_REPEAT_IGNORE_TIME_MS)
+            return true;
+    } else
+        lastSeenID = code;
+
+    lastSeenTime = now;
+
+    display_Header();
+    display_Name(PSTR("CAME-TOP432"));
+    display_IDn(code, 4);
+    display_SWITCH(1);
+    display_CMD(CMD_Single, CMD_On); // #ALL #ON
+    display_Footer();
+
+    RawSignal.Repeats = 3;
+    RawSignal.Delay = 16;
+
+
+    return true;
 }
  #endif // PLUGIN_076
 
