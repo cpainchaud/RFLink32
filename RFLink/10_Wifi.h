@@ -13,9 +13,13 @@
 #endif
 #endif
 
+#include "11_Config.h"
 
 namespace RFLink {
     namespace Wifi {
+
+        extern Config::ConfigItem configItems[];
+
         void setup();
         void mainLoop();
         

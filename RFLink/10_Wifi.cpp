@@ -51,7 +51,16 @@ namespace params {
 }
 
 
+Config::ConfigItem configItems[] =  {
+  Config::ConfigItem("host", Config::SectionId::MQTT_id, "enter a hostname here", nullptr),
+  Config::ConfigItem("port", Config::SectionId::MQTT_id, 1900, nullptr),
+  Config::ConfigItem()
+
+};
+
+
 #ifdef RFLINK_WIFIMANAGER_ENABLED
+
 
 #if defined(MQTT_ENABLED) // to store MQTT configuration in Flash
 const String mqtt_s_paramid("mqtt_s");

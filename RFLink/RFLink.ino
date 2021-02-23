@@ -28,6 +28,7 @@
 #include "8_OLED.h"
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
+#include "11_Config.h"
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -87,6 +88,9 @@ void setup()
   Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
   Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
+#if defined(ESP32) || (ESP8266)
+RFLink::Config::init();
+#endif
 
 #if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
 RFLink::Wifi::setup();
