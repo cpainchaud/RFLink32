@@ -21,17 +21,7 @@
 #endif
 
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
-#include "WiFiManager.h"
-WiFiManager wifiManager;
-  #ifdef ESP32
-  #include "ArduinoNvs.h"
-  #endif
-#endif
 
-#if defined(ESP32) && defined(MQTT_ENABLED) && defined(RFLINK_WIFIMANAGER_ENABLED) // to store MQTT configuration in Flash
-#include "ArduinoNvs.h"
-#endif
 
 #ifdef RFLINK_AUTOOTA_ENABLED
 const String autoota_url_paramid("autoota_url");
@@ -59,201 +49,7 @@ Config::ConfigItem configItems[] =  {
 };
 
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
 
-
-#if defined(MQTT_ENABLED) // to store MQTT configuration in Flash
-const String mqtt_s_paramid("mqtt_s");
-const String mqtt_p_paramid("mqtt_p");
-const String mqtt_id_paramid("mqtt_id");
-const String mqtt_u_paramid("mqtt_u");
-const String mqtt_sec_paramid("mqtt_sec");
-WiFiManagerParameter mqtt_s_param(mqtt_s_paramid.c_str(), "hostname or ip",  Mqtt::params::SERVER.c_str(), 40);
-WiFiManagerParameter mqtt_p_param(mqtt_p_paramid.c_str(), "port",  Mqtt::params::PORT.c_str(), 6);
-WiFiManagerParameter mqtt_id_param(mqtt_id_paramid.c_str(), "id", Mqtt::params::ID.c_str(), 20);
-WiFiManagerParameter mqtt_u_param(mqtt_u_paramid.c_str(), "user", Mqtt::params::USER.c_str(), 20);
-WiFiManagerParameter mqtt_sec_param(mqtt_sec_paramid.c_str(), "mqtt password", Mqtt::params::PSWD.c_str(), 20);
-
-void copyParamsFromWM_to_MQTT(){
-  auto params = wifiManager.getParameters();
-  for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    auto currentId =  params[i]->getID();
-    
-    if(mqtt_s_paramid == currentId) {
-      Mqtt::params::SERVER =  params[i]->getValue();
-      continue;
-    }
-
-    if(mqtt_p_paramid == currentId) {
-      Mqtt::params::PORT =  params[i]->getValue();
-      continue;
-    }
-
-    if(mqtt_id_paramid == currentId) {
-      Mqtt::params::ID =  params[i]->getValue();
-      continue;
-    }
-
-    if(mqtt_u_paramid == currentId) {
-      Mqtt::params::USER =  params[i]->getValue();
-      continue;
-    }
-
-    if(mqtt_sec_paramid == currentId) {
-      Mqtt::params::PSWD =  params[i]->getValue();
-      continue;
-    }
-  }
-}
-#endif
-
-
-#if defined(RFLINK_AUTOOTA_ENABLED)
-WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  AutoOTA_URL, 60);
-#endif
-
-
-#if defined(ESP32)
-void paramsUpdatedCallback(){
-  bool someParamsChanged = false;
-  NVS.begin();
-  auto params = wifiManager.getParameters();
-  for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    WiFiManagerParameter* currentParameter = params[i];
-    if(NVS.getString(currentParameter->getID())!=currentParameter->getValue())
-      someParamsChanged = true;
-    NVS.setString(currentParameter->getID(), currentParameter->getValue());
-  }
-  NVS.commit();
-
-  if(someParamsChanged) {
-    #if defined(MQTT_ENABLED)
-    copyParamsFromWM_to_MQTT();
-    Serial.println("Some parameters have changed, restart Mqtt Client is requested");
-    RFLink::Mqtt::reconnect(1, true);
-    #endif
-  }
-}
-#else
-void paramsUpdatedCallback(){
-  #if defined(MQTT_ENABLED)
-  copyParamsFromWM_to_MQTT();
-  Serial.println("Some parameters have changed, restart Mqtt Client is requested");
-  RFLink::Mqtt::reconnect(1, true);
-  #endif
-}
-#endif
-
-namespace types {
-  enum portalActions {
-    None, webRequested, CaptiveRequested, shutdownRequested
-  };
-}
-namespace vars {
-  types::portalActions portalAction = types::portalActions::None;
-}
-
-#if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) and (RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN)
-void IRAM_ATTR managePortalPinInterrupt() {
-  static int previousState = 0;                 // track button state
-  static unsigned long buttonPressedTime = 0;   // track when button was pressed
-
-  unsigned long now = millis();
-
-  auto state = digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
-
-  if(previousState == state)
-    return;
-
-  if( previousState == 0 ) {
-    buttonPressedTime = now;
-  }
-  else {
-    unsigned long pressDuration = now - buttonPressedTime;
-
-    if(pressDuration > 5) {
-      if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-        vars::portalAction = types::shutdownRequested;
-      }
-      else if(pressDuration > RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS ) {
-        vars::portalAction = types::CaptiveRequested;
-      }else{
-        vars::portalAction = types::webRequested;
-      }
-      detachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
-    }
-  }
-
-  previousState = state;
-}
-#endif
-
-void setup_WIFI(){
-
-  const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"}; 
-
-  #if defined(RFLINK_WIFIMANAGER_ENABLED)
-    #if defined(MQTT_ENABLED)  
-    wifiManager.addParameter(&mqtt_s_param);
-    wifiManager.addParameter(&mqtt_p_param);
-    wifiManager.addParameter(&mqtt_id_param);
-    wifiManager.addParameter(&mqtt_u_param);
-    wifiManager.addParameter(&mqtt_sec_param);
-
-      #if defined(ESP32) // ESP8266 doesn't support NVS
-      NVS.begin();
-      auto params = wifiManager.getParameters();
-      for(int i=0; i<wifiManager.getParametersCount(); i++) {
-        auto currentParameter = params[i];
-        auto currentId = currentParameter->getID();
-        auto value = NVS.getString(currentId);
-        if(value.length() > 0)
-          currentParameter->setValue(value.c_str(), currentParameter->getValueLength());
-      }
-      NVS.close();
-      #endif
-    #endif // MQTT_ENABLED
-
-    #if defined(RFLINK_AUTOOTA_ENABLED)
-    wifiManager.addParameter(&autoota_url_param);
-      #if defined(ESP32) // ESP8266 doesn't support NVS
-        NVS.begin();
-        auto value = NVS.getString(autoota_url_paramid);
-        if(value.length() > 0)
-          autoota_url_param.setValue(value.c_str(), autoota_url_param.getValueLength());
-        NVS.close();
-      #endif
-    #endif
-
-  wifiManager.setSaveParamsCallback(paramsUpdatedCallback); // if Config portal is used to change paramaters, we must know about it
-  #endif
-
-  wifiManager.setMenu(menu, sizeof(menu));
-}
-
-void start_WIFI(){
-  wifiManager.autoConnect();
-
-  #if (defined(ESP32) || defined(ESP8266)) && defined(MQTT_ENABLED)
-  Mqtt::params::SERVER = mqtt_s_param.getValue();
-  Mqtt::params::PORT = mqtt_p_param.getValue();
-  Mqtt::params::USER = mqtt_u_param.getValue();
-  Mqtt::params::PSWD = mqtt_sec_param.getValue();
-  Mqtt::params::ID = mqtt_id_param.getValue();
-  #endif
-
-  #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    #ifdef ESP8266
-    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);           // ESP8266 doesnt support PULLDOWN/UP
-    #else
-    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT_PULLDOWN);
-    #endif
-    Serial.print("Config portal can be started on demand via PIN #");
-    Serial.println(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
-    attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
-  #endif
-}
-#else // Regular wifi is used
 static String WIFI_PWR = String(WIFI_PWR_0);
 
 void setup_WIFI()
@@ -316,7 +112,7 @@ void setup_WIFI_OFF()
   WiFi.forceSleepBegin();
 #endif
 }
-#endif // WIFIMANAGER_ENABLED
+
 
 void setup() {
     setup_WIFI();
@@ -347,41 +143,7 @@ void setup() {
 }
 
 void mainLoop() {
-    #ifdef RFLINK_WIFIMANAGER_ENABLED
-    wifiManager.process(); // required for non blocking portal
-        #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-        if( vars::portalAction != types::portalActions::None ) { 
-          if(vars::portalAction == types::portalActions::shutdownRequested) {
-            Serial.println("Button pressed, WifiManager portal will be shutdown");
-            wifiManager.stopConfigPortal();
-            wifiManager.stopWebPortal();
-          }
-          else if(vars::portalAction == types::portalActions::webRequested) {
-            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-              Serial.println("Button pressed (short) but portal is already running so no actions required");
-            }
-            else {
-              Serial.println("Button pressed (short), WebPortal will be started");
-              wifiManager.setConfigPortalBlocking(false);
-              wifiManager.startWebPortal();
-            }
-          }
-          else if(vars::portalAction == types::portalActions::CaptiveRequested) {
-            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-              Serial.println("Button pressed (long) but portal is already running so no actions required");
-            }
-            else {
-              Serial.println("Button pressed (long), CaptivePortal will be started");
-              wifiManager.setConfigPortalBlocking(false);
-              wifiManager.startConfigPortal();
-            }
-          }
-          vars::portalAction = types::portalActions::None;
-          attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
-        }
-        #endif // RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    #endif // RFLINK_WIFIMANAGER_ENABLED
-
+    
     #if defined(RFLINK_OTA_ENABLED)
     ArduinoOTA.handle();
     #endif
