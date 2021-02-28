@@ -19,32 +19,38 @@ namespace RFLink {
         };
 
         enum SectionId {  // WARNING!!! any change here must be reflected in jsonSections variable in Config.cpp
-            WifiOTA_id,
+            Wifi_id,
+            OTA_id,
             Core_id,
             MQTT_id,
+            Portal_id,
             EOF_id // must always be the last!
         };
 
         class ConfigItem {
+
+            private:
+                bool boolDefaultValue;
+
             
 
             public:
                 ConfigItemType type;
                 const char *json_name;
                 SectionId section;
-                void* (*update_callback)(void *);
+                void (*update_callback)();
                 void* defaultValue;
-                void* currentValue;
+                JsonVariant jsonRef;
 
-                ConfigItem(const char *name, SectionId section, const char* default_value, void *(*update_callback)(void *));
-                ConfigItem(const char *name, SectionId section, long int default_value, void *(*update_callback)(void *));
-                ConfigItem(const char *name, SectionId section, int default_value, void *(*update_callback)(void *)): 
+                ConfigItem(const char *name, SectionId section, const char* default_value, void (*update_callback)());
+                ConfigItem(const char *name, SectionId section, long int default_value, void (*update_callback)());
+                ConfigItem(const char *name, SectionId section, int default_value, void (*update_callback)()): 
                     ConfigItem(name, section, (long int) default_value,  update_callback){};
-                ConfigItem(const char *name, SectionId section, bool default_value, void *(*update_callback)(void *));
+                ConfigItem(const char *name, SectionId section, bool default_value, void (*update_callback)());
                 ConfigItem();
 
                 JsonVariant createInJsonObject(JsonObject &object);
-                bool updateValueInObject(JsonObject &object);
+                bool checkOrCreateValueInJsonObject(JsonObject &object);
 
                 inline bool typeIsChar() { return this->type == ConfigItemType::STRING_t;}
                 inline bool typeIsLongInt() { return this->type == ConfigItemType::LONG_INT_t;}
@@ -60,22 +66,47 @@ namespace RFLink {
                 }
 
                 inline bool getBoolDefaultValue() {
-                    return (long int) this->defaultValue == 0;
+                    return boolDefaultValue;
                 }
 
                 inline const char * getCharValue() {
-                    return (const char *) this->currentValue;
+                    return (const char *) this->jsonRef.as<const char*>();
+                }
+
+                /**
+                 * does not make a copy of the char!!
+                 */
+                inline void setCharValue(const char *newValue) {
+                    this->jsonRef.set((char *)newValue);
                 }
 
                 inline long int getLongIntValue() {
-                    return (long int) this->currentValue;
+                    return (long int) this->jsonRef.as<signed long>();
+                }
+
+                inline void setLongIntValue(long int newValue) {
+                    this->jsonRef.set(newValue);
                 }
 
                 inline bool getBoolValue() {
-                    return (long int) this->currentValue == 0;
+                    return this->jsonRef.as<bool>();
+                }
+
+                inline void setBoolValue(bool newValue) {
+                    this->jsonRef.set(newValue);
                 }
         };
 
+        ConfigItem * findConfigItem(const char* name, SectionId section); 
+        void dumpConfigToString(String &destination);
+        bool pushNewConfiguration(JsonObject &data, String &message);
+
+        /**
+         * @return SectionId::EOF_id is not found
+         *  */
+        SectionId getSectionIdFromString(const char*);
+
+        bool saveConfigToFlash();
     }
 }
 

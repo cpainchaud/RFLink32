@@ -1,4 +1,4 @@
-#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+#if defined(RFLINK_WIFI_ENABLED)
 
 #include "RFLink.h"
 #include <Arduino.h>
@@ -30,30 +30,147 @@ const String autoota_url_paramid("autoota_url");
 namespace RFLink { namespace Wifi {
 
 namespace params {
-    String SSID = WIFI_SSID;
-    String PSWD = WIFI_PSWD;
-    #ifndef USE_DHCP
-    String IP = WIFI_IP;
-    String DNS = WIFI_DNS;
-    String GATEWAY = WIFI_GATEWAY;
-    String SUBNET = WIFI_SUBNET;
-    #endif
+
+    bool client_enabled;
+    String client_ssid;
+    String client_password;
+
+    bool client_dhcp_enabled;
+    String client_ip;
+    String client_mask;
+    String client_gateway;
+    String client_dns;
+
+    bool AP_enabled;
+    String AP_ssid;
+    String AP_password;
+    String AP_ip;
+    String AP_network;
+    String AP_mask;
 }
+
+bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
+bool accessPointParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
+
+// All json variable names
+const char json_name_client_enabled[] = "client_enabled";
+const char json_name_client_dhcp_enabled[] = "client_dhcp_enabled";
+const char json_name_client_ssid[] = "client_ssid";
+const char json_name_client_password[] = "client_password";
+const char json_name_client_ip[] = "client_ip";
+const char json_name_client_mask[] = "client_mask";
+const char json_name_client_gateway[] = "client_gateway";
+const char json_name_client_dns[] = "client_dns";
+
+const char json_name_ap_enabled[] = "ap_enabled";
+const char json_name_ap_ssid[] = "ap_ssid";
+const char json_name_ap_password[] = "ap_password";
+const char json_name_ap_ip[] = "ap_ip";
+const char json_name_ap_network[] = "ap_network";
+const char json_name_ap_mask[] = "ap_mask";
+// end of json variable names
 
 
 Config::ConfigItem configItems[] =  {
-  Config::ConfigItem("host", Config::SectionId::MQTT_id, "enter a hostname here", nullptr),
-  Config::ConfigItem("port", Config::SectionId::MQTT_id, 1900, nullptr),
-  Config::ConfigItem()
+  Config::ConfigItem("host", Config::SectionId::MQTT_id, "enter a hostname here", clientParamsUpdatedCallback),
+  Config::ConfigItem("port", Config::SectionId::MQTT_id, 1900, clientParamsUpdatedCallback),
 
+  Config::ConfigItem(json_name_client_enabled,      Config::SectionId::Wifi_id, false, clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id, true, clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_ssid,         Config::SectionId::Wifi_id, "ESPLink-AP", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_password,     Config::SectionId::Wifi_id, "inputyourown", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_ip,           Config::SectionId::Wifi_id, "192.168.0.200", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_mask,         Config::SectionId::Wifi_id, "255.255.255.0", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_gateway,      Config::SectionId::Wifi_id, "192.168.0.1", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_dns,          Config::SectionId::Wifi_id, "192.168.0.1", clientParamsUpdatedCallback),
+
+  Config::ConfigItem(json_name_ap_enabled,  Config::SectionId::Wifi_id, true, accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_ssid,     Config::SectionId::Wifi_id, "ESPLink-AP", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_password, Config::SectionId::Wifi_id, "", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_ip,       Config::SectionId::Wifi_id, "192.168.4.1", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_network,  Config::SectionId::Wifi_id, "192.168.4.0", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_mask,     Config::SectionId::Wifi_id, "255.255.255.0", accessPointParamsUpdatedCallback),
+
+  Config::ConfigItem()
 };
 
+void refreshClientParametersFromConfig(bool triggerChanges=true) {
+    params::client_enabled = Config::findConfigItem(json_name_client_enabled, Config::SectionId::Wifi_id)->getBoolValue();
+    params::client_dhcp_enabled = Config::findConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id)->getBoolValue();
+
+    params::client_ssid = Config::findConfigItem(json_name_client_ssid, Config::SectionId::Wifi_id)->getCharValue();
+    params::client_password = Config::findConfigItem(json_name_client_password, Config::SectionId::Wifi_id)->getCharValue();
+
+    params::client_ip = Config::findConfigItem(json_name_client_ip, Config::SectionId::Wifi_id)->getCharValue();
+    params::client_mask = Config::findConfigItem(json_name_client_mask, Config::SectionId::Wifi_id)->getCharValue();
+    params::client_gateway = Config::findConfigItem(json_name_client_gateway, Config::SectionId::Wifi_id)->getCharValue();
+    params::client_dns = Config::findConfigItem(json_name_client_dns, Config::SectionId::Wifi_id)->getCharValue();
+}
+
+void refreshAccessPointParametersFromConfig(bool triggerChanges=true) {
+
+    Config::ConfigItem *item;
+    bool changesDetected = false;
+
+    item = Config::findConfigItem(json_name_ap_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::AP_enabled) {
+      changesDetected = true;
+      params::AP_enabled = item->getBoolValue();
+    }
+    
+    item = Config::findConfigItem(json_name_ap_ssid, Config::SectionId::Wifi_id);
+    if( params::AP_ssid != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_ssid = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_ap_password, Config::SectionId::Wifi_id);
+    if( params::AP_password != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_password = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_ap_ip, Config::SectionId::Wifi_id);
+    if( params::AP_ip != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_ip = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_ap_network, Config::SectionId::Wifi_id);
+    if( params::AP_network != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_network = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_ap_mask, Config::SectionId::Wifi_id);
+    if( params::AP_mask != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_mask = item->getCharValue();
+    }
+
+    // Applying changes will happen in mainLoop()
+    if(triggerChanges && changesDetected)
+      accessPointParamsHaveChanged = true;
+
+}
+
+
+void clientParamsUpdatedCallback() {
+  refreshClientParametersFromConfig();
+}
+
+void accessPointParamsUpdatedCallback() {
+  refreshAccessPointParametersFromConfig();
+}
 
 
 static String WIFI_PWR = String(WIFI_PWR_0);
 
 void setup_WIFI()
 {
+    refreshClientParametersFromConfig(false);
+    refreshAccessPointParametersFromConfig(false);
+
     WiFi.persistent(false);
     WiFi.setAutoReconnect(true);
     #ifdef ESP32
@@ -63,33 +180,48 @@ void setup_WIFI()
     WiFi.setOutputPower(WIFI_PWR.toInt());
     #endif // ESP
 
-    // For Static IP
-    #ifndef USE_DHCP
-    WiFi.config(ipaddr_addr(params::IP.c_str()), ipaddr_addr(params::GATEWAY.c_str()), ipaddr_addr(params::SUBNET.c_str()));
-    #endif // USE_DHCP
+    if(!params::client_dhcp_enabled)
+      WiFi.config(ipaddr_addr(params::client_ip.c_str()), ipaddr_addr(params::client_gateway.c_str()), ipaddr_addr(params::client_mask.c_str()));
+    
 }
 
 void start_WIFI()
 {
-  WiFi.mode(WIFI_STA);
-
-  // We start by connecting to a WiFi network
-  Serial.print(F("WiFi SSID :\t\t"));
-  Serial.println(params::SSID.c_str());
-  Serial.print(F("WiFi Connection :\t"));
-  WiFi.begin(params::SSID.c_str(), params::PSWD.c_str());
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
+  if( params::AP_enabled && params::client_enabled) {
+    WiFi.mode(WIFI_AP_STA);
+  } else if(params::AP_enabled) {
+    WiFi.mode(WIFI_AP);
+  } else if (params::client_enabled) {
+    WiFi.mode(WIFI_STA);
   }
 
-  Serial.println(F("Established"));
-  Serial.print(F("WiFi IP :\t\t"));
-  Serial.println(WiFi.localIP());
-  Serial.print(F("WiFi RSSI :\t\t"));
-  Serial.println(WiFi.RSSI());
+  if( params::AP_enabled ) {
+    Serial.print("* WIFI AP starting ... ");
+    if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+      Serial.println("FAILED");
+    else
+      Serial.println("OK");
+  }
+
+  if(params::client_enabled) {
+      // We start by connecting to a WiFi network
+    Serial.print(F("WiFi SSID :\t\t"));
+    Serial.println(params::client_ssid.c_str());
+    Serial.print(F("WiFi Connection :\t"));
+    WiFi.begin(params::client_ssid.c_str(), params::client_password.c_str());
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");
+    }
+
+    Serial.println(F("Established"));
+    Serial.print(F("WiFi IP :\t\t"));
+    Serial.println(WiFi.localIP());
+    Serial.print(F("WiFi RSSI :\t\t"));
+    Serial.println(WiFi.RSSI());
+  }
 
 }
 
@@ -143,10 +275,48 @@ void setup() {
 }
 
 void mainLoop() {
-    
-    #if defined(RFLINK_OTA_ENABLED)
-    ArduinoOTA.handle();
+
+    if(accessPointParamsHaveChanged) {
+      accessPointParamsHaveChanged = false;
+
+      Serial.println("Appliying new Wifi AP settings");
+
+      #ifdef ESP32
+      bool isEnabled = ((WiFi.getMode() & WIFI_MODE_AP) != 0);
+
+      if(params::AP_enabled) {
+        if(!isEnabled) 
+          WiFi.enableAP(true);
+
+        if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+          Serial.println("WIFI AP start FAILED");
+        else
+          Serial.println("WIFI AP started");
+      } else {
+        Serial.println("Shutting down AP");
+        WiFi.enableAP(false);
+        }
     #endif
+    #ifdef ESP8266
+    if(params::AP_enabled) {
+        WiFi.enableAP(true);
+        if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+          Serial.println("WIFI AP start FAILED");
+        else
+          Serial.println("WIFI AP started");
+    } else {
+      Serial.println("Shutting down AP");
+      WiFi.enableAP(false);
+    }
+    #endif
+
+  }
+
+
+  #if defined(RFLINK_OTA_ENABLED)
+  ArduinoOTA.handle();
+  #endif
+
 }
 
 } // end of Wifi namespace
@@ -229,6 +399,5 @@ namespace AutoOTA {
 
 } // end RFLink namespace
 
-
-#endif // RFLINK_WIFIMANAGER_ENABLED || RFLINK_WIFI_ENABLED
+#endif // RFLINK_WIFI_ENABLED
 

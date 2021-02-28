@@ -29,6 +29,7 @@
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
 #include "11_Config.h"
+#include "12_Portal.h"
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -80,6 +81,10 @@ void setup()
   Serial.print(F("Arduino IDE Version :\t"));
   Serial.println(ARDUINO);
 #endif
+#ifdef ESP32
+  Serial.print(F("ESP SDK version:\t"));
+  Serial.println(ESP.getSdkVersion());
+#endif
 #ifdef ESP8266
   Serial.print(F("ESP CoreVersion :\t"));
   Serial.println(ESP.getCoreVersion());
@@ -92,9 +97,10 @@ void setup()
 RFLink::Config::init();
 #endif
 
-#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+#if defined(RFLINK_WIFI_ENABLED)
 RFLink::Wifi::setup();
-#endif // RFLINK_WIFIMANAGER_ENABLED
+RFLink::Portal::init();
+#endif // RFLINK_WIFI_ENABLED
 
 #ifdef MQTT_ENABLED
   RFLink::Mqtt::setup_MQTT();
@@ -129,9 +135,13 @@ set_Radio_mode(Radio_OFF);
   pbuffer[0] = 0;
   set_Radio_mode(Radio_RX);
 
-#ifdef RFLINK_SERIAL2NET_ENABLED
-RFLink::Serial2Net::startServer();
-#endif // RFLINK_SERIAL2NET_ENABLED
+
+#ifdef RFLINK_WIFI_ENABLED
+  RFLink::Portal::start();
+  #ifdef RFLINK_SERIAL2NET_ENABLED
+    RFLink::Serial2Net::startServer();
+  #endif // RFLINK_SERIAL2NET_ENABLED
+#endif
 
 }
 
@@ -142,7 +152,7 @@ void loop()
   RFLink::sendMsgFromBuffer();
   #endif
 
-  #if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+  #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::mainLoop();
   #endif
 

@@ -9,6 +9,7 @@
 #endif
 
 #include "10_Wifi.h"
+#include "12_Portal.h"
 
 #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
 
@@ -20,23 +21,28 @@ const char configFileName[] = "/config.json";
 
 
 const char * jsonSections[] = {
-    "wifi_ota",
+    "wifi",
+    "ota",
     "core",
     "mqtt",
+    "portal",
     "root" // this is always the last one and matches index SectionId::EOF_id
 };
+#define jsonSections_count sizeof(jsonSections)/sizeof(char *)
 
 static_assert(sizeof(jsonSections)/sizeof(char *) == SectionId::EOF_id+1, "jsonSections has missing/extra sections names, please compare with SectionId enum declations");
 
 
 ConfigItem* configItemLists[] = {
-    #if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+    #if defined(RFLINK_WIFI_ENABLED)
     &RFLink::Wifi::configItems[0],
     #endif
+    &RFLink::Portal::configItems[0],
  };
  #define configItemListsSize (sizeof(configItemLists)/sizeof(ConfigItem*))
 
-StaticJsonDocument<2048> doc;
+StaticJsonDocument<8192> doc;
+
 
 void printFile() {
   // Open file for reading
@@ -60,6 +66,22 @@ void printFile() {
 
   // Close the file
   file.close();
+}
+
+ConfigItem * findConfigItem(const char* name, SectionId section) {
+    for(int i=0; i<configItemListsSize; i++) {
+        ConfigItem *item = configItemLists[i];
+
+        while(!item->typeIsEOF()) {
+            if(item->section == section && strcmp(item->json_name, name) == 0 ) {
+                return item;
+            }
+
+            item++;
+        }
+    }
+
+    return nullptr;
 }
 
 void init() {
@@ -91,8 +113,7 @@ void init() {
     #endif
 
 
-    // Let's iterate over all registered configItems and count them/sanitize
-    int countConfigItems = 0;
+    // DEBUG ONLY? Let's iterate over all registered configItems and count them/sanitize
     for(int i=0; i<configItemListsSize; i++) {
         ConfigItem *item = configItemLists[i];
 
@@ -120,8 +141,8 @@ void init() {
             item++;
         }
     }
-    sprintf(tmp, "Counted %i config items in total", countConfigItems);
-    Serial.println(tmp);
+    //sprintf(tmp, "Counted %i config items in total", countConfigItems);
+    //Serial.println(tmp);
 
     sprintf(tmp, "Now opening JSON config file '%s'", configFileName);
     Serial.println(tmp);
@@ -137,7 +158,7 @@ void init() {
         Serial.println(F("Failed to read file, using default configuration"));
     file.close();
 
-    sprintf(tmp, "JSON file mem usage: %lu", doc.memoryUsage());
+    sprintf(tmp, "JSON file mem usage: %lu / %lu", doc.memoryUsage(), doc.memoryPool().capacity());
     Serial.println(tmp);
 
     bool fileHasChanged = false;
@@ -148,10 +169,10 @@ void init() {
         while(!item->typeIsEOF()) {
             JsonVariant sectionVariant = doc[jsonSections[item->section]];
             JsonObject sectionObject;
+
             if(sectionVariant.isUndefined()) {
                 fileHasChanged = true;
                 sectionObject = doc.createNestedObject(jsonSections[item->section]);
-
             } else if(!sectionVariant.is<JsonObject>()) {
                 fileHasChanged = true;
                 doc.remove(sectionVariant);
@@ -160,7 +181,7 @@ void init() {
                 sectionObject = sectionVariant.as<JsonObject>();
             }
 
-            if(item->updateValueInObject(sectionObject)) {
+            if(item->checkOrCreateValueInJsonObject(sectionObject)) {
                 fileHasChanged = true;
             }
 
@@ -169,49 +190,178 @@ void init() {
     }
 
     if(fileHasChanged) {
-        Serial.print("Json configuration file has changed, let's save it... ");
-
-        #ifdef ESP32
-        LITTLEFS.remove("/tmp.json");
-        File file = LITTLEFS.open("/tmp.json", "w");
-        #else
-        LittleFS.remove("/tmp.json");
-        File file = LittleFS.open("/tmp.json", "w");
-        #endif
-
-        auto bytes_written = serializeJson(doc, file);
-        file.close();
-
-        if (bytes_written == 0) {
-            Serial.println(F("Failed to write to file"));
-        } else {
-            #ifdef ESP32
-            LITTLEFS.remove(configFileName);
-            LITTLEFS.rename("/tmp.json", configFileName);
-            #else
-            LittleFS.remove(configFileName);
-            LittleFS.rename("/tmp.json", configFileName);
-            #endif
-            Serial.println("OK");
-        }
+        saveConfigToFlash();
     }
 
     printFile();
 
 }
 
+class CallbackManager {
+    private:
+        void (*callbacks[20])();
+    public:
+        CallbackManager() {
+            for(int i=0; i<sizeof(callbacks)/sizeof(void (*)()); i++){
+                callbacks[i] = nullptr;
+            }
+        }
+
+        void add(void (*c)()) {
+            if(c == nullptr)
+                return;
+            for(int i=0; i<sizeof(callbacks)/sizeof(void (*)()); i++){
+                if(callbacks[i] ==  c)
+                    return;
+                if(callbacks[i] == nullptr) {
+                    callbacks[i] = c;
+                    return;
+                }
+            }
+        }
+
+        void execute() {
+            for(int i=0; i<sizeof(callbacks)/sizeof(void (*)()); i++){
+                if(callbacks[i] == nullptr)
+                    return;
+                callbacks[i]();
+            }
+        }
+};
+
+bool pushNewConfiguration(JsonObject &data, String &message) {
+
+    bool configHasChanged = false;
+    CallbackManager callbackMgr;
+
+    // we iterate root level to find sections!
+    for (JsonPair kv : data) {
+        Serial.print("Remote has root object named: ");
+        Serial.println(kv.key().c_str());
+        
+        JsonVariant && section_variant = kv.value();
+        if(!section_variant.is<JsonObject>()) {
+            message += "root entry '";
+            message += kv.key().c_str();
+            message += "' is not an object, it will be ignored!\n";
+            continue;
+        }
+        JsonObject && sectionObject = section_variant.as<JsonObject>();
+        
+        SectionId lookupSectionID = getSectionIdFromString(kv.key().c_str());
+        if( lookupSectionID == SectionId::EOF_id ) {
+            message += "root entry '";
+            message += kv.key().c_str();
+            message += "' is not a valid section name, it will be ignored!\n";
+            continue;
+        }
+
+        // from here we have a valid section, now we go down a level in the remote object
+        for (JsonPair section_kv : sectionObject) {
+            Serial.print("Remote section has item named: ");
+            Serial.println(section_kv.key().c_str());
+
+            ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
+            if(item == nullptr) {
+                 message += "section '";
+                 message += kv.key().c_str();
+                 message += "' has extra configuration item named '";
+                 message += section_kv.key().c_str();
+                 message += "' it will be ignored\n";
+                 continue;
+            }
+
+            JsonVariant && remoteVariant = section_kv.value();
+
+            if(item->typeIsChar()) {
+                if( !remoteVariant.is<char *>() ) {
+                    message += "section '";
+                    message += kv.key().c_str();
+                    message += "' has '";
+                    message += section_kv.key().c_str();
+                    message += "' with mismatched type (not string) so it will be ignored\n";
+                    continue;
+                }
+                const char *str = remoteVariant.as<const char *>();
+                if(strcmp(str, item->getCharValue()) == 0) // no change!
+                    continue; 
+                
+                configHasChanged = true;
+                callbackMgr.add(item->update_callback);
+                item->setCharValue(str);
+
+            } else if(item->typeIsLongInt()) {
+                if( !remoteVariant.is<signed long>() ) {
+                    message += F("section '");
+                    message += kv.key().c_str();
+                    message += F("' has item '");
+                    message += section_kv.key().c_str();
+                    message += "' with mismatched type (not long int) so it will be ignored\n";
+                    continue;
+                }
+                auto remote_value = remoteVariant.as<signed long>();
+                if(remote_value != item->getLongIntValue() ) // no change!
+                    continue; 
+                
+                configHasChanged = true;
+                callbackMgr.add(item->update_callback);
+                item->setLongIntValue(remote_value);
+            } else if(item->typeIsBool()) {
+                if( !remoteVariant.is<bool>() ) {
+                    message += F("section '");
+                    message += kv.key().c_str();
+                    message += F("' has item '");
+                    message += section_kv.key().c_str();
+                    message += "' with mismatched type (not bool) so it will be ignored\n";
+                    continue;
+                }
+                auto remote_value = remoteVariant.as<bool>();
+                if(remote_value != item->getBoolValue() ) // no change!
+                    continue; 
+                
+                configHasChanged = true;
+                callbackMgr.add(item->update_callback);
+                item->setBoolValue(remote_value);
+            }
+        }
+    }
+
+    Serial.println(message.c_str());
+
+    if(configHasChanged) {
+        if(!saveConfigToFlash()) {
+            message += F("Error! Failed to write JSON config to FLASH!");
+            //Serial.println(F("Error! Failed to write JSON config to FLASH!"));
+            return false;
+        }
+        callbackMgr.execute();
+    } else {
+        Serial.println("Config file has not changed.");
+    }
+
+    return true;
+}
+
 JsonVariant ConfigItem::createInJsonObject(JsonObject &obj) {
     if(this->typeIsChar()) {
-        return obj[this->json_name] = this->getCharValue();
+        obj[this->json_name] = this->getCharDefaultValue();
+        this->jsonRef = obj[this->json_name];
+        return this->jsonRef;
+
     } else if(this->typeIsLongInt()) {
-        return obj[this->json_name] = this->getLongIntValue();
+        obj[this->json_name] = this->getLongIntDefaultValue();
+        this->jsonRef = obj[this->json_name];
+        return this->jsonRef;
+
     } else if(this->typeIsBool()) {
-        return obj[this->json_name] = this->getBoolValue();
+        obj[this->json_name] = this->getBoolDefaultValue();
+        this->jsonRef = obj[this->json_name];
+        return this->jsonRef;
     }
     return JsonVariant();
 }
 
-bool ConfigItem::updateValueInObject(JsonObject &obj) {
+bool ConfigItem::checkOrCreateValueInJsonObject(JsonObject &obj) {
 
     bool result = false;
 
@@ -222,38 +372,25 @@ bool ConfigItem::updateValueInObject(JsonObject &obj) {
         return true;
     }
 
+    this->jsonRef = value;
+
     if(this->typeIsChar()) {
         if(!value.is<char *>()) {
-            value.set((char*)this->getCharValue());
-            return true;
-        }
-        const char *str = value.as<const char *>();
-        if(strcmp(str, this->getCharValue()) != 0) {
-            value.set((char*)this->getCharValue());
+            value.set((char*)this->getCharDefaultValue());
             return true;
         }
     }
 
     if(this->typeIsLongInt()) {
         if(!value.is<signed long>()) {
-            value.set(this->getLongIntValue());
-            return true;
-        }
-        signed long val = value.as<signed long>();
-        if(  val != this->getLongIntValue() ) {
-            value.set(this->getLongIntValue());
+            value.set(this->getLongIntDefaultValue());
             return true;
         }
     }
 
     if(this->typeIsBool()) {
         if(!value.is<bool>()) {
-            value.set(this->getBoolValue());
-            return true;
-        }
-        bool val = value.as<signed long>();
-        if(  val != this->getBoolValue() ) {
-            value.set(this->getBoolValue());
+            value.set(this->getBoolDefaultValue());
             return true;
         }
     }
@@ -265,7 +402,7 @@ bool ConfigItem::updateValueInObject(JsonObject &obj) {
 ConfigItem::ConfigItem(const char *name,
                         SectionId section,
                         const  char* default_value,
-                        void *(*update_callback)(void *) )
+                        void (*update_callback)() )
 {
 
     this->json_name = name;
@@ -276,14 +413,13 @@ ConfigItem::ConfigItem(const char *name,
 
     static_assert( sizeof(this->defaultValue) <= sizeof(char *), "variable size is too small");
     this->defaultValue = (void *) default_value;
-    this->currentValue = this->defaultValue;
 
 }
 
 ConfigItem::ConfigItem(const char *name,
                         SectionId section,
                         long int default_value,
-                        void *(*update_callback)(void *))
+                        void (*update_callback)())
 {
     this->json_name = name;
     this->section = section;
@@ -292,22 +428,21 @@ ConfigItem::ConfigItem(const char *name,
 
     static_assert( sizeof(this->defaultValue) <= sizeof(long int), "variable size is too small");
     this->defaultValue = (void *) default_value;
-    this->currentValue = this->defaultValue;
 }
 
 
 ConfigItem::ConfigItem(const char *name,
                         SectionId section,
                         bool default_value,
-                        void *(*update_callback)(void *))
+                        void (*update_callback)())
 {
     this->json_name = name;
     this->section = section;
     this->type = ConfigItemType::BOOLEAN_t;
     this->update_callback = update_callback;
 
-    this->defaultValue = (void *) default_value;
-    this->currentValue = this->defaultValue;
+    this->boolDefaultValue = default_value;
+
 }
 
 ConfigItem::ConfigItem()
@@ -316,9 +451,63 @@ ConfigItem::ConfigItem()
     this->section = SectionId::EOF_id;
     this->type = ConfigItemType::EOF_t;
     this->update_callback = nullptr;
-    this->currentValue = this->defaultValue;
 }
 
+
+void dumpConfigToString(String &destination) {
+    //serializeJson(doc, destination);
+    serializeJsonPretty(doc, destination);
+}
+
+SectionId getSectionIdFromString(const char *name) {
+
+    for(int i=0; i<jsonSections_count; i++) {
+        if(strcmp(name, jsonSections[i])== 0)
+        return (SectionId) i;
+    }
+
+    return SectionId::EOF_id;
+
+}
+
+bool saveConfigToFlash(){
+
+    Serial.print("Saving JSON config to FLASH.... ");
+
+#ifdef ESP32
+    if( LITTLEFS.exists(F("/tmp.json")) )
+        LITTLEFS.remove(F("/tmp.json"));
+    File file = LITTLEFS.open(F("/tmp.json"), "w");
+#else
+    if( LittleFS.exists(F("/tmp.json")) )
+        LittleFS.remove(F("/tmp.json"));
+    File file = LittleFS.open(F("/tmp.json"), "w");
+#endif
+
+    auto bytes_written = serializeJson(doc, file);
+    file.close();
+
+    if (bytes_written == 0)
+    {
+        Serial.println(F("failed!"));
+        return false;
+    }
+    else
+    {
+#ifdef ESP32
+        if( LITTLEFS.exists(configFileName) )
+            LITTLEFS.remove(configFileName);
+        LITTLEFS.rename(F("/tmp.json"), configFileName);
+#else
+        if( LittleFS.exists(configFileName) )
+            LittleFS.remove(configFileName);
+        LittleFS.rename(F("/tmp.json"), configFileName);
+#endif
+        Serial.println(F("OK"));
+    }
+
+    return true;
+}
 
 } // end of Config namespace
 } // end of RFLink namespace

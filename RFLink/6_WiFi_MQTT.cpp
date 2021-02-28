@@ -105,10 +105,8 @@ void reconnect(int retryCount, bool force)
     retryLeft--;
     if (WiFi.status() != WL_CONNECTED)
     {
-      #ifndef RFLINK_WIFIMANAGER_ENABLED
       RFLink::Wifi::stop_WIFI();
       RFLink::Wifi::start_WIFI();
-      #endif // RFLINK_WIFIMANAGER_ENABLED
     }
 
     Serial.print(F("Trying to connect to MQTT Server '"));
