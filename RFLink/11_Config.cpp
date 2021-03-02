@@ -27,6 +27,7 @@ const char * jsonSections[] = {
     "core",
     "mqtt",
     "portal",
+    "signal",
     "root" // this is always the last one and matches index SectionId::EOF_id
 };
 #define jsonSections_count sizeof(jsonSections)/sizeof(char *)
@@ -39,6 +40,7 @@ ConfigItem* configItemLists[] = {
     &RFLink::Wifi::configItems[0],
     #endif
     &RFLink::Portal::configItems[0],
+    &RFLink::Signal::configItems[0],
  };
  #define configItemListsSize (sizeof(configItemLists)/sizeof(ConfigItem*))
 
@@ -475,7 +477,7 @@ bool saveConfigToFlash(){
 
     Serial.print("Saving JSON config to FLASH.... ");
     #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-    AsyncSignalScanner::stopScanning();
+    Signal::AsyncSignalScanner::stopScanning();
     #endif
 
 #ifdef ESP32
@@ -495,7 +497,7 @@ bool saveConfigToFlash(){
     {
         Serial.println(F("failed!"));
         #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-        AsyncSignalScanner::startScanning();
+        Signal::AsyncSignalScanner::startScanning();
         #endif
         return false;
     }
@@ -514,7 +516,7 @@ bool saveConfigToFlash(){
     }
 
     #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-    AsyncSignalScanner::startScanning();
+    Signal::AsyncSignalScanner::startScanning();
     #endif
 
     return true;

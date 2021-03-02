@@ -10,9 +10,8 @@
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-using namespace AsyncSignalScanner;
-#endif //RFLINK_ASYNC_RECEIVER_ENABLED
+using namespace RFLink::Signal;
+
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, const char *); // Receive plugins
 byte Plugin_id[PLUGIN_MAX];

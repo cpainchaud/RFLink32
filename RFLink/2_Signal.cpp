@@ -10,308 +10,12 @@
 #include "2_Signal.h"
 #include "5_Plugin.h"
 
-#ifndef RFLINK_ASYNC_RECEIVER_ENABLED
-RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
-#endif // RFLINK_ASYNC_RECEIVER_ENABLED
+
 unsigned long SignalCRC = 0L;   // holds the bitstream value for some plugins to identify RF repeats
 unsigned long SignalCRC_1 = 0L; // holds the previous SignalCRC (for mixed burst protocols)
 byte SignalHash = 0L;           // holds the processed plugin number
 byte SignalHashPrevious = 0L;   // holds the last processed plugin number
 unsigned long RepeatingTimer = 0L;
-
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-namespace AsyncSignalScanner {
-    RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false};
-    unsigned long int lastChangedState_us = 0;
-    unsigned long int nextPulseTimeoutTime_us = 0;
-    bool asyncEnabled = false;
-    bool scanningStopped = true;
-
-    void enableAsyncReceiver() {
-      asyncEnabled = true;
-    }
-
-    void disableAsyncReceiver() {
-      asyncEnabled = false;
-      stopScanning();
-    }
-
-    void startScanning() {
-      if(asyncEnabled) {
-        scanningStopped = false;
-        RawSignal.readyForDecoder = false;
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
-        lastChangedState_us = 0;
-        nextPulseTimeoutTime_us = 0;
-        asyncEnabled = true;
-        attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
-      }
-    }
-
-    void stopScanning() {
-      scanningStopped = true;
-      detachInterrupt(PIN_RF_RX_DATA);
-    }
-
-    void IRAM_ATTR RX_pin_changed_state() {
-      static unsigned long lastChangedState_us = 0;
-      unsigned long changeTime_us = micros();
-
-      if (RawSignal.readyForDecoder) // it means previous packet has not been decoded yet, let's forget about it
-        return; 
-
-      unsigned long pulseLength_us = changeTime_us - lastChangedState_us;
-      lastChangedState_us = changeTime_us;
-
-      if(pulseLength_us < MIN_PULSE_LENGTH_US){ // this is too short, noise?
-        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-      }
-
-      int pinState = digitalRead(PIN_RF_RX_DATA);
-
-      if (RawSignal.Time == 0) {            // this is potentially the beginning of a new signal
-        if( pinState != 1)                  // if we get 0 here it means that we are in the middle of a signal, let's forget about it
-          return;
-        
-        RawSignal.Time = millis();          // record when this signal started
-        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
-        nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
-
-        return;
-      }
-
-      if ( pulseLength_us > SIGNAL_END_TIMEOUT_US ) { // signal timedout but was not caught by main loop! We will do its job
-        onPulseTimerTimeout();
-        return;
-      }
-
-      RawSignal.Number++;
-
-      if (RawSignal.Number >= RAW_BUFFER_SIZE ) {      // this signal has too many pulses and will be dicarded
-        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        //Serial.println("this signal has too many pulses and will be dicarded");
-        return;
-      }
-
-      if (RawSignal.Number == 0 && pulseLength_us < SIGNAL_MIN_PREAMBLE_US) {   // too short preamnble, let's drop it
-        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        //Serial.print("too short preamnble, let's drop it:");Serial.println(pulseLength_us);
-        return;
-      }
-
-      //Serial.print("found pulse #");Serial.println(RawSignal.Number);
-      RawSignal.Pulses[RawSignal.Number] = pulseLength_us / RAWSIGNAL_SAMPLE_RATE;
-      nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
-
-    }
-
-    void onPulseTimerTimeout() {
-      if (RawSignal.readyForDecoder){  // it means previous packet has not been decoded yet, let's forget about it
-        //Serial.println("previous signal not decoded yet, discarding this one");
-        nextPulseTimeoutTime_us = 0;
-        return;
-      }
-
-      /*if (digitalRead(PIN_RF_RX_DATA) == HIGH) {   // We have a corrupted packet here
-        Serial.println("corrupted signal ends with HIGH");
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        nextPulseTimeoutTime_us = 0;
-        return;
-      }*/
-
-      if ( RawSignal.Number == 0) {  // timeout on preamble!
-        //Serial.println("timeout on preamble");
-        nextPulseTimeoutTime_us = 0;
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        return;
-      }
-
-       if ( RawSignal.Number < MIN_RAW_PULSES) {  // not enough pulses, we ignore it
-        nextPulseTimeoutTime_us = 0;
-        RawSignal.Number = 0;
-        RawSignal.Time = 0;
-        return;
-      }
-      
-      // finally we have one!
-      stopScanning();
-      nextPulseTimeoutTime_us = 0;
-      RawSignal.Number++;
-      RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / RAWSIGNAL_SAMPLE_RATE;
-      //Serial.print("found one packet, marking now for decoding. Pulses = ");Serial.println(RawSignal.Number);
-      RawSignal.readyForDecoder = true;
-    }
-};
-
-using namespace AsyncSignalScanner;
-
-boolean ScanEvent(void) {
-  if (!AsyncSignalScanner::RawSignal.readyForDecoder) {
-    if( AsyncSignalScanner::nextPulseTimeoutTime_us > 0
-        && AsyncSignalScanner::nextPulseTimeoutTime_us < micros() ) { // may be current pulse has now timedout so we have a signal?
-      
-      AsyncSignalScanner::onPulseTimerTimeout();   // refresh signal properties
-
-      if(!AsyncSignalScanner::RawSignal.readyForDecoder) // still dont have a valid signal?
-        return false;
-    }
-    else
-      return false;
-  }
-  
-  byte signalWasDecoded = PluginRXCall(0, 0); // Check all plugins to see which plugin can handle the received signal.
-  //Serial.println("check2");
-  if (signalWasDecoded)
-  { // Check all plugins to see which plugin can handle the received signal.
-      RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
-  }
-  startScanning();
-  return (signalWasDecoded != 0);
-}
-#else
-/*********************************************************************************************/
-boolean ScanEvent(void)
-{ // Deze routine maakt deel uit van de hoofdloop en wordt iedere 125uSec. doorlopen
-  unsigned long Timer = millis() + SCAN_HIGH_TIME_MS;
-
-  while (Timer > millis()) // || RepeatingTimer > millis())
-  {
-    // delay(1); // For Modem Sleep
-    if (FetchSignal())
-    { // RF: *** data start ***
-      if (PluginRXCall(0, 0))
-      { // Check all plugins to see which plugin can handle the received signal.
-        RepeatingTimer = millis() + SIGNAL_REPEAT_TIME_MS;
-        return true;
-      }
-    }
-  } // while
-  return false;
-}
-#endif // RFLINK_ASYNC_RECEIVER_ENABLED_CALL
-
-#if (defined(ESP32) || defined(ESP8266))
-// ***********************************************************************************
-boolean FetchSignal()
-{
-  // *********************************************************************************
-  static bool Toggle;
-  static unsigned long timeStartSeek_ms;
-  static unsigned long timeStartLoop_us;
-  static unsigned int RawCodeLength;
-  static unsigned long PulseLength_us;
-  static const bool Start_Level = LOW;
-  // *********************************************************************************
-
-#define RESET_SEEKSTART timeStartSeek_ms = millis();
-#define RESET_TIMESTART timeStartLoop_us = micros();
-#define CHECK_RF ((digitalRead(PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
-#define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < SIGNAL_SEEK_TIMEOUT_MS)
-#define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
-#define SWITCH_TOGGLE Toggle = !Toggle
-#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / RAWSIGNAL_SAMPLE_RATE
-
-  // ***   Init Vars   ***
-  Toggle = true;
-  RawCodeLength = 0;
-  PulseLength_us = 0;
-
-  // ***********************************
-  // ***   Scan for Preamble Pulse   ***
-  // ***********************************
-  RESET_SEEKSTART;
-
-  while (PulseLength_us < SIGNAL_MIN_PREAMBLE_US)
-  {
-    while (CHECK_RF && CHECK_TIMEOUT)
-      ;
-    RESET_TIMESTART;
-    SWITCH_TOGGLE;
-    while (CHECK_RF && CHECK_TIMEOUT)
-      ;
-    GET_PULSELENGTH;
-    SWITCH_TOGGLE;
-    if (!CHECK_TIMEOUT)
-      return false;
-  }
-
-
-  RESET_TIMESTART; // next pulse starts now before we do anything else
-  //Serial.print ("PulseLength: "); Serial.println (PulseLength);
-  STORE_PULSE;
-
-  noInterrupts(); // we must not be interrupted while are busy reading the rest of the signal
-
-  // ************************
-  // ***   Message Loop   ***
-  // ************************
-  while (RawCodeLength < RAW_BUFFER_SIZE)
-  {
-   
-    while (CHECK_RF)
-    {
-      GET_PULSELENGTH;
-      if (PulseLength_us > SIGNAL_END_TIMEOUT_US)
-        break;
-    }
-
-    // next Pulse starts now (while we are busy doing calculation) 
-    RESET_TIMESTART;
-
-    // ***   Too short Pulse Check   ***
-    if (PulseLength_us < MIN_PULSE_LENGTH_US)
-    {
-      // NO RawCodeLength++;
-      interrupts();
-      return false; // Or break; instead, if you think it may worth it.
-    }
-
-    // ***   Ending Pulse Check   ***
-    if (PulseLength_us > SIGNAL_END_TIMEOUT_US) // Again, in main while this time
-    {
-      RawCodeLength++;
-      break;
-    }
-
-    // ***   Prepare Next   ***
-    SWITCH_TOGGLE;
-
-    // ***   Store Pulse   ***
-    STORE_PULSE;
-  }
-  interrupts();
-  //Serial.print ("RawCodeLength: ");
-  //Serial.println (RawCodeLength);
-
-  if (RawCodeLength >= MIN_RAW_PULSES)
-  {
-    RawSignal.Pulses[RawCodeLength] = 0;  // Last element contains the timeout.
-    RawSignal.Number = RawCodeLength - 1; // Number of received pulse times (pulsen *2)
-    RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
-    RawSignal.Time = millis(); // Time the RF packet was received (to keep track of retransmits
-    //Serial.print ("D");
-    //Serial.print (RawCodeLength);
-    return true;
-  }
-  else
-  {
-    RawSignal.Number = 0;
-  }
-
-  return false;
-}
-#endif
-// ***********************************************************************************
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 // ***********************************************************************************
@@ -574,4 +278,414 @@ void AC_Send(unsigned long data, byte cmd)
   }
   // End transmit
 }
+
+namespace RFLink { namespace Signal {
+
+RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL}; // current message
+
+namespace params {
+  // All json variable names
+  bool async_mode_enabled = false;
+  unsigned short int sample_rate;     
+  unsigned long int min_raw_pulses;
+  unsigned long int seek_timeout;        // MS
+  unsigned long int min_preamble;        // US
+  unsigned long int min_pulse_len;       // US
+  unsigned long int signal_end_timeout;  // US
+  unsigned long int signal_repeat_time;  // MS
+  unsigned long int scan_high_time;      // MS
+  
+}
+
+const char json_name_async_mode_enabled[] = "async_mode_enabled";
+const char json_name_sample_rate[] = "sample_rate";
+const char json_name_min_raw_pulses[] = "min_raw_pulses";
+const char json_name_seek_timeout[] = "seek_timeout";
+const char json_name_min_preamble[] = "min_preamble";
+const char json_name_min_pulse_len[] = "min_pulse_len";
+const char json_name_signal_end_timeout[] = "signal_end_timeout";
+const char json_name_signal_repeat_time[] = "signal_repeat_time";
+const char json_name_scan_high_time[] = "scan_high_time";
+
+
+Config::ConfigItem configItems[] =  {
+  Config::ConfigItem(json_name_async_mode_enabled,  Config::SectionId::Signal_id,  false, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_sample_rate,         Config::SectionId::Signal_id,  RAWSIGNAL_SAMPLE_RATE, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_min_raw_pulses,      Config::SectionId::Signal_id,  MIN_RAW_PULSES, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_seek_timeout,        Config::SectionId::Signal_id,  SIGNAL_SEEK_TIMEOUT_MS, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_min_preamble,        Config::SectionId::Signal_id,  SIGNAL_MIN_PREAMBLE_US, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_min_pulse_len,       Config::SectionId::Signal_id,  MIN_PULSE_LENGTH_US, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_signal_end_timeout,  Config::SectionId::Signal_id,  SIGNAL_END_TIMEOUT_US, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_signal_repeat_time,  Config::SectionId::Signal_id,  SIGNAL_REPEAT_TIME_MS, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_scan_high_time,      Config::SectionId::Signal_id,  SCAN_HIGH_TIME_MS, paramsUpdatedCallback),
+  Config::ConfigItem()
+};
+
+void paramsUpdatedCallback() {
+  refreshParametersFromConfig();
+}
+
+void refreshParametersFromConfig(bool triggerChanges) {
+
+    Config::ConfigItem *item;
+    bool changesDetected = false;
+
+    item = Config::findConfigItem(json_name_async_mode_enabled, Config::SectionId::Signal_id);
+    if( item->getBoolValue() != params::async_mode_enabled) {
+      changesDetected = true;
+      params::async_mode_enabled = item->getBoolValue();
+    }
+
+    item = Config::findConfigItem(json_name_sample_rate, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::sample_rate) {
+      changesDetected = true;
+      params::sample_rate = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_min_raw_pulses, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::min_raw_pulses) {
+      changesDetected = true;
+      params::min_raw_pulses = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_seek_timeout, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::seek_timeout) {
+      changesDetected = true;
+      params::seek_timeout = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_min_preamble, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::min_preamble) {
+      changesDetected = true;
+      params::min_preamble = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_min_pulse_len, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::min_pulse_len) {
+      changesDetected = true;
+      params::min_pulse_len = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_signal_end_timeout, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::signal_end_timeout) {
+      changesDetected = true;
+      params::signal_end_timeout = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_signal_repeat_time, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::signal_repeat_time) {
+      changesDetected = true;
+      params::signal_repeat_time = item->getLongIntValue();
+    }
+
+    item = Config::findConfigItem(json_name_scan_high_time, Config::SectionId::Signal_id);
+    if( item->getLongIntValue() != params::scan_high_time) {
+      changesDetected = true;
+      params::scan_high_time = item->getLongIntValue();
+    }
+
+    // Applying changes will happen in mainLoop()
+    if(triggerChanges && changesDetected) {
+      Serial.println("Signal parameters have changed");
+    }
+
+}
+
+
+void setup(){
+  params::async_mode_enabled = false;
+  refreshParametersFromConfig();
+}
+
+
+boolean FetchSignal_sync()
+{
+  // *********************************************************************************
+  static bool Toggle;
+  static unsigned long timeStartSeek_ms;
+  static unsigned long timeStartLoop_us;
+  static unsigned int RawCodeLength;
+  static unsigned long PulseLength_us;
+  static const bool Start_Level = LOW;
+  // *********************************************************************************
+
+#define RESET_SEEKSTART timeStartSeek_ms = millis();
+#define RESET_TIMESTART timeStartLoop_us = micros();
+#define CHECK_RF ((digitalRead(PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
+#define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
+#define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
+#define SWITCH_TOGGLE Toggle = !Toggle
+#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate
+
+  // ***   Init Vars   ***
+  Toggle = true;
+  RawCodeLength = 0;
+  PulseLength_us = 0;
+
+
+  // ***********************************
+  // ***   Scan for Preamble Pulse   ***
+  // ***********************************
+  RESET_SEEKSTART;
+
+  while (PulseLength_us < params::min_preamble)
+  {
+    while (CHECK_RF && CHECK_TIMEOUT)
+      ;
+    RESET_TIMESTART;
+    SWITCH_TOGGLE;
+    while (CHECK_RF && CHECK_TIMEOUT)
+      ;
+    GET_PULSELENGTH;
+    SWITCH_TOGGLE;
+    if (!CHECK_TIMEOUT)
+      return false;
+  }
+
+  RESET_TIMESTART; // next pulse starts now before we do anything else
+  //Serial.print ("PulseLength: "); Serial.println (PulseLength);
+  STORE_PULSE;
+
+  noInterrupts(); // we must not be interrupted while are busy reading the rest of the signal
+
+  // ************************
+  // ***   Message Loop   ***
+  // ************************
+  while (RawCodeLength < RAW_BUFFER_SIZE)
+  {
+   
+    while (CHECK_RF)
+    {
+      GET_PULSELENGTH;
+      if (PulseLength_us > params::signal_end_timeout)
+        break;
+    }
+
+    // next Pulse starts now (while we are busy doing calculation) 
+    RESET_TIMESTART;
+
+    // ***   Too short Pulse Check   ***
+    if (PulseLength_us < params::min_pulse_len)
+    {
+      // NO RawCodeLength++;
+      interrupts();
+      return false; // Or break; instead, if you think it may worth it.
+    }
+
+    // ***   Ending Pulse Check   ***
+    if (PulseLength_us > params::signal_end_timeout) // Again, in main while this time
+    {
+      RawCodeLength++;
+      break;
+    }
+
+    // ***   Prepare Next   ***
+    SWITCH_TOGGLE;
+
+    // ***   Store Pulse   ***
+    STORE_PULSE;
+  }
+  interrupts();
+
+  if (RawCodeLength >= params::min_raw_pulses)
+  {
+    RawSignal.Pulses[RawCodeLength] = 0;  // Last element contains the timeout.
+    RawSignal.Number = RawCodeLength - 1; // Number of received pulse times (pulsen *2)
+    RawSignal.Multiply = params::sample_rate;
+    RawSignal.Time = millis(); // Time the RF packet was received (to keep track of retransmits
+    //Serial.print ("D");
+    //Serial.print (RawCodeLength);
+    return true;
+  }
+  else
+  {
+    RawSignal.Number = 0;
+  }
+
+  return false;
+}
+
+boolean ScanEvent()
+{
+  if(!params::async_mode_enabled) {
+
+    unsigned long Timer = millis() + params::scan_high_time;
+
+    while (Timer > millis()) // || RepeatingTimer > millis())
+    {
+      if (FetchSignal_sync())
+      { // RF: *** data start ***
+        if (PluginRXCall(0, 0))
+        { // Check all plugins to see which plugin can handle the received signal.
+          RepeatingTimer = millis() + params::signal_repeat_time;
+          return true;
+        }
+      }
+    } // while
+    return false;
+  }
+
+  // here we are in ASYNC mode
+
+  if (!RawSignal.readyForDecoder) {
+    if( AsyncSignalScanner::nextPulseTimeoutTime_us > 0
+        && AsyncSignalScanner::nextPulseTimeoutTime_us < micros() ) { // may be current pulse has now timedout so we have a signal?
+      
+      AsyncSignalScanner::onPulseTimerTimeout();   // refresh signal properties
+
+      if(!RawSignal.readyForDecoder) // still dont have a valid signal?
+        return false;
+    }
+    else
+      return false;
+  }
+  
+  byte signalWasDecoded = PluginRXCall(0, 0); // Check all plugins to see which plugin can handle the received signal.
+  //Serial.println("check2");
+  if (signalWasDecoded)
+  { // Check all plugins to see which plugin can handle the received signal.
+      RepeatingTimer = millis() + params::signal_repeat_time;
+  }
+  AsyncSignalScanner::startScanning();
+  return (signalWasDecoded != 0);
+}
+
+
+namespace AsyncSignalScanner {
+    unsigned long int lastChangedState_us = 0;
+    unsigned long int nextPulseTimeoutTime_us = 0;
+    bool scanningStopped = true;
+
+    void enableAsyncReceiver() {
+      params::async_mode_enabled = true;
+    }
+
+    void disableAsyncReceiver() {
+      params::async_mode_enabled = false;
+      stopScanning();
+    }
+
+    void startScanning() {
+      if(params::async_mode_enabled) {
+        scanningStopped = false;
+        RawSignal.readyForDecoder = false;
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        RawSignal.Multiply = params::sample_rate;
+        lastChangedState_us = 0;
+        nextPulseTimeoutTime_us = 0;
+        attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
+      } else {
+        Serial.println("Start of async Receiver was requested but it's not enabled!");
+      }
+    }
+
+    void stopScanning() {
+      scanningStopped = true;
+      detachInterrupt(PIN_RF_RX_DATA);
+    }
+
+    void IRAM_ATTR RX_pin_changed_state() {
+      static unsigned long lastChangedState_us = 0;
+      unsigned long changeTime_us = micros();
+
+      if (RawSignal.readyForDecoder) // it means previous packet has not been decoded yet, let's forget about it
+        return; 
+
+      unsigned long pulseLength_us = changeTime_us - lastChangedState_us;
+      lastChangedState_us = changeTime_us;
+
+      if(pulseLength_us < MIN_PULSE_LENGTH_US){ // this is too short, noise?
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+      }
+
+      int pinState = digitalRead(PIN_RF_RX_DATA);
+
+      if (RawSignal.Time == 0) {            // this is potentially the beginning of a new signal
+        if( pinState != 1)                  // if we get 0 here it means that we are in the middle of a signal, let's forget about it
+          return;
+        
+        RawSignal.Time = millis();          // record when this signal started
+        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+        nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
+
+        return;
+      }
+
+      if ( pulseLength_us > SIGNAL_END_TIMEOUT_US ) { // signal timedout but was not caught by main loop! We will do its job
+        onPulseTimerTimeout();
+        return;
+      }
+
+      RawSignal.Number++;
+
+      if (RawSignal.Number >= RAW_BUFFER_SIZE ) {      // this signal has too many pulses and will be dicarded
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        //Serial.println("this signal has too many pulses and will be dicarded");
+        return;
+      }
+
+      if (RawSignal.Number == 0 && pulseLength_us < SIGNAL_MIN_PREAMBLE_US) {   // too short preamnble, let's drop it
+        nextPulseTimeoutTime_us = 0; // stop watching for a timeout
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        //Serial.print("too short preamnble, let's drop it:");Serial.println(pulseLength_us);
+        return;
+      }
+
+      //Serial.print("found pulse #");Serial.println(RawSignal.Number);
+      RawSignal.Pulses[RawSignal.Number] = pulseLength_us / RAWSIGNAL_SAMPLE_RATE;
+      nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
+
+    }
+
+    void onPulseTimerTimeout() {
+      if (RawSignal.readyForDecoder){  // it means previous packet has not been decoded yet, let's forget about it
+        //Serial.println("previous signal not decoded yet, discarding this one");
+        nextPulseTimeoutTime_us = 0;
+        return;
+      }
+
+      /*if (digitalRead(PIN_RF_RX_DATA) == HIGH) {   // We have a corrupted packet here
+        Serial.println("corrupted signal ends with HIGH");
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        nextPulseTimeoutTime_us = 0;
+        return;
+      }*/
+
+      if ( RawSignal.Number == 0) {  // timeout on preamble!
+        //Serial.println("timeout on preamble");
+        nextPulseTimeoutTime_us = 0;
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        return;
+      }
+
+       if ( RawSignal.Number < MIN_RAW_PULSES) {  // not enough pulses, we ignore it
+        nextPulseTimeoutTime_us = 0;
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        return;
+      }
+      
+      // finally we have one!
+      stopScanning();
+      nextPulseTimeoutTime_us = 0;
+      RawSignal.Number++;
+      RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / RAWSIGNAL_SAMPLE_RATE;
+      //Serial.print("found one packet, marking now for decoding. Pulses = ");Serial.println(RawSignal.Number);
+      RawSignal.readyForDecoder = true;
+    }
+};
+
+
+} // end of ns Signal
+} // end of ns RFLink
+
+
 /*********************************************************************************************/

@@ -81,7 +81,7 @@ void loop()
   readSerialAndExecute();
   #endif
 
-  if (ScanEvent())
+  if (RFLink::Signal::ScanEvent())
     RFLink::sendMsgFromBuffer();
 }
 
@@ -132,6 +132,7 @@ namespace RFLink {
   #if defined(ESP32) || (ESP8266)
   RFLink::Config::init();
   #endif
+  RFLink::Signal::setup();
 
   #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::setup();
@@ -145,10 +146,6 @@ namespace RFLink {
 
   PluginInit();
   PluginTXInit();
-
-  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-  AsyncSignalScanner::enableAsyncReceiver();
-  #endif
 
   set_Radio_mode(Radio_OFF);
 
