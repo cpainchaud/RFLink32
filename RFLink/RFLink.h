@@ -8,6 +8,10 @@
 #ifndef RFLink_h
 #define RFLink_h
 
+#include <ArduinoJson.h>
+#include <time.h>
+#include <sys/time.h>
+
 #define BUILDNR 0x05 // 0x07       // shown in version
 #define REVNR 0x01   // 0X42       // shown in version and startup string
 
@@ -44,8 +48,15 @@
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 namespace RFLink {
+
+    extern struct timeval timeAtBoot; // used to calculate update
+
+    void setup();
+
     bool executeCliCommand(const char *cmd);
     void sendMsgFromBuffer();
+
+    void getStatusJsonString(JsonObject &output);
 }
 
 void CallReboot(void);

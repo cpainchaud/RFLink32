@@ -317,7 +317,37 @@ void mainLoop() {
   ArduinoOTA.handle();
   #endif
 
+} // end of mainLoop()
+
+void getStatusJsonString(JsonObject &output) {
+
+  auto && network = output.createNestedObject("network");
+
+  auto && wifi_ap = network.createNestedObject("wifi_ap");
+
+  if(params::AP_enabled) {
+    wifi_ap["status"] = "enabled";
+  } else {
+    wifi_ap["status"] = "disabled";
+  }
+
+  auto && wifi_client = network.createNestedObject("wifi_client");
+
+  if(params::client_enabled) {
+    if(WiFi.isConnected()) {
+      wifi_client["status"] = "connected";
+      wifi_client["ip"] = WiFi.localIP().toString();
+      wifi_client["netmask"] = WiFi.subnetMask().toString();
+      wifi_client["dns"] = "unknown";
+    } else {
+      wifi_ap["status"] = "disconnected";
+    }
+  } else {
+    wifi_client["status"] = "disabled";
+  }
+
 }
+
 
 } // end of Wifi namespace
 

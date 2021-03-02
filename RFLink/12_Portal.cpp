@@ -1,8 +1,10 @@
-#include "12_Portal.h"
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
 #include "index.html.gz.h"
 
+#include "RFLink.h"
+#include "11_Config.h"
+#include "10_Wifi.h"
 
 namespace RFLink { namespace Portal {
 
@@ -29,6 +31,22 @@ void serverApiConfigGet(AsyncWebServerRequest *request) {
     String dump;
     Config::dumpConfigToString(dump);
     request->send(200, "application/json", dump);
+}
+
+void serverApiStatusGet(AsyncWebServerRequest *request) {
+    DynamicJsonDocument output(10000);
+
+    auto && obj = output.to<JsonObject>();
+
+    RFLink::getStatusJsonString(obj);
+    
+
+    RFLink::Wifi::getStatusJsonString(obj);
+
+    String buffer;
+    serializeJson(output, buffer);
+
+    request->send(200, "application/json", buffer);
 }
 
 void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
@@ -76,8 +94,14 @@ void init() {
     server.on("/", HTTP_GET, serveIndexHtml);
     server.on("/index.html", HTTP_GET, serveIndexHtml);
     server.on("/wifi", HTTP_GET, serveIndexHtml);
+    server.on("/home", HTTP_GET, serveIndexHtml);
+    server.on("/radio", HTTP_GET, serveIndexHtml);
+    server.on("/signal", HTTP_GET, serveIndexHtml);
+    server.on("/firmware", HTTP_GET, serveIndexHtml);
 
     server.on("/api/config", HTTP_GET, serverApiConfigGet);
+
+    server.on("/api/status", HTTP_GET, serverApiStatusGet);
 
     AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/api/config", serverApiConfigPush, 10000);
     server.addHandler(handler);

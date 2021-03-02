@@ -27,6 +27,8 @@ namespace RFLink {
 
         void clientParamsUpdatedCallback();
         void accessPointParamsUpdatedCallback();
+
+        void getStatusJsonString(JsonObject &output);
     }
 
     namespace AutoOTA {
