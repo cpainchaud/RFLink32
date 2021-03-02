@@ -310,9 +310,6 @@ void setup_WIFI_OFF()
 void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     Serial.println("Connected to AP!");
  
-    Serial.print("SSID Length: ");
-    Serial.println(info.connected.ssid_len);
- 
     Serial.print("SSID: ");
     for(int i=0; i<info.connected.ssid_len; i++){
       Serial.print((char) info.connected.ssid[i]);
@@ -345,11 +342,27 @@ void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
 #endif //ESP32
 
 #ifdef ESP8266
-WiFiEventHandler stationConnectedHandler;
-WiFiEventHandler stationDisconnectedHandler;
-WiFiEventHandler probeRequestPrintHandler;
-WiFiEventHandler probeRequestBlinkHandler;
+
+
+void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected& evt) {
+  Serial.println("Connected to AP!");
+ 
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+     
+  Serial.print("\nChannel: ");
+  Serial.println(WiFi.channel());
+    
+}
+void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
+  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+}
+void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
+  Serial.println("WiFi Client has been disconnected");
+}
 #endif
+
+
 
 void setup()
 {
@@ -362,6 +375,12 @@ void setup()
   WiFi.onEvent(eventHandler_WiFiStationGotIp, SYSTEM_EVENT_STA_GOT_IP);
   WiFi.onEvent(eventHandler_WiFiStationLostIp, SYSTEM_EVENT_STA_LOST_IP);
 #endif // ESP32
+
+#ifdef ESP8266
+WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
+WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
+WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
+#endif
 
 #ifdef ESP32
   WiFi.setTxPower(WIFI_POWER_11dBm);
