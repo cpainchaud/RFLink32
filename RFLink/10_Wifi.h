@@ -24,6 +24,7 @@ namespace RFLink {
         void stop_WIFI();
         void start_WIFI();
 
+        void resetClientWifi(); // to connect/reconnect client wifi after settings have changed
 
         void clientParamsUpdatedCallback();
         void accessPointParamsUpdatedCallback();

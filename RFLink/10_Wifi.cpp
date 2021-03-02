@@ -77,7 +77,7 @@ Config::ConfigItem configItems[] =  {
 
   Config::ConfigItem(json_name_client_enabled,      Config::SectionId::Wifi_id, false, clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id, true, clientParamsUpdatedCallback),
-  Config::ConfigItem(json_name_client_ssid,         Config::SectionId::Wifi_id, "ESPLink-AP", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_ssid,         Config::SectionId::Wifi_id, "My Home Wifi", clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_password,     Config::SectionId::Wifi_id, "inputyourown", clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_ip,           Config::SectionId::Wifi_id, "192.168.0.200", clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_mask,         Config::SectionId::Wifi_id, "255.255.255.0", clientParamsUpdatedCallback),
@@ -95,16 +95,63 @@ Config::ConfigItem configItems[] =  {
 };
 
 void refreshClientParametersFromConfig(bool triggerChanges=true) {
-    params::client_enabled = Config::findConfigItem(json_name_client_enabled, Config::SectionId::Wifi_id)->getBoolValue();
-    params::client_dhcp_enabled = Config::findConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id)->getBoolValue();
 
-    params::client_ssid = Config::findConfigItem(json_name_client_ssid, Config::SectionId::Wifi_id)->getCharValue();
-    params::client_password = Config::findConfigItem(json_name_client_password, Config::SectionId::Wifi_id)->getCharValue();
+    Config::ConfigItem *item;
+    bool changesDetected = false;
 
-    params::client_ip = Config::findConfigItem(json_name_client_ip, Config::SectionId::Wifi_id)->getCharValue();
-    params::client_mask = Config::findConfigItem(json_name_client_mask, Config::SectionId::Wifi_id)->getCharValue();
-    params::client_gateway = Config::findConfigItem(json_name_client_gateway, Config::SectionId::Wifi_id)->getCharValue();
-    params::client_dns = Config::findConfigItem(json_name_client_dns, Config::SectionId::Wifi_id)->getCharValue();
+    item = Config::findConfigItem(json_name_client_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::client_enabled) {
+      changesDetected = true;
+      params::client_enabled = item->getBoolValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::client_dhcp_enabled) {
+      changesDetected = true;
+      params::client_dhcp_enabled = item->getBoolValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_ssid, Config::SectionId::Wifi_id);
+    if( params::client_ssid != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_ssid = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_password, Config::SectionId::Wifi_id);
+    if( params::client_password != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_password = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_ip, Config::SectionId::Wifi_id);
+    if( params::client_ip != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_ip = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_mask, Config::SectionId::Wifi_id);
+    if( params::client_mask != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_mask = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_gateway, Config::SectionId::Wifi_id);
+    if( params::client_gateway != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_gateway = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_dns, Config::SectionId::Wifi_id);
+    if( params::client_dns != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_dns = item->getCharValue();
+    }
+
+    // Applying changes will happen in mainLoop()
+    if(triggerChanges && changesDetected) {
+      clientParamsHaveChanged = true;
+      Serial.println("Client Wifi settings haver changed and will be applied at next loop");
+    }
 }
 
 void refreshAccessPointParametersFromConfig(bool triggerChanges=true) {
@@ -149,8 +196,10 @@ void refreshAccessPointParametersFromConfig(bool triggerChanges=true) {
     }
 
     // Applying changes will happen in mainLoop()
-    if(triggerChanges && changesDetected)
+    if(triggerChanges && changesDetected) {
       accessPointParamsHaveChanged = true;
+      Serial.println("AP Wifi settings haver changed and will be applied at next loop");
+    }
 
 }
 
@@ -166,23 +215,51 @@ void accessPointParamsUpdatedCallback() {
 
 static String WIFI_PWR = String(WIFI_PWR_0);
 
-void setup_WIFI()
-{
-    refreshClientParametersFromConfig(false);
-    refreshAccessPointParametersFromConfig(false);
 
-    WiFi.persistent(false);
-    WiFi.setAutoReconnect(true);
-    #ifdef ESP32
-    WiFi.setTxPower(WIFI_POWER_11dBm);
-    #elif ESP8266
-    WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-    WiFi.setOutputPower(WIFI_PWR.toInt());
-    #endif // ESP
 
-    if(!params::client_dhcp_enabled)
-      WiFi.config(ipaddr_addr(params::client_ip.c_str()), ipaddr_addr(params::client_gateway.c_str()), ipaddr_addr(params::client_mask.c_str()));
+void resetClientWifi() {
+  if(params::client_enabled) {
+
+    // We start by connecting to a WiFi network
+    Serial.print(F("Trying to connect WIFI SSID "));
+    Serial.print(params::client_ssid.c_str());
+    Serial.println(F(". A status will be given whenever it occurs."));
+
+    if( !params::client_dhcp_enabled) {
+      IPAddress ip, gateway, mask, dns;
+
+      ip.fromString(params::client_ip);
+      gateway.fromString(params::client_gateway);
+      mask.fromString(params::client_mask);
+      dns.fromString(params::client_dns);
+
+      WiFi.config(ip, gateway, mask, dns );
     
+    } else {
+      WiFi.config(IPAddress((uint32_t) 0), IPAddress((uint32_t) 0), IPAddress((uint32_t) 0));
+    }
+
+    delay(500);
+    if(!WiFi.isConnected() || WiFi.SSID() != params::client_ssid) {
+      WiFi.begin(params::client_ssid.c_str(), params::client_password.c_str());
+    }
+
+    WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
+
+    delay(1000);
+
+    if( WiFi.status() != WL_CONNECTED ) {
+      Serial.println(" failed connect to connect before timeout, it will automatically retry later.");
+    }
+  }  
+  else {
+    Serial.println("WiFi Client mode will be disconnected");
+    WiFi.setAutoConnect(false);
+    WiFi.setAutoReconnect(false);
+    WiFi.disconnect();
+  }
+
 }
 
 void start_WIFI()
@@ -204,23 +281,7 @@ void start_WIFI()
   }
 
   if(params::client_enabled) {
-      // We start by connecting to a WiFi network
-    Serial.print(F("WiFi SSID :\t\t"));
-    Serial.println(params::client_ssid.c_str());
-    Serial.print(F("WiFi Connection :\t"));
-    WiFi.begin(params::client_ssid.c_str(), params::client_password.c_str());
-
-    while (WiFi.status() != WL_CONNECTED)
-    {
-      delay(500);
-      Serial.print(".");
-    }
-
-    Serial.println(F("Established"));
-    Serial.print(F("WiFi IP :\t\t"));
-    Serial.println(WiFi.localIP());
-    Serial.print(F("WiFi RSSI :\t\t"));
-    Serial.println(WiFi.RSSI());
+    resetClientWifi();
   }
 
 }
@@ -245,33 +306,92 @@ void setup_WIFI_OFF()
 #endif
 }
 
+#ifdef ESP32
+void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
+    Serial.println("Connected to AP!");
+ 
+    Serial.print("SSID Length: ");
+    Serial.println(info.connected.ssid_len);
+ 
+    Serial.print("SSID: ");
+    for(int i=0; i<info.connected.ssid_len; i++){
+      Serial.print((char) info.connected.ssid[i]);
+    }
+ 
+    Serial.print("\nBSSID: ");
+    for(int i=0; i<6; i++){
+      Serial.printf("%02X", info.connected.bssid[i]);
+ 
+      if(i<5){
+        Serial.print(":");
+      }
+    }
+     
+    Serial.print("\nChannel: ");
+    Serial.println(info.connected.channel);
+ 
+    Serial.print("Auth mode: ");
+    Serial.println(info.connected.authmode);  
 
-void setup() {
-    setup_WIFI();
-    start_WIFI();
+}
 
-    #ifdef RFLINK_OTA_ENABLED
-        #ifdef RFLINK_OTA_PASSWORD
-        ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
-        #endif
+void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+}
 
-        #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-        // we must stop the Receiver from interrupting the OTA process
-        ArduinoOTA.onStart( [](){
-            Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
-            AsyncSignalScanner::stopScanning();
-            }
-        );
-        ArduinoOTA.onError( [](ota_error_t error){
-            Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
-            Serial.print(error);
-            Serial.println(" ,turning on Receiver");
-            AsyncSignalScanner::startScanning();
-            }
-        );
-        #endif // RFLINK_ASYNC_RECEIVER_ENABLED
-    ArduinoOTA.begin();
-    #endif // RFLINK_OTA_ENABLED
+void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.println("WiFi Client has lots its IP");
+}
+#endif //ESP32
+
+#ifdef ESP8266
+WiFiEventHandler stationConnectedHandler;
+WiFiEventHandler stationDisconnectedHandler;
+WiFiEventHandler probeRequestPrintHandler;
+WiFiEventHandler probeRequestBlinkHandler;
+#endif
+
+void setup()
+{
+
+  refreshClientParametersFromConfig(false);
+  refreshAccessPointParametersFromConfig(false);
+
+#ifdef ESP32
+  WiFi.onEvent(eventHandler_WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
+  WiFi.onEvent(eventHandler_WiFiStationGotIp, SYSTEM_EVENT_STA_GOT_IP);
+  WiFi.onEvent(eventHandler_WiFiStationLostIp, SYSTEM_EVENT_STA_LOST_IP);
+#endif // ESP32
+
+#ifdef ESP32
+  WiFi.setTxPower(WIFI_POWER_11dBm);
+#elif ESP8266
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  WiFi.setOutputPower(WIFI_PWR.toInt());
+#endif // ESP
+
+  start_WIFI();
+
+#ifdef RFLINK_OTA_ENABLED
+#ifdef RFLINK_OTA_PASSWORD
+  ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
+#endif
+
+#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+  // we must stop the Receiver from interrupting the OTA process
+  ArduinoOTA.onStart([]() {
+    Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
+    AsyncSignalScanner::stopScanning();
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
+    Serial.print(error);
+    Serial.println(" ,turning on Receiver");
+    AsyncSignalScanner::startScanning();
+  });
+#endif // RFLINK_ASYNC_RECEIVER_ENABLED
+  ArduinoOTA.begin();
+#endif // RFLINK_OTA_ENABLED
 }
 
 void mainLoop() {
@@ -309,7 +429,11 @@ void mainLoop() {
       WiFi.enableAP(false);
     }
     #endif
+  } // end of accessPointParamsHaveChanges
 
+  if( clientParamsHaveChanged ) {
+    clientParamsHaveChanged = 0;
+    resetClientWifi();
   }
 
 

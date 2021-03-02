@@ -24,21 +24,34 @@ namespace AsyncSignalScanner {
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false};
     unsigned long int lastChangedState_us = 0;
     unsigned long int nextPulseTimeoutTime_us = 0;
-    bool scanningEnabled = false;
+    bool asyncEnabled = false;
+    bool scanningStopped = true;
+
+    void enableAsyncReceiver() {
+      asyncEnabled = true;
+    }
+
+    void disableAsyncReceiver() {
+      asyncEnabled = false;
+      stopScanning();
+    }
 
     void startScanning() {
-      RawSignal.readyForDecoder = false;
-      RawSignal.Number = 0;
-      RawSignal.Time = 0;
-      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
-      lastChangedState_us = 0;
-      nextPulseTimeoutTime_us = 0;
-      scanningEnabled = true;
-      attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
+      if(asyncEnabled) {
+        scanningStopped = false;
+        RawSignal.readyForDecoder = false;
+        RawSignal.Number = 0;
+        RawSignal.Time = 0;
+        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+        lastChangedState_us = 0;
+        nextPulseTimeoutTime_us = 0;
+        asyncEnabled = true;
+        attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
+      }
     }
 
     void stopScanning() {
-      scanningEnabled = false;
+      scanningStopped = true;
       detachInterrupt(PIN_RF_RX_DATA);
     }
 

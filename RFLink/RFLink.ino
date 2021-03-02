@@ -3,7 +3,7 @@
 // * Portions Free Software 2018..2020 StormTeam - Marc RIVES
 // * Portions Free Software 2015..2016 StuntTeam - (RFLink R29~R33)
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
-// * Portions GPLv3 2021 Christophe Painchaud Async Receiver (Async Receiver)
+// * Portions GPLv3 2021 Christophe Painchaud
 // *
 // *                                       RFLink-esp
 // *
@@ -145,6 +145,11 @@ namespace RFLink {
 
   PluginInit();
   PluginTXInit();
+
+  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+  AsyncSignalScanner::enableAsyncReceiver();
+  #endif
+
   set_Radio_mode(Radio_OFF);
 
   #if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))

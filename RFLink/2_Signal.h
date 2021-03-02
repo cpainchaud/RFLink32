@@ -57,8 +57,11 @@ namespace AsyncSignalScanner {
     extern RawSignalStruct RawSignal;                 // Currently proccessed signal
     extern unsigned long int lastChangedState_us;     // time last state change occured
     extern unsigned long int nextPulseTimeoutTime_us; // when current pulse will timeout
-    extern bool scanningEnabled;                      // 
+    extern bool asyncEnabled;                         // 
+    extern bool scanningStopped;                      // 
 
+    void enableAsyncReceiver();
+    void disableAsyncReceiver();
     void startScanning();
     void stopScanning();
     void clearAllTimers();

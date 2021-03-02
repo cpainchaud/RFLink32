@@ -8,6 +8,7 @@
 #include <LITTLEFS.h>
 #endif
 
+#include "2_Signal.h"
 #include "10_Wifi.h"
 #include "12_Portal.h"
 
@@ -300,7 +301,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     continue;
                 }
                 auto remote_value = remoteVariant.as<signed long>();
-                if(remote_value != item->getLongIntValue() ) // no change!
+                if(remote_value == item->getLongIntValue() ) // no change!
                     continue; 
                 
                 configHasChanged = true;
@@ -316,7 +317,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     continue;
                 }
                 auto remote_value = remoteVariant.as<bool>();
-                if(remote_value != item->getBoolValue() ) // no change!
+                if(remote_value == item->getBoolValue() ) // no change!
                     continue; 
                 
                 configHasChanged = true;
@@ -473,6 +474,9 @@ SectionId getSectionIdFromString(const char *name) {
 bool saveConfigToFlash(){
 
     Serial.print("Saving JSON config to FLASH.... ");
+    #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+    AsyncSignalScanner::stopScanning();
+    #endif
 
 #ifdef ESP32
     if( LITTLEFS.exists(F("/tmp.json")) )
@@ -490,6 +494,9 @@ bool saveConfigToFlash(){
     if (bytes_written == 0)
     {
         Serial.println(F("failed!"));
+        #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+        AsyncSignalScanner::startScanning();
+        #endif
         return false;
     }
     else
@@ -505,6 +512,10 @@ bool saveConfigToFlash(){
 #endif
         Serial.println(F("OK"));
     }
+
+    #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+    AsyncSignalScanner::startScanning();
+    #endif
 
     return true;
 }

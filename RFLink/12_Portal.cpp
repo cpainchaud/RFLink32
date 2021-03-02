@@ -71,12 +71,11 @@ void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     }
 
     if( message.length() > 0 ) {
-        response += message;
+        response += message + " \"}";
     } else {
-        response += " null";
+        response += " null }";
     }
 
-    response += " \"}";
     request->send(200, "application/json", response);
 }
 
