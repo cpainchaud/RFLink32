@@ -8,6 +8,10 @@
 #ifndef RFLink_h
 #define RFLink_h
 
+#include <ArduinoJson.h>
+#include <time.h>
+#include <sys/time.h>
+
 #define BUILDNR 0x05 // 0x07       // shown in version
 #define REVNR 0x01   // 0X42       // shown in version and startup string
 
@@ -23,7 +27,6 @@
 
 // WIFI
 #define WIFI_PWR_0 20 // 0~20.5dBm
-//#define RFLINK_WIFIMANAGER_ENABLED // Enable if you want easy setup vs having it all hardcoded in your code
 //#define RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON 32 // if you want start the configuration portal with a button/pin
 #ifndef RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS
 #define RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS 1000 // milliseconds
@@ -45,8 +48,15 @@
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 namespace RFLink {
+
+    extern struct timeval timeAtBoot; // used to calculate update
+
+    void setup();
+
     bool executeCliCommand(const char *cmd);
     void sendMsgFromBuffer();
+
+    void getStatusJsonString(JsonObject &output);
 }
 
 void CallReboot(void);

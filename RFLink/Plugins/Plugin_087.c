@@ -146,7 +146,7 @@ boolean PluginTX_087(byte function, const char *string)
 
        //Plugin_087(0,"");
        //enableTX();
-       RawSendRF(&signal);
+       Signal::RawSendRF(&signal);
        
        signal.Number=0;
        success = true;

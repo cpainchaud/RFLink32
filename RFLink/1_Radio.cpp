@@ -11,29 +11,14 @@
 #include "4_Display.h"
 #include "2_Signal.h"
 
-uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
-uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
-uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
-uint8_t PIN_RF_RX_GND = PIN_RF_RX_GND_0;
-uint8_t PIN_RF_RX_NA = PIN_RF_RX_NA_0;
-uint8_t PIN_RF_RX_DATA = PIN_RF_RX_DATA_0;
-boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
-uint8_t PIN_RF_TX_PMOS = PIN_RF_TX_PMOS_0;
-uint8_t PIN_RF_TX_NMOS = PIN_RF_TX_NMOS_0;
-uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
-uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
-uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
-uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
 
-Radio_State current_State = Radio_NA;
-
-#ifdef RFM69_ENABLED
 
 #include <SPI.h>
 #include "RFM69/RFM69OOK.h"
 #include "RFM69/RFM69OOKregisters.h"
 RFM69OOK radio;
 
+#ifdef RFM69_ENABLED
 void set_Radio_mode(Radio_State new_State)
 {
   if (current_State != new_State)
@@ -84,7 +69,26 @@ void disableRX();
 void enableTX();
 void disableTX();
 
-void set_Radio_mode(Radio_State new_State)
+namespace RFLink { namespace Radio  {
+
+  uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
+  uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
+  uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
+  uint8_t PIN_RF_RX_GND = PIN_RF_RX_GND_0;
+  uint8_t PIN_RF_RX_NA = PIN_RF_RX_NA_0;
+  uint8_t PIN_RF_RX_DATA = PIN_RF_RX_DATA_0;
+  boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
+  uint8_t PIN_RF_TX_PMOS = PIN_RF_TX_PMOS_0;
+  uint8_t PIN_RF_TX_NMOS = PIN_RF_TX_NMOS_0;
+  uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
+  uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
+  uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
+  uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
+
+  States current_State = Radio_NA;
+
+
+void set_Radio_mode(States new_State)
 {
   if (current_State != new_State)
   {
@@ -200,16 +204,16 @@ void enableRX()
   if (PULLUP_RF_RX_DATA)
     pinMode(PIN_RF_RX_DATA, INPUT_PULLUP); // Initialise in/output ports
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
-  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-  AsyncSignalScanner::startScanning();
-  #endif // RFLINK_ASYNC_RECEIVER_ENABLED
+  if(RFLink::Signal::params::async_mode_enabled)
+    RFLink::Signal::AsyncSignalScanner::startScanning();
+ 
 }
 
 void disableRX()
 {
-  #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-  AsyncSignalScanner::stopScanning();
-  #endif // RFLINK_ASYNC_RECEIVER_ENABLED
+  if( RFLink::Signal::params::async_mode_enabled )
+    RFLink::Signal::AsyncSignalScanner::stopScanning();
+  
   // RX pins
   pinMode(PIN_RF_RX_DATA, INPUT);
   pinMode(PIN_RF_RX_NA, INPUT);
@@ -252,4 +256,9 @@ void disableTX()
   pinMode(PIN_RF_TX_VCC, INPUT);
   pinMode(PIN_RF_TX_GND, INPUT);
 }
-#endif // RFM69_ENABLED
+
+
+}}
+
+
+#endif // not RFM69_ENABLED

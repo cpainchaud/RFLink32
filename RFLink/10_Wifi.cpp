@@ -1,4 +1,4 @@
-#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+#if defined(RFLINK_WIFI_ENABLED)
 
 #include "RFLink.h"
 #include <Arduino.h>
@@ -11,9 +11,8 @@
 #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
 #include "2_Signal.h"
 #endif
-#ifdef MQTT_ENABLED
-#include "6_WiFi_MQTT.h"
-#endif
+
+#include "6_MQTT.h"
 
 #ifdef RFLINK_AUTOOTA_ENABLED
 #include <HTTPClient.h>
@@ -21,17 +20,7 @@
 #endif
 
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
-#include "WiFiManager.h"
-WiFiManager wifiManager;
-  #ifdef ESP32
-  #include "ArduinoNvs.h"
-  #endif
-#endif
 
-#if defined(ESP32) && defined(MQTT_ENABLED) && defined(RFLINK_WIFIMANAGER_ENABLED) // to store MQTT configuration in Flash
-#include "ArduinoNvs.h"
-#endif
 
 #ifdef RFLINK_AUTOOTA_ENABLED
 const String autoota_url_paramid("autoota_url");
@@ -40,251 +29,251 @@ const String autoota_url_paramid("autoota_url");
 namespace RFLink { namespace Wifi {
 
 namespace params {
-    String SSID = WIFI_SSID;
-    String PSWD = WIFI_PSWD;
-    #ifndef USE_DHCP
-    String IP = WIFI_IP;
-    String DNS = WIFI_DNS;
-    String GATEWAY = WIFI_GATEWAY;
-    String SUBNET = WIFI_SUBNET;
-    #endif
+
+    bool client_enabled;
+    String client_ssid;
+    String client_password;
+
+    bool client_dhcp_enabled;
+    String client_ip;
+    String client_mask;
+    String client_gateway;
+    String client_dns;
+
+    bool AP_enabled;
+    String AP_ssid;
+    String AP_password;
+    String AP_ip;
+    String AP_network;
+    String AP_mask;
 }
 
+bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
+bool accessPointParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
 
-#ifdef RFLINK_WIFIMANAGER_ENABLED
+// All json variable names
+const char json_name_client_enabled[] = "client_enabled";
+const char json_name_client_dhcp_enabled[] = "client_dhcp_enabled";
+const char json_name_client_ssid[] = "client_ssid";
+const char json_name_client_password[] = "client_password";
+const char json_name_client_ip[] = "client_ip";
+const char json_name_client_mask[] = "client_mask";
+const char json_name_client_gateway[] = "client_gateway";
+const char json_name_client_dns[] = "client_dns";
 
-#if defined(MQTT_ENABLED) // to store MQTT configuration in Flash
-const String mqtt_s_paramid("mqtt_s");
-const String mqtt_p_paramid("mqtt_p");
-const String mqtt_id_paramid("mqtt_id");
-const String mqtt_u_paramid("mqtt_u");
-const String mqtt_sec_paramid("mqtt_sec");
-WiFiManagerParameter mqtt_s_param(mqtt_s_paramid.c_str(), "hostname or ip",  Mqtt::params::SERVER.c_str(), 40);
-WiFiManagerParameter mqtt_p_param(mqtt_p_paramid.c_str(), "port",  Mqtt::params::PORT.c_str(), 6);
-WiFiManagerParameter mqtt_id_param(mqtt_id_paramid.c_str(), "id", Mqtt::params::ID.c_str(), 20);
-WiFiManagerParameter mqtt_u_param(mqtt_u_paramid.c_str(), "user", Mqtt::params::USER.c_str(), 20);
-WiFiManagerParameter mqtt_sec_param(mqtt_sec_paramid.c_str(), "mqtt password", Mqtt::params::PSWD.c_str(), 20);
+const char json_name_ap_enabled[] = "ap_enabled";
+const char json_name_ap_ssid[] = "ap_ssid";
+const char json_name_ap_password[] = "ap_password";
+const char json_name_ap_ip[] = "ap_ip";
+const char json_name_ap_network[] = "ap_network";
+const char json_name_ap_mask[] = "ap_mask";
+// end of json variable names
 
-void copyParamsFromWM_to_MQTT(){
-  auto params = wifiManager.getParameters();
-  for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    auto currentId =  params[i]->getID();
+
+Config::ConfigItem configItems[] =  {
+  Config::ConfigItem(json_name_client_enabled,      Config::SectionId::Wifi_id, false, clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id, true, clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_ssid,         Config::SectionId::Wifi_id, "My Home Wifi", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_password,     Config::SectionId::Wifi_id, "inputyourown", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_ip,           Config::SectionId::Wifi_id, "192.168.0.200", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_mask,         Config::SectionId::Wifi_id, "255.255.255.0", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_gateway,      Config::SectionId::Wifi_id, "192.168.0.1", clientParamsUpdatedCallback),
+  Config::ConfigItem(json_name_client_dns,          Config::SectionId::Wifi_id, "192.168.0.1", clientParamsUpdatedCallback),
+
+  Config::ConfigItem(json_name_ap_enabled,  Config::SectionId::Wifi_id, true, accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_ssid,     Config::SectionId::Wifi_id, "ESPLink-AP", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_password, Config::SectionId::Wifi_id, "", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_ip,       Config::SectionId::Wifi_id, "192.168.4.1", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_network,  Config::SectionId::Wifi_id, "192.168.4.0", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_mask,     Config::SectionId::Wifi_id, "255.255.255.0", accessPointParamsUpdatedCallback),
+
+  Config::ConfigItem()
+};
+
+void refreshClientParametersFromConfig(bool triggerChanges=true) {
+
+    Config::ConfigItem *item;
+    bool changesDetected = false;
+
+    item = Config::findConfigItem(json_name_client_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::client_enabled) {
+      changesDetected = true;
+      params::client_enabled = item->getBoolValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::client_dhcp_enabled) {
+      changesDetected = true;
+      params::client_dhcp_enabled = item->getBoolValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_ssid, Config::SectionId::Wifi_id);
+    if( params::client_ssid != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_ssid = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_password, Config::SectionId::Wifi_id);
+    if( params::client_password != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_password = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_ip, Config::SectionId::Wifi_id);
+    if( params::client_ip != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_ip = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_mask, Config::SectionId::Wifi_id);
+    if( params::client_mask != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_mask = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_gateway, Config::SectionId::Wifi_id);
+    if( params::client_gateway != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_gateway = item->getCharValue();
+    }
+
+    item = Config::findConfigItem(json_name_client_dns, Config::SectionId::Wifi_id);
+    if( params::client_dns != item->getCharValue() ) {
+      changesDetected = true;
+      params::client_dns = item->getCharValue();
+    }
+
+    // Applying changes will happen in mainLoop()
+    if(triggerChanges && changesDetected) {
+      clientParamsHaveChanged = true;
+      Serial.println("Client Wifi settings haver changed and will be applied at next loop");
+    }
+}
+
+void refreshAccessPointParametersFromConfig(bool triggerChanges=true) {
+
+    Config::ConfigItem *item;
+    bool changesDetected = false;
+
+    item = Config::findConfigItem(json_name_ap_enabled, Config::SectionId::Wifi_id);
+    if( item->getBoolValue() != params::AP_enabled) {
+      changesDetected = true;
+      params::AP_enabled = item->getBoolValue();
+    }
     
-    if(mqtt_s_paramid == currentId) {
-      Mqtt::params::SERVER =  params[i]->getValue();
-      continue;
+    item = Config::findConfigItem(json_name_ap_ssid, Config::SectionId::Wifi_id);
+    if( params::AP_ssid != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_ssid = item->getCharValue();
     }
 
-    if(mqtt_p_paramid == currentId) {
-      Mqtt::params::PORT =  params[i]->getValue();
-      continue;
+    item = Config::findConfigItem(json_name_ap_password, Config::SectionId::Wifi_id);
+    if( params::AP_password != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_password = item->getCharValue();
     }
 
-    if(mqtt_id_paramid == currentId) {
-      Mqtt::params::ID =  params[i]->getValue();
-      continue;
+    item = Config::findConfigItem(json_name_ap_ip, Config::SectionId::Wifi_id);
+    if( params::AP_ip != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_ip = item->getCharValue();
     }
 
-    if(mqtt_u_paramid == currentId) {
-      Mqtt::params::USER =  params[i]->getValue();
-      continue;
+    item = Config::findConfigItem(json_name_ap_network, Config::SectionId::Wifi_id);
+    if( params::AP_network != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_network = item->getCharValue();
     }
 
-    if(mqtt_sec_paramid == currentId) {
-      Mqtt::params::PSWD =  params[i]->getValue();
-      continue;
+    item = Config::findConfigItem(json_name_ap_mask, Config::SectionId::Wifi_id);
+    if( params::AP_mask != item->getCharValue() ) {
+      changesDetected = true;
+      params::AP_mask = item->getCharValue();
     }
-  }
-}
-#endif
 
-
-#if defined(RFLINK_AUTOOTA_ENABLED)
-WiFiManagerParameter autoota_url_param(autoota_url_paramid.c_str(), "url_here",  AutoOTA_URL, 60);
-#endif
-
-
-#if defined(ESP32)
-void paramsUpdatedCallback(){
-  bool someParamsChanged = false;
-  NVS.begin();
-  auto params = wifiManager.getParameters();
-  for(int i=0; i<wifiManager.getParametersCount(); i++) {
-    WiFiManagerParameter* currentParameter = params[i];
-    if(NVS.getString(currentParameter->getID())!=currentParameter->getValue())
-      someParamsChanged = true;
-    NVS.setString(currentParameter->getID(), currentParameter->getValue());
-  }
-  NVS.commit();
-
-  if(someParamsChanged) {
-    #if defined(MQTT_ENABLED)
-    copyParamsFromWM_to_MQTT();
-    Serial.println("Some parameters have changed, restart Mqtt Client is requested");
-    RFLink::Mqtt::reconnect(1, true);
-    #endif
-  }
-}
-#else
-void paramsUpdatedCallback(){
-  #if defined(MQTT_ENABLED)
-  copyParamsFromWM_to_MQTT();
-  Serial.println("Some parameters have changed, restart Mqtt Client is requested");
-  RFLink::Mqtt::reconnect(1, true);
-  #endif
-}
-#endif
-
-namespace types {
-  enum portalActions {
-    None, webRequested, CaptiveRequested, shutdownRequested
-  };
-}
-namespace vars {
-  types::portalActions portalAction = types::portalActions::None;
-}
-
-#if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) and (RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN)
-void IRAM_ATTR managePortalPinInterrupt() {
-  static int previousState = 0;                 // track button state
-  static unsigned long buttonPressedTime = 0;   // track when button was pressed
-
-  unsigned long now = millis();
-
-  auto state = digitalRead(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
-
-  if(previousState == state)
-    return;
-
-  if( previousState == 0 ) {
-    buttonPressedTime = now;
-  }
-  else {
-    unsigned long pressDuration = now - buttonPressedTime;
-
-    if(pressDuration > 5) {
-      if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-        vars::portalAction = types::shutdownRequested;
-      }
-      else if(pressDuration > RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS ) {
-        vars::portalAction = types::CaptiveRequested;
-      }else{
-        vars::portalAction = types::webRequested;
-      }
-      detachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
+    // Applying changes will happen in mainLoop()
+    if(triggerChanges && changesDetected) {
+      accessPointParamsHaveChanged = true;
+      Serial.println("AP Wifi settings haver changed and will be applied at next loop");
     }
-  }
 
-  previousState = state;
-}
-#endif
-
-void setup_WIFI(){
-
-  const char* menu[] = {"wifi","param","info","close","sep","erase","restart","exit"}; 
-
-  #if defined(RFLINK_WIFIMANAGER_ENABLED)
-    #if defined(MQTT_ENABLED)  
-    wifiManager.addParameter(&mqtt_s_param);
-    wifiManager.addParameter(&mqtt_p_param);
-    wifiManager.addParameter(&mqtt_id_param);
-    wifiManager.addParameter(&mqtt_u_param);
-    wifiManager.addParameter(&mqtt_sec_param);
-
-      #if defined(ESP32) // ESP8266 doesn't support NVS
-      NVS.begin();
-      auto params = wifiManager.getParameters();
-      for(int i=0; i<wifiManager.getParametersCount(); i++) {
-        auto currentParameter = params[i];
-        auto currentId = currentParameter->getID();
-        auto value = NVS.getString(currentId);
-        if(value.length() > 0)
-          currentParameter->setValue(value.c_str(), currentParameter->getValueLength());
-      }
-      NVS.close();
-      #endif
-    #endif // MQTT_ENABLED
-
-    #if defined(RFLINK_AUTOOTA_ENABLED)
-    wifiManager.addParameter(&autoota_url_param);
-      #if defined(ESP32) // ESP8266 doesn't support NVS
-        NVS.begin();
-        auto value = NVS.getString(autoota_url_paramid);
-        if(value.length() > 0)
-          autoota_url_param.setValue(value.c_str(), autoota_url_param.getValueLength());
-        NVS.close();
-      #endif
-    #endif
-
-  wifiManager.setSaveParamsCallback(paramsUpdatedCallback); // if Config portal is used to change paramaters, we must know about it
-  #endif
-
-  wifiManager.setMenu(menu, sizeof(menu));
 }
 
-void start_WIFI(){
-  wifiManager.autoConnect();
 
-  #if (defined(ESP32) || defined(ESP8266)) && defined(MQTT_ENABLED)
-  Mqtt::params::SERVER = mqtt_s_param.getValue();
-  Mqtt::params::PORT = mqtt_p_param.getValue();
-  Mqtt::params::USER = mqtt_u_param.getValue();
-  Mqtt::params::PSWD = mqtt_sec_param.getValue();
-  Mqtt::params::ID = mqtt_id_param.getValue();
-  #endif
-
-  #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    #ifdef ESP8266
-    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT);           // ESP8266 doesnt support PULLDOWN/UP
-    #else
-    pinMode(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, INPUT_PULLDOWN);
-    #endif
-    Serial.print("Config portal can be started on demand via PIN #");
-    Serial.println(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON);
-    attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
-  #endif
+void clientParamsUpdatedCallback() {
+  refreshClientParametersFromConfig();
 }
-#else // Regular wifi is used
+
+void accessPointParamsUpdatedCallback() {
+  refreshAccessPointParametersFromConfig();
+}
+
+
 static String WIFI_PWR = String(WIFI_PWR_0);
 
-void setup_WIFI()
-{
-    WiFi.persistent(false);
-    WiFi.setAutoReconnect(true);
-    #ifdef ESP32
-    WiFi.setTxPower(WIFI_POWER_11dBm);
-    #elif ESP8266
-    WiFi.setSleepMode(WIFI_MODEM_SLEEP);
-    WiFi.setOutputPower(WIFI_PWR.toInt());
-    #endif // ESP
 
-    // For Static IP
-    #ifndef USE_DHCP
-    WiFi.config(ipaddr_addr(params::IP.c_str()), ipaddr_addr(params::GATEWAY.c_str()), ipaddr_addr(params::SUBNET.c_str()));
-    #endif // USE_DHCP
+
+void resetClientWifi() {
+  if(params::client_enabled) {
+
+    // We start by connecting to a WiFi network
+    Serial.print(F("Trying to connect WIFI SSID "));
+    Serial.print(params::client_ssid.c_str());
+    Serial.println(F(". A status will be given whenever it occurs."));
+
+    if( !params::client_dhcp_enabled) {
+      IPAddress ip, gateway, mask, dns;
+
+      ip.fromString(params::client_ip);
+      gateway.fromString(params::client_gateway);
+      mask.fromString(params::client_mask);
+      dns.fromString(params::client_dns);
+
+      WiFi.config(ip, gateway, mask, dns );
+    
+    } else {
+      WiFi.config(IPAddress((uint32_t) 0), IPAddress((uint32_t) 0), IPAddress((uint32_t) 0));
+    }
+
+    delay(500);
+    if(!WiFi.isConnected() || WiFi.SSID() != params::client_ssid) {
+      WiFi.begin(params::client_ssid.c_str(), params::client_password.c_str());
+    }
+
+    WiFi.setAutoConnect(true);
+    WiFi.setAutoReconnect(true);
+
+  }  
+  else {
+    Serial.println("WiFi Client mode will be disconnected");
+    WiFi.setAutoConnect(false);
+    WiFi.setAutoReconnect(false);
+    WiFi.disconnect();
+  }
+
 }
 
 void start_WIFI()
 {
-  WiFi.mode(WIFI_STA);
-
-  // We start by connecting to a WiFi network
-  Serial.print(F("WiFi SSID :\t\t"));
-  Serial.println(params::SSID.c_str());
-  Serial.print(F("WiFi Connection :\t"));
-  WiFi.begin(params::SSID.c_str(), params::PSWD.c_str());
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
+  if( params::AP_enabled && params::client_enabled) {
+    WiFi.mode(WIFI_AP_STA);
+  } else if(params::AP_enabled) {
+    WiFi.mode(WIFI_AP);
+  } else if (params::client_enabled) {
+    WiFi.mode(WIFI_STA);
   }
 
-  Serial.println(F("Established"));
-  Serial.print(F("WiFi IP :\t\t"));
-  Serial.println(WiFi.localIP());
-  Serial.print(F("WiFi RSSI :\t\t"));
-  Serial.println(WiFi.RSSI());
+  if( params::AP_enabled ) {
+    Serial.print("* WIFI AP starting ... ");
+    if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+      Serial.println("FAILED");
+    else
+      Serial.println("OK");
+  }
+
+  if(params::client_enabled) {
+    resetClientWifi();
+  }
 
 }
 
@@ -307,76 +296,199 @@ void setup_WIFI_OFF()
   WiFi.forceSleepBegin();
 #endif
 }
-#endif // WIFIMANAGER_ENABLED
 
-void setup() {
-    setup_WIFI();
-    start_WIFI();
+void reconnectServices() {
+  if(RFLink::Mqtt::params::enabled)
+    RFLink::Mqtt::reconnect(1, true);
+}
 
-    #ifdef RFLINK_OTA_ENABLED
-        #ifdef RFLINK_OTA_PASSWORD
-        ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
-        #endif
+#ifdef ESP32
+void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
+    Serial.println("Connected to AP!");
+ 
+    Serial.print("SSID: ");
+    for(int i=0; i<info.connected.ssid_len; i++){
+      Serial.print((char) info.connected.ssid[i]);
+    }
+ 
+    Serial.print("\nBSSID: ");
+    for(int i=0; i<6; i++){
+      Serial.printf("%02X", info.connected.bssid[i]);
+ 
+      if(i<5){
+        Serial.print(":");
+      }
+    }
+     
+    Serial.print("\nChannel: ");
+    Serial.println(info.connected.channel);
+ 
+    Serial.print("Auth mode: ");
+    Serial.println(info.connected.authmode);
 
-        #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-        // we must stop the Receiver from interrupting the OTA process
-        ArduinoOTA.onStart( [](){
-            Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
-            AsyncSignalScanner::stopScanning();
-            }
-        );
-        ArduinoOTA.onError( [](ota_error_t error){
-            Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
-            Serial.print(error);
-            Serial.println(" ,turning on Receiver");
-            AsyncSignalScanner::startScanning();
-            }
-        );
-        #endif // RFLINK_ASYNC_RECEIVER_ENABLED
-    ArduinoOTA.begin();
-    #endif // RFLINK_OTA_ENABLED
+}
+
+void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  reconnectServices();
+}
+
+void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.println("WiFi Client has lots its IP");
+}
+#endif //ESP32
+
+#ifdef ESP8266
+
+
+void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected& evt) {
+  Serial.println("Connected to AP!");
+ 
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+     
+  Serial.print("\nChannel: ");
+  Serial.println(WiFi.channel());
+    
+}
+void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
+  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  reconnectServices();
+}
+void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
+  Serial.println("WiFi Client has been disconnected");
+}
+#endif
+
+
+
+void setup()
+{
+
+  refreshClientParametersFromConfig(false);
+  refreshAccessPointParametersFromConfig(false);
+
+#ifdef ESP32
+  WiFi.onEvent(eventHandler_WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
+  WiFi.onEvent(eventHandler_WiFiStationGotIp, SYSTEM_EVENT_STA_GOT_IP);
+  WiFi.onEvent(eventHandler_WiFiStationLostIp, SYSTEM_EVENT_STA_LOST_IP);
+#endif // ESP32
+
+#ifdef ESP8266
+WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
+WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
+WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
+#endif
+
+#ifdef ESP32
+  WiFi.setTxPower(WIFI_POWER_11dBm);
+#elif ESP8266
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
+  WiFi.setOutputPower(WIFI_PWR.toInt());
+#endif // ESP
+
+  start_WIFI();
+
+#ifdef RFLINK_OTA_ENABLED
+#ifdef RFLINK_OTA_PASSWORD
+  ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
+#endif
+
+#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+  // we must stop the Receiver from interrupting the OTA process
+  ArduinoOTA.onStart([]() {
+    Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
+    AsyncSignalScanner::stopScanning();
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
+    Serial.print(error);
+    Serial.println(" ,turning on Receiver");
+    AsyncSignalScanner::startScanning();
+  });
+#endif // RFLINK_ASYNC_RECEIVER_ENABLED
+  ArduinoOTA.begin();
+#endif // RFLINK_OTA_ENABLED
 }
 
 void mainLoop() {
-    #ifdef RFLINK_WIFIMANAGER_ENABLED
-    wifiManager.process(); // required for non blocking portal
-        #if defined(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON) && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-        if( vars::portalAction != types::portalActions::None ) { 
-          if(vars::portalAction == types::portalActions::shutdownRequested) {
-            Serial.println("Button pressed, WifiManager portal will be shutdown");
-            wifiManager.stopConfigPortal();
-            wifiManager.stopWebPortal();
-          }
-          else if(vars::portalAction == types::portalActions::webRequested) {
-            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-              Serial.println("Button pressed (short) but portal is already running so no actions required");
-            }
-            else {
-              Serial.println("Button pressed (short), WebPortal will be started");
-              wifiManager.setConfigPortalBlocking(false);
-              wifiManager.startWebPortal();
-            }
-          }
-          else if(vars::portalAction == types::portalActions::CaptiveRequested) {
-            if( wifiManager.getWebPortalActive() ||  wifiManager.getConfigPortalActive() ) {
-              Serial.println("Button pressed (long) but portal is already running so no actions required");
-            }
-            else {
-              Serial.println("Button pressed (long), CaptivePortal will be started");
-              wifiManager.setConfigPortalBlocking(false);
-              wifiManager.startConfigPortal();
-            }
-          }
-          vars::portalAction = types::portalActions::None;
-          attachInterrupt(RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON, managePortalPinInterrupt, CHANGE);
-        }
-        #endif // RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON && RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON != NOT_A_PIN
-    #endif // RFLINK_WIFIMANAGER_ENABLED
 
-    #if defined(RFLINK_OTA_ENABLED)
-    ArduinoOTA.handle();
+    if(accessPointParamsHaveChanged) {
+      accessPointParamsHaveChanged = false;
+
+      Serial.println("Appliying new Wifi AP settings");
+
+      #ifdef ESP32
+      bool isEnabled = ((WiFi.getMode() & WIFI_MODE_AP) != 0);
+
+      if(params::AP_enabled) {
+        if(!isEnabled) 
+          WiFi.enableAP(true);
+
+        if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+          Serial.println("WIFI AP start FAILED");
+        else
+          Serial.println("WIFI AP started");
+      } else {
+        Serial.println("Shutting down AP");
+        WiFi.enableAP(false);
+        }
     #endif
+    #ifdef ESP8266
+    if(params::AP_enabled) {
+        WiFi.enableAP(true);
+        if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+          Serial.println("WIFI AP start FAILED");
+        else
+          Serial.println("WIFI AP started");
+    } else {
+      Serial.println("Shutting down AP");
+      WiFi.enableAP(false);
+    }
+    #endif
+  } // end of accessPointParamsHaveChanges
+
+  if( clientParamsHaveChanged ) {
+    clientParamsHaveChanged = 0;
+    resetClientWifi();
+  }
+
+
+  #if defined(RFLINK_OTA_ENABLED)
+  ArduinoOTA.handle();
+  #endif
+
+} // end of mainLoop()
+
+void getStatusJsonString(JsonObject &output) {
+
+  auto && network = output.createNestedObject("network");
+
+  auto && wifi_ap = network.createNestedObject("wifi_ap");
+
+  if(params::AP_enabled) {
+    wifi_ap["status"] = "enabled";
+  } else {
+    wifi_ap["status"] = "disabled";
+  }
+
+  auto && wifi_client = network.createNestedObject("wifi_client");
+
+  if(params::client_enabled) {
+    if(WiFi.isConnected()) {
+      wifi_client["status"] = "connected";
+      wifi_client["ip"] = WiFi.localIP().toString();
+      wifi_client["netmask"] = WiFi.subnetMask().toString();
+      wifi_client["dns"] = "unknown";
+    } else {
+      wifi_ap["status"] = "disconnected";
+    }
+  } else {
+    wifi_client["status"] = "disabled";
+  }
+
 }
+
 
 } // end of Wifi namespace
 
@@ -458,6 +570,5 @@ namespace AutoOTA {
 
 } // end RFLink namespace
 
-
-#endif // RFLINK_WIFIMANAGER_ENABLED || RFLINK_WIFI_ENABLED
+#endif // RFLINK_WIFI_ENABLED
 

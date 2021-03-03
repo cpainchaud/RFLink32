@@ -9,6 +9,7 @@
 #define Radio_h
 
 #include <Arduino.h>
+#include <11_Config.h>
 
 #define TRANSMITTER_STABLE_DELAY_US 500 // 500        // Delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define PULLUP_RF_RX_DATA_0 false       // false      // Sometimes a pullup in needed on RX data pin
@@ -21,19 +22,6 @@
 
 // PIN Definition
 //
-extern uint8_t PIN_RF_RX_PMOS;
-extern uint8_t PIN_RF_RX_NMOS;
-extern uint8_t PIN_RF_RX_VCC;
-extern uint8_t PIN_RF_RX_GND;
-extern uint8_t PIN_RF_RX_NA;
-extern uint8_t PIN_RF_RX_DATA;
-extern uint8_t PIN_RF_TX_PMOS;
-extern uint8_t PIN_RF_TX_NMOS;
-extern uint8_t PIN_RF_TX_VCC;
-extern uint8_t PIN_RF_TX_GND;
-extern uint8_t PIN_RF_TX_NA;
-extern uint8_t PIN_RF_TX_DATA;
-extern boolean PULLUP_RF_RX_DATA;
 
 #ifdef ESP8266
 // ESP8266 D1 Mini
@@ -57,7 +45,7 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_RX_VCC_0 NOT_A_PIN         // Power to the receiver on this pin
 #define PIN_RF_RX_GND_0 NOT_A_PIN         // Ground to the receiver on this pin
 #define PIN_RF_RX_NA_0 NOT_A_PIN          // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA_0 13        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_DATA_0 21        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
 #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
 #define PIN_RF_TX_NMOS_0 4         // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 NOT_A_PIN          // +5 volt / Vcc power to the transmitter on this pin
@@ -96,21 +84,54 @@ extern boolean PULLUP_RF_RX_DATA;
 #define PIN_RF_TX_DATA_0 14        // Data to the 433Mhz transmitter on this pin
 #endif
 
-enum Radio_State
-{
-    Radio_OFF,
-    Radio_RX,
-    Radio_TX,
-    Radio_NA
-};
 
-void enableRX();
-void disableRX();
-void enableTX();
-void disableTX();
 
-void set_Radio_mode(Radio_State new_state);
-#if (defined(ESP8266) || defined(ESP32))
-void show_Radio_Pin();
-#endif // ESP8266 || ESP32
+namespace RFLink { namespace Radio {
+
+    enum States
+    {
+        Radio_OFF,
+        Radio_RX,
+        Radio_TX,
+        Radio_NA
+    };
+
+    enum HardwareType
+    {
+        HW_basic_t,
+        HW_RFM69_t,
+    };
+
+    extern Config::ConfigItem configItems[];
+
+    extern uint8_t PIN_RF_RX_PMOS;
+    extern uint8_t PIN_RF_RX_NMOS;
+    extern uint8_t PIN_RF_RX_VCC;
+    extern uint8_t PIN_RF_RX_GND;
+    extern uint8_t PIN_RF_RX_NA;
+    extern uint8_t PIN_RF_RX_DATA;
+    extern uint8_t PIN_RF_TX_PMOS;
+    extern uint8_t PIN_RF_TX_NMOS;
+    extern uint8_t PIN_RF_TX_VCC;
+    extern uint8_t PIN_RF_TX_GND;
+    extern uint8_t PIN_RF_TX_NA;
+    extern uint8_t PIN_RF_TX_DATA;
+    extern boolean PULLUP_RF_RX_DATA;
+
+    
+    void setup();
+    void paramsUpdatedCallback();
+    void refreshParametersFromConfig(bool triggerChanges=true);
+
+    void set_Radio_mode(States new_state);
+    void show_Radio_Pin();
+    
+    void enableRX();
+    void disableRX();
+    void enableTX();
+    void disableTX();
+
+}}
+
+
 #endif // Radio_h

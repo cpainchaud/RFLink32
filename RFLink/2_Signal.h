@@ -9,6 +9,7 @@
 #define Signal_h
 
 #include <Arduino.h>
+#include "11_Config.h"
 
 //#define RFLINK_ASYNC_RECEIVER_ENABLED          // enable if you prefer interrupt based receiver over 'loop' based one
 #define RAW_BUFFER_SIZE 292        // 292        // Maximum number of pulses that is received in one go.
@@ -52,34 +53,67 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
 #endif
 
 
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
-namespace AsyncSignalScanner {
-    extern RawSignalStruct RawSignal;                 // Currently proccessed signal
-    extern unsigned long int lastChangedState_us;     // time last state change occured
-    extern unsigned long int nextPulseTimeoutTime_us; // when current pulse will timeout
-    extern bool scanningEnabled;                      // 
-
-    void startScanning();
-    void stopScanning();
-    void clearAllTimers();
-    void IRAM_ATTR RX_pin_changed_state();
-    void onPulseTimerTimeout();
-};
-#else
-extern RawSignalStruct RawSignal;
-#endif // RFLINK_ASYNC_RECEIVER_ENABLED
-
 extern unsigned long SignalCRC;   // holds the bitstream value for some plugins to identify RF repeats
 extern unsigned long SignalCRC_1; // holds the previous SignalCRC (for mixed burst protocols)
 extern byte SignalHash;           // holds the processed plugin number
 extern byte SignalHashPrevious;   // holds the last processed plugin number
 extern unsigned long RepeatingTimer;
 
-boolean FetchSignal();
-boolean ScanEvent(void);
-// void RFLinkHW(void);
-void RawSendRF(RawSignalStruct *signal);
+namespace RFLink {
+  namespace Signal {
 
-void AC_Send(unsigned long data, byte cmd);
+    extern RawSignalStruct RawSignal;   
+
+    namespace params {
+      // All json variable names
+      extern bool async_mode_enabled;
+      extern unsigned short int sample_rate;
+      extern unsigned long int min_raw_pulses;
+      extern unsigned long int seek_timeout;        // MS
+      extern unsigned long int min_preamble;        // US
+      extern unsigned long int min_pulse_len;       // US
+      extern unsigned long int signal_end_timeout;  // US
+      extern unsigned long int signal_repeat_time;  // MS
+      extern unsigned long int scan_high_time;      // MS 
+    }
+
+    namespace counters {
+      
+    }
+
+    extern Config::ConfigItem configItems[];
+
+    void setup();
+    void paramsUpdatedCallback();
+    void refreshParametersFromConfig(bool triggerChanges=true);
+    void RawSendRF(RawSignalStruct *signal);
+    void AC_Send(unsigned long data, byte cmd);
+
+    bool ScanEvent();
+
+    namespace AsyncSignalScanner {
+      extern unsigned long int lastChangedState_us;     // time last state change occured
+      extern unsigned long int nextPulseTimeoutTime_us; // when current pulse will timeout
+      extern bool scanningStopped;                      // 
+
+      void enableAsyncReceiver();
+      void disableAsyncReceiver();
+      void startScanning();
+      void stopScanning();
+      void clearAllTimers();
+      void IRAM_ATTR RX_pin_changed_state();
+      void onPulseTimerTimeout();
+
+      inline bool isStopped() {
+        return scanningStopped;
+      };
+
+      inline bool isEnabled() {
+        return params::async_mode_enabled;
+      };
+  };
+
+  } // end of ns Signal
+} //  end of ns RFLink
 
 #endif

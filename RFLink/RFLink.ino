@@ -3,7 +3,7 @@
 // * Portions Free Software 2018..2020 StormTeam - Marc RIVES
 // * Portions Free Software 2015..2016 StuntTeam - (RFLink R29~R33)
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
-// * Portions GPLv3 2021 Christophe Painchaud Async Receiver (Async Receiver)
+// * Portions GPLv3 2021 Christophe Painchaud
 // *
 // *                                       RFLink-esp
 // *
@@ -24,10 +24,12 @@
 #include "3_Serial.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
-#include "6_WiFi_MQTT.h"
+#include "6_MQTT.h"
 #include "8_OLED.h"
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
+#include "11_Config.h"
+#include "12_Portal.h"
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -57,88 +59,15 @@ void CallReboot(void)
 
 void setup()
 {
-#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
-  // Low Power Arduino
-  ADCSRA = 0;            // disable ADC
-  power_all_disable();   // turn off all modules
-  power_timer0_enable(); // Timer 0
-  power_usart0_enable(); // UART
-  delay(250);            // Wait ESP-01S
-#ifdef RFM69_ENABLED
-  power_spi_enable(); // SPI
-#endif
-#elif defined(ESP32)
-  btStop();
-#endif
-
-  delay(250);         // Time needed to switch back from Upload to Console
-  Serial.begin(BAUD); // Initialise the serial port
-
-#if (defined(ESP32) || defined(ESP8266))
-  Serial.println(); // ESP "Garbage" message
-  Serial.print(F("Arduino IDE Version :\t"));
-  Serial.println(ARDUINO);
-#endif
-#ifdef ESP8266
-  Serial.print(F("ESP CoreVersion :\t"));
-  Serial.println(ESP.getCoreVersion());
-#endif // ESP8266
-  Serial.print(F("Sketch File :\t\t"));
-  Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
-  Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
-
-
-#if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
-RFLink::Wifi::setup();
-#endif // RFLINK_WIFIMANAGER_ENABLED
-
-#ifdef MQTT_ENABLED
-  RFLink::Mqtt::setup_MQTT();
-  RFLink::Mqtt::reconnect(1);
-#endif // MQTT_ENABLED
-
-PluginInit();
-PluginTXInit();
-set_Radio_mode(Radio_OFF);
-
-#if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
-  show_Radio_Pin();
-#endif // ESP8266 || ESP32
-
-#ifdef OLED_ENABLED
-  setup_OLED();
-#endif
-
-  display_Header();
-  display_Splash();
-  display_Footer();
-
-#ifdef SERIAL_ENABLED
-  Serial.print(pbuffer);
-#endif
-#ifdef OLED_ENABLED
-  splash_OLED();
-#endif
-#ifdef MQTT_ENABLED
-  RFLink::Mqtt::publishMsg();
-#endif
-  pbuffer[0] = 0;
-  set_Radio_mode(Radio_RX);
-
-#ifdef RFLINK_SERIAL2NET_ENABLED
-RFLink::Serial2Net::startServer();
-#endif // RFLINK_SERIAL2NET_ENABLED
-
+  RFLink::setup();
 }
 
 void loop()
 {
-  #ifdef MQTT_ENABLED
   RFLink::Mqtt::checkMQTTloop();
   RFLink::sendMsgFromBuffer();
-  #endif
 
-  #if defined(RFLINK_WIFIMANAGER_ENABLED) || defined(RFLINK_WIFI_ENABLED)
+  #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::mainLoop();
   #endif
 
@@ -150,11 +79,108 @@ void loop()
   readSerialAndExecute();
   #endif
 
-  if (ScanEvent())
+  if (RFLink::Signal::ScanEvent())
     RFLink::sendMsgFromBuffer();
 }
 
 namespace RFLink {
+
+  struct timeval timeAtBoot;
+
+  void setup() {
+
+    if (gettimeofday(&timeAtBoot, NULL)!= 0) {
+        Serial.println("Failed to obtain time");
+    }
+
+    #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
+    // Low Power Arduino
+    ADCSRA = 0;            // disable ADC
+    power_all_disable();   // turn off all modules
+    power_timer0_enable(); // Timer 0
+    power_usart0_enable(); // UART
+    delay(250);            // Wait ESP-01S
+  #ifdef RFM69_ENABLED
+    power_spi_enable(); // SPI
+  #endif
+  #elif defined(ESP32)
+    btStop();
+  #endif
+
+    delay(250);         // Time needed to switch back from Upload to Console
+    Serial.begin(BAUD); // Initialise the serial port
+
+  #if (defined(ESP32) || defined(ESP8266))
+    Serial.println(); // ESP "Garbage" message
+    Serial.print(F("Arduino IDE Version :\t"));
+    Serial.println(ARDUINO);
+  #endif
+  #ifdef ESP32
+    Serial.print(F("ESP SDK version:\t"));
+    Serial.println(ESP.getSdkVersion());
+  #endif
+  #ifdef ESP8266
+    Serial.print(F("ESP CoreVersion :\t"));
+    Serial.println(ESP.getCoreVersion());
+  #endif // ESP8266
+    Serial.print(F("Sketch File :\t\t"));
+    Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
+    Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
+
+  #if defined(ESP32) || (ESP8266)
+  RFLink::Config::init();
+  #endif
+  RFLink::Signal::setup();
+
+  #if defined(RFLINK_WIFI_ENABLED)
+  RFLink::Wifi::setup();
+  RFLink::Portal::init();
+
+  RFLink::Mqtt::setup_MQTT();
+    //RFLink::Mqtt::reconnect(1);
+
+  #endif // RFLINK_WIFI_ENABLED
+
+
+  PluginInit();
+  PluginTXInit();
+
+  Radio::set_Radio_mode(Radio::Radio_OFF);
+
+  #if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
+    Radio::show_Radio_Pin();
+  #endif // ESP8266 || ESP32
+
+  #ifdef OLED_ENABLED
+    setup_OLED();
+  #endif
+
+    display_Header();
+    display_Splash();
+    display_Footer();
+
+  #ifdef SERIAL_ENABLED
+    Serial.print(pbuffer);
+  #endif
+  #ifdef OLED_ENABLED
+    splash_OLED();
+  #endif
+
+  #ifdef MQTT_ENABLED
+    //RFLink::Mqtt::publishMsg();
+  #endif
+
+    pbuffer[0] = 0;
+    Radio::set_Radio_mode(Radio::Radio_RX);
+
+
+  #ifdef RFLINK_WIFI_ENABLED
+    RFLink::Portal::start();
+    #ifdef RFLINK_SERIAL2NET_ENABLED
+      RFLink::Serial2Net::startServer();
+    #endif // RFLINK_SERIAL2NET_ENABLED
+  #endif
+  }
 
   void sendMsgFromBuffer()
   {
@@ -165,9 +191,9 @@ namespace RFLink {
         Serial.print(pbuffer);
     #endif
 
-    #ifdef MQTT_ENABLED
-        RFLink::Mqtt::publishMsg();
-    #endif
+
+    RFLink::Mqtt::publishMsg();
+  
 
     #ifdef RFLINK_SERIAL2NET_ENABLED
       RFLink::Serial2Net::broadcastMessage(pbuffer);
@@ -295,14 +321,14 @@ namespace RFLink {
           // -------------------------------------------------------
           // Handle Generic Commands / Translate protocol data into Nodo text commands
           // -------------------------------------------------------
-          set_Radio_mode(Radio_TX);
+          Radio::set_Radio_mode(Radio::Radio_TX);
 
           if (PluginTXCall(0, cmd))
             ValidCommand = 1;
           else // Answer that an invalid command was received?
             ValidCommand = 2;
 
-          set_Radio_mode(Radio_RX);
+          Radio::set_Radio_mode(Radio::Radio_RX);
         }
       }
     } // if > 7
@@ -320,6 +346,16 @@ namespace RFLink {
     return true;
   }
 
+  void getStatusJsonString(JsonObject &output) {
+
+    struct timeval now;
+    if (gettimeofday(&now, NULL)!= 0) {
+        Serial.println("Failed to obtain time");
+      }
+
+    output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
+
+  }
 
 }
 

@@ -23,18 +23,26 @@
 #define ATLANTIC_PLUGIN_ID 064
 #define PLUGIN_DESC_064 "Atlantic"
 #define ATLANTIC_PULSECOUNT 74
+#define ATLANTIC_PULSECOUNT_TOO_SHORT_BREAK 223
 
 #define ATLANTIC_PULSE_MID 600 / RAWSIGNAL_SAMPLE_RATE
 #define ATLANTIC_PULSE_MIN 300 / RAWSIGNAL_SAMPLE_RATE
 #define ATLANTIC_PULSE_MAX 900 / RAWSIGNAL_SAMPLE_RATE
+
+#define ATLANTIC_TOO_SHORT_BREAK_MIN_LENGTH 2500 / RAWSIGNAL_SAMPLE_RATE
 
 #ifdef PLUGIN_064
 #include "../4_Display.h"
 
 boolean Plugin_064(byte function, const char *string)
 {
-   if (RawSignal.Number != ATLANTIC_PULSECOUNT)
+   if (RawSignal.Number != ATLANTIC_PULSECOUNT && RawSignal.Number != ATLANTIC_PULSECOUNT_TOO_SHORT_BREAK)
       return false;
+
+   if(RawSignal.Number == ATLANTIC_PULSECOUNT_TOO_SHORT_BREAK) {
+      if( RawSignal.Pulses[75] < ATLANTIC_TOO_SHORT_BREAK_MIN_LENGTH )
+         return false;
+   }
 
    unsigned long bitstream = 0L; // Only the 32 first bits are processed
 
