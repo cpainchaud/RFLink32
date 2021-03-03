@@ -33,15 +33,15 @@
 
 #define PLUGIN_076_PULSE_COUNT 26
 
-#define PLUGIN_076_PREAMBLE 400
+#define PLUGIN_076_PREAMBLE 290
 #define PLUGIN_076_PREAMBLE_MIN 368
 #define PLUGIN_076_PREAMBLE_MAX 432
 
-#define PLUGIN_076_SHORT_PULSE = 270
+#define PLUGIN_076_SHORT_PULSE 290
 #define PLUGIN_076_SHORT_PULSE_MIN 180
 #define PLUGIN_076_SHORT_PULSE_MAX 464
 
-#define PLUGIN_078_LONG_PULSE 730
+#define PLUGIN_076_LONG_PULSE 710
 #define PLUGIN_076_LONG_PULSE_MIN 570
 #define PLUGIN_076_LONG_PULSE_MAX 850
 
@@ -156,8 +156,8 @@ boolean Plugin_076(byte function, const char *string)
     display_CMD(CMD_Single, CMD_On); // #ALL #ON
     display_Footer();
 
-    RawSignal.Repeats = 3;
-    RawSignal.Delay = 16;
+    RawSignal.Repeats = 4;
+    RawSignal.Delay = 15;
 
 
     return true;
@@ -170,19 +170,36 @@ boolean Plugin_076(byte function, const char *string)
 boolean  PluginTX_076(byte function, const char *string)
 {
     RawSignalStruct signal;
-    if (strncasecmp(InputBuffer_Serial + 3, "CAME-TOP432;", 8) == 0){
-        uint16_t code = 2162;
-        code = code << 4;
+
+    if (strncasecmp(InputBuffer_Serial + 3, "CAME-TOP432;", 11) == 0){
+
+        uint16_t code = 0x78d;
 
         signal.Number = PLUGIN_076_PULSE_COUNT;
-        signal.Repeats = 3;
+        signal.Repeats = 5;
         signal.Delay = 15;
-        signal.Multiply = 10;
+        signal.Multiply = RAWSIGNAL_SAMPLE_RATE;
 
-        signal.Pulses[1] = PLUGIN_076_PREAMBLE / signal.Multiply; 
+        signal.Pulses[1] = PLUGIN_076_PREAMBLE / signal.Multiply;
 
+        for(int i=0; i<12; i++){
+            unsigned long mask = 1;
+            mask = mask << (12 - i -1);
+            
+            if( (code & mask) != 0 ) {
+                signal.Pulses[2+i*2] = PLUGIN_076_SHORT_PULSE / signal.Multiply;
+                signal.Pulses[2+i*2+1] = PLUGIN_076_LONG_PULSE / signal.Multiply;
+            }
+            else {
+                signal.Pulses[2+i*2] = PLUGIN_076_LONG_PULSE / signal.Multiply;
+                signal.Pulses[2+i*2+1] = PLUGIN_076_SHORT_PULSE / signal.Multiply;
+            }
 
+        }
 
+       RawSendRF(&signal);
+       
+       signal.Number=0;
     }
     else
         return false;

@@ -129,7 +129,7 @@
 // -------------------
 // Misc
 // -------------------
-//#define PLUGIN_TX_076               // CAME TOP-432 Door Opener
+#define PLUGIN_TX_076               // CAME TOP-432 Door Opener
 // -------------------
 //       -=#=-
 // -------------------
