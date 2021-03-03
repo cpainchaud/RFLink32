@@ -81,15 +81,19 @@
 #define HC_PLUGIN_ID 011
 #define PLUGIN_DESC_011 "HomeConfort"
 #define HC_PULSECOUNT 100
-#define HC_PULSE_PREAMBLE 2400 / RAWSIGNAL_SAMPLE_RATE
-#define HC_PULSE_MID       500 / RAWSIGNAL_SAMPLE_RATE
-#define HC_PULSE_MAX       800 / RAWSIGNAL_SAMPLE_RATE
+#define HC_PULSE_PREAMBLE_D 2400
+#define HC_PULSE_MID_D 500
+#define HC_PULSE_MAX_D 800
 
 #ifdef PLUGIN_011
 #include "../4_Display.h"
 
 boolean Plugin_011(byte function, const char *string)
 {
+   const long HC_PULSE_PREAMBLE = HC_PULSE_PREAMBLE_D / RawSignal.Multiply;
+   const long HC_PULSE_MID = HC_PULSE_MID_D / RawSignal.Multiply;
+   const long HC_PULSE_MAX = HC_PULSE_MAX_D / RawSignal.Multiply;
+
   if (RawSignal.Number != HC_PULSECOUNT) // Incorrect pulse count
       return false;
   if (RawSignal.Pulses[1] < HC_PULSE_PREAMBLE )

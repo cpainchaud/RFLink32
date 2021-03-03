@@ -68,7 +68,7 @@
 #define WS1100_PULSECOUNT 94
 #define WS1200_PULSECOUNT 126
 
-#define ALECTOV3_PULSEMID 300 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV3_PULSEMID_D 300
 
 #ifdef PLUGIN_031
 #include "../4_Display.h"
@@ -80,6 +80,8 @@ boolean Plugin_031(byte function, const char *string)
 {
    if ((RawSignal.Number != WS1100_PULSECOUNT) && (RawSignal.Number != WS1200_PULSECOUNT))
       return false;
+
+   const long ALECTOV3_PULSEMID = ALECTOV3_PULSEMID_D / RawSignal.Multiply;
 
    unsigned long bitstream1 = 0L;
    unsigned long bitstream2 = 0L;

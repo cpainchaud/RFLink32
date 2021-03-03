@@ -35,7 +35,7 @@
 #define PLUGIN_DESC_008 "Kambrook"
 #define KAMBROOK_PULSECOUNT 96
 
-#define KAMBROOK_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE
+#define KAMBROOK_PULSEMID_D 400
 
 #ifdef PLUGIN_008
 #include "../4_Display.h"
@@ -44,6 +44,8 @@ boolean Plugin_008(byte function, const char *string)
 {
     if (RawSignal.Number != KAMBROOK_PULSECOUNT)
         return false;
+    
+    const long KAMBROOK_PULSEMID = KAMBROOK_PULSEMID_D / RawSignal.Multiply;
 
     unsigned long address = 0L;
     byte sync = 0;

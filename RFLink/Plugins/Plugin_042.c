@@ -93,9 +93,9 @@
 #define UPM_MIN_PULSECOUNT 46
 #define UPM_MAX_PULSECOUNT 56
 
-#define UPM_PULSELOHI 1100 / RAWSIGNAL_SAMPLE_RATE
-#define UPM_PULSEHIHI 2075 / RAWSIGNAL_SAMPLE_RATE
-#define UPM_PULSEHILO 1600 / RAWSIGNAL_SAMPLE_RATE
+#define UPM_PULSELOHI_D 110
+#define UPM_PULSEHIHI_D 2075
+#define UPM_PULSEHILO_D 1600
 
 #ifdef PLUGIN_042
 #include "../4_Display.h"
@@ -104,6 +104,10 @@ boolean Plugin_042(byte function, const char *string)
 {
    if (RawSignal.Number < UPM_MIN_PULSECOUNT || RawSignal.Number > UPM_MAX_PULSECOUNT)
       return false;
+
+   const long UPM_PULSELOHI = UPM_PULSELOHI_D / RawSignal.Multiply;
+   const long UPM_PULSEHIHI = UPM_PULSEHIHI_D / RawSignal.Multiply;
+   const long UPM_PULSEHILO = UPM_PULSEHILO_D / RawSignal.Multiply;
 
    unsigned long bitstream1 = 0L; // holds first 10 bits
    unsigned long bitstream2 = 0L; // holds last 26 bits

@@ -39,11 +39,11 @@
 
 #define FA20_PULSECOUNT 52
 
-#define FA20_MIDHI 1000 / RAWSIGNAL_SAMPLE_RATE
-#define FA20_PULSEMIN 1000 / RAWSIGNAL_SAMPLE_RATE
-#define FA20_PULSEMINMAX 1500 / RAWSIGNAL_SAMPLE_RATE
-#define FA20_PULSEMAXMIN 2000 / RAWSIGNAL_SAMPLE_RATE
-#define FA20_PULSEMAX 2800 / RAWSIGNAL_SAMPLE_RATE
+#define FA20_MIDHI_D 1000
+#define FA20_PULSEMIN_D 1000
+#define FA20_PULSEMINMAX_D 1500
+#define FA20_PULSEMAXMIN_D 2000
+#define FA20_PULSEMAX_D 2800
 
 #ifdef PLUGIN_080
 #include "../4_Display.h"
@@ -52,6 +52,12 @@ boolean Plugin_080(byte function, const char *string)
 {
    if (RawSignal.Number != FA20_PULSECOUNT)
       return false;
+
+   const long FA20_MIDHI = FA20_MIDHI_D / RawSignal.Multiply;
+   const long FA20_PULSEMIN = FA20_PULSEMIN_D / RawSignal.Multiply;
+   const long FA20_PULSEMINMAX = FA20_PULSEMINMAX_D / RawSignal.Multiply;
+   const long FA20_PULSEMAXMIN = FA20_PULSEMAXMIN_D / RawSignal.Multiply;
+   const long FA20_PULSEMAX = FA20_PULSEMAX_D / RawSignal.Multiply;
       
    unsigned long bitstream = 0L;
    //==================================================================================
@@ -148,7 +154,7 @@ boolean  PluginTX_080(byte function, const char *string)
       RawSignal.Pulses[52] = 0;
       RawSignal.Number = 52;
       RawSendRF();
-      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE; // restore setting
+      RawSignal.Multiply = RFLink::Signal::params::sample_rate; // restore setting
       success = true;
    }
    return success;

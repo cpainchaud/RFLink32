@@ -42,9 +42,9 @@
 #define PLUGIN_DESC_005 "Eurodomest"
 #define EURODOMEST_PulseLength 50
 
-#define EURODOMEST_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE
-#define EURODOMEST_PULSEMIN 100 / RAWSIGNAL_SAMPLE_RATE
-#define EURODOMEST_PULSEMAX 900 / RAWSIGNAL_SAMPLE_RATE
+#define EURODOMEST_PULSEMID_D 400
+#define EURODOMEST_PULSEMIN_D 100
+#define EURODOMEST_PULSEMAX_D 900
 
 #ifdef PLUGIN_005
 #include "../4_Display.h"
@@ -55,6 +55,10 @@ boolean Plugin_005(byte function, const char *string)
       return false;
    if (RawSignal.Pulses[0] == 63)
       return false; // No need to test, packet for plugin 63
+
+   const long EURODOMEST_PULSEMID = EURODOMEST_PULSEMID_D / RawSignal.Multiply;
+   const long EURODOMEST_PULSEMIN = EURODOMEST_PULSEMIN_D / RawSignal.Multiply;
+   const long EURODOMEST_PULSEMAX = EURODOMEST_PULSEMAX_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0;
    byte unitcode = 0;

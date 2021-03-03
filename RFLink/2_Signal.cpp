@@ -96,12 +96,12 @@ boolean FetchSignal()
       if (PulseLength < MIN_PULSE_LENGTH_US)
         break; // Pulse length too short
       Ftoggle = !Ftoggle;
-      RawSignal.Pulses[RawCodeLength++] = PulseLength / (unsigned long)(RAWSIGNAL_SAMPLE_RATE); // store in RawSignal !!!!
+      RawSignal.Pulses[RawCodeLength++] = PulseLength / (unsigned long)(Signal::params::sample_rate); // store in RawSignal !!!!
     } while (RawCodeLength < RAW_BUFFER_SIZE && numloops <= maxloops);                          // For as long as there is space in the buffer, no timeout etc.
     if (RawCodeLength >= MIN_RAW_PULSES)
     {
       RawSignal.Repeats = 0;                      // No repeats
-      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE; // Sample size.
+      RawSignal.Multiply = Signal::params::sample_rate; // Sample size.
       RawSignal.Number = RawCodeLength - 1;       // Number of received pulse times (pulsen *2)
       RawSignal.Pulses[RawSignal.Number + 1] = 0; // Last element contains the timeout.
       RawSignal.Time = millis();                  // Time the RF packet was received (to keep track of retransmits
@@ -151,7 +151,7 @@ const char json_name_scan_high_time[] = "scan_high_time";
 
 Config::ConfigItem configItems[] =  {
   Config::ConfigItem(json_name_async_mode_enabled,  Config::SectionId::Signal_id,  false, paramsUpdatedCallback),
-  Config::ConfigItem(json_name_sample_rate,         Config::SectionId::Signal_id,  RAWSIGNAL_SAMPLE_RATE, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_sample_rate,         Config::SectionId::Signal_id,  DEFAULT_RAWSIGNAL_SAMPLE_RATE, paramsUpdatedCallback),
   Config::ConfigItem(json_name_min_raw_pulses,      Config::SectionId::Signal_id,  MIN_RAW_PULSES, paramsUpdatedCallback),
   Config::ConfigItem(json_name_seek_timeout,        Config::SectionId::Signal_id,  SIGNAL_SEEK_TIMEOUT_MS, paramsUpdatedCallback),
   Config::ConfigItem(json_name_min_preamble,        Config::SectionId::Signal_id,  SIGNAL_MIN_PREAMBLE_US, paramsUpdatedCallback),
@@ -453,7 +453,7 @@ namespace AsyncSignalScanner {
           return;
         
         RawSignal.Time = millis();          // record when this signal started
-        RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+        RawSignal.Multiply = Signal::params::sample_rate;
         nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
 
         return;
@@ -483,7 +483,7 @@ namespace AsyncSignalScanner {
       }
 
       //Serial.print("found pulse #");Serial.println(RawSignal.Number);
-      RawSignal.Pulses[RawSignal.Number] = pulseLength_us / RAWSIGNAL_SAMPLE_RATE;
+      RawSignal.Pulses[RawSignal.Number] = pulseLength_us / Signal::params::sample_rate;
       nextPulseTimeoutTime_us = changeTime_us + SIGNAL_END_TIMEOUT_US;
 
     }
@@ -522,7 +522,7 @@ namespace AsyncSignalScanner {
       stopScanning();
       nextPulseTimeoutTime_us = 0;
       RawSignal.Number++;
-      RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / RAWSIGNAL_SAMPLE_RATE;
+      RawSignal.Pulses[RawSignal.Number] = SIGNAL_END_TIMEOUT_US / Signal::params::sample_rate;
       //Serial.print("found one packet, marking now for decoding. Pulses = ");Serial.println(RawSignal.Number);
       RawSignal.readyForDecoder = true;
     }

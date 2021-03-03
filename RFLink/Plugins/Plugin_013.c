@@ -92,9 +92,10 @@
 #define PLUGIN_DESC_013 "Powerfix"
 #define POWERFIX_PulseLength 42
 
-#define POWEFIX_PULSEMID 900 / RAWSIGNAL_SAMPLE_RATE
-#define POWEFIX_PULSEMIN 450 / RAWSIGNAL_SAMPLE_RATE
-#define POWEFIX_PULSEMAX 1400 / RAWSIGNAL_SAMPLE_RATE
+#define POWEFIX_PULSEMID_D 900
+#define POWEFIX_PULSEMIN_D 450
+#define POWEFIX_PULSEMAX_D 1400
+
 
 #ifdef PLUGIN_013
 #include "../4_Display.h"
@@ -103,6 +104,11 @@ boolean Plugin_013(byte function, const char *string)
 {
    if (RawSignal.Number != POWERFIX_PulseLength)
       return false;
+
+   const long POWEFIX_PULSEMID = POWEFIX_PULSEMID_D / RawSignal.Multiply;
+   const long POWEFIX_PULSEMIN = POWEFIX_PULSEMIN_D / RawSignal.Multiply;
+   const long POWEFIX_PULSEMAX = POWEFIX_PULSEMAX_D / RawSignal.Multiply;
+
    unsigned long bitstream = 0L;
    unsigned int address = 0;
    byte unitcode = 0;

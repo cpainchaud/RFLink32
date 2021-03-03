@@ -42,16 +42,22 @@
 #define PLUGIN_DESC_037 "AcuRite 986"
 #define ACURITE_PULSECOUNT 84
 
-#define ACURITE_MIDHI 2000 / RAWSIGNAL_SAMPLE_RATE
-#define ACURITE_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
-#define ACURITE_PULSEMINMAX 2500 / RAWSIGNAL_SAMPLE_RATE
-#define ACURITE_PULSEMAXMIN 650 / RAWSIGNAL_SAMPLE_RATE
+#define ACURITE_MIDHI_D 2000
+#define ACURITE_PULSEMIN_D 150
+#define ACURITE_PULSEMINMAX_D 2500
+#define ACURITE_PULSEMAXMIN_D 650
+
 
 #ifdef PLUGIN_037
 #include "../4_Display.h"
 
 boolean Plugin_037(byte function, const char *string)
 {
+   const long ACURITE_MIDHI = ACURITE_MIDHI_D / RawSignal.Multiply;
+   const long ACURITE_PULSEMIN = ACURITE_PULSEMIN_D / RawSignal.Multiply;
+   const long ACURITE_PULSEMINMAX = ACURITE_PULSEMINMAX_D / RawSignal.Multiply;
+   const long ACURITE_PULSEMAXMIN = ACURITE_PULSEMAXMIN_D / RawSignal.Multiply;
+
    if (RawSignal.Number < ACURITE_PULSECOUNT || RawSignal.Number > (ACURITE_PULSECOUNT + 4))
       return false;
 

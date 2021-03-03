@@ -28,9 +28,10 @@
 
 #define ALARMPIRV2_PULSECOUNT 50
 
-#define ALARMPIRV2_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV2_PULSEMAX 2000 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV2_PULSEMIN 150 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV2_PULSEMID_D 700
+#define ALARMPIRV2_PULSEMAX_D 200
+#define ALARMPIRV2_PULSEMIN_D 150
+
 
 #ifdef PLUGIN_062
 #include "../4_Display.h"
@@ -41,6 +42,10 @@ boolean Plugin_062(byte function, const char *string)
       return false;
    if (RawSignal.Pulses[0] == 63)
       return false; // No need to test, packet for plugin 63
+
+   const long ALARMPIRV2_PULSEMID = ALARMPIRV2_PULSEMID_D / RawSignal.Multiply;
+   const long ALARMPIRV2_PULSEMAX = ALARMPIRV2_PULSEMAX_D / RawSignal.Multiply;
+   const long ALARMPIRV2_PULSEMIN = ALARMPIRV2_PULSEMIN_D / RawSignal.Multiply;
       
    unsigned long bitstream = 0L;
    //==================================================================================

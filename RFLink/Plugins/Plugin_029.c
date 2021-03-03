@@ -57,7 +57,7 @@
 #define DKW2012_MIN_PULSECOUNT 170
 #define DKW2012_MAX_PULSECOUNT 178
 
-#define DKW2012_PULSEMINMAX 768 / RAWSIGNAL_SAMPLE_RATE
+#define DKW2012_PULSEMINMAX_D 768
 
 #ifdef PLUGIN_029
 #include "../4_Display.h"
@@ -66,6 +66,8 @@ uint8_t Plugin_029_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 
 boolean Plugin_029(byte function, const char *string)
 {
+  const long DKW2012_PULSEMINMAX = DKW2012_PULSEMINMAX_D / RawSignal.Multiply;
+
   if (!(
           ((RawSignal.Number >= ACH2010_MIN_PULSECOUNT) &&
            (RawSignal.Number <= ACH2010_MAX_PULSECOUNT)) ||

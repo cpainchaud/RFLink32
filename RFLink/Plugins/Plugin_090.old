@@ -70,7 +70,8 @@
 A270000104030080A04103
 */
 // *********************************************************************************************
-#define NODO_PULSE_MID 1000 / RAWSIGNAL_SAMPLE_RATE // PWM: Pulsen langer zijn '1'
+#define NODO_PULSE_MID_D 1000
+const long NODO_PULSE_MID = NODO_PULSE_MID_D / RawSignal.Multiply; // PWM: Pulsen langer zijn '1'
 #define NodoSlave_PULSECOUNT 194
 
 #ifdef PLUGIN_090

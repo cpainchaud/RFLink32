@@ -46,7 +46,7 @@
 #define PLUGIN_DESC_007 "Conrad"
 #define CONRADRSL2_PULSECOUNT 66
 
-#define CONRADRSL2_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE
+#define CONRADRSL2_PULSEMID_D 600
 
 #ifdef PLUGIN_007
 #include "../4_Display.h"
@@ -55,6 +55,9 @@ boolean Plugin_007(byte function, const char *string)
 {
    if ((RawSignal.Number != CONRADRSL2_PULSECOUNT) && (RawSignal.Number != CONRADRSL2_PULSECOUNT + 2))
       return false;
+
+   const long CONRADRSL2_PULSEMID = CONRADRSL2_PULSEMID_D / RawSignal.Multiply;
+
    unsigned long bitstream = 0L;
    byte checksum = 0;
    byte command = 0;

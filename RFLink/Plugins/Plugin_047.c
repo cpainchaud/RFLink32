@@ -36,13 +36,13 @@
 #define PLUGIN_DESC_047 "Auriol V4"
 #define AURIOLV4_PULSECOUNT 88
 
-#define AURIOLV4_MIDLO 128 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV4_MIDHI 672 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV4_MIDLO_D 128
+#define AURIOLV4_MIDHI_D 672
 
-#define AURIOLV4_PULSEMIN 224 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV4_PULSEMINMAX 352 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV4_PULSEMAXMIN 576 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV4_PULSEMAX 768 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV4_PULSEMIN_D 224
+#define AURIOLV4_PULSEMINMAX_D 352
+#define AURIOLV4_PULSEMAXMIN_D 576
+#define AURIOLV4_PULSEMAX_D 768
 
 #ifdef PLUGIN_047
 #include "../4_Display.h"
@@ -52,6 +52,13 @@ boolean Plugin_047(byte function, const char *string)
 {
    if ((RawSignal.Number < AURIOLV4_PULSECOUNT - 4) || (RawSignal.Number > AURIOLV4_PULSECOUNT + 2))
       return false;
+
+   const long AURIOLV4_MIDLO = AURIOLV4_MIDLO_D / RawSignal.Multiply;
+   const long AURIOLV4_MIDHI = AURIOLV4_MIDHI_D / RawSignal.Multiply;
+   const long AURIOLV4_PULSEMIN = AURIOLV4_PULSEMIN_D / RawSignal.Multiply;
+   const long AURIOLV4_PULSEMINMAX = AURIOLV4_PULSEMINMAX_D / RawSignal.Multiply;
+   const long AURIOLV4_PULSEMAXMIN = AURIOLV4_PULSEMAXMIN_D / RawSignal.Multiply;
+   const long AURIOLV4_PULSEMAX = AURIOLV4_PULSEMAX_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L; // holds first 8x4=32 bits
    uint8_t checksum = 0;         // holds last  2x4=8 bits

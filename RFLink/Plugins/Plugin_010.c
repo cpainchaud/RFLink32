@@ -50,12 +50,12 @@
 #define RGB_MIN_PULSECOUNT 180
 #define RGB_MAX_PULSECOUNT 186
 
-#define RGB_PULSE_STHI 1600 / RAWSIGNAL_SAMPLE_RATE
-#define RGB_PULSE_STLO 1300 / RAWSIGNAL_SAMPLE_RATE
-#define RGB_PULSE_HIHI 1100 / RAWSIGNAL_SAMPLE_RATE
-#define RGB_PULSE_HILO 900 / RAWSIGNAL_SAMPLE_RATE
-#define RGB_PULSE_LOHI 600 / RAWSIGNAL_SAMPLE_RATE
-#define RGB_PULSE_LOLO 400 / RAWSIGNAL_SAMPLE_RATE
+#define RGB_PULSE_STHI_D 1600
+#define RGB_PULSE_STLO_D 1300
+#define RGB_PULSE_HIHI_D 1100
+#define RGB_PULSE_HILO_D 900
+#define RGB_PULSE_LOHI_D 600
+#define RGB_PULSE_LOLO_D 400
 
 #ifdef PLUGIN_010
 #include "../4_Display.h"
@@ -64,6 +64,14 @@ boolean Plugin_010(byte function, const char *string)
 {
    if (RawSignal.Number < RGB_MIN_PULSECOUNT || RawSignal.Number > RGB_MAX_PULSECOUNT)
       return false;
+
+   const long RGB_PULSE_STHI = RGB_PULSE_STHI_D / RawSignal.Multiply;
+   const long RGB_PULSE_STLO = RGB_PULSE_STLO_D / RawSignal.Multiply;
+   const long RGB_PULSE_HIHI = RGB_PULSE_HIHI_D / RawSignal.Multiply;
+   const long RGB_PULSE_HILO = RGB_PULSE_HILO_D / RawSignal.Multiply;
+   const long RGB_PULSE_LOHI = RGB_PULSE_LOHI_D / RawSignal.Multiply;
+   const long RGB_PULSE_LOLO = RGB_PULSE_LOLO_D / RawSignal.Multiply;
+
    unsigned long bitstream = 0L; // holds first 32 bits
 
    byte checksum = 0;   // holds the checksum calculation

@@ -40,8 +40,8 @@
 
 #define PLIEGER_PULSECOUNT 66
 
-#define PLIEGER_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
-#define PLIEGER_PULSEMAX 1900 / RAWSIGNAL_SAMPLE_RATE
+#define PLIEGER_PULSEMID_D 700
+#define PLIEGER_PULSEMAX_D 1900
 
 #ifdef PLUGIN_071
 #include "../4_Display.h"
@@ -50,6 +50,9 @@ boolean Plugin_071(byte function, const char *string)
 {
    if (RawSignal.Number != PLIEGER_PULSECOUNT)
       return false;
+   
+   const long PLIEGER_PULSEMID = PLIEGER_PULSEMID_D / RawSignal.Multiply;
+   const long PLIEGER_PULSEMAX = PLIEGER_PULSEMAX_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L;
    unsigned int id = 0;

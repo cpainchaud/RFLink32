@@ -49,7 +49,7 @@ boolean Plugin_073(byte function, const char *string)
     unsigned long bitstream = 0L;
     unsigned long checksum = 0L;
     //==================================================================================
-    if (RawSignal.Pulses[1] * RAWSIGNAL_SAMPLE_RATE > 675)
+    if (RawSignal.Pulses[1] * RawSignal.Multiply > 675)
         return false; // First pulse is start bit and should be short!
                       //==================================================================================
                       // Get all 12 bits
@@ -57,20 +57,20 @@ boolean Plugin_073(byte function, const char *string)
     for (byte x = 2; x < DELTRONIC_PULSECOUNT; x = x + 2)
     {
         bitstream <<= 1; // Always shift
-        if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 800)
+        if (RawSignal.Pulses[x] * RawSignal.Multiply > 800)
         { // long pulse  (800-1275)
-            if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 1275)
+            if (RawSignal.Pulses[x] * RawSignal.Multiply > 1275)
                 return false; // pulse too long to be valid
-            if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE > 675)
+            if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 675)
                 return false; // invalid manchestercode (10 01)
 
             bitstream |= 0x1; // 10 => 1 bit
         }
         else
         { // short pulse
-            if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 250)
+            if (RawSignal.Pulses[x] * RawSignal.Multiply < 250)
                 return false; // too short
-            if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE < 700)
+            if (RawSignal.Pulses[x + 1] * RawSignal.Multiply < 700)
                 return false; // invalid manchestercode (10 01)
 
             // bitstream |= 0x0; // 01 => 0 bit

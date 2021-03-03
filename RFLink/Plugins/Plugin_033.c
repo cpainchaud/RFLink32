@@ -35,14 +35,17 @@
 #define PLUGIN_DESC_033 "Conrad"
 #define CONRAD_PULSECOUNT 80
 
-#define CONRAD_PULSEMAX 5000 / RAWSIGNAL_SAMPLE_RATE
-#define CONRAD_PULSEMIN 2300 / RAWSIGNAL_SAMPLE_RATE
+#define CONRAD_PULSEMAX_D 5000
+#define CONRAD_PULSEMIN_D 2300
 
 #ifdef PLUGIN_033
 #include "../4_Display.h"
 
 boolean Plugin_033(byte function, const char *string)
 {
+   const long CONRAD_PULSEMAX = CONRAD_PULSEMAX_D / RawSignal.Multiply;
+   const long CONRAD_PULSEMIN = CONRAD_PULSEMIN_D / RawSignal.Multiply;
+
    if (RawSignal.Number != CONRAD_PULSECOUNT)
       return false;
 

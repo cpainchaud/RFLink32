@@ -49,12 +49,11 @@
 
 #define AURIOLV2_PULSECOUNT 74
 
-#define AURIOLV2_MIDHI 700 / RAWSIGNAL_SAMPLE_RATE
-
-#define AURIOLV2_PULSEMIN 500 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV2_PULSEMINMAX 1100 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV2_PULSEMAXMIN 1400 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOLV2_PULSEMAX 2100 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOLV2_MIDHI_D 700
+#define AURIOLV2_PULSEMIN_D 500
+#define AURIOLV2_PULSEMINMAX_D 1100
+#define AURIOLV2_PULSEMAXMIN_D 1400
+#define AURIOLV2_PULSEMAX_D 2100
 
 #ifdef PLUGIN_046
 #include "../4_Display.h"
@@ -63,6 +62,13 @@ boolean Plugin_046(byte function, const char *string)
 {
    if (RawSignal.Number != AURIOLV2_PULSECOUNT)
       return false;
+
+   const long AURIOLV2_MIDHI = AURIOLV2_MIDHI_D / RawSignal.Multiply;
+   const long AURIOLV2_PULSEMIN = AURIOLV2_PULSEMIN_D / RawSignal.Multiply;
+   const long AURIOLV2_PULSEMINMAX = AURIOLV2_PULSEMINMAX_D / RawSignal.Multiply;
+   const long AURIOLV2_PULSEMAXMIN = AURIOLV2_PULSEMAXMIN_D / RawSignal.Multiply;
+   const long AURIOLV2_PULSEMAX = AURIOLV2_PULSEMAX_D / RawSignal.Multiply;
+
 
    unsigned long bitstream1 = 0L; // holds first 6x4=24 bits
    unsigned long bitstream2 = 0L; // holds last  3x4=12 bits

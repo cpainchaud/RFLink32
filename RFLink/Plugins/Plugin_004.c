@@ -47,13 +47,14 @@
 #define PLUGIN_DESC_004 "NewKaku"
 #define NewKAKU_RawSignalLength 132            // regular KAKU packet length
 #define NewKAKUdim_RawSignalLength 148         // KAKU packet length including DIM bits
-#define NewKAKU_mT 650 / RAWSIGNAL_SAMPLE_RATE // us, approx. in between 1T and 4T
+#define NewKAKU_mT_D 650 // us, approx. in between 1T and 4T
 
 #ifdef PLUGIN_004
 #include "../4_Display.h"
 
 boolean Plugin_004(byte function, const char *string)
 {
+   const long NewKAKU_mT = NewKAKU_mT_D / RawSignal.Multiply;
    // nieuwe KAKU bestaat altijd uit start bit + 32 bits + evt 4 dim bits. Ongelijk, dan geen NewKAKU
    if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength))
       return false;

@@ -21,10 +21,12 @@
 #define SIGNAL_REPEAT_TIME_MS 250  // 500        // Time in mSec. in which the same RF signal should not be accepted again. Filters out retransmits.
 #define SCAN_HIGH_TIME_MS 50       // 50         // time interval in ms. fast processing for background tasks
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
-#define RAWSIGNAL_SAMPLE_RATE 32   // 32         // =8 bits. Sample width / resolution in uSec for raw RF pulses.
+#define DEFAULT_RAWSIGNAL_SAMPLE_RATE 32   // 32         // =8 bits. Sample width / resolution in uSec for raw RF pulses.
 #else
-#define RAWSIGNAL_SAMPLE_RATE 1    // for compatibility with Arduinos only unless you want to scan pulses > 65000us
+#define DEFAULT_RAWSIGNAL_SAMPLE_RATE 1    // for compatibility with Arduinos only unless you want to scan pulses > 65000us
 #endif
+
+#define RAWSIGNAL_SAMPLE_RATE RFLink::Signal::params::sample_rate
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)) // Arduinos ATmega with low memory available use use SAMPLING
 struct RawSignalStruct // Raw signal variabelen places in a struct

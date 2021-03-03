@@ -48,7 +48,7 @@ boolean Plugin_072(byte function, const char *string)
       return false;
    if (RawSignal.Pulses[0] != BYRON_PLUGIN_ID)
       return false; // only accept plugin1 translated packets
-   if (RawSignal.Pulses[1] * RAWSIGNAL_SAMPLE_RATE > 425)
+   if (RawSignal.Pulses[1] * RawSignal.Multiply > 425)
       return false; // first pulse is start bit and must be short
 
    unsigned long bitstream = 0L;
@@ -58,21 +58,21 @@ boolean Plugin_072(byte function, const char *string)
    for (byte x = 2; x < BYRON_PULSECOUNT; x += 2)
    {
       bitstream <<= 1; // Always shift
-      if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 350)
+      if (RawSignal.Pulses[x] * RawSignal.Multiply < 350)
       { // 200-275 (150-350 is accepted)
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 150)
+         if (RawSignal.Pulses[x] * RawSignal.Multiply < 150)
             return false; // pulse too short
-         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE < 350)
+         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply < 350)
             return false; // bad manchester code
          // bitstream |= 0x0;
       }
       else
       { // 500-575 (450-650 is accepted)
-         if (RawSignal.Pulses[x + 1] * RAWSIGNAL_SAMPLE_RATE > 450)
+         if (RawSignal.Pulses[x + 1] * RawSignal.Multiply > 450)
             return false; // bad manchester code
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE < 450)
+         if (RawSignal.Pulses[x] * RawSignal.Multiply < 450)
             return false; // pulse too short
-         if (RawSignal.Pulses[x] * RAWSIGNAL_SAMPLE_RATE > 650)
+         if (RawSignal.Pulses[x] * RawSignal.Multiply > 650)
             return false; // pulse too long
          bitstream |= 0x1;
       }
@@ -157,7 +157,7 @@ boolean  PluginTX_072(byte function, const char *string)
       RawSignal.Pulses[26] = BYRONSPACE / RawSignal.Multiply;
       RawSignal.Number = 26;
       RawSendRF();
-      RawSignal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+      RawSignal.Multiply = RFLink::Signal::params::sample_rate;
       success = true;
       //-----------------------------------------------
    }

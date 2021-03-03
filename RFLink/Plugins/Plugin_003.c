@@ -219,14 +219,17 @@
 #define KAKU_PLUGIN_ID 003
 #define PLUGIN_DESC_003 "Kaku / AB400D / Impuls / PT2262 / Sartano / Tristate"
 #define KAKU_CodeLength 12                        // number of data bits
-#define KAKU_R 300 / RAWSIGNAL_SAMPLE_RATE        //360 // 300          // 370? 350 us
-#define KAKU_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE // (17)  510 = KAKU_R*2 not sufficient!
+#define KAKU_R_D 300       //360 // 300          // 370? 350 us
+#define KAKU_PULSEMID_D 600 // (17)  510 = KAKU_R*2 not sufficient!
 
 #ifdef PLUGIN_003
 #include "../4_Display.h"
 
 boolean Plugin_003(byte function, const char *string)
 {
+   const long KAKU_R = KAKU_R_D / RawSignal.Multiply;
+   const long KAKU_PULSEMID = KAKU_PULSEMID_D / RawSignal.Multiply;
+
    if (RawSignal.Number != (KAKU_CodeLength * 4) + 2)
       return false; // conventionele KAKU bestaat altijd uit 12 data bits plus stop. Ongelijk, dan geen KAKU!
    if (RawSignal.Pulses[0] == 15)

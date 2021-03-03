@@ -41,8 +41,8 @@
 
 #define IMAGINTRONIX_PULSECOUNT 96
 
-#define IMAGINTRONIX_PULSEMID 1000 / RAWSIGNAL_SAMPLE_RATE
-#define IMAGINTRONIX_PULSESHORT 550 / RAWSIGNAL_SAMPLE_RATE
+#define IMAGINTRONIX_PULSEMID_D 100
+#define IMAGINTRONIX_PULSESHORT_D 550
 
 #ifdef PLUGIN_035
 #include "../4_Display.h"
@@ -51,6 +51,10 @@ boolean Plugin_035(byte function, const char *string)
 {
    if (RawSignal.Number != IMAGINTRONIX_PULSECOUNT)
       return false;
+
+   const long IMAGINTRONIX_PULSEMID = IMAGINTRONIX_PULSEMID_D / RawSignal.Multiply;
+   const long IMAGINTRONIX_PULSESHORT = IMAGINTRONIX_PULSESHORT_D / RawSignal.Multiply;
+
    unsigned int temperature = 0;
    unsigned int rc = 0;
 

@@ -31,7 +31,7 @@
 #define CRESTA_MIN_PULSECOUNT 124 // unknown until we have a collection of all packet types but this seems to be the minimum
 #define CRESTA_MAX_PULSECOUNT 284 // unknown until we have a collection of all packet types
 
-#define CRESTA_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
+#define CRESTA_PULSEMID_D 700
 
 #ifdef PLUGIN_034
 #include "../4_Display.h"
@@ -43,6 +43,8 @@ boolean Plugin_034(byte function, const char *string)
 {
    if ((RawSignal.Number < CRESTA_MIN_PULSECOUNT) || (RawSignal.Number > CRESTA_MAX_PULSECOUNT))
       return false;
+
+   const long CRESTA_PULSEMID = CRESTA_PULSEMID_D / RawSignal.Multiply;
 
    byte bytecounter = 0;  // used for counting the number of received bytes
    byte bitcounter = 0;   // counts number of received bits (converted from pulses)

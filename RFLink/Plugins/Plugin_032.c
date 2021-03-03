@@ -43,10 +43,10 @@
 #define PLUGIN_DESC_032 "Alecto V4"
 #define ALECTOV4_PULSECOUNT 74
 
-#define ALECTOV4_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
-#define ALECTOV4_PULSEMIN 1500 / RAWSIGNAL_SAMPLE_RATE
-#define ALECTOV4_PULSEMINMAX 2500 / RAWSIGNAL_SAMPLE_RATE
-#define ALECTOV4_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV4_MIDHI_D 550
+#define ALECTOV4_PULSEMIN_D 1500
+#define ALECTOV4_PULSEMINMAX_D 2500
+#define ALECTOV4_PULSEMAXMIN_D 3000
 
 #ifdef PLUGIN_032
 #include "../4_Display.h"
@@ -55,6 +55,12 @@ boolean Plugin_032(byte function, const char *string)
 {
    if (RawSignal.Number < ALECTOV4_PULSECOUNT || RawSignal.Number > (ALECTOV4_PULSECOUNT + 4))
       return false;
+
+   const long ALECTOV4_MIDHI = ALECTOV4_MIDHI_D / RawSignal.Multiply;
+   const long ALECTOV4_PULSEMIN = ALECTOV4_PULSEMIN_D / RawSignal.Multiply;
+   const long ALECTOV4_PULSEMINMAX = ALECTOV4_PULSEMINMAX_D / RawSignal.Multiply;
+   const long ALECTOV4_PULSEMAXMIN = ALECTOV4_PULSEMAXMIN_D / RawSignal.Multiply;
+
 
    unsigned long bitstream = 0L;
    int temperature = 0;

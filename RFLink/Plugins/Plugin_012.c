@@ -81,7 +81,7 @@
 #define FA500RM3_PulseLength 26
 #define FA500RM1_PulseLength 58
 
-#define FA500_PULSEMID 400 / RAWSIGNAL_SAMPLE_RATE
+#define FA500_PULSEMID_D 400
 
 #ifdef PLUGIN_012
 #include "../4_Display.h"
@@ -90,6 +90,8 @@ boolean Plugin_012(byte function, const char *string)
 {
    if (RawSignal.Number != (FA500RM3_PulseLength) && RawSignal.Number != (FA500RM1_PulseLength))
       return false;
+
+   const long FA500_PULSEMID = FA500_PULSEMID_D / RawSignal.Multiply;
 
    byte type = 0; // 0=KAKU 1=ITK 2=PT2262
    byte housecode = 0;

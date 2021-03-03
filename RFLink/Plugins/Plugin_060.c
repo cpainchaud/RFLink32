@@ -31,10 +31,10 @@
 
 #define ALARMPIRV0_PULSECOUNT 26
 
-#define ALARMPIRV0_PULSEMID 700 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV0_PULSEMAX 1000 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV0_PULSESHORT 550 / RAWSIGNAL_SAMPLE_RATE
-#define ALARMPIRV0_PULSEMIN 250 / RAWSIGNAL_SAMPLE_RATE
+#define ALARMPIRV0_PULSEMID_D 700
+#define ALARMPIRV0_PULSEMAX_D 1000
+#define ALARMPIRV0_PULSESHORT_D 550
+#define ALARMPIRV0_PULSEMIN_D 250
 
 #ifdef PLUGIN_060
 #include "../4_Display.h"
@@ -43,6 +43,11 @@ boolean Plugin_060(byte function, const char *string)
 {
    if (RawSignal.Number != ALARMPIRV0_PULSECOUNT)
       return false;
+
+   const long ALARMPIRV0_PULSEMID = ALARMPIRV0_PULSEMID_D / RawSignal.Multiply;
+   const long ALARMPIRV0_PULSEMAX = ALARMPIRV0_PULSEMAX_D / RawSignal.Multiply;
+   const long ALARMPIRV0_PULSESHORT = ALARMPIRV0_PULSESHORT_D / RawSignal.Multiply;
+   const long ALARMPIRV0_PULSEMIN = ALARMPIRV0_PULSEMIN_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L;
    //==================================================================================

@@ -71,18 +71,18 @@
 #define PLUGIN_DESC_001 "Long Packet Translation and debugging"
 #define OVERSIZED_LIMIT 291 // longest packet is handled by plugin 48
 
-#define PULSE500 500 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE1100 1100 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE1600 1600 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE2000 2000 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE4000 4000 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE4200 4200 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE3300 3300 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE2500 2500 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE3000 3000 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE5000 5000 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE6000 6000 / RAWSIGNAL_SAMPLE_RATE
-#define PULSE6500 6500 / RAWSIGNAL_SAMPLE_RATE
+#define PULSE500_D 500
+#define PULSE1100_D 1100
+#define PULSE1600_D 1600
+#define PULSE2000_D 2000
+#define PULSE4000_D 4000
+#define PULSE4200_D 4200
+#define PULSE3300_D 3300
+#define PULSE2500_D 2500
+#define PULSE3000_D 3000
+#define PULSE5000_D 5000
+#define PULSE6000_D 6000
+#define PULSE6500_D 6500
 
 #ifdef PLUGIN_001
 #include "../4_Display.h"
@@ -90,6 +90,18 @@
 boolean Plugin_001(byte function, const char *string)
 {
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
+   const long PULSE500 = PULSE500_D / RawSignal.Multiply;
+   const long PULSE1100 = PULSE1100_D / RawSignal.Multiply;
+   const long PULSE1600 = PULSE1600_D / RawSignal.Multiply;
+   const long PULSE2000 = PULSE2000_D / RawSignal.Multiply;
+   const long PULSE4000 = PULSE4000_D / RawSignal.Multiply;
+   const long PULSE4200 = PULSE4200_D / RawSignal.Multiply;
+   const long PULSE3300 = PULSE3300_D / RawSignal.Multiply;
+   const long PULSE2500 = PULSE2500_D / RawSignal.Multiply;
+   const long PULSE3000 = PULSE3000_D / RawSignal.Multiply;
+   const long PULSE5000 = PULSE5000_D / RawSignal.Multiply;
+   const long PULSE6000 = PULSE6000_D / RawSignal.Multiply;
+   const long PULSE6500 = PULSE6500_D / RawSignal.Multiply;
 
    int i, j;
    // ==========================================================================
@@ -216,7 +228,7 @@ boolean Plugin_001(byte function, const char *string)
          }
          else
          {
-            Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);
+            Serial.print(RawSignal.Pulses[i] * RawSignal.Multiply);
             if (i < RawSignal.Number)
                Serial.write(',');
          }
@@ -504,8 +516,10 @@ boolean Plugin_001(byte function, const char *string)
    // The long final pulse (6990 us) is truncated by the buffer size. 
    // ==========================================================================
 
-   #define PULSE600 600 / RAWSIGNAL_SAMPLE_RATE
-   #define PULSE700 700 / RAWSIGNAL_SAMPLE_RATE
+   #define PULSE600_D 600
+   const long PULSE600 = PULSE600_D / RawSignal.Multiply;
+   #define PULSE700_D 700
+   const long PULSE700 = PULSE700_D / RawSignal.Multiply;
 
    if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
    {

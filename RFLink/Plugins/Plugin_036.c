@@ -34,13 +34,15 @@
 #define PLUGIN_DESC_036 "F007_TH"
 #define F007_TH_PULSECOUNT 111
 
-#define F007_TH_PULSE_MID  650 / RAWSIGNAL_SAMPLE_RATE
+#define F007_TH_PULSE_MID_D  650
 
 #ifdef PLUGIN_036
 #include "../4_Display.h"
 
 boolean Plugin_036(byte function, const char *string)
 {
+   const long F007_TH_PULSE_MID = F007_TH_PULSE_MID_D / RawSignal.Multiply;
+
    if (RawSignal.Number != F007_TH_PULSECOUNT)
       return false;
 

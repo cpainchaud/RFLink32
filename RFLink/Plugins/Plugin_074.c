@@ -53,7 +53,7 @@ boolean Plugin_074(byte function, const char *string)
     //==================================================================================
     // Get all 12 bits
     //==================================================================================
-    byte j = (RL02_T * 2) / RAWSIGNAL_SAMPLE_RATE;
+    byte j = (RL02_T * 2) / RawSignal.Multiply;
     for (byte i = 0; i < RL02_CodeLength; i++)
     {
 

@@ -36,11 +36,10 @@
 #define PLUGIN_DESC_045 "Auriol"
 #define AURIOL_PULSECOUNT 66
 
-#define AURIOL_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
-
-#define AURIOL_PULSEMIN 1600 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOL_PULSEMINMAX 2200 / RAWSIGNAL_SAMPLE_RATE
-#define AURIOL_PULSEMAXMIN 3000 / RAWSIGNAL_SAMPLE_RATE
+#define AURIOL_MIDHI_D 550
+#define AURIOL_PULSEMIN_D 1600
+#define AURIOL_PULSEMINMAX_D 2200
+#define AURIOL_PULSEMAXMIN_D 3000
 
 #ifdef PLUGIN_045
 #include "../4_Display.h"
@@ -49,6 +48,11 @@ boolean Plugin_045(byte function, const char *string)
 {
    if (RawSignal.Number != AURIOL_PULSECOUNT)
       return false;
+
+   const long AURIOL_MIDHI = AURIOL_MIDHI_D / RawSignal.Multiply;
+   const long AURIOL_PULSEMIN = AURIOL_PULSEMIN_D / RawSignal.Multiply;
+   const long AURIOL_PULSEMINMAX = AURIOL_PULSEMINMAX_D / RawSignal.Multiply;
+   const long AURIOL_PULSEMAXMIN = AURIOL_PULSEMAXMIN_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L; // holds 8x4=32 bits
    byte checksumcalc = 0;

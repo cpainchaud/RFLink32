@@ -38,15 +38,19 @@
 #define KOPPLA_PulseLength_MIN 36
 #define KOPPLA_PulseLength_MAX 52
 
-#define KOPPLA_PULSEMID 1300 / RAWSIGNAL_SAMPLE_RATE
-#define KOPPLA_PULSEMAX 1850 / RAWSIGNAL_SAMPLE_RATE
-#define KOPPLA_PULSEMIN 650 / RAWSIGNAL_SAMPLE_RATE
+#define KOPPLA_PULSEMID_D 1300
+#define KOPPLA_PULSEMAX_D 1850
+#define KOPPLA_PULSEMIN_D 650
 
 #ifdef PLUGIN_014
 #include "../4_Display.h"
 
 boolean Plugin_014(byte function, const char *string)
 {
+   const long KOPPLA_PULSEMID = KOPPLA_PULSEMID_D / RawSignal.Multiply;
+   const long KOPPLA_PULSEMAX = KOPPLA_PULSEMAX_D / RawSignal.Multiply;
+   const long KOPPLA_PULSEMIN = KOPPLA_PULSEMIN_D / RawSignal.Multiply;
+
    if ((RawSignal.Number < KOPPLA_PulseLength_MIN) || (RawSignal.Number > KOPPLA_PulseLength_MAX))
       return false;
    unsigned long bitstream = 0L;

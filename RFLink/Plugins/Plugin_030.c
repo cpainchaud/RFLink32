@@ -96,8 +96,8 @@
 #define PLUGIN_DESC_030 "Alecto V1"
 #define ALECTOV1_PULSECOUNT 74
 
-#define ALECTOV1_MIDHI 700 / RAWSIGNAL_SAMPLE_RATE
-#define ALECTOV1_PULSEMAXMIN 2560 / RAWSIGNAL_SAMPLE_RATE
+#define ALECTOV1_MIDHI_D 700
+#define ALECTOV1_PULSEMAXMIN_D 2560
 
 #ifdef PLUGIN_030
 #include "../4_Display.h"
@@ -106,6 +106,9 @@ boolean Plugin_030(byte function, const char *string)
 {
    if (RawSignal.Number != ALECTOV1_PULSECOUNT)
       return false;
+
+   const long ALECTOV1_MIDHI = ALECTOV1_MIDHI_D / RawSignal.Multiply;
+   const long ALECTOV1_PULSEMAXMIN = ALECTOV1_PULSEMAXMIN_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L;
    byte data[8];

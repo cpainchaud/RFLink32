@@ -45,9 +45,9 @@
 
 #define MAXITROL2_PULSECOUNT 26
 
-#define MAXITROL2_MID 550
-#define MAXITROL2_PULSEMINMAX 550 / RAWSIGNAL_SAMPLE_RATE
-#define MAXITROL2_PULSEMAX 900 / RAWSIGNAL_SAMPLE_RATE
+#define MAXITROL2_MID_D 550
+#define MAXITROL2_PULSEMINMAX_D 550
+#define MAXITROL2_PULSEMAX_D 900
 
 #ifdef PLUGIN_082
 #include "../4_Display.h"
@@ -56,6 +56,10 @@ boolean Plugin_082(byte function, const char *string)
 {
    if (RawSignal.Number != MAXITROL2_PULSECOUNT)
       return false;
+
+   const long MAXITROL2_MID = MAXITROL2_MID_D / RawSignal.Multiply;
+   const long MAXITROL2_PULSEMINMAX = MAXITROL2_PULSEMINMAX_D / RawSignal.Multiply;
+   const long MAXITROL2_PULSEMAX = MAXITROL2_PULSEMAX_D / RawSignal.Multiply;
 
    unsigned int bitstream = 0L;
    byte address = 0;

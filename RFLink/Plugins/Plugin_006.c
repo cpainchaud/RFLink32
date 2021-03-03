@@ -38,13 +38,15 @@
 #define BLYSS_PLUGIN_ID 006
 #define PLUGIN_DESC_006 "Blyss / Avidsen"
 #define BLYSS_PULSECOUNT 106
-#define BLYSS_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
+#define BLYSS_PULSEMID_D 500
 
 #ifdef PLUGIN_006
 #include "../4_Display.h"
 
 boolean Plugin_006(byte function, const char *string)
 {
+   const long BLYSS_PULSEMID = BLYSS_PULSEMID_D / RawSignal.Multiply;
+
    if (RawSignal.Number != BLYSS_PULSECOUNT)
       return false;
    unsigned long bitstream = 0L;

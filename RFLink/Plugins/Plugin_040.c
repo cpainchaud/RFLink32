@@ -48,16 +48,21 @@
 #define PLUGIN_DESC_040 "Mebus"
 #define MEBUS_PULSECOUNT 58
 
-#define MEBUS_MIDHI 550 / RAWSIGNAL_SAMPLE_RATE
-#define MEBUS_PULSEMIN 1500 / RAWSIGNAL_SAMPLE_RATE
-#define MEBUS_PULSEMINMAX 2100 / RAWSIGNAL_SAMPLE_RATE
-#define MEBUS_PULSEMAXMIN 3400 / RAWSIGNAL_SAMPLE_RATE
+#define MEBUS_MIDHI_D 550
+#define MEBUS_PULSEMIN_D 1500
+#define MEBUS_PULSEMINMAX_D 2100
+#define MEBUS_PULSEMAXMIN_D 3400
 
 #ifdef PLUGIN_040
 #include "../4_Display.h"
 
 boolean Plugin_040(byte function, const char *string)
 {
+   const long MEBUS_MIDHI = MEBUS_MIDHI_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMIN = MEBUS_PULSEMIN_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMINMAX = MEBUS_PULSEMINMAX_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMAXMIN = MEBUS_PULSEMAXMIN_D / RawSignal.Multiply;
+
    if (RawSignal.Number != MEBUS_PULSECOUNT)
       return false;
 

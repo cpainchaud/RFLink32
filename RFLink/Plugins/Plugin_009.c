@@ -47,7 +47,7 @@
 #define PLUGIN_DESC_009 "X10"
 #define X10_PulseLength 66
 
-#define X10_PULSEMID 600 / RAWSIGNAL_SAMPLE_RATE
+#define X10_PULSEMID_D 600
 
 #ifdef PLUGIN_009
 #include "../4_Display.h"
@@ -56,6 +56,7 @@ boolean Plugin_009(byte function, const char *string)
 {
    if ((RawSignal.Number != (X10_PulseLength)) && (RawSignal.Number != (X10_PulseLength + 2)))
       return false;
+   const long X10_PULSEMID = X10_PULSEMID_D / RawSignal.Multiply;
    unsigned long bitstream = 0L;
    byte housecode = 0;
    byte unitcode = 0;

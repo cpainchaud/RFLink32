@@ -51,7 +51,7 @@
 #define PLUGIN_DESC_015 "HomeEasy"
 #define HomeEasy_PulseLength 116
 
-#define HomeEasy_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
+#define HomeEasy_PULSEMID_D 500
 
 #ifdef PLUGIN_015
 #include "../4_Display.h"
@@ -60,6 +60,9 @@ boolean Plugin_015(byte function, const char *string)
 {
    if (RawSignal.Number != HomeEasy_PulseLength)
       return false;
+
+   const long HomeEasy_PULSEMID = HomeEasy_PULSEMID_D / RawSignal.Multiply;
+
    unsigned long preamble = 0L;
    unsigned long address = 0L;
    unsigned long bitstream = 0L;

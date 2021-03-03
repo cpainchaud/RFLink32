@@ -72,10 +72,10 @@
 #define PLUGIN_DESC_002 "LaCrosse V2"
 #define LACROSSE_PULSECOUNT 104 // also handles 102 pulses!
 
-#define LACROSSE_MIDLO 1100 / RAWSIGNAL_SAMPLE_RATE
-#define LACROSSE_MIDHI 1480 / RAWSIGNAL_SAMPLE_RATE
+#define LACROSSE_MIDLO_D 1100
+#define LACROSSE_MIDHI_D 1480
 
-#define LACROSSE_PULSEMID 1000 / RAWSIGNAL_SAMPLE_RATE
+#define LACROSSE_PULSEMID_D 1000
 
 #ifdef PLUGIN_002
 #include "../4_Display.h"
@@ -84,6 +84,10 @@ boolean Plugin_002(byte function, const char *string)
 {
    if ((RawSignal.Number != LACROSSE_PULSECOUNT) && (RawSignal.Number != (LACROSSE_PULSECOUNT - 2)))
       return false;
+
+   const long LACROSSE_MIDLO = LACROSSE_MIDLO_D / RawSignal.Multiply;
+   const long LACROSSE_MIDHI = LACROSSE_MIDHI_D / RawSignal.Multiply;
+   const long LACROSSE_PULSEMID = LACROSSE_PULSEMID_D / RawSignal.Multiply;
 
    unsigned long bitstream1 = 0L; // holds first 5x4=20 bits
    unsigned long bitstream2 = 0L; // holds last  8x4=32 bits

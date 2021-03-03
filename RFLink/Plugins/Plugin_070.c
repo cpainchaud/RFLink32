@@ -46,8 +46,8 @@
 #define PLUGIN_DESC_070 "SelectPlus"
 #define SELECTPLUS_PULSECOUNT 36
 
-#define SELECTPLUS_PULSEMID 650 / RAWSIGNAL_SAMPLE_RATE
-#define SELECTPLUS_PULSEMAX 2125 / RAWSIGNAL_SAMPLE_RATE
+#define SELECTPLUS_PULSEMID_D 650
+#define SELECTPLUS_PULSEMAX_D 2125
 
 #ifdef PLUGIN_070
 #include "../4_Display.h"
@@ -56,6 +56,9 @@ boolean Plugin_070(byte function, const char *string)
 {
     if (RawSignal.Number != SELECTPLUS_PULSECOUNT)
         return false;
+    
+    const long SELECTPLUS_PULSEMID = SELECTPLUS_PULSEMID_D / RawSignal.Multiply;
+    const long SELECTPLUS_PULSEMAX = SELECTPLUS_PULSEMAX_D / RawSignal.Multiply;
 
     unsigned long bitstream = 0L;
     byte checksum = 0;

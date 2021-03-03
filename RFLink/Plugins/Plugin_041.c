@@ -87,13 +87,15 @@
 #define LACROSSE41_PULSECOUNT3 122 // Wind sensor
 #define LACROSSE41_PULSECOUNT4 132 // Brightness sensor
 
-#define LACROSSE41_PULSEMID 500 / RAWSIGNAL_SAMPLE_RATE
+#define LACROSSE41_PULSEMID_D 500
 
 #ifdef PLUGIN_041
 #include "../4_Display.h"
 
 boolean Plugin_041(byte function, const char *string)
 {
+   const long LACROSSE41_PULSEMID = LACROSSE41_PULSEMID_D / RawSignal.Multiply;
+
    if ((RawSignal.Number != LACROSSE41_PULSECOUNT1) && (RawSignal.Number != LACROSSE41_PULSECOUNT2) &&
        (RawSignal.Number != LACROSSE41_PULSECOUNT3) && (RawSignal.Number != LACROSSE41_PULSECOUNT4))
       return false;

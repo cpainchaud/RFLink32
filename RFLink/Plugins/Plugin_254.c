@@ -57,7 +57,7 @@ boolean Plugin_254(byte function, const char *string)
       }
       else
       {
-         Serial.print(RawSignal.Pulses[i] * RAWSIGNAL_SAMPLE_RATE);
+         Serial.print(RawSignal.Pulses[i] * RawSignal.Multiply);
          if (i < RawSignal.Number)
             Serial.write(',');
       }

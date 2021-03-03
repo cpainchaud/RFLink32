@@ -31,7 +31,7 @@
 #define PLUGIN_DESC_083 PSTR("BRELMOTOR")
 #define DOOYA_PULSECOUNT_1 82
 
-#define DOOYA_MIDVALUE 384 / RAWSIGNAL_SAMPLE_RATE
+#define DOOYA_MIDVALUE_D 384
 
 #define DOOYA_UP_COMMAND    0x11 // 0001 0001
 #define DOOYA_STOP_COMMAND  0x55 // 0101 0101
@@ -44,6 +44,8 @@
 
 boolean Plugin_083(byte function, const char *string)
 {
+   const long DOOYA_MIDVALUE = DOOYA_MIDVALUE_D / RawSignal.Multiply;
+   
    char dbuffer[64];
 
       if ( RawSignal.Number == DOOYA_PULSECOUNT_1 ) 

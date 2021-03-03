@@ -178,7 +178,7 @@ boolean  PluginTX_076(byte function, const char *string)
         signal.Number = PLUGIN_076_PULSE_COUNT;
         signal.Repeats = 5;
         signal.Delay = 15;
-        signal.Multiply = RAWSIGNAL_SAMPLE_RATE;
+        signal.Multiply = RFLink::Signal::params::sample_rate;
 
         signal.Pulses[1] = PLUGIN_076_PREAMBLE / signal.Multiply;
 
