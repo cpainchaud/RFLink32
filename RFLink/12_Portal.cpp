@@ -64,14 +64,15 @@ void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     response.reserve(256);
 
     if( !Config::pushNewConfiguration(data, message) ) {
-        response = "{ \"success\": False, \"message\": ";
+        response = "{ \"success\": false, \"message\": ";
     }
     else {
-        response = "{ \"success\": True, \"message\": ";
+        response = "{ \"success\": true, \"message\": ";
     }
 
     if( message.length() > 0 ) {
-        response += message + " \"}";
+        response += '"';
+        response += message + "\"}";
     } else {
         response += " null }";
     }

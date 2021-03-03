@@ -386,7 +386,10 @@ void refreshParametersFromConfig(bool triggerChanges) {
 
     // Applying changes will happen in mainLoop()
     if(triggerChanges && changesDetected) {
-      Serial.println("Signal parameters have changed");
+      Serial.println("Signal parameters have changed.");
+      if(params::async_mode_enabled && AsyncSignalScanner::isStopped()) {
+        AsyncSignalScanner::startScanning();
+      }
     }
 
 }
@@ -558,6 +561,7 @@ namespace AsyncSignalScanner {
 
     void enableAsyncReceiver() {
       params::async_mode_enabled = true;
+      startScanning();
     }
 
     void disableAsyncReceiver() {

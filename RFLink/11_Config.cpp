@@ -9,6 +9,7 @@
 #endif
 
 #include "2_Signal.h"
+#include "6_MQTT.h"
 #include "10_Wifi.h"
 #include "12_Portal.h"
 
@@ -41,6 +42,7 @@ ConfigItem* configItemLists[] = {
     #endif
     &RFLink::Portal::configItems[0],
     &RFLink::Signal::configItems[0],
+    &RFLink::Mqtt::configItems[0],
  };
  #define configItemListsSize (sizeof(configItemLists)/sizeof(ConfigItem*))
 
@@ -246,7 +248,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
         if(!section_variant.is<JsonObject>()) {
             message += "root entry '";
             message += kv.key().c_str();
-            message += "' is not an object, it will be ignored!\n";
+            message += "' is not an object, it will be ignored!\\n";
             continue;
         }
         JsonObject && sectionObject = section_variant.as<JsonObject>();
@@ -255,7 +257,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
         if( lookupSectionID == SectionId::EOF_id ) {
             message += "root entry '";
             message += kv.key().c_str();
-            message += "' is not a valid section name, it will be ignored!\n";
+            message += "' is not a valid section name, it will be ignored!\\n";
             continue;
         }
 
@@ -270,7 +272,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                  message += kv.key().c_str();
                  message += "' has extra configuration item named '";
                  message += section_kv.key().c_str();
-                 message += "' it will be ignored\n";
+                 message += "' it will be ignored\\n";
                  continue;
             }
 
@@ -282,7 +284,7 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     message += kv.key().c_str();
                     message += "' has '";
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not string) so it will be ignored\n";
+                    message += "' with mismatched type (not string) so it will be ignored\\n";
                     continue;
                 }
                 const char *str = remoteVariant.as<const char *>();
@@ -294,28 +296,32 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                 item->setCharValue(str);
 
             } else if(item->typeIsLongInt()) {
-                if( !remoteVariant.is<signed long>() ) {
+
+                long int remote_value;
+                if(remoteVariant.is<unsigned long>())
+                    remote_value = remoteVariant.as<unsigned long>();
+                else {
                     message += F("section '");
                     message += kv.key().c_str();
                     message += F("' has item '");
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not long int) so it will be ignored\n";
+                    message += "' with mismatched type (not long int) so it will be ignored\\n";
                     continue;
                 }
-                auto remote_value = remoteVariant.as<signed long>();
                 if(remote_value == item->getLongIntValue() ) // no change!
                     continue; 
                 
                 configHasChanged = true;
                 callbackMgr.add(item->update_callback);
                 item->setLongIntValue(remote_value);
+
             } else if(item->typeIsBool()) {
                 if( !remoteVariant.is<bool>() ) {
                     message += F("section '");
                     message += kv.key().c_str();
                     message += F("' has item '");
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not bool) so it will be ignored\n";
+                    message += "' with mismatched type (not bool) so it will be ignored\\n";
                     continue;
                 }
                 auto remote_value = remoteVariant.as<bool>();

@@ -11,9 +11,8 @@
 #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
 #include "2_Signal.h"
 #endif
-#ifdef MQTT_ENABLED
-#include "6_WiFi_MQTT.h"
-#endif
+
+#include "6_MQTT.h"
 
 #ifdef RFLINK_AUTOOTA_ENABLED
 #include <HTTPClient.h>
@@ -72,9 +71,6 @@ const char json_name_ap_mask[] = "ap_mask";
 
 
 Config::ConfigItem configItems[] =  {
-  Config::ConfigItem("host", Config::SectionId::MQTT_id, "enter a hostname here", clientParamsUpdatedCallback),
-  Config::ConfigItem("port", Config::SectionId::MQTT_id, 1900, clientParamsUpdatedCallback),
-
   Config::ConfigItem(json_name_client_enabled,      Config::SectionId::Wifi_id, false, clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_dhcp_enabled, Config::SectionId::Wifi_id, true, clientParamsUpdatedCallback),
   Config::ConfigItem(json_name_client_ssid,         Config::SectionId::Wifi_id, "My Home Wifi", clientParamsUpdatedCallback),
@@ -247,11 +243,6 @@ void resetClientWifi() {
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
 
-    delay(1000);
-
-    if( WiFi.status() != WL_CONNECTED ) {
-      Serial.println(" failed connect to connect before timeout, it will automatically retry later.");
-    }
   }  
   else {
     Serial.println("WiFi Client mode will be disconnected");
@@ -306,6 +297,11 @@ void setup_WIFI_OFF()
 #endif
 }
 
+void reconnectServices() {
+  if(RFLink::Mqtt::params::enabled)
+    RFLink::Mqtt::reconnect(1, true);
+}
+
 #ifdef ESP32
 void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
     Serial.println("Connected to AP!");
@@ -328,12 +324,13 @@ void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) 
     Serial.println(info.connected.channel);
  
     Serial.print("Auth mode: ");
-    Serial.println(info.connected.authmode);  
+    Serial.println(info.connected.authmode);
 
 }
 
 void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  reconnectServices();
 }
 
 void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -356,6 +353,7 @@ void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected
 }
 void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
   Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  reconnectServices();
 }
 void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
   Serial.println("WiFi Client has been disconnected");

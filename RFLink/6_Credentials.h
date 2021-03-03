@@ -25,7 +25,7 @@
 
 // MQTT Server
 #define  MQTT_SERVER "192.168.1.xxx"
-#define  MQTT_PORT "1883"
+#define  MQTT_PORT 1883
 #define  MQTT_ID "ESP8266-RFLink_xxx"
 #define  MQTT_USER "xxx"
 #define  MQTT_PSWD "xxx"

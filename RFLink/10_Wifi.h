@@ -28,6 +28,7 @@ namespace RFLink {
 
         void clientParamsUpdatedCallback();
         void accessPointParamsUpdatedCallback();
+        void reconnectServices();
 
         void getStatusJsonString(JsonObject &output);
     }

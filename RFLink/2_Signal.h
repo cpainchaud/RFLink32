@@ -77,7 +77,10 @@ namespace RFLink {
       extern unsigned long int min_pulse_len;       // US
       extern unsigned long int signal_end_timeout;  // US
       extern unsigned long int signal_repeat_time;  // MS
-      extern unsigned long int scan_high_time;      // MS
+      extern unsigned long int scan_high_time;      // MS 
+    }
+
+    namespace counters {
       
     }
 
@@ -101,6 +104,14 @@ namespace RFLink {
       void clearAllTimers();
       void IRAM_ATTR RX_pin_changed_state();
       void onPulseTimerTimeout();
+
+      inline bool isStopped() {
+        return scanningStopped;
+      };
+
+      inline bool isEnabled() {
+        return params::async_mode_enabled;
+      };
   };
 
   } // end of ns Signal

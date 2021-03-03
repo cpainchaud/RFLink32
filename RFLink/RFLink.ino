@@ -24,7 +24,7 @@
 #include "3_Serial.h"
 #include "4_Display.h"
 #include "5_Plugin.h"
-#include "6_WiFi_MQTT.h"
+#include "6_MQTT.h"
 #include "8_OLED.h"
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
@@ -64,10 +64,8 @@ void setup()
 
 void loop()
 {
-  #ifdef MQTT_ENABLED
   RFLink::Mqtt::checkMQTTloop();
   RFLink::sendMsgFromBuffer();
-  #endif
 
   #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::mainLoop();
@@ -137,12 +135,12 @@ namespace RFLink {
   #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::setup();
   RFLink::Portal::init();
+
+  RFLink::Mqtt::setup_MQTT();
+    //RFLink::Mqtt::reconnect(1);
+
   #endif // RFLINK_WIFI_ENABLED
 
-  #ifdef MQTT_ENABLED
-    RFLink::Mqtt::setup_MQTT();
-    RFLink::Mqtt::reconnect(1);
-  #endif // MQTT_ENABLED
 
   PluginInit();
   PluginTXInit();
@@ -167,9 +165,11 @@ namespace RFLink {
   #ifdef OLED_ENABLED
     splash_OLED();
   #endif
+
   #ifdef MQTT_ENABLED
-    RFLink::Mqtt::publishMsg();
+    //RFLink::Mqtt::publishMsg();
   #endif
+
     pbuffer[0] = 0;
     set_Radio_mode(Radio_RX);
 
@@ -191,9 +191,9 @@ namespace RFLink {
         Serial.print(pbuffer);
     #endif
 
-    #ifdef MQTT_ENABLED
-        RFLink::Mqtt::publishMsg();
-    #endif
+
+    RFLink::Mqtt::publishMsg();
+  
 
     #ifdef RFLINK_SERIAL2NET_ENABLED
       RFLink::Serial2Net::broadcastMessage(pbuffer);

@@ -48,9 +48,6 @@ So far, in addition of core libraries, we use:
 
 ## 7. COMPILE OPTIONS AND FLAGS
 Many features are not enabled by default or can be disabled for various reasons : firmware size, compability etc etc. Here is a listing with some instructions:
-### MQTT Server (disabled by default)
-- Define compilation flag MQTT_ENABLED or define it in 6_WIFI_MQTT.h
-- If you have not enabled WifiManager, make sure you update Wifi settings in 6_Credentials.h
 ### OTA (disabled by default)
 There are 3 types of OTA tp update your firwware
 #### Arduino/ESP's classic push over UDP (disabled by default)
