@@ -59,9 +59,6 @@ extern byte SignalHash;           // holds the processed plugin number
 extern byte SignalHashPrevious;   // holds the last processed plugin number
 extern unsigned long RepeatingTimer;
 
-void RawSendRF(RawSignalStruct *signal);
-void AC_Send(unsigned long data, byte cmd);
-
 namespace RFLink {
   namespace Signal {
 
@@ -89,6 +86,8 @@ namespace RFLink {
     void setup();
     void paramsUpdatedCallback();
     void refreshParametersFromConfig(bool triggerChanges=true);
+    void RawSendRF(RawSignalStruct *signal);
+    void AC_Send(unsigned long data, byte cmd);
 
     bool ScanEvent();
 

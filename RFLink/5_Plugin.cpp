@@ -11,6 +11,7 @@
 #include "5_Plugin.h"
 
 using namespace RFLink::Signal;
+using namespace RFLink;
 
 
 boolean (*Plugin_ptr[PLUGIN_MAX])(byte, const char *); // Receive plugins

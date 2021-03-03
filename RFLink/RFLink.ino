@@ -145,10 +145,10 @@ namespace RFLink {
   PluginInit();
   PluginTXInit();
 
-  set_Radio_mode(Radio_OFF);
+  Radio::set_Radio_mode(Radio::Radio_OFF);
 
   #if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
-    show_Radio_Pin();
+    Radio::show_Radio_Pin();
   #endif // ESP8266 || ESP32
 
   #ifdef OLED_ENABLED
@@ -171,7 +171,7 @@ namespace RFLink {
   #endif
 
     pbuffer[0] = 0;
-    set_Radio_mode(Radio_RX);
+    Radio::set_Radio_mode(Radio::Radio_RX);
 
 
   #ifdef RFLINK_WIFI_ENABLED
@@ -321,14 +321,14 @@ namespace RFLink {
           // -------------------------------------------------------
           // Handle Generic Commands / Translate protocol data into Nodo text commands
           // -------------------------------------------------------
-          set_Radio_mode(Radio_TX);
+          Radio::set_Radio_mode(Radio::Radio_TX);
 
           if (PluginTXCall(0, cmd))
             ValidCommand = 1;
           else // Answer that an invalid command was received?
             ValidCommand = 2;
 
-          set_Radio_mode(Radio_RX);
+          Radio::set_Radio_mode(Radio::Radio_RX);
         }
       }
     } // if > 7

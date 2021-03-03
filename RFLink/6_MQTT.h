@@ -59,6 +59,8 @@ void checkMQTTloop();
 void paramsUpdatedCallback();
 void refreshParametersFromConfig(bool triggerChanges=true);
 
+void getStatusJsonString(JsonObject &output);
+
 }} // end of MQTT namespace
 
 

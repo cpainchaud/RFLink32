@@ -345,7 +345,6 @@ void checkMQTTloop()
   if (millis() > lastCheck + MQTT_LOOP_MS)
   {
     if (!MQTTClient.connected()) {
-      Serial.println("MQTT Client is disconnected");
       reconnect(1);
     }
 
@@ -359,6 +358,22 @@ void checkMQTTloop()
     MQTTClient.loop();
     lastCheck = millis();
   }
+
+}
+
+void getStatusJsonString(JsonObject &output) {
+  auto && mqtt = output.createNestedObject("mqtt");
+
+  if(params::enabled) {
+    if( MQTTClient.connected() ) {
+      mqtt["status"] = "connected";
+    } else {
+      mqtt["status"] = "error";
+    }
+  } else {
+    mqtt["status"] = "disabled";
+  }
+
 
 }
 

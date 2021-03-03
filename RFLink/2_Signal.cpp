@@ -117,168 +117,9 @@ boolean FetchSignal()
 // *********************************************************************************
 
 #endif
-// ***********************************************************************************
 
-/*********************************************************************************************/
-/*
-  // RFLink Board specific: Generate a short pulse to switch the Aurel Transceiver from TX to RX mode.
-  void RFLinkHW( void) {
-     delayMicroseconds(36);
-     digitalWrite(PIN_BSF_0,LOW);
-     delayMicroseconds(16);
-     digitalWrite(PIN_BSF_0,HIGH);
-     return;
-  }
-*/
-/*********************************************************************************************\
-   Send rawsignal buffer to RF  * DEPRICATED * DO NOT USE
-\*********************************************************************************************/
 
-  void RawSendRF(RawSignalStruct *signal) {                                                    
-    int x;
-    
-    set_Radio_mode(Radio_State::Radio_TX);
-
-    //RawSignal.Pulses[RawSignal.Number]=1;                                   // due to a bug in Arduino 1.0.1
-
-    for(byte y=0; y<signal->Repeats; y++) {                               // herhaal verzenden RF code
-      x=1;
-      noInterrupts();
-      while(x<signal->Number) {
-          digitalWrite(PIN_RF_TX_DATA,HIGH);
-          delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
-          digitalWrite(PIN_RF_TX_DATA,LOW);
-          delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
-      }
-      interrupts();
-      if (y+1 < signal->Repeats) delay(signal->Delay);                 // Delay buiten het gebied waar de interrupts zijn uitgeschakeld! Anders werkt deze funktie niet.
-    }
-
-    set_Radio_mode(Radio_State::Radio_RX);
-  }
-
-/*********************************************************************************************\
-   Send bitstream to RF - Plugin 004 (Newkaku) special version
-\*********************************************************************************************/
-void AC_Send(unsigned long data, byte cmd)
-{
-#define AC_FPULSE 260 // Pulse width in microseconds
-#define AC_FRETRANS 5 // Number of code retransmissions
-
-  // Serial.println("Send AC");
-  // Serial.println(data, HEX);
-  // Serial.println(cmd, HEX);
-
-  unsigned long bitstream = 0L;
-  byte command = 0;
-  // prepare data to send
-  for (unsigned short i = 0; i < 32; i++)
-  { // reverse data bits
-    bitstream <<= 1;
-    bitstream |= (data & B1);
-    data >>= 1;
-  }
-  if (cmd != 0xff)
-  { // reverse dim bits
-    for (unsigned short i = 0; i < 4; i++)
-    {
-      command <<= 1;
-      command |= (cmd & B1);
-      cmd >>= 1;
-    }
-  }
-  // send bits
-  for (byte nRepeat = 0; nRepeat < AC_FRETRANS; nRepeat++)
-  {
-    data = bitstream;
-    if (cmd != 0xff)
-      cmd = command;
-    digitalWrite(PIN_RF_TX_DATA, HIGH);
-    //delayMicroseconds(fpulse);  //335
-    delayMicroseconds(335);
-    digitalWrite(PIN_RF_TX_DATA, LOW);
-    delayMicroseconds(AC_FPULSE * 10 + (AC_FPULSE >> 1)); //335*9=3015 //260*10=2600
-    for (unsigned short i = 0; i < 32; i++)
-    {
-      if (i == 27 && cmd != 0xff)
-      { // DIM command, send special DIM sequence TTTT replacing on/off bit
-        digitalWrite(PIN_RF_TX_DATA, HIGH);
-        delayMicroseconds(AC_FPULSE);
-        digitalWrite(PIN_RF_TX_DATA, LOW);
-        delayMicroseconds(AC_FPULSE);
-        digitalWrite(PIN_RF_TX_DATA, HIGH);
-        delayMicroseconds(AC_FPULSE);
-        digitalWrite(PIN_RF_TX_DATA, LOW);
-        delayMicroseconds(AC_FPULSE);
-      }
-      else
-        switch (data & B1)
-        {
-        case 0:
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300  260*4=1040
-          break;
-        case 1:
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE * 5);
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE);
-          break;
-        }
-      //Next bit
-      data >>= 1;
-    }
-    // send dim bits when needed
-    if (cmd != 0xff)
-    { // need to send DIM command bits
-      for (unsigned short i = 0; i < 4; i++)
-      { // 4 bits
-        switch (cmd & B1)
-        {
-        case 0:
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300
-          break;
-        case 1:
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE * 5);
-          digitalWrite(PIN_RF_TX_DATA, HIGH);
-          delayMicroseconds(AC_FPULSE);
-          digitalWrite(PIN_RF_TX_DATA, LOW);
-          delayMicroseconds(AC_FPULSE);
-          break;
-        }
-        //Next bit
-        cmd >>= 1;
-      }
-    }
-    //Send termination/synchronisation-signal. Total length: 32 periods
-    digitalWrite(PIN_RF_TX_DATA, HIGH);
-    delayMicroseconds(AC_FPULSE);
-    digitalWrite(PIN_RF_TX_DATA, LOW);
-    delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
-  }
-  // End transmit
-}
-
+  
 namespace RFLink { namespace Signal {
 
 RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL}; // current message
@@ -414,7 +255,7 @@ boolean FetchSignal_sync()
 
 #define RESET_SEEKSTART timeStartSeek_ms = millis();
 #define RESET_TIMESTART timeStartLoop_us = micros();
-#define CHECK_RF ((digitalRead(PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
+#define CHECK_RF ((digitalRead(Radio::PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
 #define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
 #define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
 #define SWITCH_TOGGLE Toggle = !Toggle
@@ -446,7 +287,7 @@ boolean FetchSignal_sync()
   }
 
   RESET_TIMESTART; // next pulse starts now before we do anything else
-  //Serial.print ("PulseLength: "); Serial.println (PulseLength);
+  //Serial.print ("PulseLength: "); Serial.println (PulseLength_us);
   STORE_PULSE;
 
   noInterrupts(); // we must not be interrupted while are busy reading the rest of the signal
@@ -578,7 +419,7 @@ namespace AsyncSignalScanner {
         RawSignal.Multiply = params::sample_rate;
         lastChangedState_us = 0;
         nextPulseTimeoutTime_us = 0;
-        attachInterrupt(PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
+        attachInterrupt(Radio::PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
       } else {
         Serial.println("Start of async Receiver was requested but it's not enabled!");
       }
@@ -586,7 +427,7 @@ namespace AsyncSignalScanner {
 
     void stopScanning() {
       scanningStopped = true;
-      detachInterrupt(PIN_RF_RX_DATA);
+      detachInterrupt(Radio::PIN_RF_RX_DATA);
     }
 
     void IRAM_ATTR RX_pin_changed_state() {
@@ -605,7 +446,7 @@ namespace AsyncSignalScanner {
         RawSignal.Time = 0;
       }
 
-      int pinState = digitalRead(PIN_RF_RX_DATA);
+      int pinState = digitalRead(Radio::PIN_RF_RX_DATA);
 
       if (RawSignal.Time == 0) {            // this is potentially the beginning of a new signal
         if( pinState != 1)                  // if we get 0 here it means that we are in the middle of a signal, let's forget about it
@@ -687,6 +528,150 @@ namespace AsyncSignalScanner {
     }
 };
 
+/*********************************************************************************************\
+   Send bitstream to RF - Plugin 004 (Newkaku) special version
+\*********************************************************************************************/
+void AC_Send(unsigned long data, byte cmd)
+{
+#define AC_FPULSE 260 // Pulse width in microseconds
+#define AC_FRETRANS 5 // Number of code retransmissions
+
+  // Serial.println("Send AC");
+  // Serial.println(data, HEX);
+  // Serial.println(cmd, HEX);
+
+  unsigned long bitstream = 0L;
+  byte command = 0;
+  // prepare data to send
+  for (unsigned short i = 0; i < 32; i++)
+  { // reverse data bits
+    bitstream <<= 1;
+    bitstream |= (data & B1);
+    data >>= 1;
+  }
+  if (cmd != 0xff)
+  { // reverse dim bits
+    for (unsigned short i = 0; i < 4; i++)
+    {
+      command <<= 1;
+      command |= (cmd & B1);
+      cmd >>= 1;
+    }
+  }
+  // send bits
+  for (byte nRepeat = 0; nRepeat < AC_FRETRANS; nRepeat++)
+  {
+    data = bitstream;
+    if (cmd != 0xff)
+      cmd = command;
+    digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+    //delayMicroseconds(fpulse);  //335
+    delayMicroseconds(335);
+    digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+    delayMicroseconds(AC_FPULSE * 10 + (AC_FPULSE >> 1)); //335*9=3015 //260*10=2600
+    for (unsigned short i = 0; i < 32; i++)
+    {
+      if (i == 27 && cmd != 0xff)
+      { // DIM command, send special DIM sequence TTTT replacing on/off bit
+        digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+        delayMicroseconds(AC_FPULSE);
+        digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+        delayMicroseconds(AC_FPULSE);
+      }
+      else
+        switch (data & B1)
+        {
+        case 0:
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300  260*4=1040
+          break;
+        case 1:
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5);
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          break;
+        }
+      //Next bit
+      data >>= 1;
+    }
+    // send dim bits when needed
+    if (cmd != 0xff)
+    { // need to send DIM command bits
+      for (unsigned short i = 0; i < 4; i++)
+      { // 4 bits
+        switch (cmd & B1)
+        {
+        case 0:
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300
+          break;
+        case 1:
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE * 5);
+          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          delayMicroseconds(AC_FPULSE);
+          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          delayMicroseconds(AC_FPULSE);
+          break;
+        }
+        //Next bit
+        cmd >>= 1;
+      }
+    }
+    //Send termination/synchronisation-signal. Total length: 32 periods
+    digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+    delayMicroseconds(AC_FPULSE);
+    digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+    delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
+  }
+  // End transmit
+}
+
+void RawSendRF(RawSignalStruct *signal) {                                                    
+    int x;
+    
+    Radio::set_Radio_mode(Radio::States::Radio_TX);
+
+    //RawSignal.Pulses[RawSignal.Number]=1;                                   // due to a bug in Arduino 1.0.1
+
+    for(byte y=0; y<signal->Repeats; y++) {                               // herhaal verzenden RF code
+      x=1;
+      noInterrupts();
+      while(x<signal->Number) {
+          digitalWrite(Radio::PIN_RF_TX_DATA,HIGH);
+          delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
+          digitalWrite(Radio::PIN_RF_TX_DATA,LOW);
+          delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
+      }
+      interrupts();
+      if (y+1 < signal->Repeats) delay(signal->Delay);                 // Delay buiten het gebied waar de interrupts zijn uitgeschakeld! Anders werkt deze funktie niet.
+    }
+
+    Radio::set_Radio_mode(Radio::States::Radio_RX);
+  }
 
 } // end of ns Signal
 } // end of ns RFLink

@@ -202,7 +202,7 @@ boolean  PluginTX_004(byte function, const char *string)
    // bitstream now contains the AC/NewKAKU-bits that have to be transmitted
    // --------------- NEWKAKU SEND ------------
 
-   AC_Send(bitstream, Cmd_dimmer);
+   Signal::AC_Send(bitstream, Cmd_dimmer);
 
    // --------------------------------------
    return true;

@@ -19,6 +19,8 @@ boolean CheckCmd();
 boolean CopySerial(char *);
 /*********************************************************************************************/
 
+using namespace RFLink;
+
 /**
  * @return False if Serial has no data to read and fails to execute command. 
  * */
@@ -212,14 +214,14 @@ boolean CheckCmd()
         // -------------------------------------------------------
         // Handle Generic Commands / Translate protocol data into Nodo text commands
         // -------------------------------------------------------
-        set_Radio_mode(Radio_TX);
+        Radio::set_Radio_mode(Radio::States::Radio_TX);
 
         if (PluginTXCall(0, InputBuffer_Serial))
           ValidCommand = 1;
         else // Answer that an invalid command was received?
           ValidCommand = 2;
 
-        set_Radio_mode(Radio_RX);
+        Radio::set_Radio_mode(Radio::States::Radio_RX);
       }
     }
   } // if > 7
