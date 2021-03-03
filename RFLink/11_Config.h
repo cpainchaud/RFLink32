@@ -25,6 +25,7 @@ namespace RFLink {
             MQTT_id,
             Portal_id,
             Signal_id,
+            Radio_id,
             EOF_id // must always be the last!
         };
 

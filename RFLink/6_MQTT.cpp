@@ -211,6 +211,8 @@ void setup_MQTT()
 {
   lastMqttConnectionAttemptTime.tv_sec = 0;
 
+  MQTTClient.setKeepAlive(MQTT_KEEPALIVE);
+
   Serial.print(F("MQTT setup SSL mode :\t\t\t"));
   if(params::ssl_enabled) {
     #ifdef ESP32

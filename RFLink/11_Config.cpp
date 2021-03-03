@@ -10,6 +10,7 @@
 
 #include "2_Signal.h"
 #include "6_MQTT.h"
+#include "1_Radio.h"
 #include "10_Wifi.h"
 #include "12_Portal.h"
 
@@ -29,6 +30,7 @@ const char * jsonSections[] = {
     "mqtt",
     "portal",
     "signal",
+    "radio",
     "root" // this is always the last one and matches index SectionId::EOF_id
 };
 #define jsonSections_count sizeof(jsonSections)/sizeof(char *)
@@ -39,10 +41,11 @@ static_assert(sizeof(jsonSections)/sizeof(char *) == SectionId::EOF_id+1, "jsonS
 ConfigItem* configItemLists[] = {
     #if defined(RFLINK_WIFI_ENABLED)
     &RFLink::Wifi::configItems[0],
+    &RFLink::Mqtt::configItems[0],
     #endif
     &RFLink::Portal::configItems[0],
     &RFLink::Signal::configItems[0],
-    &RFLink::Mqtt::configItems[0],
+    &RFLink::Radio::configItems[0],
  };
  #define configItemListsSize (sizeof(configItemLists)/sizeof(ConfigItem*))
 

@@ -71,21 +71,121 @@ void disableTX();
 
 namespace RFLink { namespace Radio  {
 
+  HardwareType hardware;
+
   uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
   uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
-  uint8_t PIN_RF_RX_VCC = PIN_RF_RX_VCC_0;
+  uint8_t PIN_RF_RX_VCC;
   uint8_t PIN_RF_RX_GND = PIN_RF_RX_GND_0;
   uint8_t PIN_RF_RX_NA = PIN_RF_RX_NA_0;
   uint8_t PIN_RF_RX_DATA = PIN_RF_RX_DATA_0;
   boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
+  bool rx_power_inverted;
+
   uint8_t PIN_RF_TX_PMOS = PIN_RF_TX_PMOS_0;
   uint8_t PIN_RF_TX_NMOS = PIN_RF_TX_NMOS_0;
   uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
   uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
   uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
   uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
+  bool tx_power_inverted;
 
   States current_State = Radio_NA;
+
+  const char * hardwareNames[] = {
+    "generic",
+    "RFM69",
+    "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
+};
+#define jsonSections_count sizeof(jsonSections)/sizeof(char *)
+
+static_assert(sizeof(hardwareNames)/sizeof(char *) == HardwareType::HW_EOF_t+1, "hardwareNames has missing/extra names, please compare with HardwareType enum declarations");
+
+// All json variable names
+const char json_name_hardware[] = "hardware";
+
+const char json_name_rx_data_pin[] = "rx_data_pin";
+const char json_name_rx_power_pin[] = "rx_power_pin";
+const char json_name_rx_power_inverted[] = "rx_power_inverted";
+
+const char json_name_tx_data_pin[] = "tx_data_pin";
+const char json_name_tx_power_pin[] = "tx_power";
+const char json_name_tx_power_inverted[] = "tx_power_inverted";
+
+Config::ConfigItem configItems[] =  {
+  Config::ConfigItem(json_name_hardware,    Config::SectionId::Radio_id, hardwareNames[HardwareType::HW_basic_t], paramsUpdatedCallback),
+
+  Config::ConfigItem(json_name_rx_data_pin,      Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_power_pin,     Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_power_inverted,Config::SectionId::Radio_id, false, paramsUpdatedCallback),
+
+  Config::ConfigItem(json_name_tx_data_pin,      Config::SectionId::Radio_id, PIN_RF_TX_DATA_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_power_pin,     Config::SectionId::Radio_id, PIN_RF_TX_VCC_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_power_inverted,Config::SectionId::Radio_id, false, paramsUpdatedCallback),
+  
+  Config::ConfigItem()
+};
+
+void refreshParametersFromConfig() {
+
+  States savedState = current_State;
+
+  if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
+    set_Radio_mode(States::Radio_OFF);
+  }
+
+  Config::ConfigItem *item;
+  bool changesDetected = false;
+
+  item = Config::findConfigItem(json_name_rx_data_pin, Config::SectionId::Wifi_id);
+  if( PIN_RF_RX_DATA != item->getLongIntValue() ) {
+    changesDetected = true;
+    PIN_RF_RX_DATA = item->getBoolValue();
+  }
+
+  item = Config::findConfigItem(json_name_rx_power_pin, Config::SectionId::Wifi_id);
+  if( rx_power_inverted != item->getBoolValue() ) {
+    changesDetected = true;
+    rx_power_inverted = item->getBoolValue();
+  }
+
+  item = Config::findConfigItem(json_name_rx_power_inverted, Config::SectionId::Wifi_id);
+  if( PIN_RF_RX_VCC != item->getLongIntValue() ) {
+    changesDetected = true;
+    PIN_RF_RX_VCC = item->getBoolValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_data_pin, Config::SectionId::Wifi_id);
+  if( PIN_RF_TX_DATA != item->getLongIntValue() ) {
+    changesDetected = true;
+    PIN_RF_TX_DATA = item->getBoolValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_power_pin, Config::SectionId::Wifi_id);
+  if( PIN_RF_TX_VCC != item->getLongIntValue() ) {
+    changesDetected = true;
+    PIN_RF_TX_VCC = item->getBoolValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_power_pin, Config::SectionId::Wifi_id);
+  if( tx_power_inverted != item->getBoolValue() ) {
+    changesDetected = true;
+    tx_power_inverted = item->getBoolValue();
+  }
+
+
+
+  // restore to RX state
+  if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
+    set_Radio_mode(States::Radio_RX);
+  }
+
+}
+
+void paramsUpdatedCallback() {
+  void refreshParametersFromConfig();
+}
+
 
 
 void set_Radio_mode(States new_State)
