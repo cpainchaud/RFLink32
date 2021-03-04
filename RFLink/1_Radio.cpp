@@ -18,77 +18,31 @@
 #include "RFM69/RFM69OOKregisters.h"
 RFM69OOK radio;
 
-#ifdef RFM69_ENABLED
-void set_Radio_mode(Radio_State new_State)
-{
-  if (current_State != new_State)
-  {
-    switch (new_State)
-    {
-    case Radio_OFF:
-      PIN_RF_RX_DATA = NOT_A_PIN;
-      PIN_RF_TX_DATA = NOT_A_PIN;
-      radio.reset();
-      radio.initialize();
-      radio.setFrequency(433920000);
-      Serial.print("Freq = ");
-      Serial.println(radio.getFrequency());
-      //Serial.print("Temp = "); Serial.println(radio.readTemperature());
-      radio.setHighPower(true); // for RFM69HW
-      // radio.sleep();
-      break;
 
-    case Radio_RX:
-      radio.transmitEnd();
-      PIN_RF_TX_DATA = NOT_A_PIN;
-      radio.receiveBegin();
-      PIN_RF_RX_DATA = RF69OOK_IRQ_PIN;
-      radio.attachUserInterrupt(NULL);
-      detachInterrupt(0);
-      detachInterrupt(1);
-      break;
-
-    case Radio_TX:
-      radio.receiveEnd();
-      PIN_RF_RX_DATA = NOT_A_PIN;
-      radio.transmitBegin();
-      PIN_RF_TX_DATA = RF69OOK_IRQ_PIN;
-      radio.setPowerLevel(10);
-      break;
-
-    case Radio_NA:
-      break;
-    }
-    current_State = new_State;
-  }
-}
-#else
-// Prototype
-void enableRX();
-void disableRX();
-void enableTX();
-void disableTX();
 
 namespace RFLink { namespace Radio  {
 
   HardwareType hardware;
 
-  uint8_t PIN_RF_RX_PMOS = PIN_RF_RX_PMOS_0;
-  uint8_t PIN_RF_RX_NMOS = PIN_RF_RX_NMOS_0;
-  uint8_t PIN_RF_RX_VCC;
-  uint8_t PIN_RF_RX_GND = PIN_RF_RX_GND_0;
-  uint8_t PIN_RF_RX_NA = PIN_RF_RX_NA_0;
-  uint8_t PIN_RF_RX_DATA = PIN_RF_RX_DATA_0;
-  boolean PULLUP_RF_RX_DATA = PULLUP_RF_RX_DATA_0;
-  bool rx_power_inverted;
+  namespace pins {
+    uint8_t RX_PMOS = PIN_RF_RX_PMOS_0;
+    uint8_t RX_NMOS = PIN_RF_RX_NMOS_0;
+    uint8_t RX_VCC = PIN_RF_RX_VCC_0;
+    uint8_t RX_GND = PIN_RF_RX_GND_0;
+    uint8_t RX_NA = PIN_RF_RX_NA_0;
+    uint8_t RX_DATA = PIN_RF_RX_DATA_0;
 
-  uint8_t PIN_RF_TX_PMOS = PIN_RF_TX_PMOS_0;
-  uint8_t PIN_RF_TX_NMOS = PIN_RF_TX_NMOS_0;
-  uint8_t PIN_RF_TX_VCC = PIN_RF_TX_VCC_0;
-  uint8_t PIN_RF_TX_GND = PIN_RF_TX_GND_0;
-  uint8_t PIN_RF_TX_NA = PIN_RF_TX_NA_0;
-  uint8_t PIN_RF_TX_DATA = PIN_RF_TX_DATA_0;
-  bool tx_power_inverted;
+    boolean PULLUP_RX_DATA = PULLUP_RF_RX_DATA_0;
+
+
+    uint8_t TX_PMOS = PIN_RF_TX_PMOS_0;
+    uint8_t TX_NMOS = PIN_RF_TX_NMOS_0;
+    uint8_t TX_VCC = PIN_RF_TX_VCC_0;
+    uint8_t TX_GND = PIN_RF_TX_GND_0;
+    uint8_t TX_NA = PIN_RF_TX_NA_0;
+    uint8_t TX_DATA = PIN_RF_TX_DATA_0;
+  }
+
 
   States current_State = Radio_NA;
 
@@ -97,115 +51,183 @@ namespace RFLink { namespace Radio  {
     "RFM69",
     "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
 };
-#define jsonSections_count sizeof(jsonSections)/sizeof(char *)
+#define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
 
 static_assert(sizeof(hardwareNames)/sizeof(char *) == HardwareType::HW_EOF_t+1, "hardwareNames has missing/extra names, please compare with HardwareType enum declarations");
 
 // All json variable names
 const char json_name_hardware[] = "hardware";
 
-const char json_name_rx_data_pin[] = "rx_data_pin";
-const char json_name_rx_power_pin[] = "rx_power_pin";
-const char json_name_rx_power_inverted[] = "rx_power_inverted";
+const char json_name_rx_data[] =  "rx_data";
+const char json_name_rx_vcc[] =   "rx_vcc";
+const char json_name_rx_nmos[] =  "rx_nmos";
+const char json_name_rx_pmos[] =  "rx_pmos";
+const char json_name_rx_gnd[] =   "rx_gnd";
+const char json_name_rx_na[] =    "rx_na";
 
-const char json_name_tx_data_pin[] = "tx_data_pin";
-const char json_name_tx_power_pin[] = "tx_power";
-const char json_name_tx_power_inverted[] = "tx_power_inverted";
+const char json_name_tx_data[] =  "tx_data";
+const char json_name_tx_vcc[] =   "tx_vcc";
+const char json_name_tx_nmos[] =  "tx_nmos";
+const char json_name_tx_pmos[] =  "tx_pmos";
+const char json_name_tx_gnd[] =   "tx_gnd";
+
 
 Config::ConfigItem configItems[] =  {
-  Config::ConfigItem(json_name_hardware,    Config::SectionId::Radio_id, hardwareNames[HardwareType::HW_basic_t], paramsUpdatedCallback),
+  Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[HardwareType::HW_basic_t], paramsUpdatedCallback),
 
-  Config::ConfigItem(json_name_rx_data_pin,      Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
-  Config::ConfigItem(json_name_rx_power_pin,     Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
-  Config::ConfigItem(json_name_rx_power_inverted,Config::SectionId::Radio_id, false, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_data,   Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_vcc,    Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_nmos,   Config::SectionId::Radio_id, PIN_RF_RX_NMOS_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_pmos,   Config::SectionId::Radio_id, PIN_RF_RX_PMOS_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_gnd,    Config::SectionId::Radio_id, PIN_RF_RX_GND_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_na,     Config::SectionId::Radio_id, PIN_RF_RX_NA_0, paramsUpdatedCallback),
 
-  Config::ConfigItem(json_name_tx_data_pin,      Config::SectionId::Radio_id, PIN_RF_TX_DATA_0, paramsUpdatedCallback),
-  Config::ConfigItem(json_name_tx_power_pin,     Config::SectionId::Radio_id, PIN_RF_TX_VCC_0, paramsUpdatedCallback),
-  Config::ConfigItem(json_name_tx_power_inverted,Config::SectionId::Radio_id, false, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_data,   Config::SectionId::Radio_id, PIN_RF_TX_DATA_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_vcc,    Config::SectionId::Radio_id, PIN_RF_TX_VCC_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_nmos,   Config::SectionId::Radio_id, PIN_RF_TX_NMOS_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_pmos,   Config::SectionId::Radio_id, PIN_RF_TX_PMOS_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_tx_gnd,    Config::SectionId::Radio_id, PIN_RF_TX_GND_0, paramsUpdatedCallback),
+
   
   Config::ConfigItem()
 };
 
 void refreshParametersFromConfig() {
-
   States savedState = current_State;
 
+  // let's save radio state before we shut it down
   if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
     set_Radio_mode(States::Radio_OFF);
+    //Serial.println("Radio was active before config change was requested");
   }
 
   Config::ConfigItem *item;
   bool changesDetected = false;
 
-  item = Config::findConfigItem(json_name_rx_data_pin, Config::SectionId::Wifi_id);
-  if( PIN_RF_RX_DATA != item->getLongIntValue() ) {
-    changesDetected = true;
-    PIN_RF_RX_DATA = item->getBoolValue();
+  item = Config::findConfigItem(json_name_hardware, Config::SectionId::Radio_id);
+  if( strcmp(hardwareNames[hardware], item->getCharValue()) != 0) {
+    auto new_hardware_id =  hardwareIDFromString(item->getCharValue());
+    if( new_hardware_id == HardwareType::HW_EOF_t ) {
+      Serial.printf("Unsupported radio hardware name '' was provided, falling to default generic receiver!", item->getCharValue());
+      changesDetected = true;
+    }
+    else
+      if(hardware != new_hardware_id){
+        changesDetected = true;
+        hardware = new_hardware_id;
+      }
   }
 
-  item = Config::findConfigItem(json_name_rx_power_pin, Config::SectionId::Wifi_id);
-  if( rx_power_inverted != item->getBoolValue() ) {
+  item = Config::findConfigItem(json_name_rx_data, Config::SectionId::Radio_id);
+  if( pins::RX_DATA != item->getLongIntValue() ) {
     changesDetected = true;
-    rx_power_inverted = item->getBoolValue();
+    pins::RX_DATA = item->getLongIntValue();
   }
 
-  item = Config::findConfigItem(json_name_rx_power_inverted, Config::SectionId::Wifi_id);
-  if( PIN_RF_RX_VCC != item->getLongIntValue() ) {
+  item = Config::findConfigItem(json_name_rx_vcc, Config::SectionId::Radio_id);
+  if( pins::RX_VCC != item->getLongIntValue() ) {
     changesDetected = true;
-    PIN_RF_RX_VCC = item->getBoolValue();
+    pins::RX_VCC = item->getLongIntValue();
   }
 
-  item = Config::findConfigItem(json_name_tx_data_pin, Config::SectionId::Wifi_id);
-  if( PIN_RF_TX_DATA != item->getLongIntValue() ) {
+  item = Config::findConfigItem(json_name_rx_nmos, Config::SectionId::Radio_id);
+  if( pins::RX_NMOS != item->getLongIntValue() ) {
     changesDetected = true;
-    PIN_RF_TX_DATA = item->getBoolValue();
+    pins::RX_NMOS = item->getLongIntValue();
   }
 
-  item = Config::findConfigItem(json_name_tx_power_pin, Config::SectionId::Wifi_id);
-  if( PIN_RF_TX_VCC != item->getLongIntValue() ) {
+  item = Config::findConfigItem(json_name_rx_pmos, Config::SectionId::Radio_id);
+  if( pins::RX_PMOS != item->getLongIntValue() ) {
     changesDetected = true;
-    PIN_RF_TX_VCC = item->getBoolValue();
+    pins::RX_PMOS = item->getLongIntValue();
   }
 
-  item = Config::findConfigItem(json_name_tx_power_pin, Config::SectionId::Wifi_id);
-  if( tx_power_inverted != item->getBoolValue() ) {
+  item = Config::findConfigItem(json_name_rx_gnd, Config::SectionId::Radio_id);
+  if( pins::RX_GND != item->getLongIntValue() ) {
     changesDetected = true;
-    tx_power_inverted = item->getBoolValue();
+    pins::RX_GND = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_rx_na, Config::SectionId::Radio_id);
+  if( pins::RX_NA != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::RX_NA = item->getLongIntValue();
+  }
+
+
+  // TX
+
+  item = Config::findConfigItem(json_name_tx_data, Config::SectionId::Radio_id);
+  if( pins::TX_DATA != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::TX_DATA = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_vcc, Config::SectionId::Radio_id);
+  if( pins::TX_VCC != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::TX_VCC = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_nmos, Config::SectionId::Radio_id);
+  if( pins::TX_NMOS != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::TX_NMOS = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_pmos, Config::SectionId::Radio_id);
+  if( pins::TX_PMOS != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::TX_PMOS = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_tx_gnd, Config::SectionId::Radio_id);
+  if( pins::TX_GND != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::TX_GND = item->getLongIntValue();
   }
 
 
   // restore to RX state
   if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
     set_Radio_mode(States::Radio_RX);
+    //Serial.println("Changes applied, bringing radio back to RX mode");
   }
 
 }
 
 void paramsUpdatedCallback() {
-  void refreshParametersFromConfig();
+  refreshParametersFromConfig();
 }
 
+HardwareType hardwareIDFromString(const char *name) {
+  for(int i=0; i<hardwareNames_count; i++) {
+    if(strcmp(hardwareNames[i], name) == 0)
+      return (HardwareType) i;
+  }
 
+  return HardwareType::HW_EOF_t;
+}
 
-void set_Radio_mode(States new_State)
+void set_Radio_mode_generic(States new_State)
 {
   if (current_State != new_State)
   {
     switch (new_State)
     {
     case Radio_OFF:
-      disableTX();
-      disableRX();
+      disableTX_generic();
+      disableRX_generic();
       break;
 
     case Radio_RX:
-      disableTX();
-      enableRX();
+      disableTX_generic();
+      enableRX_generic();
       break;
 
     case Radio_TX:
-      disableRX();
-      enableTX();
+      disableRX_generic();
+      enableTX_generic();
       break;
 
     case Radio_NA:
@@ -218,146 +240,202 @@ void set_Radio_mode(States new_State)
 #if (defined(ESP8266) || defined(ESP32))
 void show_Radio_Pin()
 {
-  if (PIN_RF_RX_PMOS != (uint8_t)NOT_A_PIN)
+  if (pins::RX_PMOS != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_PMOS :\t"));
-    Serial.println(GPIO2String(PIN_RF_RX_PMOS));
-    Serial.println(PIN_RF_RX_PMOS);
+    Serial.println(GPIO2String(pins::RX_PMOS));
+    Serial.println(pins::RX_PMOS);
   }
-  if (PIN_RF_RX_NMOS != (uint8_t)NOT_A_PIN)
+  if (pins::RX_NMOS != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_NMOS :\t"));
-    Serial.println(GPIO2String(PIN_RF_RX_NMOS));
+    Serial.println(GPIO2String(pins::RX_NMOS));
   }
-  if (PIN_RF_RX_VCC != (uint8_t)NOT_A_PIN)
+  if (pins::RX_VCC != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_VCC :\t"));
-    Serial.println(GPIO2String(PIN_RF_RX_VCC));
+    Serial.println(GPIO2String(pins::RX_VCC));
   }
-  if (PIN_RF_RX_GND != (uint8_t)NOT_A_PIN)
+  if (pins::RX_GND != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_GND :\t"));
-    Serial.println(GPIO2String(PIN_RF_RX_GND));
+    Serial.println(GPIO2String(pins::RX_GND));
   }
-  if (PIN_RF_RX_NA != (uint8_t)NOT_A_PIN)
+  if (pins::RX_NA != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_NA :\t"));
-    Serial.println(GPIO2String(PIN_RF_RX_NA));
+    Serial.println(GPIO2String(pins::RX_NA));
   }
-  if (PIN_RF_RX_DATA != (uint8_t)NOT_A_PIN)
+  if (pins::RX_DATA != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_RX_DATA :\t"));
-    Serial.print(GPIO2String(PIN_RF_RX_DATA));
-    if (PULLUP_RF_RX_DATA)
+    Serial.print(GPIO2String(pins::RX_DATA));
+    if (pins::PULLUP_RX_DATA)
       Serial.println(F(" (Pullup enabled)"));
     else
       Serial.println();
   }
   //
-  if (PIN_RF_TX_PMOS != (uint8_t)NOT_A_PIN)
+  if (pins::TX_PMOS != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_PMOS :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_PMOS));
+    Serial.println(GPIO2String(pins::TX_PMOS));
   }
-  if (PIN_RF_TX_NMOS != (uint8_t)NOT_A_PIN)
+  if (pins::TX_NMOS != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_NMOS :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_NMOS));
+    Serial.println(GPIO2String(pins::TX_NMOS));
   }
-  if (PIN_RF_TX_VCC != (uint8_t)NOT_A_PIN)
+  if (pins::TX_VCC != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_VCC :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_VCC));
+    Serial.println(GPIO2String(pins::TX_VCC));
   }
-  if (PIN_RF_TX_GND != (uint8_t)NOT_A_PIN)
+  if (pins::TX_GND != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_GND :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_GND));
+    Serial.println(GPIO2String(pins::TX_GND));
   }
-  if (PIN_RF_TX_DATA != (uint8_t)NOT_A_PIN)
+  if (pins::TX_DATA != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_DATA :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_DATA));
+    Serial.println(GPIO2String(pins::TX_DATA));
   }
-  if (PIN_RF_TX_NA != (uint8_t)NOT_A_PIN)
+  if (pins::TX_NA != (uint8_t)NOT_A_PIN)
   {
     Serial.print(F("Radio pin RF_TX_NA :\t"));
-    Serial.println(GPIO2String(PIN_RF_TX_NA));
+    Serial.println(GPIO2String(pins::TX_NA));
   }
 }
 #endif // ESP8266 || ESP32
 
-void enableRX()
+void set_Radio_mode(States new_State) 
+{ 
+  if(hardware == HardwareType::HW_basic_t)
+    set_Radio_mode_generic(new_State);
+  else if(hardware == HardwareType::HW_RFM69_t)
+    set_Radio_mode_RFM69(new_State);
+  else
+    Serial.printf("Error while trying to switch Radio state: unknown hardware id '%i'", new_State); 
+}
+
+void setup() {
+  refreshParametersFromConfig();
+}
+
+void enableRX_generic()
 {
   // RX pins
-  pinMode(PIN_RF_RX_NA, INPUT);       // Initialise in/output ports
-  pinMode(PIN_RF_RX_DATA, INPUT);     // Initialise in/output ports
-  pinMode(PIN_RF_RX_NMOS, OUTPUT);    // MOSFET, always output
-  pinMode(PIN_RF_RX_PMOS, OUTPUT);    // MOSFET, always output
-  digitalWrite(PIN_RF_RX_NMOS, HIGH); // turn GND to RF receiver ON
-  digitalWrite(PIN_RF_RX_PMOS, LOW);  // turn VCC to RF receiver ON
-  pinMode(PIN_RF_RX_GND, OUTPUT);     // Initialise in/output ports
-  pinMode(PIN_RF_RX_VCC, OUTPUT);     // Initialise in/output ports
-  digitalWrite(PIN_RF_RX_GND, LOW);   // turn GND to RF receiver ON
-  digitalWrite(PIN_RF_RX_VCC, HIGH);  // turn VCC to RF receiver ON
-  if (PULLUP_RF_RX_DATA)
-    pinMode(PIN_RF_RX_DATA, INPUT_PULLUP); // Initialise in/output ports
+  pinMode(pins::RX_NA, INPUT);       // Initialise in/output ports
+  pinMode(pins::RX_DATA, INPUT);     // Initialise in/output ports
+  pinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
+  pinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(pins::RX_NMOS, HIGH); // turn GND to RF receiver ON
+  digitalWrite(pins::RX_PMOS, LOW);  // turn VCC to RF receiver ON
+  pinMode(pins::RX_GND, OUTPUT);     // Initialise in/output ports
+  pinMode(pins::RX_VCC, OUTPUT);     // Initialise in/output ports
+  digitalWrite(pins::RX_GND, LOW);   // turn GND to RF receiver ON
+  digitalWrite(pins::RX_VCC, HIGH);  // turn VCC to RF receiver ON
+  if (pins::PULLUP_RX_DATA)
+    pinMode(pins::RX_DATA, INPUT_PULLUP); // Initialise in/output ports
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
   if(RFLink::Signal::params::async_mode_enabled)
     RFLink::Signal::AsyncSignalScanner::startScanning();
  
 }
 
-void disableRX()
+void disableRX_generic()
 {
   if( RFLink::Signal::params::async_mode_enabled )
     RFLink::Signal::AsyncSignalScanner::stopScanning();
   
   // RX pins
-  pinMode(PIN_RF_RX_DATA, INPUT);
-  pinMode(PIN_RF_RX_NA, INPUT);
-  pinMode(PIN_RF_RX_PMOS, OUTPUT);    // MOSFET, always output
-  pinMode(PIN_RF_RX_NMOS, OUTPUT);    // MOSFET, always output
-  digitalWrite(PIN_RF_RX_PMOS, HIGH); // turn VCC to RF receiver OFF
-  digitalWrite(PIN_RF_RX_NMOS, LOW);  // turn GND to RF receiver OFF
-  pinMode(PIN_RF_RX_VCC, INPUT);
-  pinMode(PIN_RF_RX_GND, INPUT);
+  pinMode(pins::RX_DATA, INPUT);
+  pinMode(pins::RX_NA, INPUT);
+  pinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
+  pinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(pins::RX_PMOS, HIGH); // turn VCC to RF receiver OFF
+  digitalWrite(pins::RX_NMOS, LOW);  // turn GND to RF receiver OFF
+  pinMode(pins::RX_VCC, INPUT);
+  pinMode(pins::RX_GND, INPUT);
 }
 
-void enableTX()
+void enableTX_generic()
 {
   // TX Pins
-  pinMode(PIN_RF_TX_NA, INPUT);       // Initialise in/output ports
-  pinMode(PIN_RF_TX_DATA, OUTPUT);    // Initialise in/output ports
-  digitalWrite(PIN_RF_TX_DATA, LOW);  // No signal yet
-  pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
-  pinMode(PIN_RF_TX_PMOS, OUTPUT);    // MOSFET, always output
-  digitalWrite(PIN_RF_TX_NMOS, HIGH); // turn GND to TX receiver ON
-  digitalWrite(PIN_RF_TX_PMOS, LOW);  // turn VCC to TX receiver ON
-  pinMode(PIN_RF_TX_GND, OUTPUT);     // Initialise in/output ports
-  pinMode(PIN_RF_TX_VCC, OUTPUT);     // Initialise in/output ports
-  digitalWrite(PIN_RF_TX_GND, LOW);   // turn GND to TX receiver ON
-  digitalWrite(PIN_RF_TX_VCC, HIGH);  // turn VCC to TX receiver ON
+  pinMode(pins::TX_NA, INPUT);       // Initialise in/output ports
+  pinMode(pins::TX_DATA, OUTPUT);    // Initialise in/output ports
+  digitalWrite(pins::TX_DATA, LOW);  // No signal yet
+  pinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
+  pinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(pins::TX_NMOS, HIGH); // turn GND to TX receiver ON
+  digitalWrite(pins::TX_PMOS, LOW);  // turn VCC to TX receiver ON
+  pinMode(pins::TX_GND, OUTPUT);     // Initialise in/output ports
+  pinMode(pins::TX_VCC, OUTPUT);     // Initialise in/output ports
+  digitalWrite(pins::TX_GND, LOW);   // turn GND to TX receiver ON
+  digitalWrite(pins::TX_VCC, HIGH);  // turn VCC to TX receiver ON
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
 }
 
-void disableTX()
+void disableTX_generic()
 {
   // TX Pins
   delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
-  digitalWrite(PIN_RF_TX_DATA, LOW);  // No more signal
-  pinMode(PIN_RF_TX_DATA, INPUT);     //
-  pinMode(PIN_RF_TX_NA, INPUT);       //
-  pinMode(PIN_RF_TX_NMOS, OUTPUT);    // MOSFET, always output
-  pinMode(PIN_RF_TX_PMOS, OUTPUT);    // MOSFET, always output
-  digitalWrite(PIN_RF_TX_PMOS, HIGH); // turn VCC to TX receiver OFF
-  digitalWrite(PIN_RF_TX_NMOS, LOW);  // turn GND to TX receiver OFF
-  pinMode(PIN_RF_TX_VCC, INPUT);
-  pinMode(PIN_RF_TX_GND, INPUT);
+  digitalWrite(pins::TX_DATA, LOW);  // No more signal
+  pinMode(pins::TX_DATA, INPUT);     //
+  pinMode(pins::TX_NA, INPUT);       //
+  pinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
+  pinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
+  digitalWrite(pins::TX_PMOS, HIGH); // turn VCC to TX receiver OFF
+  digitalWrite(pins::TX_NMOS, LOW);  // turn GND to TX receiver OFF
+  pinMode(pins::TX_VCC, INPUT);
+  pinMode(pins::TX_GND, INPUT);
+}
+
+void set_Radio_mode_RFM69(States new_State)
+{
+  // @TODO : review compatibility with ASYNC mode
+  if (current_State != new_State)
+  {
+    switch (new_State)
+    {
+    case Radio_OFF:
+      pins::RX_DATA = NOT_A_PIN;
+      pins::TX_DATA = NOT_A_PIN;
+      radio.reset();
+      radio.initialize();
+      radio.setFrequency(433920000);
+      Serial.print("Freq = ");
+      Serial.println(radio.getFrequency());
+      //Serial.print("Temp = "); Serial.println(radio.readTemperature());
+      radio.setHighPower(true); // for RFM69HW
+      // radio.sleep();
+      break;
+
+    case Radio_RX:
+      radio.transmitEnd();
+      pins::TX_DATA = NOT_A_PIN;
+      radio.receiveBegin();
+      pins::RX_DATA = RF69OOK_IRQ_PIN;
+      radio.attachUserInterrupt(NULL);
+      detachInterrupt(0);
+      detachInterrupt(1);
+      break;
+
+    case Radio_TX:
+      radio.receiveEnd();
+      pins::RX_DATA = NOT_A_PIN;
+      radio.transmitBegin();
+      pins::TX_DATA = RF69OOK_IRQ_PIN;
+      radio.setPowerLevel(10);
+      break;
+
+    case Radio_NA:
+      break;
+    }
+    current_State = new_State;
+  }
 }
 
 
 }}
-
-
-#endif // not RFM69_ENABLED

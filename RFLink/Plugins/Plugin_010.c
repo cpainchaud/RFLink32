@@ -259,9 +259,9 @@ void TRC02_Send(unsigned long address, int command)
       crc = 0;
       fsendbuff = address;
       fsendbuff = (fsendbuff << 8) + command;
-      digitalWrite(PIN_RF_TX_DATA, HIGH); // start pulse
+      digitalWrite(TX_DATA, HIGH); // start pulse
       delayMicroseconds(fpulse * 3);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(fpulse);
       for (int i = 0; i < 32; i++)
       { // TRC02 packet is 32 bits + 1 bit crc
@@ -270,17 +270,17 @@ void TRC02_Send(unsigned long address, int command)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse);
             crc += crc ^ 0;
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse);
             crc += crc ^ 1;
          }
@@ -288,17 +288,17 @@ void TRC02_Send(unsigned long address, int command)
       if (crc == 1)
       { // crc pulse
          delayMicroseconds(fpulse);
-         digitalWrite(PIN_RF_TX_DATA, LOW);
+         digitalWrite(TX_DATA, LOW);
          delayMicroseconds(fpulse);
-         digitalWrite(PIN_RF_TX_DATA, HIGH);
+         digitalWrite(TX_DATA, HIGH);
          delayMicroseconds(fpulse);
       }
       else
       {
          delayMicroseconds(fpulse);
-         digitalWrite(PIN_RF_TX_DATA, HIGH);
+         digitalWrite(TX_DATA, HIGH);
          delayMicroseconds(fpulse);
-         digitalWrite(PIN_RF_TX_DATA, LOW);
+         digitalWrite(TX_DATA, LOW);
          delayMicroseconds(fpulse);
       }
    }

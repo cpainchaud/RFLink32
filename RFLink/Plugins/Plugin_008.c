@@ -232,16 +232,16 @@ void Kambrook_Send(unsigned long address)
             fsendbuff = (fsendbuff << 1);     // Shift left
             if (fdatabit != fdatamask)
             { // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
             else
             { // Write 1
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse2);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
         }
@@ -256,16 +256,16 @@ void Kambrook_Send(unsigned long address)
             fsendbuff = (fsendbuff << 1);     // Shift left
             if (fdatabit != fdatamask)
             { // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
             else
             { // Write 1
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse2);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
         }
@@ -280,21 +280,21 @@ void Kambrook_Send(unsigned long address)
             fsendbuff = (fsendbuff << 1);     // Shift left
             if (fdatabit != fdatamask)
             { // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
             else
             { // Write 1
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse2);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse);
             }
         }
         // --------------
-        digitalWrite(PIN_RF_TX_DATA, LOW);
+        digitalWrite(TX_DATA, LOW);
         delayMicroseconds(fpulse2 * 14);
     }
 }

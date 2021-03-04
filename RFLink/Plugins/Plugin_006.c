@@ -247,9 +247,9 @@ void Blyss_Send(unsigned long address, byte devtype)
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       // send SYNC 1P low, 6P high
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(fpulse);
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(fpulse * 6);
       // end send SYNC
       // --------------
@@ -270,16 +270,16 @@ void Blyss_Send(unsigned long address, byte devtype)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 2);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 2);
          }
       }
@@ -294,16 +294,16 @@ void Blyss_Send(unsigned long address, byte devtype)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 2);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 2);
          }
       }
@@ -320,21 +320,21 @@ void Blyss_Send(unsigned long address, byte devtype)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 2);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 2);
          }
       }
       // --------------
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       //delayMicroseconds(fpulse * 18);             // delay between RF retransmits
       delay(24); // delay 23.8 ms
    }

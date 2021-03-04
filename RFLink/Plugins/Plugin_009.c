@@ -471,9 +471,9 @@ void X10_Send(uint32_t address)
       fsendbuff = address;
 
       // send SYNC 12P High, 10P low
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(fpulse * 12);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(fpulse * 10);
       // end send SYNC
       // Send command
@@ -484,23 +484,23 @@ void X10_Send(uint32_t address)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 4);
          }
       }
       // Send Stop/delay
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(fpulse * 20);
    }
    return;

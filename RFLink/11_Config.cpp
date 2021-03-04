@@ -16,6 +16,10 @@
 
 #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
 
+#if defined(DEBUG) || defined(RFLINK_DEBUG)
+#define DEBUG_RFLINK_CONFIG
+#endif
+
 namespace RFLink { namespace Config {
 
 
@@ -127,19 +131,25 @@ void init() {
 
         while(!item->typeIsEOF()) {
             if (item->typeIsChar()) {
+                #ifdef DEBUG_RFLINK_CONFIG
                 sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
                 Serial.print(tmp);
                 Serial.println(item->getCharDefaultValue());
+                #endif
 
             } else if (item->typeIsLongInt()) {
+                #ifdef DEBUG_RFLINK_CONFIG
                 sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
                 Serial.print(tmp);
                 Serial.println(item->getLongIntDefaultValue());
+                #endif
 
             } else if (item->typeIsBool()) {
+                #ifdef DEBUG_RFLINK_CONFIG
                 sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
                 Serial.print(tmp);
                 Serial.println(item->getBoolDefaultValue());
+                #endif
             }
             else {
                 Serial.print("unsupported configitem type=");
@@ -244,8 +254,11 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
 
     // we iterate root level to find sections!
     for (JsonPair kv : data) {
+
+        #ifdef DEBUG_RFLINK_CONFIG
         Serial.print("Remote has root object named: ");
         Serial.println(kv.key().c_str());
+        #endif
         
         JsonVariant && section_variant = kv.value();
         if(!section_variant.is<JsonObject>()) {
@@ -266,8 +279,10 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
 
         // from here we have a valid section, now we go down a level in the remote object
         for (JsonPair section_kv : sectionObject) {
+            #ifdef RFLINK_CONFIG_DEBUG
             Serial.print("Remote section has item named: ");
             Serial.println(section_kv.key().c_str());
+            #endif
 
             ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
             if(item == nullptr) {
@@ -301,8 +316,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
             } else if(item->typeIsLongInt()) {
 
                 long int remote_value;
-                if(remoteVariant.is<unsigned long>())
-                    remote_value = remoteVariant.as<unsigned long>();
+                if(remoteVariant.is<signed long>())
+                    remote_value = remoteVariant.as<signed long>();
                 else {
                     message += F("section '");
                     message += kv.key().c_str();
@@ -311,8 +326,9 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     message += "' with mismatched type (not long int) so it will be ignored\\n";
                     continue;
                 }
+
                 if(remote_value == item->getLongIntValue() ) // no change!
-                    continue; 
+                    continue;
                 
                 configHasChanged = true;
                 callbackMgr.add(item->update_callback);

@@ -24,8 +24,8 @@ boolean FetchSignal()
 
   // Because this is a time critical routine, we use static variables so that
   // variables do not need to be initialized at each function call.
-  static const uint8_t Fbit = digitalPinToBitMask(PIN_RF_RX_DATA);
-  static const uint8_t Fport = digitalPinToPort(PIN_RF_RX_DATA);
+  static const uint8_t Fbit = digitalPinToBitMask(RX_DATA);
+  static const uint8_t Fport = digitalPinToPort(RX_DATA);
   static const uint8_t FstateMask = (HIGH ? Fbit : 0); // When the 433RX is at rest, the output is low. StateSignal must be HIGH
   //
 
@@ -255,7 +255,7 @@ boolean FetchSignal_sync()
 
 #define RESET_SEEKSTART timeStartSeek_ms = millis();
 #define RESET_TIMESTART timeStartLoop_us = micros();
-#define CHECK_RF ((digitalRead(Radio::PIN_RF_RX_DATA) == Start_Level) ^ Toggle)
+#define CHECK_RF ((digitalRead(Radio::pins::RX_DATA) == Start_Level) ^ Toggle)
 #define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
 #define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
 #define SWITCH_TOGGLE Toggle = !Toggle
@@ -419,7 +419,7 @@ namespace AsyncSignalScanner {
         RawSignal.Multiply = params::sample_rate;
         lastChangedState_us = 0;
         nextPulseTimeoutTime_us = 0;
-        attachInterrupt(Radio::PIN_RF_RX_DATA, RX_pin_changed_state, CHANGE);
+        attachInterrupt(Radio::pins::RX_DATA, RX_pin_changed_state, CHANGE);
       } else {
         Serial.println("Start of async Receiver was requested but it's not enabled!");
       }
@@ -427,7 +427,7 @@ namespace AsyncSignalScanner {
 
     void stopScanning() {
       scanningStopped = true;
-      detachInterrupt(Radio::PIN_RF_RX_DATA);
+      detachInterrupt(Radio::pins::RX_DATA);
     }
 
     void IRAM_ATTR RX_pin_changed_state() {
@@ -446,7 +446,7 @@ namespace AsyncSignalScanner {
         RawSignal.Time = 0;
       }
 
-      int pinState = digitalRead(Radio::PIN_RF_RX_DATA);
+      int pinState = digitalRead(Radio::pins::RX_DATA);
 
       if (RawSignal.Time == 0) {            // this is potentially the beginning of a new signal
         if( pinState != 1)                  // if we get 0 here it means that we are in the middle of a signal, let's forget about it
@@ -495,7 +495,7 @@ namespace AsyncSignalScanner {
         return;
       }
 
-      /*if (digitalRead(PIN_RF_RX_DATA) == HIGH) {   // We have a corrupted packet here
+      /*if (digitalRead(RX_DATA) == HIGH) {   // We have a corrupted packet here
         Serial.println("corrupted signal ends with HIGH");
         RawSignal.Number = 0;
         RawSignal.Time = 0;
@@ -564,45 +564,45 @@ void AC_Send(unsigned long data, byte cmd)
     data = bitstream;
     if (cmd != 0xff)
       cmd = command;
-    digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+    digitalWrite(Radio::pins::TX_DATA, HIGH);
     //delayMicroseconds(fpulse);  //335
     delayMicroseconds(335);
-    digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+    digitalWrite(Radio::pins::TX_DATA, LOW);
     delayMicroseconds(AC_FPULSE * 10 + (AC_FPULSE >> 1)); //335*9=3015 //260*10=2600
     for (unsigned short i = 0; i < 32; i++)
     {
       if (i == 27 && cmd != 0xff)
       { // DIM command, send special DIM sequence TTTT replacing on/off bit
-        digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+        digitalWrite(Radio::pins::TX_DATA, HIGH);
         delayMicroseconds(AC_FPULSE);
-        digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+        digitalWrite(Radio::pins::TX_DATA, LOW);
         delayMicroseconds(AC_FPULSE);
-        digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+        digitalWrite(Radio::pins::TX_DATA, HIGH);
         delayMicroseconds(AC_FPULSE);
-        digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+        digitalWrite(Radio::pins::TX_DATA, LOW);
         delayMicroseconds(AC_FPULSE);
       }
       else
         switch (data & B1)
         {
         case 0:
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300  260*4=1040
           break;
         case 1:
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE * 5);
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE);
           break;
         }
@@ -617,23 +617,23 @@ void AC_Send(unsigned long data, byte cmd)
         switch (cmd & B1)
         {
         case 0:
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE * 5); // 335*3=1005 260*5=1300
           break;
         case 1:
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE * 5);
-          digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+          digitalWrite(Radio::pins::TX_DATA, HIGH);
           delayMicroseconds(AC_FPULSE);
-          digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+          digitalWrite(Radio::pins::TX_DATA, LOW);
           delayMicroseconds(AC_FPULSE);
           break;
         }
@@ -642,9 +642,9 @@ void AC_Send(unsigned long data, byte cmd)
       }
     }
     //Send termination/synchronisation-signal. Total length: 32 periods
-    digitalWrite(Radio::PIN_RF_TX_DATA, HIGH);
+    digitalWrite(Radio::pins::TX_DATA, HIGH);
     delayMicroseconds(AC_FPULSE);
-    digitalWrite(Radio::PIN_RF_TX_DATA, LOW);
+    digitalWrite(Radio::pins::TX_DATA, LOW);
     delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
   }
   // End transmit
@@ -661,9 +661,9 @@ void RawSendRF(RawSignalStruct *signal) {
       x=1;
       noInterrupts();
       while(x<signal->Number) {
-          digitalWrite(Radio::PIN_RF_TX_DATA,HIGH);
+          digitalWrite(Radio::pins::TX_DATA,HIGH);
           delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
-          digitalWrite(Radio::PIN_RF_TX_DATA,LOW);
+          digitalWrite(Radio::pins::TX_DATA,LOW);
           delayMicroseconds(signal->Pulses[x++]*signal->Multiply);    // min een kleine correctie
       }
       interrupts();

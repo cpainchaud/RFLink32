@@ -331,20 +331,20 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
     for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
         data1=bitstream1; 
         data2=bitstream2; 
-		digitalWrite(PIN_RF_TX_DATA, HIGH);
+		digitalWrite(TX_DATA, HIGH);
 		delayMicroseconds(fpulse*10 + (fpulse >> 1));  //335*9=3015 //270*10=2700
 		for (unsigned short i=0; i<24; i++) {
 			switch (data1 & B1) {
 				case 0:
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse * 1);
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse2 * 1);  
 					break;
 				case 1:
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse2 * 1);
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse * 1);
 					break;
 			}
@@ -354,15 +354,15 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 		for (unsigned short i=0; i<24; i++) {
 			switch (data2 & B1) {
 				case 0:
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse * 1);
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse2 * 1); // 335*3=1005 260*5=1300  260*4=1040
 					break;
 				case 1:
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse2 * 1);
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse * 1);
 					break;
 			}
@@ -370,9 +370,9 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 			data2>>=1;
 		}
 		//Send termination/synchronisation-signal. 
-		//digitalWrite(PIN_RF_TX_DATA, HIGH);
+		//digitalWrite(TX_DATA, HIGH);
 		//delayMicroseconds(fpulse);
-		digitalWrite(PIN_RF_TX_DATA, LOW);
+		digitalWrite(TX_DATA, LOW);
 		delayMicroseconds(fpulse * 27); 
 
         //RawSignal.Pulses[98]=300/RawSignal.Multiply;
@@ -409,23 +409,23 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
     for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++) {
         data1=bitstream1; 
         data2=bitstream2; 
-		digitalWrite(PIN_RF_TX_DATA, HIGH);
+		digitalWrite(TX_DATA, HIGH);
 		//delayMicroseconds(fpulse);  //335
 		delayMicroseconds(335);       
-		digitalWrite(PIN_RF_TX_DATA, LOW);
+		digitalWrite(TX_DATA, LOW);
 		delayMicroseconds(fpulse*10 + (fpulse >> 1));  //335*9=3015 //270*10=2700
 		for (unsigned short i=0; i<24; i++) {
 			switch (data1 & B1) {
 				case 0:
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse * 1);
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse2 * 1);  
 					break;
 				case 1:
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse2 * 1);
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse * 1);
 					break;
 			}
@@ -435,15 +435,15 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 		for (unsigned short i=0; i<24; i++) {
 			switch (data2 & B1) {
 				case 0:
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse * 1);
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse2 * 1); // 335*3=1005 260*5=1300  260*4=1040
 					break;
 				case 1:
-					digitalWrite(PIN_RF_TX_DATA, HIGH);
+					digitalWrite(TX_DATA, HIGH);
 					delayMicroseconds(fpulse2 * 1);
-					digitalWrite(PIN_RF_TX_DATA, LOW);
+					digitalWrite(TX_DATA, LOW);
 					delayMicroseconds(fpulse * 1);
 					break;
 			}
@@ -451,9 +451,9 @@ void HomeConfort_Send(unsigned long data1, unsigned long data2) {
 			data2>>=1;
 		}
 		//Send termination/synchronisation-signal. 
-		digitalWrite(PIN_RF_TX_DATA, HIGH);
+		digitalWrite(TX_DATA, HIGH);
 		delayMicroseconds(fpulse);
-		digitalWrite(PIN_RF_TX_DATA, LOW);
+		digitalWrite(TX_DATA, LOW);
 		delayMicroseconds(fpulse * 27); 
 
         //RawSignal.Pulses[98]=300/RawSignal.Multiply;

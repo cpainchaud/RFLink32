@@ -244,16 +244,16 @@ void HomeEasyEU_Send(unsigned long address, unsigned long command)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 5);
          }
       }
@@ -268,16 +268,16 @@ void HomeEasyEU_Send(unsigned long address, unsigned long command)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 5);
          }
       }
@@ -291,23 +291,23 @@ void HomeEasyEU_Send(unsigned long address, unsigned long command)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 5);
          }
       }
       // -------------- Send stop
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+      digitalWrite(TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 26);
    }
 }

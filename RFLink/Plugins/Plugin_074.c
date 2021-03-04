@@ -162,24 +162,24 @@ void RL02_Send(unsigned long address)
             // PT2262 data can be 0, 1 or float.
             if (fdatabit != fdatamask)
             { // Write 0
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse * 3);
             }
             else
             { // Write float
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse * 1);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(fpulse * 3);
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(fpulse * 1);
             }
         }
@@ -188,31 +188,31 @@ void RL02_Send(unsigned long address)
         // Send last bit. Can be either 1 or float
         if (fdatabit != fdatamask)
         { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse);
         }
         else
         { // Write float
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
         }
 
         // Send sync bit
-        digitalWrite(PIN_RF_TX_DATA, HIGH);
+        digitalWrite(TX_DATA, HIGH);
         delayMicroseconds(fpulse * 1);
-        digitalWrite(PIN_RF_TX_DATA, LOW); // and lower the signal
+        digitalWrite(TX_DATA, LOW); // and lower the signal
         delayMicroseconds(fpulse * 31);
     }
 }

@@ -107,36 +107,63 @@ namespace RFLink { namespace Radio {
 
     extern Config::ConfigItem configItems[];
 
-    extern uint8_t PIN_RF_RX_PMOS;
-    extern uint8_t PIN_RF_RX_NMOS;
-    extern uint8_t PIN_RF_RX_VCC;
-    extern uint8_t PIN_RF_RX_GND;
-    extern uint8_t PIN_RF_RX_NA;
-    extern uint8_t PIN_RF_RX_DATA;
-    extern boolean PULLUP_RF_RX_DATA;
+    namespace pins {
+        extern uint8_t RX_PMOS;
+        extern uint8_t RX_NMOS;
+        extern uint8_t RX_VCC;
+        extern uint8_t RX_GND;
+        extern uint8_t RX_NA;
+        extern uint8_t RX_DATA;
+        extern boolean PULLUP_RX_DATA;
 
-    extern uint8_t PIN_RF_TX_PMOS;
-    extern uint8_t PIN_RF_TX_NMOS;
-    extern uint8_t PIN_RF_TX_VCC;
-    extern uint8_t PIN_RF_TX_GND;
-    extern uint8_t PIN_RF_TX_NA;
-    extern uint8_t PIN_RF_TX_DATA;
+        extern uint8_t TX_PMOS;
+        extern uint8_t TX_NMOS;
+        extern uint8_t TX_VCC;
+        extern uint8_t TX_GND;
+        extern uint8_t TX_NA;
+        extern uint8_t TX_DATA;
+    }
     
 
     
     void setup();
     void paramsUpdatedCallback();
     void refreshParametersFromConfig();
-    
+
+
+    /**
+     * return HardwareType::HW_EOF_t when not found
+     * */
     HardwareType hardwareIDFromString(const char *);
 
     void set_Radio_mode(States new_state);
     void show_Radio_Pin();
+
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void set_Radio_mode_generic(States new_state);
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void set_Radio_mode_RFM69(States new_state);
     
-    void enableRX();
-    void disableRX();
-    void enableTX();
-    void disableTX();
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void enableRX_generic();
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void disableRX_generic();
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void enableTX_generic();
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void disableTX_generic();
 
 }}
 

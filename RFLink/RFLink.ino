@@ -130,12 +130,12 @@ namespace RFLink {
   #if defined(ESP32) || (ESP8266)
   RFLink::Config::init();
   #endif
+  RFLink::Radio::setup();
   RFLink::Signal::setup();
 
   #if defined(RFLINK_WIFI_ENABLED)
   RFLink::Wifi::setup();
   RFLink::Portal::init();
-
   RFLink::Mqtt::setup_MQTT();
     //RFLink::Mqtt::reconnect(1);
 
@@ -191,8 +191,9 @@ namespace RFLink {
         Serial.print(pbuffer);
     #endif
 
-
-    RFLink::Mqtt::publishMsg();
+    #ifndef RFLINK_MQTT_DISABLED
+      RFLink::Mqtt::publishMsg();
+    #endif // !RFLINK_MQTT_DISABLED
   
 
     #ifndef RFLINK_SERIAL2NET_DISABLED

@@ -245,9 +245,9 @@ void sendRF(int currentPulses)
    for (int j=0; j < RawSignal.Repeats; j++) {
       for (int i = 0; i < currentPulses; i=i+2) 
       {
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(RawSignal.Pulses[i]*RawSignal.Multiply);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(RawSignal.Pulses[i+1]*RawSignal.Multiply);
       }
    }

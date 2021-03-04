@@ -142,13 +142,13 @@ void Deltronic_Send(unsigned long address)
     periodSync = 36 * period;
 
     // Send seperator
-    digitalWrite(PIN_RF_TX_DATA, HIGH);
+    digitalWrite(TX_DATA, HIGH);
     delayMicroseconds(period);
 
     // Send sync
-    digitalWrite(PIN_RF_TX_DATA, LOW);
+    digitalWrite(TX_DATA, LOW);
     delayMicroseconds(periodSync);
-    digitalWrite(PIN_RF_TX_DATA, HIGH);
+    digitalWrite(TX_DATA, HIGH);
     delayMicroseconds(period);
 
     for (repeat = 0; repeat < repeatTimes; repeat++)
@@ -159,27 +159,27 @@ void Deltronic_Send(unsigned long address)
             if (address & bitmask)
             {
                 // Send 1
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(periodLong);
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(period);
             }
             else
             {
                 // Send 0
-                digitalWrite(PIN_RF_TX_DATA, LOW);
+                digitalWrite(TX_DATA, LOW);
                 delayMicroseconds(period);
-                digitalWrite(PIN_RF_TX_DATA, HIGH);
+                digitalWrite(TX_DATA, HIGH);
                 delayMicroseconds(periodLong);
             }
             bitmask >>= 1;
         }
         // Send sync
-        digitalWrite(PIN_RF_TX_DATA, LOW);
+        digitalWrite(TX_DATA, LOW);
         delayMicroseconds(periodSync);
-        digitalWrite(PIN_RF_TX_DATA, HIGH);
+        digitalWrite(TX_DATA, HIGH);
         delayMicroseconds(period);
     }
-    digitalWrite(PIN_RF_TX_DATA, LOW);
+    digitalWrite(TX_DATA, LOW);
 }
 #endif // PLUGIN_TX_073

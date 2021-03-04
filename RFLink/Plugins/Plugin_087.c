@@ -156,7 +156,7 @@ boolean PluginTX_087(byte function, const char *string)
        //Serial.println(signal.Number);
 
        //Plugin_087(0,"");
-       //enableTX();
+       //enableTX_generic();
        Signal::RawSendRF(&signal);
        
        signal.Number=0;

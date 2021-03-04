@@ -322,9 +322,9 @@ void Flamingo_Send(int fbutton, int fcmd)
       Serial.println(fsendbuff, HEX);
 
       // send SYNC 1P High, 15P low
-      digitalWrite(PIN_RF_TX_DATA, HIGH);
+      digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(PIN_RF_TX_DATA, LOW);
+      digitalWrite(TX_DATA, LOW);
       delayMicroseconds(fpulse * 15);
       // end send SYNC
 
@@ -337,20 +337,20 @@ void Flamingo_Send(int fbutton, int fcmd)
 
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
          }
          else
          { // Write 1
-            digitalWrite(PIN_RF_TX_DATA, HIGH);
+            digitalWrite(TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(PIN_RF_TX_DATA, LOW);
+            digitalWrite(TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
       }
-      //digitalWrite(PIN_RF_TX_DATA, LOW);
+      //digitalWrite(TX_DATA, LOW);
       //delayMicroseconds(fpulse * 15);
    }
 }

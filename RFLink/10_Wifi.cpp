@@ -264,7 +264,7 @@ void start_WIFI()
   }
 
   if( params::AP_enabled ) {
-    Serial.print("* WIFI AP starting ... ");
+    Serial.printf("* WIFI AP starting with SSID '%s'... ", params::AP_ssid.c_str());
     if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
       Serial.println("FAILED");
     else
