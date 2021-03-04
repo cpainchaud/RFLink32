@@ -1,7 +1,7 @@
 #ifndef _9_Serial2Net_H_
 #define  _9_Serial2Net_H_
 
-#ifdef RFLINK_SERIAL2NET_ENABLED
+#ifndef RFLINK_SERIAL2NET_DISABLED
 
 #ifndef SERIAL2NET_PORT
 #define SERIAL2NET_PORT 1900
@@ -27,5 +27,5 @@ namespace RFLink {
     }
 }
 
-#endif // RFLINK_SERIAL2NET_ENABLED
+#endif // !RFLINK_SERIAL2NET_DISABLED
 #endif // _9_Serial2Net_H_

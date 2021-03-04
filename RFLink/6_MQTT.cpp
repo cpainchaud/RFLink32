@@ -380,7 +380,6 @@ void getStatusJsonString(JsonObject &output) {
 }
 
 
-
 }} // end of Mqtt namespace
 
 

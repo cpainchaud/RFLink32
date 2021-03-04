@@ -174,7 +174,6 @@ void refreshParametersFromConfig() {
   }
 
 
-
   // restore to RX state
   if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
     set_Radio_mode(States::Radio_RX);

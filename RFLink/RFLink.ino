@@ -71,9 +71,9 @@ void loop()
   RFLink::Wifi::mainLoop();
   #endif
 
-  #ifdef RFLINK_SERIAL2NET_ENABLED
+  #ifndef RFLINK_SERIAL2NET_DISABLED
   RFLink::Serial2Net::serverLoop();
-  #endif // RFLINK_SERIAL2NET_ENABLED
+  #endif // !RFLINK_SERIAL2NET_DISABLED
 
   #if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
   readSerialAndExecute();
@@ -176,9 +176,9 @@ namespace RFLink {
 
   #ifdef RFLINK_WIFI_ENABLED
     RFLink::Portal::start();
-    #ifdef RFLINK_SERIAL2NET_ENABLED
+    #ifndef RFLINK_SERIAL2NET_DISABLED
       RFLink::Serial2Net::startServer();
-    #endif // RFLINK_SERIAL2NET_ENABLED
+    #endif // !RFLINK_SERIAL2NET_DISABLED
   #endif
   }
 
@@ -195,9 +195,9 @@ namespace RFLink {
     RFLink::Mqtt::publishMsg();
   
 
-    #ifdef RFLINK_SERIAL2NET_ENABLED
+    #ifndef RFLINK_SERIAL2NET_DISABLED
       RFLink::Serial2Net::broadcastMessage(pbuffer);
-    #endif // RFLINK_SERIAL2NET_ENABLED
+    #endif // !RFLINK_SERIAL2NET_DISABLED
 
     #ifdef OLED_ENABLED
         print_OLED();

@@ -1,10 +1,12 @@
 #include "9_Serial2Net.h"
 #include "RFLink.h"
 
-#ifdef RFLINK_SERIAL2NET_ENABLED
+#ifndef RFLINK_SERIAL2NET_DISABLED
+
 
 #include <WiFiClient.h>
 #include <WiFiServer.h>
+#include <lwip/sockets.h>
 
 namespace RFLink { namespace Serial2Net {
 
@@ -27,6 +29,23 @@ namespace RFLink { namespace Serial2Net {
                 ignore = false;
                 end = 0;
                 return *this;
+            }
+
+            void enabledTcpKeepalive() {
+                int keepAlive = 1;
+                int keepIdle = 30;
+                int keepInterval = 3;
+                int keepCount = 3;
+
+                #ifdef ESP8266
+                this->keepAlive(keepIdle, keepInterval, keepCount);
+                #else
+                setSocketOption(SO_KEEPALIVE, (char*) &keepAlive, sizeof (keepAlive));
+                setOption(TCP_KEEPIDLE, &keepIdle);
+                setOption(TCP_KEEPINTVL, &keepInterval);
+                setOption(TCP_KEEPCNT, &keepCount);
+                println("This is RFLink-ESP, welcome!");
+                #endif
             }
 
             /**
@@ -101,7 +120,7 @@ namespace RFLink { namespace Serial2Net {
             }
     };
     
-    WiFiServer server;
+    WiFiServer server(SERIAL2NET_PORT);
 
     boolean alreadyConnected = false;
     const unsigned short clientsMax=10;
@@ -123,6 +142,7 @@ namespace RFLink { namespace Serial2Net {
         for(int i=0; i<clientsMax; i++) {
             if(!clients[i].connected()) {
                 clients[i] = client;
+                clients[i].enabledTcpKeepalive();
                 return true;
             }
         }
@@ -180,4 +200,4 @@ namespace RFLink { namespace Serial2Net {
 
 }}
 
-#endif //RFLINK_SERIAL2NET_ENABLED
+#endif // !RFLINK_SERIAL2NET_DISABLED
