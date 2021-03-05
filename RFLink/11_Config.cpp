@@ -25,8 +25,6 @@ namespace RFLink { namespace Config {
 
 const char configFileName[] = "/config.json";
 
-
-
 const char * jsonSections[] = {
     "wifi",
     "ota",

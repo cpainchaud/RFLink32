@@ -89,6 +89,8 @@ namespace RFLink {
 
   void setup() {
 
+    Serial.setRxBufferSize(INPUT_COMMAND_SIZE);
+
     if (gettimeofday(&timeAtBoot, NULL)!= 0) {
         Serial.println("Failed to obtain time");
     }
@@ -316,6 +318,10 @@ namespace RFLink {
           display_Header();
           display_Splash();
           display_Footer();
+        }
+        else if (strncasecmp(cmd + 3, "signal", 6) == 0)
+        {
+          Signal::executeCliCommand(cmd + 3 + 6 + 1);
         }
         else
         {

@@ -90,6 +90,8 @@ namespace RFLink {
     void refreshParametersFromConfig(bool triggerChanges=true);
     void RawSendRF(RawSignalStruct *signal);
     void AC_Send(unsigned long data, byte cmd);
+    
+    void executeCliCommand(const char *cmd);
 
     bool ScanEvent();
 

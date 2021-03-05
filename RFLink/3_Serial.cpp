@@ -64,8 +64,8 @@ boolean CopySerial(char *src)
 boolean ReadSerial()
 {
   // SERIAL: *************** Check if there is data ready on the serial port **********************
-  static byte SerialInByte;        // incoming character value
-  static byte SerialInByteCounter; // number of bytes counter
+  static int SerialInByte;        // incoming character value
+  static int SerialInByteCounter; // number of bytes counter
   static unsigned long FocusTimer; // Timer to keep focus on the task during communication
 
   if (Serial.available())

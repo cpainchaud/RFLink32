@@ -124,6 +124,10 @@ namespace RFLink { namespace Signal {
 
 RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL}; // current message
 
+namespace commands {
+  String sendRF("sendRF");
+}
+
 namespace params {
   // All json variable names
   bool async_mode_enabled = false;
@@ -671,6 +675,56 @@ void RawSendRF(RawSignalStruct *signal) {
     }
 
     Radio::set_Radio_mode(Radio::States::Radio_RX);
+  }
+
+  void executeCliCommand(const char *cmd) {
+    String strCmd(cmd);
+    
+    int commaIndex = strCmd.indexOf(';');
+
+    if(commaIndex < 0) {
+      Serial.println("Error : failed to find ending ';' for the command");
+      return;
+    }
+
+    String command = strCmd.substring(0, commaIndex);
+
+    if(command.equalsIgnoreCase(commands::sendRF)) {
+      //String argsStr = strCmd.substring(commaIndex+1);
+      DynamicJsonDocument json(2500);
+      RawSignalStruct signal;
+
+      if( deserializeJson(json, cmd + commaIndex +1 ) != DeserializationError::Ok) {
+        Serial.print("An error occured while reading json");
+        return;
+        //Serial.println(cmd+commaIndex);
+      }
+
+      //Serial.printf("Now reading Json to find signal properties");
+
+      auto root = json.as<JsonObject>();
+      JsonArrayConst pulsesJson = root.getMember("pulses");
+      signal.Number = pulsesJson.size() + 1;
+
+      int index = 0;
+      for(JsonVariantConst pulse : pulsesJson) {
+          index ++;
+          signal.Pulses[index] = pulse.as<signed long int>();
+          //Serial.printf("Pulse=%i\n",signal.Pulses[index]);
+      }
+
+      signal.Repeats = root.getMember("repeat").as<signed int>();
+      signal.Delay = root.getMember("delay").as<signed int>();
+
+      Serial.printf("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i", signal.Number, signal.Repeats, signal.Delay);
+      RawSendRF(&signal);
+      Serial.println("done");
+
+    }
+    else {
+      Serial.printf("Error : unknown command '%s'\n", command.c_str());
+    }
+
   }
 
 } // end of ns Signal
