@@ -8,9 +8,8 @@
 #ifdef RFLINK_OTA_ENABLED
 #include <ArduinoOTA.h>
 #endif
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
 #include "2_Signal.h"
-#endif
+
 
 #include "6_MQTT.h"
 
@@ -270,6 +269,10 @@ void start_WIFI()
     else
       Serial.println("OK");
   }
+  else {
+    // just in case it
+    WiFi.softAPdisconnect();
+  }
 
   if(params::client_enabled) {
     resetClientWifi();
@@ -394,7 +397,6 @@ WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
   ArduinoOTA.setPassword(RFLINK_OTA_PASSWORD);
 #endif
 
-#ifdef RFLINK_ASYNC_RECEIVER_ENABLED
   // we must stop the Receiver from interrupting the OTA process
   ArduinoOTA.onStart([]() {
     Serial.println("20;XX;DEBUG;MSG=OTA requested, turning off Receiver");
@@ -406,7 +408,6 @@ WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
     Serial.println(" ,turning on Receiver");
     AsyncSignalScanner::startScanning();
   });
-#endif // RFLINK_ASYNC_RECEIVER_ENABLED
   ArduinoOTA.begin();
 #endif // RFLINK_OTA_ENABLED
 }

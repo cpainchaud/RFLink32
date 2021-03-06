@@ -108,8 +108,10 @@ void refreshParametersFromConfig() {
   if( strcmp(hardwareNames[hardware], item->getCharValue()) != 0) {
     auto new_hardware_id =  hardwareIDFromString(item->getCharValue());
     if( new_hardware_id == HardwareType::HW_EOF_t ) {
-      Serial.printf("Unsupported radio hardware name '' was provided, falling to default generic receiver!", item->getCharValue());
+      Serial.printf("Unsupported radio hardware name '%s' was provided, falling to default generic receiver!", item->getCharValue());
       changesDetected = true;
+      hardware = HardwareType::HW_basic_t;
+      item->setCharValue(hardwareNames[hardware]);
     }
     else
       if(hardware != new_hardware_id){

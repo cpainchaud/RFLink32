@@ -11,7 +11,6 @@
 #include <Arduino.h>
 #include "11_Config.h"
 
-//#define RFLINK_ASYNC_RECEIVER_ENABLED          // enable if you prefer interrupt based receiver over 'loop' based one
 #define RAW_BUFFER_SIZE 292        // 292        // Maximum number of pulses that is received in one go.
 #define MIN_RAW_PULSES 24          // 24         // Minimal number of bits that need to have been received before we spend CPU time on decoding the signal.
 #define SIGNAL_SEEK_TIMEOUT_MS 25  // 25         // After this time in mSec, RF signal will be considered absent.
@@ -102,7 +101,13 @@ namespace RFLink {
 
       void enableAsyncReceiver();
       void disableAsyncReceiver();
+      /**
+       * It will only work if AsyncScanner is enabled
+       * */
       void startScanning();
+      /**
+       * It will only work if AsyncScanner is enabled
+       * */
       void stopScanning();
       void clearAllTimers();
       void IRAM_ATTR RX_pin_changed_state();

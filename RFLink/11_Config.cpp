@@ -499,9 +499,7 @@ SectionId getSectionIdFromString(const char *name) {
 bool saveConfigToFlash(){
 
     Serial.print("Saving JSON config to FLASH.... ");
-    #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
     Signal::AsyncSignalScanner::stopScanning();
-    #endif
 
 #ifdef ESP32
     if( LITTLEFS.exists(F("/tmp.json")) )
@@ -519,9 +517,7 @@ bool saveConfigToFlash(){
     if (bytes_written == 0)
     {
         Serial.println(F("failed!"));
-        #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
         Signal::AsyncSignalScanner::startScanning();
-        #endif
         return false;
     }
     else
@@ -538,9 +534,9 @@ bool saveConfigToFlash(){
         Serial.println(F("OK"));
     }
 
-    #ifdef RFLINK_ASYNC_RECEIVER_ENABLED
+
     Signal::AsyncSignalScanner::startScanning();
-    #endif
+
 
     return true;
 }
