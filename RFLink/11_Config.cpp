@@ -65,7 +65,7 @@ void resetConfig() {
      if( LITTLEFS.exists(configFileName) )
         LITTLEFS.remove(configFileName);
     #else
-    if( LittleFS.exists(configFileName)
+    if( LittleFS.exists(configFileName) )
         LittleFS.remove(configFileName);
     #endif
 
@@ -519,6 +519,7 @@ void dumpConfigToString(String &destination) {
 
 void dumpConfigToSerial() {
     serializeJson(doc, Serial);
+    Serial.println();
 }
 
 SectionId getSectionIdFromString(const char *name) {
@@ -611,7 +612,6 @@ void executeCliCommand(const char *cmd) {
           Serial.printf("Some warning/errors occured while trying to SET config from CLI:\n");
           Serial.println(msg.c_str());
       }
-
     }
     else {
       Serial.printf("Error : unknown command '%s'\n", command.c_str());

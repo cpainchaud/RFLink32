@@ -28,11 +28,11 @@ Resets all the configurationd to factory defaults. Beware that you will need to 
 ## Edit configuration
 `10;config;set;<json code here>`
 
-### Enabled Wifi Station/Client mode:
+#### Enabled Wifi Station/Client mode:
 
 `10;config;set;{"wifi":{"client_enabtled":true,"client_dehcp_enabled":true,"client_ssid":"my_home_wifi"}}`
 
-### Full JSON for Reference
+#### Full JSON for Reference
 ````json
 "portal": {
 		"enabled": true,
@@ -55,7 +55,7 @@ Resets all the configurationd to factory defaults. Beware that you will need to 
 	"wifi": {
 		"client_enabled": false,
 		"client_dhcp_enabled": true,
-		"client_ssid": "ESPLink-AP",
+		"client_ssid": "RFLink-AP",
 		"client_password": "inputyourown",
 		"client_ip": "192.168.0.200",
 		"client_mask": "255.255.255.0",
