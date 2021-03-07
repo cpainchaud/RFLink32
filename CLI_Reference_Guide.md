@@ -30,7 +30,7 @@ Resets all the configurationd to factory defaults. Beware that you will need to 
 
 #### Enabled Wifi Station/Client mode:
 
-`10;config;set;{"wifi":{"client_enabtled":true,"client_dehcp_enabled":true,"client_ssid":"my_home_wifi"}}`
+`10;config;set;{"wifi":{"client_enabled":true,"client_dhcp_enabled":true,"client_ssid":"my_home_wifi"}}`
 
 #### Full JSON for Reference
 ````json

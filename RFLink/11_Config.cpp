@@ -601,7 +601,7 @@ void executeCliCommand(const char *cmd) {
       DynamicJsonDocument json(2500);
 
       if( deserializeJson(json, cmd + commaIndex +1 ) != DeserializationError::Ok) {
-        Serial.print("An error occured while reading json");
+        Serial.println("An error occured while reading json");
         return;
       }
 
