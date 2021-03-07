@@ -80,7 +80,7 @@ Config::ConfigItem configItems[] =  {
   Config::ConfigItem(json_name_client_dns,          Config::SectionId::Wifi_id, "192.168.0.1", clientParamsUpdatedCallback),
 
   Config::ConfigItem(json_name_ap_enabled,  Config::SectionId::Wifi_id, true, accessPointParamsUpdatedCallback),
-  Config::ConfigItem(json_name_ap_ssid,     Config::SectionId::Wifi_id, "ESPLink-AP", accessPointParamsUpdatedCallback),
+  Config::ConfigItem(json_name_ap_ssid,     Config::SectionId::Wifi_id, "RFLink-AP", accessPointParamsUpdatedCallback),
   Config::ConfigItem(json_name_ap_password, Config::SectionId::Wifi_id, "", accessPointParamsUpdatedCallback),
   Config::ConfigItem(json_name_ap_ip,       Config::SectionId::Wifi_id, "192.168.4.1", accessPointParamsUpdatedCallback),
   Config::ConfigItem(json_name_ap_network,  Config::SectionId::Wifi_id, "192.168.4.0", accessPointParamsUpdatedCallback),

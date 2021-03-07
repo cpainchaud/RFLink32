@@ -101,7 +101,8 @@ namespace RFLink {
 
         ConfigItem * findConfigItem(const char* name, SectionId section); 
         void dumpConfigToString(String &destination);
-        bool pushNewConfiguration(JsonObject &data, String &message);
+        void dumpConfigToSerial();
+        bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine);
 
         /**
          * @return SectionId::EOF_id is not found
@@ -109,6 +110,11 @@ namespace RFLink {
         SectionId getSectionIdFromString(const char*);
 
         bool saveConfigToFlash();
+
+        void executeCliCommand(const char *cmd);
+        void resetConfig();
+
+        
     }
 }
 

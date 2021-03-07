@@ -64,7 +64,7 @@ void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     String response;
     response.reserve(256);
 
-    if( !Config::pushNewConfiguration(data, message) ) {
+    if( !Config::pushNewConfiguration(data, message, true) ) {
         response = "{ \"success\": false, \"message\": ";
     }
     else {

@@ -323,6 +323,10 @@ namespace RFLink {
         {
           Signal::executeCliCommand(cmd + 3 + 6 + 1);
         }
+        else if (strncasecmp(cmd + 3, "config", 6) == 0)
+        {
+          Config::executeCliCommand(cmd + 3 + 6 + 1);
+        }
         else
         {
           // -------------------------------------------------------

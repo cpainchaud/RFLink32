@@ -22,6 +22,12 @@
 
 namespace RFLink { namespace Config {
 
+namespace commands {
+  String set("set");
+  String reset("reset");
+  String dump("dump");
+}
+
 
 const char configFileName[] = "/config.json";
 
@@ -52,6 +58,19 @@ ConfigItem* configItemLists[] = {
  #define configItemListsSize (sizeof(configItemLists)/sizeof(ConfigItem*))
 
 StaticJsonDocument<8192> doc;
+
+
+void resetConfig() {
+    #ifdef ESP32
+     if( LITTLEFS.exists(configFileName) )
+        LITTLEFS.remove(configFileName);
+    #else
+    if( LittleFS.exists(configFileName)
+        LittleFS.remove(configFileName);
+    #endif
+
+    Serial.println("Config has been reset and requires a reboot to complete");
+}
 
 
 void printFile() {
@@ -245,10 +264,15 @@ class CallbackManager {
         }
 };
 
-bool pushNewConfiguration(JsonObject &data, String &message) {
+bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine ) {
 
     bool configHasChanged = false;
     CallbackManager callbackMgr;
+    message.reserve(256);
+    String new_line("\n");
+
+    if(escapeNewLine)
+        new_line = "\\n";
 
     // we iterate root level to find sections!
     for (JsonPair kv : data) {
@@ -262,7 +286,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
         if(!section_variant.is<JsonObject>()) {
             message += "root entry '";
             message += kv.key().c_str();
-            message += "' is not an object, it will be ignored!\\n";
+            message += "' is not an object, it will be ignored!";
+            message += new_line;
             continue;
         }
         JsonObject && sectionObject = section_variant.as<JsonObject>();
@@ -271,7 +296,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
         if( lookupSectionID == SectionId::EOF_id ) {
             message += "root entry '";
             message += kv.key().c_str();
-            message += "' is not a valid section name, it will be ignored!\\n";
+            message += "' is not a valid section name, it will be ignored";
+            message += new_line;
             continue;
         }
 
@@ -288,7 +314,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                  message += kv.key().c_str();
                  message += "' has extra configuration item named '";
                  message += section_kv.key().c_str();
-                 message += "' it will be ignored\\n";
+                 message += "' it will be ignored";
+                 message += new_line;
                  continue;
             }
 
@@ -300,7 +327,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     message += kv.key().c_str();
                     message += "' has '";
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not string) so it will be ignored\\n";
+                    message += "' with mismatched type (not string) so it will be ignored";
+                    message += new_line;
                     continue;
                 }
                 const char *str = remoteVariant.as<const char *>();
@@ -321,7 +349,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     message += kv.key().c_str();
                     message += F("' has item '");
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not long int) so it will be ignored\\n";
+                    message += "' with mismatched type (not long int) so it will be ignored";
+                    message += new_line;
                     continue;
                 }
 
@@ -338,7 +367,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
                     message += kv.key().c_str();
                     message += F("' has item '");
                     message += section_kv.key().c_str();
-                    message += "' with mismatched type (not bool) so it will be ignored\\n";
+                    message += "' with mismatched type (not bool) so it will be ignored";
+                    message += new_line;
                     continue;
                 }
                 auto remote_value = remoteVariant.as<bool>();
@@ -359,6 +389,8 @@ bool pushNewConfiguration(JsonObject &data, String &message) {
             message += F("Error! Failed to write JSON config to FLASH!");
             //Serial.println(F("Error! Failed to write JSON config to FLASH!"));
             return false;
+        } else {
+            Serial.println("Confile hfile saved to flash.");
         }
         callbackMgr.execute();
     } else {
@@ -485,6 +517,10 @@ void dumpConfigToString(String &destination) {
     serializeJsonPretty(doc, destination);
 }
 
+void dumpConfigToSerial() {
+    serializeJson(doc, Serial);
+}
+
 SectionId getSectionIdFromString(const char *name) {
 
     for(int i=0; i<jsonSections_count; i++) {
@@ -540,6 +576,48 @@ bool saveConfigToFlash(){
 
     return true;
 }
+
+
+void executeCliCommand(const char *cmd) {
+    String strCmd(cmd);
+    
+    int commaIndex = strCmd.indexOf(';');
+
+    if(commaIndex < 0) {
+      Serial.println("Error : failed to find ending ';' for the command");
+      return;
+    }
+
+    String command = strCmd.substring(0, commaIndex);
+
+    if(command.equalsIgnoreCase(commands::reset)){
+      resetConfig();
+    } else if(command.equalsIgnoreCase(commands::dump)) {
+        dumpConfigToSerial();
+    }
+    else if(command.equalsIgnoreCase(commands::set)) {
+      //String argsStr = strCmd.substring(commaIndex+1);
+      DynamicJsonDocument json(2500);
+
+      if( deserializeJson(json, cmd + commaIndex +1 ) != DeserializationError::Ok) {
+        Serial.print("An error occured while reading json");
+        return;
+      }
+
+      auto root = json.as<JsonObject>();
+      String msg;
+      pushNewConfiguration(root, msg, false);
+      if(msg.length() > 0) {
+          Serial.printf("Some warning/errors occured while trying to SET config from CLI:\n");
+          Serial.println(msg.c_str());
+      }
+
+    }
+    else {
+      Serial.printf("Error : unknown command '%s'\n", command.c_str());
+    }
+
+  }
 
 } // end of Config namespace
 } // end of RFLink namespace
