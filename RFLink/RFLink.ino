@@ -136,11 +136,9 @@ namespace RFLink {
   RFLink::Signal::setup();
 
   #if defined(RFLINK_WIFI_ENABLED)
-  RFLink::Wifi::setup();
   RFLink::Portal::init();
   RFLink::Mqtt::setup_MQTT();
-    //RFLink::Mqtt::reconnect(1);
-
+  RFLink::Wifi::setup();
   #endif // RFLINK_WIFI_ENABLED
 
 
