@@ -480,7 +480,7 @@ void getStatusJsonString(JsonObject &output) {
       wifi_client["status"] = "connected";
       wifi_client["ip"] = WiFi.localIP().toString();
       wifi_client["netmask"] = WiFi.subnetMask().toString();
-      wifi_client["dns"] = "unknown";
+      wifi_client["dns"] = WiFi.dnsIP().toString();
     } else {
       wifi_ap["status"] = "disconnected";
     }
