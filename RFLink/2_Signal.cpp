@@ -423,7 +423,7 @@ namespace AsyncSignalScanner {
         RawSignal.Multiply = params::sample_rate;
         lastChangedState_us = 0;
         nextPulseTimeoutTime_us = 0;
-        attachInterrupt(Radio::pins::RX_DATA, RX_pin_changed_state, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(Radio::pins::RX_DATA), RX_pin_changed_state, CHANGE);
       } else {
         Serial.println("Start of async Receiver was requested but it's not enabled!");
       }
