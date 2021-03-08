@@ -42,8 +42,8 @@ bool RFM69OOK::initialize()
   {
     /* 0x01 */ { REG_OPMODE, RF_OPMODE_SEQUENCER_OFF | RF_OPMODE_LISTEN_OFF | RF_OPMODE_STANDBY },
     /* 0x02 */ { REG_DATAMODUL, RF_DATAMODUL_DATAMODE_CONTINUOUSNOBSYNC | RF_DATAMODUL_MODULATIONTYPE_OOK | RF_DATAMODUL_MODULATIONSHAPING_00 }, // no shaping
-/*!!!! 0x03 */ { REG_BITRATEMSB, RF_BITRATEMSB_9600 }, // Bitrate => necessary even in OOK
-/*!!!! 0x04 */ { REG_BITRATELSB, RF_BITRATELSB_9600 }, // 9600 instead of 4800 for Energy Harvesting Switch
+/*!!!! 0x03 */ { REG_BITRATEMSB, RF_BITRATEMSB_19200 }, // Bitrate => necessary even in OOK
+/*!!!! 0x04 */ { REG_BITRATELSB, RF_BITRATELSB_19200 }, // 9600 instead of 4800 for Energy Harvesting Switch
 /*!!!! 0x07 */ { REG_FRFMSB, 0x6C }, // Rem : FStep = FXOsc / 2^19
 /*!!!! 0x08 */ { REG_FRFMID, 0x7A }, //       FRF = FStep * Frf
 /*!!!! 0x09 */ { REG_FRFLSB, 0xE1 }, //       FRF = 433.92 MHz
