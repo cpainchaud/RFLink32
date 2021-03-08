@@ -716,7 +716,7 @@ void RawSendRF(RawSignalStruct *signal) {
       signal.Repeats = root.getMember("repeat").as<signed int>();
       signal.Delay = root.getMember("delay").as<signed int>();
 
-      Serial.printf("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i", signal.Number, signal.Repeats, signal.Delay);
+      Serial.printf("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i... ", signal.Number, signal.Repeats, signal.Delay);
       RawSendRF(&signal);
       Serial.println("done");
 
