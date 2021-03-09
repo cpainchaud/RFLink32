@@ -432,7 +432,7 @@ void set_Radio_mode_RFM69(States new_State)
       radio.receiveEnd();
       pinMode(pins::TX_DATA, OUTPUT);
       radio.transmitBegin();
-      radio.setPowerLevel(18);
+      radio.setPowerLevel(31);
       break;
 
     case Radio_NA:
