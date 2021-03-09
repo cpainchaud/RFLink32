@@ -64,8 +64,6 @@
   #define RF69OOK_IRQ_NUM          0
   #define RF69OOK_RST_PIN          NOT_A_PIN
 #elif defined(ESP32) || defined(ESP8266)
-  #define RF69OOK_IRQ_PIN          25 // Previously 26
-  #define RF69OOK_IRQ_NUM          digitalPinToInterrupt(RF69OOK_IRQ_PIN)
   #define RF69OOK_RST_PIN          4
   //#define RF69OOK_SPI_CS           5
 #endif
@@ -85,10 +83,8 @@ class RFM69OOK {
     static volatile int RSSI; //most accurate RSSI during reception (closest to the reception)
     static volatile byte _mode; //should be protected?
 
-    RFM69OOK(byte slaveSelectPin=RF69OOK_SPI_CS, byte interruptPin=RF69OOK_IRQ_PIN, bool isRFM69HW=false, byte interruptNum=RF69OOK_IRQ_NUM) {
+    RFM69OOK(byte slaveSelectPin=RF69OOK_SPI_CS, bool isRFM69HW=false) {
       _slaveSelectPin = slaveSelectPin;
-      _interruptPin = interruptPin;
-      _interruptNum = interruptNum;
       _mode = RF69OOK_MODE_STANDBY;
       _powerLevel = 31;
       _isRFM69HW = isRFM69HW;
@@ -119,7 +115,6 @@ class RFM69OOK {
     void transmitEnd();
     bool poll();
     void send(bool signal);
-    void attachUserInterrupt(void (*function)());
 	void setBandwidth(uint8_t bw);
     void setBitrate(uint32_t bitrate);
 	void setRSSIThreshold(int8_t rssi);
@@ -130,13 +125,8 @@ class RFM69OOK {
     void unselect();
 
   protected:
-    static void IRAM_ATTR isr0();
-    void virtual interruptHandler();
-
     static RFM69OOK* selfPointer;
     byte _slaveSelectPin;
-    byte _interruptPin;
-    byte _interruptNum;
     byte _powerLevel;
     bool _isRFM69HW;
     byte _SPCR;

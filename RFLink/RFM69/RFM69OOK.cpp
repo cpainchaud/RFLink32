@@ -96,38 +96,21 @@ void RFM69OOK::reset() // maroprjs : Manual Reset
 	delay(7);
 }
 
-// Poll for OOK signal
-bool RFM69OOK::poll()
-{
-  return digitalRead(_interruptPin);
-}
-
-// Send a 1 or 0 signal in OOK mode
-void RFM69OOK::send(bool signal)
-{
-  digitalWrite(_interruptPin, signal);
-}
-
 // Turn the radio into transmission mode
 void RFM69OOK::transmitBegin()
 {
   setMode(RF69OOK_MODE_TX);
-  detachInterrupt(_interruptNum); // not needed in TX mode
-  pinMode(_interruptPin, OUTPUT);
 }
 
 // Turn the radio back to standby
 void RFM69OOK::transmitEnd()
 {
-  pinMode(_interruptPin, INPUT);
   setMode(RF69OOK_MODE_STANDBY);
 }
 
 // Turn the radio into OOK listening mode
 void RFM69OOK::receiveBegin()
 {
-  pinMode(_interruptPin, INPUT);
-  attachInterrupt(_interruptNum, RFM69OOK::isr0, CHANGE); // generate interrupts in RX mode
   setMode(RF69OOK_MODE_RX);
 }
 
@@ -135,21 +118,8 @@ void RFM69OOK::receiveBegin()
 void RFM69OOK::receiveEnd()
 {
   setMode(RF69OOK_MODE_STANDBY);
-  detachInterrupt(_interruptNum); // make sure there're no surprises
 }
 
-// Handle pin change interrupts in OOK mode
-void RFM69OOK::interruptHandler()
-{
-  if (userInterrupt != NULL) (*userInterrupt)();
-}
-
-// Set a user interrupt for all transfer methods in receive mode
-// call with NULL to disable the user interrupt handler
-void RFM69OOK::attachUserInterrupt(void (*function)())
-{
-  userInterrupt = function;
-}
 
 // return the frequency (in Hz)
 uint32_t RFM69OOK::getFrequency()
@@ -248,8 +218,6 @@ void RFM69OOK::setPowerLevel(byte powerLevel)
   _powerLevel = powerLevel;
   writeReg(REG_PALEVEL, (readReg(REG_PALEVEL) & 0xE0) | (_powerLevel > 31 ? 31 : _powerLevel));
 }
-
-void IRAM_ATTR RFM69OOK::isr0() { selfPointer->interruptHandler(); }
 
 int8_t RFM69OOK::readRSSI(bool forceTrigger) {
   if (forceTrigger)

@@ -355,6 +355,9 @@ boolean FetchSignal_sync()
 
 boolean ScanEvent()
 {
+  if(Radio::current_State != Radio::States::Radio_RX)
+    return false;
+
   if(!params::async_mode_enabled) {
 
     unsigned long Timer = millis() + params::scan_high_time;

@@ -104,6 +104,7 @@ namespace RFLink { namespace Radio {
     };
 
     extern HardwareType hardware;
+    extern States current_State;
 
     extern Config::ConfigItem configItems[];
 

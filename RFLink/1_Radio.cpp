@@ -402,13 +402,12 @@ void set_Radio_mode_RFM69(States new_State)
     switch (new_State)
     {
     case Radio_OFF:
-      pins::RX_DATA = NOT_A_PIN;
-      pins::TX_DATA = NOT_A_PIN;
+      if( RFLink::Signal::params::async_mode_enabled )
+          RFLink::Signal::AsyncSignalScanner::stopScanning();
       radio.reset();
       radio.initialize();
       radio.setFrequency(433920000);
-      Serial.print("Freq = ");
-      Serial.println(radio.getFrequency());
+      Serial.printf("RFM69 initialized with Freq = %.2f\n", (double)radio.getFrequency()/1000000);
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       radio.setHighPower(true); // for RFM69HW
       // radio.sleep();
@@ -416,19 +415,20 @@ void set_Radio_mode_RFM69(States new_State)
 
     case Radio_RX:
       radio.transmitEnd();
-      pins::TX_DATA = NOT_A_PIN;
+      pinMode(pins::RX_DATA, INPUT);
       radio.receiveBegin();
-      pins::RX_DATA = RF69OOK_IRQ_PIN;
-      radio.attachUserInterrupt(NULL);
-      detachInterrupt(0);
-      detachInterrupt(1);
+      if( RFLink::Signal::params::async_mode_enabled )
+        RFLink::Signal::AsyncSignalScanner::startScanning();
+      //detachInterrupt(0);
+      //detachInterrupt(1);
       break;
 
     case Radio_TX:
+      if( RFLink::Signal::params::async_mode_enabled )
+          RFLink::Signal::AsyncSignalScanner::stopScanning();
       radio.receiveEnd();
-      pins::RX_DATA = NOT_A_PIN;
+      pinMode(pins::TX_DATA, OUTPUT);
       radio.transmitBegin();
-      pins::TX_DATA = RF69OOK_IRQ_PIN;
       radio.setPowerLevel(10);
       break;
 
