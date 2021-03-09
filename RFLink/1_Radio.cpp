@@ -48,7 +48,8 @@ namespace RFLink { namespace Radio  {
 
   const char * hardwareNames[] = {
     "generic",
-    "RFM69",
+    "RFM69CW",
+    "RFM69HCW",
     "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
 };
 #define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
@@ -315,7 +316,7 @@ void set_Radio_mode(States new_State)
 { 
   if(hardware == HardwareType::HW_basic_t)
     set_Radio_mode_generic(new_State);
-  else if(hardware == HardwareType::HW_RFM69_t)
+  else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
     set_Radio_mode_RFM69(new_State);
   else
     Serial.printf("Error while trying to switch Radio state: unknown hardware id '%i'", new_State); 
@@ -409,7 +410,9 @@ void set_Radio_mode_RFM69(States new_State)
       radio.setFrequency(433920000);
       Serial.printf("RFM69 initialized with Freq = %.2f\n", (double)radio.getFrequency()/1000000);
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
-      radio.setHighPower(true); // for RFM69HW
+      if(hardware == HardwareType::HW_RFM69HCW_t)
+        radio.setHighPower(true);
+      // // for RFM69HW
       // radio.sleep();
       break;
 
@@ -429,7 +432,7 @@ void set_Radio_mode_RFM69(States new_State)
       radio.receiveEnd();
       pinMode(pins::TX_DATA, OUTPUT);
       radio.transmitBegin();
-      radio.setPowerLevel(10);
+      radio.setPowerLevel(18);
       break;
 
     case Radio_NA:

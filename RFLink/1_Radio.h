@@ -99,7 +99,8 @@ namespace RFLink { namespace Radio {
     enum HardwareType
     {
         HW_basic_t,
-        HW_RFM69_t,
+        HW_RFM69CW_t,
+        HW_RFM69HCW_t,
         HW_EOF_t,
     };
 
