@@ -5,8 +5,8 @@ on:
   pull_request:
 
 jobs:
-  build:
 
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,5 +36,25 @@ jobs:
     - name: D1_sw
       run: |
         pio run --project-conf .travis.platformio.ini --environment D1_sw
+
+    - name: Copy firmwares in 1 place
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        mkdir firmwares
+        cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware.bin
+        cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
+        cp .pio/build/D1_sw/firmware.bin firmwares/esp8266-firmware.bin
+
+    - name: Publish firmware
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "nightly"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          firmwares/*.bin
+
+
 
 
