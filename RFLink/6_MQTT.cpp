@@ -209,6 +209,8 @@ void refreshParametersFromConfig(bool triggerChanges) {
 
 void setup_MQTT()
 {
+  refreshParametersFromConfig(false);
+
   lastMqttConnectionAttemptTime.tv_sec = 0;
 
   MQTTClient.setKeepAlive(MQTT_KEEPALIVE);
@@ -227,7 +229,6 @@ void setup_MQTT()
 
   if (params::port == 0)
     params::port = 1883;
-  Serial.println(F("Not Set"));
 
   if(params::ssl_enabled)
     MQTTClient.setClient(WIFIClientSecure);
@@ -255,7 +256,7 @@ void reconnect(int retryCount, bool force)
   gettimeofday(&currentTime, nullptr);
 
   if(!force) {
-    if(currentTime.tv_sec- lastMqttConnectionAttemptTime.tv_sec < 20) {
+    if(currentTime.tv_sec- lastMqttConnectionAttemptTime.tv_sec < 30) {
       return;
     }
   }
@@ -327,8 +328,9 @@ void publishMsg()
 
 void checkMQTTloop()
 {
-  if(!params::enabled)
+  if(!params::enabled) {
     return;
+  }
 
   if(paramsHaveChanged) {
     paramsHaveChanged = false;
@@ -337,6 +339,7 @@ void checkMQTTloop()
     else {
       MQTTClient.setClient(WIFIClient);
     }
+    MQTTClient.setServer(params::server.c_str(), params::port);
     reconnect(1, true);
     gettimeofday(&lastMqttConnectionAttemptTime, nullptr);
     return;
