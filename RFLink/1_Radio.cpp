@@ -18,6 +18,8 @@
 #include "RFM69/RFM69OOKregisters.h"
 RFM69OOK radio;
 
+#include <RadioLib.h>
+SX1278 radio_SX1278 = new Module(5, 25, 4, 2);
 
 
 namespace RFLink { namespace Radio  {
@@ -50,6 +52,7 @@ namespace RFLink { namespace Radio  {
     "generic",
     "RFM69CW",
     "RFM69HCW",
+    "SX7218",
     "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
 };
 #define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
@@ -318,6 +321,8 @@ void set_Radio_mode(States new_State)
     set_Radio_mode_generic(new_State);
   else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
     set_Radio_mode_RFM69(new_State);
+  else if( hardware == HardwareType::HW_SX7218_t )
+    set_Radio_mode_SX7218(new_State);
   else
     Serial.printf("Error while trying to switch Radio state: unknown hardware id '%i'", new_State); 
 }
@@ -441,6 +446,72 @@ void set_Radio_mode_RFM69(States new_State)
     current_State = new_State;
   }
 }
+
+void set_Radio_mode_SX7218(States new_State)
+{
+  // @TODO : review compatibility with ASYNC mode
+  if (current_State != new_State)
+  {
+    switch (new_State)
+    {
+    case Radio_OFF: {
+      if( RFLink::Signal::params::async_mode_enabled )
+          RFLink::Signal::AsyncSignalScanner::stopScanning();
+      auto result = radio_SX1278.beginFSK( 433.92F, 19.200F, 50.0F, 200.0F, 12, 16, true);
+      //Serial.printf("Initialiazed SX1218, return code %i\n", result);
+      radio_SX1278.setOOK(true);
+
+      //result = radio_SX1278.setOOKFixedTreshold(0x00);
+      //Serial.printf("SX7218, FixedTrashold result=%i\n", result);
+
+      result = radio_SX1278.setEncoding(RADIOLIB_ENCODING_NRZ);
+      //Serial.printf("SX1218, set encoding result=%i\n", result);
+
+      result = radio_SX1278.setDataShapingOOK(0);
+      //Serial.printf("SX1218, set data shaping result=%i\n", result);
+
+      //result = radio_SX1278.startReceive(0, SX127X_RXCONTINUOUS);
+      //Serial.printf("SX7218, receive start code %i\n", result);
+
+      //result = radio_SX1278.startDirect();
+      //Serial.printf("SX7218, startDirect code %i\n", result);
+      break;
+    }
+
+    case Radio_RX: {
+
+      auto result = radio_SX1278.receiveDirect();
+      //Serial.printf("SX1218, receivedirect = %i\n", result);
+
+      pinMode(pins::RX_DATA, INPUT);
+
+      if( RFLink::Signal::params::async_mode_enabled )
+        RFLink::Signal::AsyncSignalScanner::startScanning();
+
+      break;
+    }
+
+    case Radio_TX: {
+
+      if( RFLink::Signal::params::async_mode_enabled )
+        RFLink::Signal::AsyncSignalScanner::stopScanning();
+      
+      pinMode(pins::TX_DATA, OUTPUT);
+
+      auto result = radio_SX1278.transmitDirect();
+      //Serial.printf("SX1218, transmitDirect = %i\n", result);
+
+      break;
+    }
+
+    case Radio_NA:
+      break;
+    }
+    current_State = new_State;
+  }
+}
+
+
 
 
 }}

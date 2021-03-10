@@ -101,6 +101,7 @@ namespace RFLink { namespace Radio {
         HW_basic_t,
         HW_RFM69CW_t,
         HW_RFM69HCW_t,
+        HW_SX7218_t,
         HW_EOF_t,
     };
 
@@ -149,6 +150,10 @@ namespace RFLink { namespace Radio {
      * don't use directly unless you know what you are doing.
      * */
     void set_Radio_mode_RFM69(States new_state);
+    /**
+     * don't use directly unless you know what you are doing.
+     * */
+    void set_Radio_mode_SX7218(States new_state);
     
     /**
      * don't use directly unless you know what you are doing.
