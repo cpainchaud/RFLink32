@@ -79,6 +79,8 @@ namespace RFLink {
     }
 
     namespace counters {
+      extern unsigned long int receivedSignalsCount;
+      extern unsigned long int successfullyDecodedSignalsCount;
       
     }
 
@@ -93,6 +95,7 @@ namespace RFLink {
     void executeCliCommand(const char *cmd);
 
     bool ScanEvent();
+    void getStatusJsonString(JsonObject &output);
 
     namespace AsyncSignalScanner {
       extern unsigned long int lastChangedState_us;     // time last state change occured

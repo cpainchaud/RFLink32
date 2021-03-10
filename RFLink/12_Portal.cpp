@@ -3,6 +3,7 @@
 #include "index.html.gz.h"
 
 #include "RFLink.h"
+#include "2_Signal.h"
 #include "6_MQTT.h"
 #include "11_Config.h"
 #include "10_Wifi.h"
@@ -43,6 +44,7 @@ void serverApiStatusGet(AsyncWebServerRequest *request) {
     
     RFLink::Wifi::getStatusJsonString(obj);
     RFLink::Mqtt::getStatusJsonString(obj);
+    RFLink::Signal::getStatusJsonString(obj);
 
     String buffer;
     serializeJson(output, buffer);
@@ -117,5 +119,5 @@ void start() {
 }
 
 
-}
-}
+} // end of Portal namespace
+} // end of RFLink namespace
