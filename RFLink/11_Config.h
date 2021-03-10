@@ -102,7 +102,7 @@ namespace RFLink {
         ConfigItem * findConfigItem(const char* name, SectionId section); 
         void dumpConfigToString(String &destination);
         void dumpConfigToSerial();
-        bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine);
+        bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks = true);
 
         /**
          * @return SectionId::EOF_id is not found
@@ -114,7 +114,6 @@ namespace RFLink {
         void executeCliCommand(const char *cmd);
         void resetConfig();
 
-        
     }
 }
 

@@ -198,6 +198,47 @@ void init() {
 
     bool fileHasChanged = false;
 
+
+    // We're hunting extra configurations which dont exist in json
+    auto root = doc.as<JsonObject>();
+    for (JsonPair kv : root) {
+        //Serial.print("Remote has root object named: ");
+        //Serial.println(kv.key().c_str());
+        
+        JsonVariant && section_variant = kv.value();
+        if(!section_variant.is<JsonObject>()) {
+            Serial.printf("root entry '%s'  is not an object, it will be discarded\n", kv.key().c_str());
+            root.remove(kv.key().c_str());
+            continue;
+        }
+        JsonObject && sectionObject = section_variant.as<JsonObject>();
+        
+        SectionId lookupSectionID = getSectionIdFromString(kv.key().c_str());
+        if( lookupSectionID == SectionId::EOF_id ) {
+            Serial.printf("root entry '%s' is not a valid section name, it will be discarded", kv.key().c_str());
+            root.remove(kv.key().c_str());
+            continue;
+        }
+
+        // from here we have a valid section, now we go down a level in the remote object
+        for (JsonPair section_kv : sectionObject) {
+            //Serial.print("Remote section has item named: ");
+            //Serial.println(section_kv.key().c_str());
+
+            ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
+            if (item == nullptr)
+            {
+                Serial.printf("section '%s' has extra configuration item named '%s'  it will be dicarded\n", kv.key().c_str(), section_kv.key().c_str());
+                sectionObject.remove(section_kv.key().c_str());
+                fileHasChanged = true;
+                continue;
+            }
+        }
+    }
+
+
+
+    // Let's fill missing json config with their default values
     for(int i=0; i<configItemListsSize; i++) {
         ConfigItem *item = configItemLists[i];
 
@@ -264,7 +305,7 @@ class CallbackManager {
         }
 };
 
-bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine ) {
+bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks) {
 
     bool configHasChanged = false;
     CallbackManager callbackMgr;
@@ -302,6 +343,7 @@ bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine 
         }
 
         // from here we have a valid section, now we go down a level in the remote object
+        Serial.printf("Section %s has %i members\n",  kv.key().c_str(), sectionObject.size());
         for (JsonPair section_kv : sectionObject) {
             #ifdef RFLINK_CONFIG_DEBUG
             Serial.print("Remote section has item named: ");
@@ -309,14 +351,15 @@ bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine 
             #endif
 
             ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
-            if(item == nullptr) {
-                 message += "section '";
-                 message += kv.key().c_str();
-                 message += "' has extra configuration item named '";
-                 message += section_kv.key().c_str();
-                 message += "' it will be ignored";
-                 message += new_line;
-                 continue;
+            if (item == nullptr)
+            {
+                message += "section '";
+                message += kv.key().c_str();
+                message += "' has extra configuration item named '";
+                message += section_kv.key().c_str();
+                message += "' it will be ignored";
+                message += new_line;
+                continue;
             }
 
             JsonVariant && remoteVariant = section_kv.value();
@@ -390,9 +433,10 @@ bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine 
             //Serial.println(F("Error! Failed to write JSON config to FLASH!"));
             return false;
         } else {
-            Serial.println("Confile hfile saved to flash.");
+            Serial.println("Config file saved to flash.");
         }
-        callbackMgr.execute();
+        if(triggerUpdateCallbacks)
+            callbackMgr.execute();
     } else {
         Serial.println("Config file has not changed.");
     }
