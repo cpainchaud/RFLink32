@@ -1,5 +1,8 @@
+.idea
 .pio
 .vscode
 pictures/Full size/
-RFLink/6_Credentials.h
 RFLink/RFLink.ino.cpp
+cmake-build-*
+CMakeLists.txt
+CMakeListsPrivate.txt
