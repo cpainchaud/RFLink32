@@ -147,6 +147,8 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
     //Upload handler chunks in data
 
     if (!index) {
+        Serial.println("OTA via Portal Requested");
+
         //if(!request->hasParam("MD5", true)) {
         //    return request->send(400, "text/plain", "MD5 parameter missing");
         //}
@@ -182,8 +184,9 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
             Update.printError(Serial);
             return request->send(400, "text/plain", "Could not end OTA");
         }
+        Serial.println("OTA via Portal is a success. You are one reboot away your new shiny release!");
     }else{
-        Serial.print("OTA worked!");
+
     }
     return;
 }
