@@ -64,28 +64,13 @@ void setup()
 
 void loop()
 {
-  RFLink::Mqtt::checkMQTTloop();
-  RFLink::sendMsgFromBuffer();
-
-  #if defined(RFLINK_WIFI_ENABLED)
-  RFLink::Wifi::mainLoop();
-  #endif
-
-  #ifndef RFLINK_SERIAL2NET_DISABLED
-  RFLink::Serial2Net::serverLoop();
-  #endif // !RFLINK_SERIAL2NET_DISABLED
-
-  #if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
-  readSerialAndExecute();
-  #endif
-
-  if (RFLink::Signal::ScanEvent())
-    RFLink::sendMsgFromBuffer();
+    RFLink::mainLoop();
 }
 
 namespace RFLink {
 
   struct timeval timeAtBoot;
+  struct timeval scheduledRebootTime;
 
   void setup() {
 
@@ -94,6 +79,7 @@ namespace RFLink {
     if (gettimeofday(&timeAtBoot, NULL)!= 0) {
         Serial.println("Failed to obtain time");
     }
+    scheduledRebootTime.tv_sec = 0;
 
     #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
     // Low Power Arduino
@@ -181,6 +167,34 @@ namespace RFLink {
     #endif // !RFLINK_SERIAL2NET_DISABLED
   #endif
   }
+
+    void mainLoop()
+    {
+        RFLink::Mqtt::checkMQTTloop();
+        RFLink::sendMsgFromBuffer();
+
+#if defined(RFLINK_WIFI_ENABLED)
+        RFLink::Wifi::mainLoop();
+#endif
+
+#ifndef RFLINK_SERIAL2NET_DISABLED
+        RFLink::Serial2Net::serverLoop();
+#endif // !RFLINK_SERIAL2NET_DISABLED
+
+#if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
+        readSerialAndExecute();
+#endif
+
+        if (RFLink::Signal::ScanEvent())
+            RFLink::sendMsgFromBuffer();
+
+        struct timeval now;
+        gettimeofday(&now, 0);
+        if(scheduledRebootTime.tv_sec !=0 && now.tv_sec > scheduledRebootTime.tv_sec) {
+            Serial.println("***** Rebooting now for scheduled reboot !!! *****");
+            ESP.restart();
+        }
+    }
 
   void sendMsgFromBuffer()
   {
@@ -355,6 +369,11 @@ namespace RFLink {
     return true;
   }
 
+  void scheduleReboot(unsigned int seconds) {
+      gettimeofday(&scheduledRebootTime, NULL);
+      scheduledRebootTime.tv_sec += seconds;
+  }
+
   void getStatusJsonString(JsonObject &output) {
 
     struct timeval now;
@@ -363,6 +382,13 @@ namespace RFLink {
       }
 
     output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
+
+    output["heap_free"] = ESP.getFreeHeap();
+#ifdef ESP8266
+    output["heap_frag"] = ESP.getHeapFragmentation();
+    output["stack_free_cont"] = ESP.getFreeContStack();
+    output["free_block_max_size"] = ESP.getMaxFreeBlockSize();
+#endif
 
   }
 

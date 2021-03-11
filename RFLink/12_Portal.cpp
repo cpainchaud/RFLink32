@@ -98,6 +98,7 @@ void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &
 
 void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     if (not json.is<JsonObject>()) {
+        Serial.println("API Config push requested but invalid JSON was received!");
         request->send(400, "text/plain", "Not an object");
         return;
     }
@@ -184,7 +185,8 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
             Update.printError(Serial);
             return request->send(400, "text/plain", "Could not end OTA");
         }
-        Serial.println("OTA via Portal is a success. You are one reboot away your new shiny release!");
+        Serial.println("OTA via Portal is a success. You are one reboot away your new shiny release! See you in 5 seconds...");
+        RFLink::scheduleReboot(5);
     }else{
 
     }
@@ -216,7 +218,7 @@ void init() {
 
     server.on("/api/firmware/update", HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
 
-    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/api/config", serverApiConfigPush, 10000);
+    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/api/config", serverApiConfigPush, 4000);
     server.addHandler(handler);
 
     handler = new AsyncCallbackJsonWebHandler("/api/firmware/update_from_url", serveApiFirmwareUpdateFromUrl, 1000);

@@ -372,9 +372,9 @@ void setup()
 #endif // ESP32
 
 #ifdef ESP8266
-e1 = WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
-e2 = WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
-e3 = WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
+    e1 = WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
+    e2 = WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
+    e3 = WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
 #endif
 
 #ifdef ESP32

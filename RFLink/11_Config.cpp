@@ -57,7 +57,7 @@ namespace RFLink
         };
 #define configItemListsSize (sizeof(configItemLists) / sizeof(ConfigItem *))
 
-        StaticJsonDocument<8192> doc;
+        StaticJsonDocument<4096> doc;
 
         void resetConfig()
         {
@@ -101,7 +101,7 @@ namespace RFLink
 
         ConfigItem *findConfigItem(const char *name, SectionId section)
         {
-            for (int i = 0; i < configItemListsSize; i++)
+            for (unsigned int i = 0; i < configItemListsSize; i++)
             {
                 ConfigItem *item = configItemLists[i];
 
@@ -121,9 +121,6 @@ namespace RFLink
 
         void init()
         {
-
-            char tmp[100];
-
             Serial.print("Loading persistent filesystem... ");
 
 #ifdef ESP32
@@ -134,8 +131,7 @@ namespace RFLink
             }
             Serial.print("OK. ");
 
-            Serial.printf(tmp, "File system usage: %lu/%luKB.\r\n", LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
-            Serial.println(tmp);
+            Serial.printf("File system usage: %u/%uKB.\r\n", LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
 #else // this is ESP8266
             if (!LittleFS.begin())
             {
@@ -146,12 +142,11 @@ namespace RFLink
 
             FSInfo info;
             LittleFS.info(info);
-            sprintf(tmp, "File system usage: %lu/%luKB.", info.usedBytes / 1024, info.totalBytes / 1024);
-            Serial.println(tmp);
+            Serial.printf("File system usage: %u/%uKB.\r\n", info.usedBytes / 1024, info.totalBytes / 1024);
 #endif
 
             // DEBUG ONLY? Let's iterate over all registered configItems and count them/sanitize
-            for (int i = 0; i < configItemListsSize; i++)
+            for (unsigned int i = 0; i < configItemListsSize; i++)
             {
                 ConfigItem *item = configItemLists[i];
 
@@ -193,7 +188,7 @@ namespace RFLink
             //sprintf(tmp, "Counted %i config items in total", countConfigItems);
             //Serial.println(tmp);
 
-            Serial.printf(tmp, "Now opening JSON config file '%s'\r\n", configFileName);
+            Serial.printf("Now opening JSON config file '%s'\r\n", configFileName);
 
 #ifdef ESP32
             File file = LITTLEFS.open(configFileName, "r");
@@ -206,7 +201,7 @@ namespace RFLink
                 Serial.println(F("Failed to read file, using default configuration"));
             file.close();
 
-            Serial.printf(tmp, "JSON file mem usage: %lu / %lu\r\n", doc.memoryUsage(), doc.memoryPool().capacity());
+            Serial.printf("JSON file mem usage: %u / %u\r\n", doc.memoryUsage(), doc.memoryPool().capacity());
 
             bool fileHasChanged = false;
 
@@ -252,7 +247,7 @@ namespace RFLink
             }
 
             // Let's fill missing json config with their default values
-            for (int i = 0; i < configItemListsSize; i++)
+            for (unsigned int i = 0; i < configItemListsSize; i++)
             {
                 ConfigItem *item = configItemLists[i];
 
@@ -302,7 +297,7 @@ namespace RFLink
         public:
             CallbackManager()
             {
-                for (int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
+                for (unsigned int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
                 {
                     callbacks[i] = nullptr;
                 }
@@ -312,7 +307,7 @@ namespace RFLink
             {
                 if (c == nullptr)
                     return;
-                for (int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
+                for (unsigned int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
                 {
                     if (callbacks[i] == c)
                         return;
@@ -326,7 +321,7 @@ namespace RFLink
 
             void execute()
             {
-                for (int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
+                for (unsigned int i = 0; i < sizeof(callbacks) / sizeof(void (*)()); i++)
                 {
                     if (callbacks[i] == nullptr)
                         return;
@@ -624,7 +619,7 @@ namespace RFLink
         SectionId getSectionIdFromString(const char *name)
         {
 
-            for (int i = 0; i < jsonSections_count; i++)
+            for (unsigned int i = 0; i < jsonSections_count; i++)
             {
                 if (strcmp(name, jsonSections[i]) == 0)
                     return (SectionId)i;

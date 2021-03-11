@@ -50,13 +50,17 @@
 namespace RFLink {
 
     extern struct timeval timeAtBoot; // used to calculate update
+    extern struct timeval scheduledRebootTime;
 
     void setup();
+    void mainLoop();
 
     bool executeCliCommand(const char *cmd);
     void sendMsgFromBuffer();
 
     void getStatusJsonString(JsonObject &output);
+
+    void scheduleReboot(unsigned int seconds);
 }
 
 void CallReboot(void);
