@@ -772,7 +772,7 @@ namespace RFLink
       }
       else
       {
-        Serial.printf("Error : unknown command '%s'\n", command.c_str());
+        Serial.printf("Error : unknown command '%s'\r\n", command.c_str());
       }
     }
 

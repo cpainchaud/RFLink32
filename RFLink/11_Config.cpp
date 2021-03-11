@@ -134,7 +134,7 @@ namespace RFLink
             }
             Serial.print("OK. ");
 
-            sprintf(tmp, "File system usage: %lu/%luKB.", LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
+            Serial.printf(tmp, "File system usage: %lu/%luKB.\r\n", LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
             Serial.println(tmp);
 #else // this is ESP8266
             if (!LittleFS.begin())
@@ -193,8 +193,7 @@ namespace RFLink
             //sprintf(tmp, "Counted %i config items in total", countConfigItems);
             //Serial.println(tmp);
 
-            sprintf(tmp, "Now opening JSON config file '%s'", configFileName);
-            Serial.println(tmp);
+            Serial.printf(tmp, "Now opening JSON config file '%s'\r\n", configFileName);
 
 #ifdef ESP32
             File file = LITTLEFS.open(configFileName, "r");
@@ -207,8 +206,7 @@ namespace RFLink
                 Serial.println(F("Failed to read file, using default configuration"));
             file.close();
 
-            sprintf(tmp, "JSON file mem usage: %lu / %lu", doc.memoryUsage(), doc.memoryPool().capacity());
-            Serial.println(tmp);
+            Serial.printf(tmp, "JSON file mem usage: %lu / %lu\r\n", doc.memoryUsage(), doc.memoryPool().capacity());
 
             bool fileHasChanged = false;
 
@@ -222,7 +220,7 @@ namespace RFLink
                 JsonVariant &&section_variant = kv.value();
                 if (!section_variant.is<JsonObject>())
                 {
-                    Serial.printf("root entry '%s'  is not an object, it will be discarded\n", kv.key().c_str());
+                    Serial.printf("root entry '%s'  is not an object, it will be discarded\r\n", kv.key().c_str());
                     root.remove(kv.key().c_str());
                     continue;
                 }
@@ -231,7 +229,7 @@ namespace RFLink
                 SectionId lookupSectionID = getSectionIdFromString(kv.key().c_str());
                 if (lookupSectionID == SectionId::EOF_id)
                 {
-                    Serial.printf("root entry '%s' is not a valid section name, it will be discarded", kv.key().c_str());
+                    Serial.printf("root entry '%s' is not a valid section name, it will be discarded\r\n", kv.key().c_str());
                     root.remove(kv.key().c_str());
                     continue;
                 }
@@ -245,7 +243,7 @@ namespace RFLink
                     ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
                     if (item == nullptr)
                     {
-                        Serial.printf("section '%s' has extra configuration item named '%s'  it will be dicarded\n", kv.key().c_str(), section_kv.key().c_str());
+                        Serial.printf("section '%s' has extra configuration item named '%s'  it will be dicarded\r\n", kv.key().c_str(), section_kv.key().c_str());
                         sectionObject.remove(section_kv.key().c_str());
                         fileHasChanged = true;
                         continue;
@@ -379,7 +377,7 @@ namespace RFLink
                 }
 
                 // from here we have a valid section, now we go down a level in the remote object
-                Serial.printf("Section %s has %i members\n", kv.key().c_str(), sectionObject.size());
+                //Serial.printf("Section %s has %i members\r\n", kv.key().c_str(), sectionObject.size());
                 for (JsonPair section_kv : sectionObject)
                 {
 #ifdef RFLINK_CONFIG_DEBUG
@@ -717,13 +715,13 @@ namespace RFLink
                 pushNewConfiguration(root, msg, false);
                 if (msg.length() > 0)
                 {
-                    Serial.printf("Some warning/errors occured while trying to SET config from CLI:\n");
+                    Serial.println("Some warning/errors occured while trying to SET config from CLI:");
                     Serial.println(msg.c_str());
                 }
             }
             else
             {
-                Serial.printf("Error : unknown command '%s'\n", command.c_str());
+                Serial.printf("Error : unknown command '%s'\r\n", command.c_str());
             }
         }
 

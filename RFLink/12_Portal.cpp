@@ -7,6 +7,7 @@
 #include "6_MQTT.h"
 #include "11_Config.h"
 #include "10_Wifi.h"
+#include "13_OTA.h"
 
 namespace RFLink { namespace Portal {
 
@@ -35,7 +36,7 @@ void serverApiConfigGet(AsyncWebServerRequest *request) {
     request->send(200, "application/json", dump);
 }
 
-void serverApiStatusGet(AsyncWebServerRequest *request) {
+void serveApiStatusGet(AsyncWebServerRequest *request) {
     DynamicJsonDocument output(10000);
 
     auto && obj = output.to<JsonObject>();
@@ -50,6 +51,39 @@ void serverApiStatusGet(AsyncWebServerRequest *request) {
     serializeJson(output, buffer);
 
     request->send(200, "application/json", buffer);
+}
+
+void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &json)
+{
+    if (not json.is<JsonObject>()) {
+        request->send(400, "text/plain", "Not an object");
+        return;
+    }
+
+    JsonObject && data = json.as<JsonObject>();
+    JsonVariant url = json["url"];
+
+    if(url.isUndefined()) {
+        request->send(400, "text/plain", "malformed request data");
+        return;
+    }
+
+    if(!url.is<char *>()) {
+        request->send(400, "text/plain", "malformed request data");
+        return;
+    }
+
+    const char *url_str = url.as<char *>();
+    int url_length = strlen(url_str);
+
+    if(url_length < 7)  {
+        request->send(400, "text/plain", "malformed url provided");
+        return;
+    }
+
+    RFLink::OTA::downloadFromUrl(url);
+
+
 }
 
 void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
@@ -104,10 +138,12 @@ void init() {
     server.on("/services", HTTP_GET, serveIndexHtml);
 
     server.on("/api/config", HTTP_GET, serverApiConfigGet);
-
-    server.on("/api/status", HTTP_GET, serverApiStatusGet);
+    server.on("/api/status", HTTP_GET, serveApiStatusGet);
 
     AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/api/config", serverApiConfigPush, 10000);
+    server.addHandler(handler);
+
+    handler = new AsyncCallbackJsonWebHandler("/api/firmware/update_from_url", serveApiFirmwareUpdateFromUrl, 1000);
     server.addHandler(handler);
 
 }

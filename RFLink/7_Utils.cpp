@@ -363,8 +363,8 @@ int main(int argc, char **argv)
 
     uint8_t msg[] = {0x08, 0x0a, 0xe8, 0x80};
 
-    fprintf(stderr, "util::crc8(): odd parity:  %02X\n", crc8(msg, 3, 0x80, 0x00));
-    fprintf(stderr, "util::crc8(): even parity: %02X\n", crc8(msg, 4, 0x80, 0x00));
+    fprintf(stderr, "util::crc8(): odd parity:  %02X\r\n", crc8(msg, 3, 0x80, 0x00));
+    fprintf(stderr, "util::crc8(): even parity: %02X\r\n", crc8(msg, 4, 0x80, 0x00));
 
     return 0;
 }

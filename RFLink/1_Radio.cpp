@@ -413,7 +413,7 @@ void set_Radio_mode_RFM69(States new_State)
       radio.reset();
       radio.initialize();
       radio.setFrequency(433920000);
-      Serial.printf("RFM69 initialized with Freq = %.2f\n", (double)radio.getFrequency()/1000000);
+      Serial.printf("RFM69 initialized with Freq = %.2f\r\n", (double)radio.getFrequency()/1000000);
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       if(hardware == HardwareType::HW_RFM69HCW_t)
         radio.setHighPower(true);

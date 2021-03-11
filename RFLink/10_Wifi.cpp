@@ -9,14 +9,7 @@
 #include <ArduinoOTA.h>
 #endif
 #include "2_Signal.h"
-
-
 #include "6_MQTT.h"
-
-#ifdef RFLINK_AUTOOTA_ENABLED
-#include <HTTPClient.h>
-#include <HTTPUpdate.h>
-#endif
 
 
 
@@ -332,12 +325,12 @@ void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) 
 }
 
 void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  Serial.printf("WiFi Client has received a new IP: %s\r\n", WiFi.localIP().toString().c_str());
   reconnectServices();
 }
 
 void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("WiFi Client has lots its IP");
+  Serial.println("WiFi Client has lost its IP");
 }
 #endif //ESP32
 
@@ -355,7 +348,7 @@ void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected
     
 }
 void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
-  Serial.printf("WiFi Client has received a new IP: %s\n", WiFi.localIP().toString().c_str());
+  Serial.printf("WiFi Client has received a new IP: %s\r\n", WiFi.localIP().toString().c_str());
   reconnectServices();
 }
 void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
@@ -493,81 +486,6 @@ void getStatusJsonString(JsonObject &output) {
 
 } // end of Wifi namespace
 
-#ifdef RFLINK_AUTOOTA_ENABLED
-namespace AutoOTA {
-
-  void checkForUpdateAndApply()
-  {
-    NVS.begin();
-    String CurrentFirmware = NVS.getString("FirmWare");
-    String url = NVS.getString(autoota_url_paramid);
-    if(url.length() < 1)
-     url = AutoOTA_URL;
-    NVS.close();
-
-    // Return if WiFi not connected
-    if (WiFi.status() != WL_CONNECTED) return;
-    Serial.println();
-    Serial.println("FOTA : "+ url);
-    // Read Reference of installed Firmware
-    
-    HTTPClient http;
-    WiFiClient client;
-
-    //Look for FirmWare Update
-    String FirmWareDispo="";
-    const char * headerKeys[] = {"Last-Modified"};
-    const size_t numberOfHeaders = 1;
-    http.begin(url);
-    http.collectHeaders(headerKeys, numberOfHeaders);
-    int httpCode = http.GET();
-    if (httpCode != HTTP_CODE_OK)
-      {
-        Serial.println("FOTA : No file available (" + http.errorToString(httpCode) + ")");
-        http.end();
-        return;
-      }
-    FirmWareDispo=http.header((size_t)0);
-    http.end();
-
-    // Check Date of UpDate
-    Serial.println("FOTA : Firware available = " + FirmWareDispo);
-    if (CurrentFirmware=="" || CurrentFirmware==FirmWareDispo)
-      {
-      Serial.println("FOTA : no new UpDate !");
-      return;
-      }
-
-    //Download process
-    //httpUpdate.setLedPin(Led_Pin, LOW); // Value for LED ON
-    t_httpUpdate_return ret;
-    Serial.println();
-    Serial.println("*********************");
-    Serial.println("FOTA : DOWNLOADING...");
-    httpUpdate.rebootOnUpdate(false);
-    ret = httpUpdate.update(client, url);
-    switch (ret) {
-      case HTTP_UPDATE_FAILED:
-        Serial.println(String("FOTA : Uploading Error !") + httpUpdate.getLastError() + httpUpdate.getLastErrorString().c_str());
-        break;
-      case HTTP_UPDATE_NO_UPDATES:
-       Serial.println("FOTA : UpDate not Available");
-        break;
-      case HTTP_UPDATE_OK:
-        Serial.println("FOTA : Update OK !!!");
-        Serial.println("*********************");
-        Serial.println();
-        NVS.begin();
-        NVS.setString("FirmWare", FirmWareDispo);
-        NVS.close();
-        WiFi.persistent(true);
-        delay(1000);
-        ESP.restart();
-        break;
-      }
-  }
-} // end of AutoOTA namespace
-#endif // RFLINK_AUTOOTA_ENABLED
 
 } // end RFLink namespace
 
