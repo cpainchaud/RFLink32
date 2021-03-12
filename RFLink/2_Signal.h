@@ -25,8 +25,6 @@
 #define DEFAULT_RAWSIGNAL_SAMPLE_RATE 1    // for compatibility with Arduinos only unless you want to scan pulses > 65000us
 #endif
 
-#define RAWSIGNAL_SAMPLE_RATE RFLink::Signal::params::sample_rate
-
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__)) // Arduinos ATmega with low memory available use use SAMPLING
 struct RawSignalStruct // Raw signal variabelen places in a struct
 {
