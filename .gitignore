@@ -2,7 +2,7 @@
 .pio
 .vscode
 pictures/Full size/
-RFLink/RFLink.ino.cpp
+RFLink/main.ino.cpp
 cmake-build-*
 CMakeLists.txt
 CMakeListsPrivate.txt
