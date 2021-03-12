@@ -200,7 +200,7 @@ void refreshParametersFromConfig(bool triggerChanges) {
 
     // Applying changes will happen in mainLoop()
     if(triggerChanges && changesDetected) {
-      Serial.println("Mqtt parameters have changed, they will be applied at next 'loop'.");
+      Serial.println(F("Mqtt parameters have changed, they will be applied at next 'loop'."));
       paramsHaveChanged = true; 
     }
 

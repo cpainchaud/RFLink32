@@ -44,7 +44,7 @@ namespace RFLink { namespace Serial2Net {
                 setOption(TCP_KEEPIDLE, &keepIdle);
                 setOption(TCP_KEEPINTVL, &keepInterval);
                 setOption(TCP_KEEPCNT, &keepCount);
-                println("This is RFLink-ESP, welcome!");
+                println(F("This is RFLink-ESP, welcome!"));
                 #endif
             }
 
@@ -92,7 +92,7 @@ namespace RFLink { namespace Serial2Net {
                 end += newBytesCount;
 
                 if( result < 0 && end >= __buffer_size-1 ){
-                    println("Command is too long, we're closing this connection!");
+                    println(F("Command is too long, we're closing this connection!"));
                     ignore = true;
                     stop();
                     return -1;
@@ -146,7 +146,7 @@ namespace RFLink { namespace Serial2Net {
                 return true;
             }
         }
-        client.println("Too many clients connected, goodbye!");
+        client.println(F("Too many clients connected, goodbye!"));
         return false;
     }
 

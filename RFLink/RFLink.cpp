@@ -69,7 +69,7 @@ namespace RFLink {
         Serial.setRxBufferSize(INPUT_COMMAND_SIZE);
 
         if (gettimeofday(&timeAtBoot, NULL) != 0) {
-            Serial.println("Failed to obtain time");
+            Serial.println(F("Failed to obtain time"));
         }
         scheduledRebootTime.tv_sec = 0;
 
@@ -182,7 +182,7 @@ namespace RFLink {
         struct timeval now;
         gettimeofday(&now, 0);
         if (scheduledRebootTime.tv_sec != 0 && now.tv_sec > scheduledRebootTime.tv_sec) {
-            Serial.println("***** Rebooting now for scheduled reboot !!! *****");
+            Serial.println(F("***** Rebooting now for scheduled reboot !!! *****"));
             ESP.restart();
         }
     }
@@ -333,7 +333,7 @@ namespace RFLink {
 
         struct timeval now;
         if (gettimeofday(&now, NULL) != 0) {
-            Serial.println("Failed to obtain time");
+            Serial.println(F("Failed to obtain time"));
         }
 
         output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;

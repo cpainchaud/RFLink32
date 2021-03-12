@@ -249,7 +249,7 @@ namespace RFLink
       // Applying changes will happen in mainLoop()
       if (triggerChanges && changesDetected)
       {
-        Serial.println("Signal parameters have changed.");
+        Serial.println(F("Signal parameters have changed."));
         if (params::async_mode_enabled && AsyncSignalScanner::isStopped())
         {
           AsyncSignalScanner::startScanning();
@@ -456,7 +456,7 @@ namespace RFLink
         }
         else
         {
-          Serial.println("Start of async Receiver was requested but it's not enabled!");
+          Serial.println(F("Start of async Receiver was requested but it's not enabled!"));
         }
       }
 
@@ -730,7 +730,7 @@ namespace RFLink
 
       if (commaIndex < 0)
       {
-        Serial.println("Error : failed to find ending ';' for the command");
+        Serial.println(F("Error : failed to find ending ';' for the command"));
         return;
       }
 
@@ -744,7 +744,7 @@ namespace RFLink
 
         if (deserializeJson(json, cmd + commaIndex + 1) != DeserializationError::Ok)
         {
-          Serial.print("An error occured while reading json");
+          Serial.println(F("An error occured while reading json"));
           return;
           //Serial.println(cmd+commaIndex);
         }
@@ -754,6 +754,11 @@ namespace RFLink
         auto root = json.as<JsonObject>();
         JsonArrayConst pulsesJson = root.getMember("pulses");
         signal.Number = pulsesJson.size() + 1;
+
+        if(signal.Number > RAW_BUFFER_SIZE) {
+            Serial.printf_P(PSTR("sendRF: error, your Signal has %i pulses while this supports only %i\r\n"), signal.Number, RAW_BUFFER_SIZE);
+            return;
+        }
 
         int index = 0;
         for (JsonVariantConst pulse : pulsesJson)
@@ -766,13 +771,13 @@ namespace RFLink
         signal.Repeats = root.getMember("repeat").as<signed int>();
         signal.Delay = root.getMember("delay").as<signed int>();
 
-        Serial.printf("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i... ", signal.Number, signal.Repeats, signal.Delay);
+        Serial.printf_P(PSTR("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i... "), signal.Number, signal.Repeats, signal.Delay);
         RawSendRF(&signal);
-        Serial.println("done");
+        Serial.println(F("done"));
       }
       else
       {
-        Serial.printf("Error : unknown command '%s'\r\n", command.c_str());
+        Serial.printf_P(PSTR("Error : unknown command '%s'\r\n"), command.c_str());
       }
     }
 

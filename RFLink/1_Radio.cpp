@@ -112,7 +112,7 @@ void refreshParametersFromConfig() {
   if( strcmp(hardwareNames[hardware], item->getCharValue()) != 0) {
     auto new_hardware_id =  hardwareIDFromString(item->getCharValue());
     if( new_hardware_id == HardwareType::HW_EOF_t ) {
-      Serial.printf("Unsupported radio hardware name '%s' was provided, falling to default generic receiver!", item->getCharValue());
+      Serial.printf_P(PSTR("Unsupported radio hardware name '%s' was provided, falling to default generic receiver!"), item->getCharValue());
       changesDetected = true;
       hardware = HardwareType::HW_basic_t;
       item->setCharValue(hardwareNames[hardware]);
@@ -324,7 +324,7 @@ void set_Radio_mode(States new_State)
   else if( hardware == HardwareType::HW_SX7218_t )
     set_Radio_mode_SX7218(new_State);
   else
-    Serial.printf("Error while trying to switch Radio state: unknown hardware id '%i'", new_State); 
+    Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'"), new_State);
 }
 
 void setup() {
@@ -413,7 +413,7 @@ void set_Radio_mode_RFM69(States new_State)
       radio.reset();
       radio.initialize();
       radio.setFrequency(433920000);
-      Serial.printf("RFM69 initialized with Freq = %.2f\r\n", (double)radio.getFrequency()/1000000);
+      Serial.printf_P(PSTR("RFM69 initialized with Freq = %.2f\r\n"), (double)radio.getFrequency()/1000000);
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       if(hardware == HardwareType::HW_RFM69HCW_t)
         radio.setHighPower(true);

@@ -118,7 +118,7 @@ boolean PluginTX_087(byte function, const char *string)
     RawSignalStruct signal;
 
     if (strncasecmp(InputBuffer_Serial + 3, "NOXALARM;", 8) == 0){
-       Serial.println("NOX TX Requested");
+       Serial.println(F("NOX TX Requested"));
        //RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL};
 
        signal.Number = NOX_CONTROL_PULSECOUNT;

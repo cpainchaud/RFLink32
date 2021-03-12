@@ -69,13 +69,13 @@ namespace RFLink
                 LittleFS.remove(configFileName);
 #endif
 
-            Serial.println("Config has been reset and requires a reboot to complete");
+            Serial.println(F("Config has been reset and requires a reboot to complete"));
         }
 
         void printFile()
         {
             // Open file for reading
-            Serial.println("Now dumping JSON file content:");
+            Serial.println(F("Now dumping JSON file content:"));
 #ifdef ESP32
             File file = LITTLEFS.open(configFileName, "r");
 #else
@@ -121,28 +121,28 @@ namespace RFLink
 
         void init()
         {
-            Serial.print("Loading persistent filesystem... ");
+            Serial.print(F("Loading persistent filesystem... "));
 
 #ifdef ESP32
             if (!LITTLEFS.begin(true))
             {
-                Serial.println(" FAILED!!");
+                Serial.println(F(" FAILED!!"));
                 return;
             }
             Serial.print("OK. ");
 
-            Serial.printf("File system usage: %u/%uKB.\r\n", LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
+            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
 #else // this is ESP8266
             if (!LittleFS.begin())
             {
-                Serial.println(" FAILED!!");
+                Serial.println(F(" FAILED!!"));
                 return;
             }
-            Serial.print("OK. ");
+            Serial.print(F("OK. "));
 
             FSInfo info;
             LittleFS.info(info);
-            Serial.printf("File system usage: %u/%uKB.\r\n", info.usedBytes / 1024, info.totalBytes / 1024);
+            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
 #endif
 
             // DEBUG ONLY? Let's iterate over all registered configItems and count them/sanitize
@@ -178,7 +178,7 @@ namespace RFLink
                     }
                     else
                     {
-                        Serial.print("unsupported configitem type=");
+                        Serial.print(F("unsupported configitem type="));
                         Serial.println(item->type);
                     }
 
@@ -188,7 +188,7 @@ namespace RFLink
             //sprintf(tmp, "Counted %i config items in total", countConfigItems);
             //Serial.println(tmp);
 
-            Serial.printf("Now opening JSON config file '%s'\r\n", configFileName);
+            Serial.printf(PSTR("Now opening JSON config file '%s'\r\n"), configFileName);
 
 #ifdef ESP32
             File file = LITTLEFS.open(configFileName, "r");
@@ -201,7 +201,7 @@ namespace RFLink
                 Serial.println(F("Failed to read file, using default configuration"));
             file.close();
 
-            Serial.printf("JSON file mem usage: %u / %u\r\n", doc.memoryUsage(), doc.memoryPool().capacity());
+            Serial.printf_P(PSTR("JSON file mem usage: %u / %u\r\n"), doc.memoryUsage(), doc.memoryPool().capacity());
 
             bool fileHasChanged = false;
 
@@ -215,7 +215,7 @@ namespace RFLink
                 JsonVariant &&section_variant = kv.value();
                 if (!section_variant.is<JsonObject>())
                 {
-                    Serial.printf("root entry '%s'  is not an object, it will be discarded\r\n", kv.key().c_str());
+                    Serial.printf_P(PSTR("root entry '%s'  is not an object, it will be discarded\r\n"), kv.key().c_str());
                     root.remove(kv.key().c_str());
                     continue;
                 }
@@ -224,7 +224,7 @@ namespace RFLink
                 SectionId lookupSectionID = getSectionIdFromString(kv.key().c_str());
                 if (lookupSectionID == SectionId::EOF_id)
                 {
-                    Serial.printf("root entry '%s' is not a valid section name, it will be discarded\r\n", kv.key().c_str());
+                    Serial.printf_P(PSTR("root entry '%s' is not a valid section name, it will be discarded\r\n"), kv.key().c_str());
                     root.remove(kv.key().c_str());
                     continue;
                 }
@@ -238,7 +238,7 @@ namespace RFLink
                     ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
                     if (item == nullptr)
                     {
-                        Serial.printf("section '%s' has extra configuration item named '%s'  it will be dicarded\r\n", kv.key().c_str(), section_kv.key().c_str());
+                        Serial.printf_P(PSTR("section '%s' has extra configuration item named '%s'  it will be dicarded\r\n"), kv.key().c_str(), section_kv.key().c_str());
                         sectionObject.remove(section_kv.key().c_str());
                         fileHasChanged = true;
                         continue;
@@ -336,26 +336,26 @@ namespace RFLink
             bool configHasChanged = false;
             CallbackManager callbackMgr;
             message.reserve(256);
-            String new_line("\n");
+            String new_line(F("\n"));
 
             if (escapeNewLine)
-                new_line = "\\n";
+                new_line = F("\\n");
 
             // we iterate root level to find sections!
             for (JsonPair kv : data)
             {
 
 #ifdef DEBUG_RFLINK_CONFIG
-                Serial.print("Remote has root object named: ");
+                Serial.print(F("Remote has root object named: "));
                 Serial.println(kv.key().c_str());
 #endif
 
                 JsonVariant &&section_variant = kv.value();
                 if (!section_variant.is<JsonObject>())
                 {
-                    message += "root entry '";
+                    message += F("root entry '");
                     message += kv.key().c_str();
-                    message += "' is not an object, it will be ignored!";
+                    message += F("' is not an object, it will be ignored!");
                     message += new_line;
                     continue;
                 }
@@ -364,30 +364,30 @@ namespace RFLink
                 SectionId lookupSectionID = getSectionIdFromString(kv.key().c_str());
                 if (lookupSectionID == SectionId::EOF_id)
                 {
-                    message += "root entry '";
+                    message += F("root entry '");
                     message += kv.key().c_str();
-                    message += "' is not a valid section name, it will be ignored";
+                    message += F("' is not a valid section name, it will be ignored");
                     message += new_line;
                     continue;
                 }
 
                 // from here we have a valid section, now we go down a level in the remote object
-                //Serial.printf("Section %s has %i members\r\n", kv.key().c_str(), sectionObject.size());
+                //Serial.printf_P(PSTR("Section %s has %i members\r\n"), kv.key().c_str(), sectionObject.size());
                 for (JsonPair section_kv : sectionObject)
                 {
 #ifdef RFLINK_CONFIG_DEBUG
-                    Serial.print("Remote section has item named: ");
+                    Serial.print(F("Remote section has item named: "));
                     Serial.println(section_kv.key().c_str());
 #endif
 
                     ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
                     if (item == nullptr)
                     {
-                        message += "section '";
+                        message += F("section '");
                         message += kv.key().c_str();
-                        message += "' has extra configuration item named '";
+                        message += F("' has extra configuration item named '");
                         message += section_kv.key().c_str();
-                        message += "' it will be ignored";
+                        message += F("' it will be ignored");
                         message += new_line;
                         continue;
                     }
@@ -398,11 +398,11 @@ namespace RFLink
                     {
                         if (!remoteVariant.is<char *>())
                         {
-                            message += "section '";
+                            message += F("section '");
                             message += kv.key().c_str();
-                            message += "' has '";
+                            message += F("' has '");
                             message += section_kv.key().c_str();
-                            message += "' with mismatched type (not string) so it will be ignored";
+                            message += F("' with mismatched type (not string) so it will be ignored");
                             message += new_line;
                             continue;
                         }
@@ -426,7 +426,7 @@ namespace RFLink
                             message += kv.key().c_str();
                             message += F("' has item '");
                             message += section_kv.key().c_str();
-                            message += "' with mismatched type (not long int) so it will be ignored";
+                            message += F("' with mismatched type (not long int) so it will be ignored");
                             message += new_line;
                             continue;
                         }
@@ -446,7 +446,7 @@ namespace RFLink
                             message += kv.key().c_str();
                             message += F("' has item '");
                             message += section_kv.key().c_str();
-                            message += "' with mismatched type (not bool) so it will be ignored";
+                            message += F("' with mismatched type (not bool) so it will be ignored");
                             message += new_line;
                             continue;
                         }
@@ -473,14 +473,14 @@ namespace RFLink
                 }
                 else
                 {
-                    Serial.println("Config file saved to flash.");
+                    Serial.println(F("Config file saved to flash."));
                 }
                 if (triggerUpdateCallbacks)
                     callbackMgr.execute();
             }
             else
             {
-                Serial.println("Config file has not changed.");
+                Serial.println(F("Config file has not changed."));
             }
 
             return true;
@@ -631,7 +631,7 @@ namespace RFLink
         bool saveConfigToFlash()
         {
 
-            Serial.print("Saving JSON config to FLASH.... ");
+            Serial.print(F("Saving JSON config to FLASH.... "));
             Signal::AsyncSignalScanner::stopScanning();
 
 #ifdef ESP32
@@ -680,7 +680,7 @@ namespace RFLink
 
             if (commaIndex < 0)
             {
-                Serial.println("Error : failed to find ending ';' for the command");
+                Serial.println(F("Error : failed to find ending ';' for the command"));
                 return;
             }
 
@@ -701,7 +701,7 @@ namespace RFLink
 
                 if (deserializeJson(json, cmd + commaIndex + 1) != DeserializationError::Ok)
                 {
-                    Serial.println("An error occured while reading json");
+                    Serial.println(F("An error occured while reading json"));
                     return;
                 }
 
@@ -710,13 +710,13 @@ namespace RFLink
                 pushNewConfiguration(root, msg, false);
                 if (msg.length() > 0)
                 {
-                    Serial.println("Some warning/errors occured while trying to SET config from CLI:");
+                    Serial.println(F("Some warning/errors occured while trying to SET config from CLI:"));
                     Serial.println(msg.c_str());
                 }
             }
             else
             {
-                Serial.printf("Error : unknown command '%s'\r\n", command.c_str());
+                Serial.printf_P(PSTR("Error : unknown command '%s'\r\n"), command.c_str());
             }
         }
 

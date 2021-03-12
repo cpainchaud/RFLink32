@@ -138,7 +138,7 @@ void refreshClientParametersFromConfig(bool triggerChanges=true) {
     // Applying changes will happen in mainLoop()
     if(triggerChanges && changesDetected) {
       clientParamsHaveChanged = true;
-      Serial.println("Client Wifi settings haver changed and will be applied at next loop");
+      Serial.println(F("Client Wifi settings haver changed and will be applied at next loop"));
     }
 }
 
@@ -186,7 +186,7 @@ void refreshAccessPointParametersFromConfig(bool triggerChanges=true) {
     // Applying changes will happen in mainLoop()
     if(triggerChanges && changesDetected) {
       accessPointParamsHaveChanged = true;
-      Serial.println("AP Wifi settings haver changed and will be applied at next loop");
+      Serial.println(F("AP Wifi settings haver changed and will be applied at next loop"));
     }
 
 }
@@ -237,7 +237,7 @@ void resetClientWifi() {
 
   }  
   else {
-    Serial.println("WiFi Client mode will be disconnected");
+    Serial.println(F("WiFi Client mode will be disconnected"));
     WiFi.setAutoConnect(false);
     WiFi.setAutoReconnect(false);
     WiFi.disconnect();
@@ -256,11 +256,11 @@ void start_WIFI()
   }
 
   if( params::AP_enabled ) {
-    Serial.printf("* WIFI AP starting with SSID '%s'... ", params::AP_ssid.c_str());
+    Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s'... "), params::AP_ssid.c_str());
     if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
-      Serial.println("FAILED");
+      Serial.println(F("FAILED"));
     else
-      Serial.println("OK");
+      Serial.println(F("OK"));
   }
   else {
     // just in case it
@@ -300,9 +300,9 @@ void reconnectServices() {
 
 #ifdef ESP32
 void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-    Serial.println("Connected to AP!");
+    Serial.println(F("Connected to AP!"));
  
-    Serial.print("SSID: ");
+    Serial.print(F("SSID: "));
     for(int i=0; i<info.connected.ssid_len; i++){
       Serial.print((char) info.connected.ssid[i]);
     }
@@ -316,16 +316,16 @@ void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) 
       }
     }
      
-    Serial.print("\nChannel: ");
+    Serial.print(F("\nChannel: "));
     Serial.println(info.connected.channel);
  
-    Serial.print("Auth mode: ");
+    Serial.print(F("Auth mode: "));
     Serial.println(info.connected.authmode);
 
 }
 
 void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.printf("WiFi Client has received a new IP: %s\r\n", WiFi.localIP().toString().c_str());
+  Serial.printf_P(PSTR("WiFi Client has received a new IP: %s\r\n"), WiFi.localIP().toString().c_str());
   reconnectServices();
 }
 
@@ -337,23 +337,23 @@ void eventHandler_WiFiStationLostIp(WiFiEvent_t event, WiFiEventInfo_t info) {
 #ifdef ESP8266
 WiFiEventHandler e1;
 void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected& evt) {
-  Serial.println("Connected to AP!");
+  Serial.println(F("Connected to AP!"));
  
-  Serial.print("SSID: ");
+  Serial.print(F("SSID: "));
   Serial.println(WiFi.SSID());
      
-  Serial.print("\nChannel: ");
+  Serial.print(F("\nChannel: "));
   Serial.println(WiFi.channel());
     
 }
 WiFiEventHandler e2;
 void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
-  Serial.printf("WiFi Client has received a new IP: %s\r\n", WiFi.localIP().toString().c_str());
+  Serial.printf_P(PSTR("WiFi Client has received a new IP: %s\r\n"), WiFi.localIP().toString().c_str());
   reconnectServices();
 }
 WiFiEventHandler e3;
 void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected& evt) {
-  Serial.println("WiFi Client has been disconnected");
+  Serial.println(F("WiFi Client has been disconnected"));
 }
 #endif
 
@@ -397,7 +397,7 @@ void setup()
     AsyncSignalScanner::stopScanning();
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    Serial.print("20;XX;DEBUG;MSG=OTA failed with error code #");
+    Serial.print(F("20;XX;DEBUG;MSG=OTA failed with error code #"));
     Serial.print(error);
     Serial.println(" ,turning on Receiver");
     AsyncSignalScanner::startScanning();
@@ -411,7 +411,7 @@ void mainLoop() {
     if(accessPointParamsHaveChanged) {
       accessPointParamsHaveChanged = false;
 
-      Serial.println("Appliying new Wifi AP settings");
+      Serial.println(F("Applying new Wifi AP settings"));
 
       #ifdef ESP32
       bool isEnabled = ((WiFi.getMode() & WIFI_MODE_AP) != 0);
@@ -433,11 +433,11 @@ void mainLoop() {
     if(params::AP_enabled) {
         WiFi.enableAP(true);
         if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
-          Serial.println("WIFI AP start FAILED");
+          Serial.println(F("WIFI AP start FAILED"));
         else
-          Serial.println("WIFI AP started");
+          Serial.println(F("WIFI AP started"));
     } else {
-      Serial.println("Shutting down AP");
+      Serial.println(F("Shutting down AP"));
       WiFi.enableAP(false);
     }
     #endif
@@ -457,29 +457,29 @@ void mainLoop() {
 
 void getStatusJsonString(JsonObject &output) {
 
-  auto && network = output.createNestedObject("network");
+  auto && network = output.createNestedObject(F("network"));
 
-  auto && wifi_ap = network.createNestedObject("wifi_ap");
+  auto && wifi_ap = network.createNestedObject(F("wifi_ap"));
 
   if(params::AP_enabled) {
-    wifi_ap["status"] = "enabled";
+    wifi_ap[F("status")] = F("enabled");
   } else {
-    wifi_ap["status"] = "disabled";
+    wifi_ap[F("status")] = F("disabled");
   }
 
-  auto && wifi_client = network.createNestedObject("wifi_client");
+  auto && wifi_client = network.createNestedObject(F("wifi_client"));
 
   if(params::client_enabled) {
     if(WiFi.isConnected()) {
-      wifi_client["status"] = "connected";
-      wifi_client["ip"] = WiFi.localIP().toString();
-      wifi_client["netmask"] = WiFi.subnetMask().toString();
-      wifi_client["dns"] = WiFi.dnsIP().toString();
+      wifi_client[F("status")] = F("connected");
+      wifi_client[F("ip")] = WiFi.localIP().toString();
+      wifi_client[F("netmask")] = WiFi.subnetMask().toString();
+      wifi_client[F("dns")] = WiFi.dnsIP().toString();
     } else {
-      wifi_ap["status"] = "disconnected";
+      wifi_ap[F("status")] = F("disconnected");
     }
   } else {
-    wifi_client["status"] = "disabled";
+    wifi_client[F("status")] = F("disabled");
   }
 
 }

@@ -76,7 +76,7 @@ bool RFM69OOK::initialize()
     delay(1);
     if( millis() - startTime > 5000 ) {
       startTime = millis();
-      Serial.println("RFM69 has not yet initialized properly, is it correctly wired? (repeat every 5 seconds)");
+      Serial.println(F("RFM69 has not yet initialized properly, is it correctly wired? (repeat every 5 seconds)"));
     }
   }
 
@@ -298,9 +298,9 @@ void RFM69OOK::readAllRegs()
   for (byte regAddr = 1; regAddr <= 0x4F; regAddr++) {
     regVal = readReg(regAddr);
     Serial.print(regAddr, HEX);
-    Serial.print(" - ");
+    Serial.print(F(" - "));
     Serial.print(regVal,HEX);
-    Serial.print(" - ");
+    Serial.print(F(" - "));
     Serial.println(regVal,BIN);
   }
 }

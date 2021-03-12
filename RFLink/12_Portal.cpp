@@ -66,20 +66,19 @@ void serveApiStatusGet(AsyncWebServerRequest *request) {
 void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &json)
 {
     if (not json.is<JsonObject>()) {
-        request->send(400, "text/plain", "Not an object");
+        request->send(400, F("text/plain"), F("Not an object"));
         return;
     }
 
-    JsonObject && data = json.as<JsonObject>();
     JsonVariant url = json["url"];
 
     if(url.isUndefined()) {
-        request->send(400, "text/plain", "malformed request data");
+        request->send(400, F("text/plain"), F("malformed request data"));
         return;
     }
 
     if(!url.is<char *>()) {
-        request->send(400, "text/plain", "malformed request data");
+        request->send(400, F("text/plain"), F("malformed request data"));
         return;
     }
 
@@ -87,7 +86,7 @@ void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &
     int url_length = strlen(url_str);
 
     if(url_length < 7)  {
-        request->send(400, "text/plain", "malformed url provided");
+        request->send(400, F("text/plain"), F("malformed url provided"));
         return;
     }
 
@@ -98,8 +97,8 @@ void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &
 
 void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     if (not json.is<JsonObject>()) {
-        Serial.println("API Config push requested but invalid JSON was received!");
-        request->send(400, "text/plain", "Not an object");
+        Serial.println(F("API Config push requested but invalid JSON was received!"));
+        request->send(400, F("text/plain"), F("Not an object"));
         return;
     }
 
@@ -112,20 +111,20 @@ void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
     response.reserve(256);
 
     if( !Config::pushNewConfiguration(data, message, true) ) {
-        response = "{ \"success\": false, \"message\": ";
+        response = F("{ \"success\": false, \"message\": ");
     }
     else {
-        response = "{ \"success\": true, \"message\": ";
+        response = F("{ \"success\": true, \"message\": ");
     }
 
     if( message.length() > 0 ) {
         response += '"';
         response += message + "\"}";
     } else {
-        response += " null }";
+        response += F(" null }");
     }
 
-    request->send(200, "application/json", response);
+    request->send(200, F("application/json"), response);
 }
 
 
@@ -137,8 +136,8 @@ void handleFirmwareUpdateFinalResponse(AsyncWebServerRequest *request) {
             (Update.hasError()) ? 500 : 200, "text/plain",
             (Update.hasError()) ? "FAIL" : "OK"
             );
-    response->addHeader("Connection", "close");
-    response->addHeader("Access-Control-Allow-Origin", "*");
+    response->addHeader(F("Connection"), F("close"));
+    response->addHeader(F("Access-Control-Allow-Origin"), "*");
     request->send(response);
     //restartRequired = true;
 }
@@ -148,7 +147,7 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
     //Upload handler chunks in data
 
     if (!index) {
-        Serial.println("OTA via Portal Requested");
+        Serial.println(F("OTA via Portal Requested"));
 
         //if(!request->hasParam("MD5", true)) {
         //    return request->send(400, "text/plain", "MD5 parameter missing");
@@ -169,23 +168,23 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
         if (!Update.begin(UPDATE_SIZE_UNKNOWN, cmd)) { // Start with max available size
 #endif
             Update.printError(Serial);
-            return request->send(400, "text/plain", "OTA could not begin");
+            return request->send(400, F("text/plain"), F("OTA could not begin"));
         }
     }
 
     // Write chunked data to the free sketch space
     if(len){
         if (Update.write(data, len) != len) {
-            return request->send(400, "text/plain", "OTA could not begin");
+            return request->send(400, F("text/plain"), F("OTA could not begin"));
         }
     }
 
     if (final) { // if the final flag is set then this is the last frame of data
         if (!Update.end(true)) { //true to set the size to the current progress
             Update.printError(Serial);
-            return request->send(400, "text/plain", "Could not end OTA");
+            return request->send(400, F("text/plain"), F("Could not end OTA"));
         }
-        Serial.println("OTA via Portal is a success. You are one reboot away your new shiny release! See you in 5 seconds...");
+        Serial.println(F("OTA via Portal is a success. You are one reboot away your new shiny release! See you in 5 seconds..."));
         RFLink::scheduleReboot(5);
     }else{
 
@@ -195,8 +194,8 @@ void handleChunksReception(AsyncWebServerRequest *request, String filename, size
 
 void serveIndexHtml(AsyncWebServerRequest *request) {
 
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html_gz_start, index_html_gz_size);
-    response->addHeader("Content-Encoding", "gzip");
+    AsyncWebServerResponse *response = request->beginResponse_P(200, F("text/html"), index_html_gz_start, index_html_gz_size);
+    response->addHeader(F("Content-Encoding"), F("gzip"));
     request->send(response);
 }
 
@@ -204,32 +203,32 @@ void serveIndexHtml(AsyncWebServerRequest *request) {
 void init() {
     server.onNotFound(notFound);
 
-    server.on("/", HTTP_GET, serveIndexHtml);
-    server.on("/index.html", HTTP_GET, serveIndexHtml);
-    server.on("/wifi", HTTP_GET, serveIndexHtml);
-    server.on("/home", HTTP_GET, serveIndexHtml);
-    server.on("/radio", HTTP_GET, serveIndexHtml);
-    server.on("/signal", HTTP_GET, serveIndexHtml);
-    server.on("/firmware", HTTP_GET, serveIndexHtml);
-    server.on("/services", HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/index.html"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/wifi"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/home"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/radio"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/signal"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/firmware"), HTTP_GET, serveIndexHtml);
+    server.on(PSTR("/services"), HTTP_GET, serveIndexHtml);
 
-    server.on("/api/config", HTTP_GET, serverApiConfigGet);
-    server.on("/api/status", HTTP_GET, serveApiStatusGet);
+    server.on(PSTR("/api/config"), HTTP_GET, serverApiConfigGet);
+    server.on(PSTR("/api/status"), HTTP_GET, serveApiStatusGet);
 
-    server.on("/api/firmware/update", HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
+    server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
 
-    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/api/config", serverApiConfigPush, 4000);
+    AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler(PSTR("/api/config"), serverApiConfigPush, 4000);
     server.addHandler(handler);
 
-    handler = new AsyncCallbackJsonWebHandler("/api/firmware/update_from_url", serveApiFirmwareUpdateFromUrl, 1000);
+    handler = new AsyncCallbackJsonWebHandler(PSTR("/api/firmware/update_from_url"), serveApiFirmwareUpdateFromUrl, 1000);
     server.addHandler(handler);
 
 }
 
 void start() {
-    Serial.print("Starting WebServer... ");
+    Serial.print(F("Starting WebServer... "));
     server.begin();
-    Serial.println("OK");
+    Serial.println(F("OK"));
 }
 
 

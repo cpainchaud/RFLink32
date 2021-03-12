@@ -38,7 +38,7 @@ namespace RFLink
                 readyStateLoading = 3,          // receiving, partial data available
                 readyStateDone = 4} _readyState; // Request complete, all data available
              */
-            Serial.println("Request has changed state : %i\r\n");
+            Serial.println(F("Request has changed state : %i\r\n"));
             if(readyState == 4){
                 Serial.println(request->responseText());
                 Serial.println();
@@ -62,7 +62,7 @@ namespace RFLink
                 bytesReceived += amountToRead;
                 remaining = request.available();
             }
-            Serial.printf("Total read so far %u\r\n", bytesReceived);
+            Serial.printf_P(PSTR("Total read so far %u\r\n"), bytesReceived);
         }
 
         void downloadFromUrl(const char *url)
@@ -89,7 +89,7 @@ namespace RFLink
                 currentUrl = http.header("Location");
                 http.end();
                 delay(1);
-                Serial.printf("Web server has replied with a code 302, we will follow link: %s\r\n", currentUrl.c_str());
+                Serial.printf_P(PSTR("Web server has replied with a code 302, we will follow link: %s\r\n"), currentUrl.c_str());
                 httpRelocated.begin(currentUrl);
                 httpCode = httpRelocated.GET();
                 currentHttpClient = &httpRelocated;
@@ -99,11 +99,11 @@ namespace RFLink
 
             if (httpCode != HTTP_CODE_OK)
             {
-                Serial.printf("HTTP request returned status code %i\r\n", httpCode);
+                Serial.printf_P(PSTR("HTTP request returned status code %i\r\n"), httpCode);
                 return;
             }
 
-            Serial.printf("HTTP request returned status code %i\r\n", httpCode);
+            Serial.printf(PSTR("HTTP request returned status code %i\r\n"), httpCode);
 
             /*
             bytesReceived = 0;
