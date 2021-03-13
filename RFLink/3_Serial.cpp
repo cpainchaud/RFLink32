@@ -13,7 +13,7 @@
 #include "5_Plugin.h"
 
 char InputBuffer_Serial[INPUT_COMMAND_SIZE];
-int serialBufferCursor;
+int serialBufferCursor=0;
 
 /**
  *
@@ -35,7 +35,7 @@ boolean readSerialAndExecute() {
     if (ReadSerial()) {
 #ifdef SERIAL_ENABLED
         Serial.flush();
-        Serial.print(F("Message arrived [Serial]:"));
+        Serial.printf_P(PSTR("Message arrived [Serial](%i):"), serialBufferCursor);
         Serial.println(InputBuffer_Serial);
 #endif
         bool success = RFLink::executeCliCommand(InputBuffer_Serial);
@@ -65,39 +65,48 @@ boolean CopySerial(char *src) {
 
 boolean ReadSerial() {
     // SERIAL: *************** Check if there is data ready on the serial port **********************
-    static int byteRead;        // incoming character value
+
     static unsigned long FocusTimer; // Timer to keep focus on the task during communication
 
-    if (Serial.available()) {
+    int readCount;
+    int availableBytes = Serial.available();
+
+    if (availableBytes) {
         FocusTimer = millis() + FOCUS_TIME_MS;
+
         while (true) {
-            if (Serial.available()) {
-                byteRead = Serial.read();
+            availableBytes = Serial.available();
+            if (availableBytes) {
 
-                if (isprint(byteRead))
-                    InputBuffer_Serial[serialBufferCursor++] = byteRead;
+                readCount = INPUT_COMMAND_SIZE-1-serialBufferCursor;
+                if( readCount > availableBytes)
+                    readCount = availableBytes;
 
-                //Serial.printf(PSTR("received char %hu\r\n"), byteRead);
-                if (byteRead == 10 || byteRead == 13 ) {
-                    //Serial.println(F("Exit Serial() because of new line"));
-                    InputBuffer_Serial[serialBufferCursor+1] = 0; // serial data is complete
+                Serial.readBytes(&InputBuffer_Serial[serialBufferCursor], readCount);
+                serialBufferCursor += availableBytes;
+
+                //Serial.printf_P(PSTR("read %i bytes, cursor=%i and last char=%hu\r\n"), readCount, serialBufferCursor, InputBuffer_Serial[serialBufferCursor-1]);
+
+                if(InputBuffer_Serial[serialBufferCursor-1] == 13) {
+                    InputBuffer_Serial[serialBufferCursor-1] = 0;
                     return true;
                 }
 
                 FocusTimer = millis() + FOCUS_TIME_MS;
-                //Serial.printf(PSTR("Read %i bytes so far from console\r\n"), serialBufferCursor);
+                //Serial.printf_P(PSTR("Read %i bytes so far from console\r\n"), serialBufferCursor);
             }
 
             if (millis() >= FocusTimer) { // we will get more characters at next loop
+                //Serial.println(F("Exit because of timer"));
                 return false;
             }
 
             if(serialBufferCursor >= (INPUT_COMMAND_SIZE - 1))
             {
                 resetSerialBuffer();
-                Serial.println(PSTR("Error: Your command was too long so it was ignored"));
+                Serial.println(F("Error: Your command was too long so it was ignored"));
                 while (Serial.available()) { // Let's empty Serial so no mistake is made !
-                    byteRead = Serial.read();
+                    Serial.read();
                 }
                 return false;
             }

@@ -67,6 +67,7 @@ namespace RFLink {
     void setup() {
 
         Serial.setRxBufferSize(INPUT_COMMAND_SIZE);
+        Serial.setTimeout(1);
 
         if (gettimeofday(&timeAtBoot, NULL) != 0) {
             Serial.println(F("Failed to obtain time"));

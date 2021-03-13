@@ -10,7 +10,7 @@
 
 #include <Arduino.h>
 
-#define BAUD 921600            // 57600      // Baudrate for serial communication.
+#define BAUD 115200            // 57600      // Baudrate for serial communication.
 #ifndef INPUT_COMMAND_SIZE
     #define INPUT_COMMAND_SIZE 2000 // 60         // Maximum number of characters that a command via serial can be.
 #endif
