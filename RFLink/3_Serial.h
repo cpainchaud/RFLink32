@@ -17,6 +17,9 @@
 #define FOCUS_TIME_MS 50      // 50         // Duration in mSec. that, after receiving serial data from USB only the serial port is checked.
 
 extern char InputBuffer_Serial[INPUT_COMMAND_SIZE];
+extern int serialBufferCursor;
+
+void resetSerialBuffer();
 
 boolean readSerialAndExecute();
 boolean CheckMQTT(byte *);
