@@ -458,23 +458,23 @@ void set_Radio_mode_SX7218(States new_State)
       if( RFLink::Signal::params::async_mode_enabled )
           RFLink::Signal::AsyncSignalScanner::stopScanning();
       auto result = radio_SX1278.beginFSK( 433.92F, 19.200F, 50.0F, 200.0F, 12, 16, true);
-      //Serial.printf("Initialiazed SX1218, return code %i\n", result);
+      //Serial.printf("Initialiazed SX1218, return code %i\r\n", result);
       radio_SX1278.setOOK(true);
 
       //result = radio_SX1278.setOOKFixedTreshold(0x00);
-      //Serial.printf("SX7218, FixedTrashold result=%i\n", result);
+      //Serial.printf("SX7218, FixedTrashold result=%i\r\n", result);
 
       result = radio_SX1278.setEncoding(RADIOLIB_ENCODING_NRZ);
-      //Serial.printf("SX1218, set encoding result=%i\n", result);
+      //Serial.printf("SX1218, set encoding result=%i\r\n", result);
 
       result = radio_SX1278.setDataShapingOOK(0);
-      //Serial.printf("SX1218, set data shaping result=%i\n", result);
+      //Serial.printf("SX1218, set data shaping result=%i\r\n", result);
 
       //result = radio_SX1278.startReceive(0, SX127X_RXCONTINUOUS);
-      //Serial.printf("SX7218, receive start code %i\n", result);
+      //Serial.printf("SX7218, receive start code %i\r\n", result);
 
       //result = radio_SX1278.startDirect();
-      //Serial.printf("SX7218, startDirect code %i\n", result);
+      //Serial.printf("SX7218, startDirect code %i\r\n", result);
       break;
     }
 

@@ -307,7 +307,7 @@ void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) 
       Serial.print((char) info.connected.ssid[i]);
     }
  
-    Serial.print("\nBSSID: ");
+    Serial.print("\r\nBSSID: ");
     for(int i=0; i<6; i++){
       Serial.printf("%02X", info.connected.bssid[i]);
  
@@ -316,7 +316,7 @@ void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) 
       }
     }
      
-    Serial.print(F("\nChannel: "));
+    Serial.print(F("\r\nChannel: "));
     Serial.println(info.connected.channel);
  
     Serial.print(F("Auth mode: "));
@@ -342,7 +342,7 @@ void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected
   Serial.print(F("SSID: "));
   Serial.println(WiFi.SSID());
      
-  Serial.print(F("\nChannel: "));
+  Serial.print(F("\r\nChannel: "));
   Serial.println(WiFi.channel());
     
 }

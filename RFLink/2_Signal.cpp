@@ -765,7 +765,7 @@ namespace RFLink
         {
           index++;
           signal.Pulses[index] = pulse.as<signed long int>();
-          //Serial.printf("Pulse=%i\n",signal.Pulses[index]);
+          //Serial.printf("Pulse=%i\r\n",signal.Pulses[index]);
         }
 
         signal.Repeats = root.getMember("repeat").as<signed int>();

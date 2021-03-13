@@ -359,7 +359,7 @@ int add_nibbles(uint8_t const message[], unsigned num_bytes)
 #ifdef _TEST
 int main(int argc, char **argv)
 {
-    fprintf(stderr, "util:: test\n");
+    fprintf(stderr, "util:: test\r\n");
 
     uint8_t msg[] = {0x08, 0x0a, 0xe8, 0x80};
 
