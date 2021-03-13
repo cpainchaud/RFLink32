@@ -129,7 +129,7 @@ namespace RFLink
                 Serial.println(F(" FAILED!!"));
                 return;
             }
-            Serial.print("OK. ");
+            Serial.print(F("OK. "));
 
             Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
 #else // this is ESP8266
@@ -155,8 +155,7 @@ namespace RFLink
                     if (item->typeIsChar())
                     {
 #ifdef DEBUG_RFLINK_CONFIG
-                        sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
-                        Serial.print(tmp);
+                        Serial.printf(PSTR("added configitem '%s' with default_value="), item->json_name);
                         Serial.println(item->getCharDefaultValue());
 #endif
                     }

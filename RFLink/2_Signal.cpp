@@ -784,8 +784,8 @@ namespace RFLink
     void getStatusJsonString(JsonObject &output)
     {
       auto &&signal = output.createNestedObject("signal");
-      signal["received_signal_count"] = counters::receivedSignalsCount;
-      signal["successfully_decoded_count"] = counters::successfullyDecodedSignalsCount;
+      signal[F("received_signal_count")] = counters::receivedSignalsCount;
+      signal[F("successfully_decoded_count")] = counters::successfullyDecodedSignalsCount;
 
     }
 
