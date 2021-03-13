@@ -740,7 +740,7 @@ namespace RFLink
       {
         //String argsStr = strCmd.substring(commaIndex+1);
         DynamicJsonDocument json(2500);
-        RawSignalStruct signal;
+        RawSignalStruct signal = {0, 0, 0, 2, 0UL};
 
         if (deserializeJson(json, cmd + commaIndex + 1) != DeserializationError::Ok)
         {
@@ -764,14 +764,14 @@ namespace RFLink
         for (JsonVariantConst pulse : pulsesJson)
         {
           index++;
-          signal.Pulses[index] = pulse.as<signed long int>();
+          signal.Pulses[index] = pulse.as<signed long int>() / signal.Multiply;
           //Serial.printf("Pulse=%i\r\n",signal.Pulses[index]);
         }
 
         signal.Repeats = root.getMember("repeat").as<signed int>();
         signal.Delay = root.getMember("delay").as<signed int>();
 
-        Serial.printf_P(PSTR("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i... "), signal.Number, signal.Repeats, signal.Delay);
+        Serial.printf_P(PSTR("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i, multiply=%i... "), signal.Number, signal.Repeats, signal.Delay, signal.Multiply);
         RawSendRF(&signal);
         Serial.println(F("done"));
       }
