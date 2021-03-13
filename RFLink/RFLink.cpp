@@ -66,6 +66,9 @@ namespace RFLink {
 
     void setup() {
 
+        delay(250);         // Time needed to switch back from Upload to Console
+        Serial.begin(BAUD); // Initialise the serial port
+
         Serial.setRxBufferSize(INPUT_COMMAND_SIZE);
         Serial.setTimeout(1);
 
@@ -87,9 +90,6 @@ namespace RFLink {
 #elif defined(ESP32)
         btStop();
 #endif
-
-        delay(250);         // Time needed to switch back from Upload to Console
-        Serial.begin(BAUD); // Initialise the serial port
 
 #if (defined(ESP32) || defined(ESP8266))
         Serial.println(); // ESP "Garbage" message
