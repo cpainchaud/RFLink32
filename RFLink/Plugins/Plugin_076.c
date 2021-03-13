@@ -75,7 +75,6 @@ unsigned long lastSeenTime = 0;
 
 boolean Plugin_076(byte function, const char *string)
 {
-    char tmpbuf[60];
     uint16_t code = 0;
 
     if (RawSignal.Number != PLUGIN_076_PULSE_COUNT)
