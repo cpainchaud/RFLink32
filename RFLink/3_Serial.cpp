@@ -6,6 +6,7 @@
 // ************************************* //
 
 #include <Arduino.h>
+#include <HardwareSerial.h>
 #include "RFLink.h"
 #include "1_Radio.h"
 #include "3_Serial.h"
@@ -28,14 +29,38 @@ boolean CopySerial(char *);
 
 using namespace RFLink;
 
+class HardwareSerialExtended: public HardwareSerial {
+
+public:
+    size_t readBytesUntil(char terminator, char *buffer, size_t length)
+    {
+        if(length < 1) {
+            return 0;
+        }
+        size_t index = 0;
+        while(index < length) {
+            int c = timedRead();
+            if(c<0)
+                break;
+            *buffer++ = (char) c;
+            index++;
+            if(c == terminator) {
+                break;
+            }
+        }
+        return index; // return number of characters, not including null terminator
+    }
+};
+
 /**
  * @return False if Serial has no data to read and fails to execute command. 
  * */
 boolean readSerialAndExecute() {
     if (ReadSerial()) {
 #ifdef SERIAL_ENABLED
+        Serial.print(F("\33[2K\r"));
         Serial.flush();
-        Serial.printf_P(PSTR("Message arrived [Serial](%i):"), serialBufferCursor);
+        Serial.printf_P(PSTR("Message arrived [Serial]:"));
         Serial.println(InputBuffer_Serial);
 #endif
         bool success = RFLink::executeCliCommand(InputBuffer_Serial);
@@ -63,6 +88,8 @@ boolean CopySerial(char *src) {
     return (strncpy(InputBuffer_Serial, src, INPUT_COMMAND_SIZE - 2));
 }
 
+HardwareSerialExtended *RFL_Serial = (HardwareSerialExtended*) &Serial;
+
 boolean ReadSerial() {
     // SERIAL: *************** Check if there is data ready on the serial port **********************
 
@@ -70,6 +97,7 @@ boolean ReadSerial() {
 
     int readCount;
     int availableBytes = Serial.available();
+    int cursorReference = serialBufferCursor;
 
     if (availableBytes) {
         FocusTimer = millis() + FOCUS_TIME_MS;
@@ -78,26 +106,26 @@ boolean ReadSerial() {
             availableBytes = Serial.available();
             if (availableBytes) {
 
-                readCount = INPUT_COMMAND_SIZE-1-serialBufferCursor;
-                if( readCount > availableBytes)
-                    readCount = availableBytes;
+                readCount = RFL_Serial->readBytesUntil(13, &InputBuffer_Serial[serialBufferCursor], INPUT_COMMAND_SIZE - 1 - serialBufferCursor);
 
-                Serial.readBytes(&InputBuffer_Serial[serialBufferCursor], readCount);
-                serialBufferCursor += availableBytes;
+                if(readCount > 0) {
 
-                //Serial.printf_P(PSTR("read %i bytes, cursor=%i and last char=%hu\r\n"), readCount, serialBufferCursor, InputBuffer_Serial[serialBufferCursor-1]);
+                    serialBufferCursor += readCount;
 
-                if(InputBuffer_Serial[serialBufferCursor-1] == 13) {
-                    InputBuffer_Serial[serialBufferCursor-1] = 0;
-                    return true;
+                    if (InputBuffer_Serial[serialBufferCursor - 1] == 13) {
+                        InputBuffer_Serial[serialBufferCursor - 1] = 0;
+                        return true;
+                    }
+                    FocusTimer = millis() + FOCUS_TIME_MS;
+                    //Serial.printf_P(PSTR("Read %i bytes so far from console and last char=%hu\r\n"), serialBufferCursor, InputBuffer_Serial[serialBufferCursor-1]);
                 }
 
-                FocusTimer = millis() + FOCUS_TIME_MS;
-                //Serial.printf_P(PSTR("Read %i bytes so far from console\r\n"), serialBufferCursor);
             }
 
             if (millis() >= FocusTimer) { // we will get more characters at next loop
                 //Serial.println(F("Exit because of timer"));
+                if(cursorReference != serialBufferCursor)
+                    Serial.write(&InputBuffer_Serial[cursorReference], serialBufferCursor-cursorReference);
                 return false;
             }
 

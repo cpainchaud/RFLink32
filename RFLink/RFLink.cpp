@@ -69,7 +69,7 @@ namespace RFLink {
         delay(250);         // Time needed to switch back from Upload to Console
         Serial.begin(BAUD); // Initialise the serial port
 
-        Serial.setRxBufferSize(INPUT_COMMAND_SIZE);
+        Serial.setRxBufferSize(512);
         Serial.setTimeout(1);
 
         if (gettimeofday(&timeAtBoot, NULL) != 0) {
@@ -88,7 +88,7 @@ namespace RFLink {
     power_spi_enable(); // SPI
 #endif
 #elif defined(ESP32)
-        btStop();
+        //btStop();
 #endif
 
 #if (defined(ESP32) || defined(ESP8266))
