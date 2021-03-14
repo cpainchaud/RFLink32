@@ -32,7 +32,7 @@ using namespace RFLink;
 class HardwareSerialExtended: public HardwareSerial {
 
 public:
-    size_t readBytesUntil(char terminator, char *buffer, size_t length)
+    size_t readBytesUntilNewLine(char *buffer, size_t length)
     {
         if(length < 1) {
             return 0;
@@ -44,7 +44,14 @@ public:
                 break;
             *buffer++ = (char) c;
             index++;
-            if(c == terminator) {
+            if(c == 10)
+                break;
+            if(c == 13) {
+                int nextChar = timedPeek();
+                if(nextChar < 0)
+                    break;
+                if(nextChar == 10) // \n newline char found
+                    read();
                 break;
             }
         }
@@ -62,6 +69,7 @@ boolean readSerialAndExecute() {
         Serial.flush();
         Serial.printf_P(PSTR("Message arrived [Serial]:"));
         Serial.println(InputBuffer_Serial);
+        Serial.flush();
 #endif
         bool success = RFLink::executeCliCommand(InputBuffer_Serial);
         resetSerialBuffer();
@@ -106,13 +114,13 @@ boolean ReadSerial() {
             availableBytes = Serial.available();
             if (availableBytes) {
 
-                readCount = RFL_Serial->readBytesUntil(13, &InputBuffer_Serial[serialBufferCursor], INPUT_COMMAND_SIZE - 1 - serialBufferCursor);
+                readCount = RFL_Serial->readBytesUntilNewLine(&InputBuffer_Serial[serialBufferCursor], INPUT_COMMAND_SIZE - 1 - serialBufferCursor);
 
                 if(readCount > 0) {
 
                     serialBufferCursor += readCount;
 
-                    if (InputBuffer_Serial[serialBufferCursor - 1] == 13) {
+                    if (InputBuffer_Serial[serialBufferCursor - 1] == 13 || InputBuffer_Serial[serialBufferCursor - 1] == 10) {
                         InputBuffer_Serial[serialBufferCursor - 1] = 0;
                         return true;
                     }
