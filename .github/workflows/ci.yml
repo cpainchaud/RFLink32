@@ -42,12 +42,13 @@ jobs:
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: |
         mkdir firmwares
-        cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware.bin
+        cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware-OTA.bin
         cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
         cp .pio/build/D1_sw/firmware.bin firmwares/esp8266-firmware.bin
         cd firmwares
         wget https://raw.githubusercontent.com/espressif/arduino-esp32/master/tools/partitions/boot_app0.bin
         wget https://raw.githubusercontent.com/espressif/arduino-esp32/master/tools/sdk/bin/bootloader_dio_40m.bin
+        python ../tools/esp32-makeimg.py bootloader_dio_40m.bin esp32-partitions.bin boot_app0.bin esp32-firmware-OTA.bin esp32-full.img
         cd ..
 
     - name: Publish firmware
@@ -58,7 +59,7 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          firmwares/*.bin
+          firmwares/*
 
 
 
