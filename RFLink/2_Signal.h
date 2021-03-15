@@ -90,7 +90,7 @@ namespace RFLink {
     void RawSendRF(RawSignalStruct *signal);
     void AC_Send(unsigned long data, byte cmd);
     
-    void executeCliCommand(const char *cmd);
+    void executeCliCommand(char *cmd);
 
     bool ScanEvent();
     void getStatusJsonString(JsonObject &output);
@@ -113,6 +113,8 @@ namespace RFLink {
       void clearAllTimers();
       void IRAM_ATTR RX_pin_changed_state();
       void onPulseTimerTimeout();
+
+      bool getSignalFromJson(RawSignalStruct &signal, const char *json_str);
 
       inline bool isStopped() {
         return scanningStopped;

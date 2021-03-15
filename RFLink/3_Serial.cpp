@@ -120,12 +120,13 @@ boolean ReadSerial() {
 
                     serialBufferCursor += readCount;
 
+                    //Serial.printf_P(PSTR("Read %i bytes so far from console and last char=%hu\r\n"), serialBufferCursor, InputBuffer_Serial[serialBufferCursor-1]);
+
                     if (InputBuffer_Serial[serialBufferCursor - 1] == 13 || InputBuffer_Serial[serialBufferCursor - 1] == 10) {
                         InputBuffer_Serial[serialBufferCursor - 1] = 0;
                         return true;
                     }
                     FocusTimer = millis() + FOCUS_TIME_MS;
-                    //Serial.printf_P(PSTR("Read %i bytes so far from console and last char=%hu\r\n"), serialBufferCursor, InputBuffer_Serial[serialBufferCursor-1]);
                 }
 
             }

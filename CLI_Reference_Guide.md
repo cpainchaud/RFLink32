@@ -23,17 +23,25 @@ Resets all the configurationd to factory defaults. Beware that you will need to 
 ## Send RF pulses manually
 
 `10;signal;sendRF;{"repeat":3,"delay":10,"pulses":[400,20,400,30,60,20,400,30,6020,400,30,6020,400,30,6020,400,30,6020,400,30,6020,400,30,6020,400,30,6020,400,30]}`
+- delay (milliseconds, min=0, max=65000): time between repeats of your signal
+- repeat (min=0, max=65000): how many time you want that signal to be repeated
+- pulses (array of pulses, microseconds)
 
+## Test sample signal against plugins
+
+10;signal;testRF;{"pulses":[400,20,400,30,60,20,400,30,600]}`
+- pulses (array of pulses, microseconds)
 
 ## Edit configuration
 `10;config;set;<json code here>`
 
 #### Enabled Wifi Station/Client mode:
 
-`10;config;set;{"wifi":{"client_enabled":true,"client_dhcp_enabled":true,"client_ssid":"my_home_wifi"}}`
+`10;config;set;{"wifi":{"client_enabled":true,"client_dhcp_enabled":true,"client_ssid":"my_home_wifi","client_password":"_PASSWORD_"}}`
 
 #### Full JSON for Reference
 ````json
+{
 "portal": {
 		"enabled": true,
 		"auth_enabled": false,

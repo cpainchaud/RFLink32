@@ -212,7 +212,7 @@ namespace RFLink {
         }
     }
 
-    bool executeCliCommand(const char *cmd) {
+    bool executeCliCommand(char *cmd) {
         static byte ValidCommand = 0;
         if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
             // 10;....;..;ON;

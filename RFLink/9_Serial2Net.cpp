@@ -32,7 +32,7 @@ namespace RFLink { namespace Serial2Net {
             }
 
             void enabledTcpKeepalive() {
-                int keepAlive = 1;
+                int keepAlive = 1; // used only with ESP32
                 int keepIdle = 30;
                 int keepInterval = 3;
                 int keepCount = 3;
@@ -183,7 +183,7 @@ namespace RFLink { namespace Serial2Net {
                     #endif
 
                     if(command.length() > 0) { // Let's request RFLink to parse this command
-                        RFLink::executeCliCommand(command.c_str());
+                        RFLink::executeCliCommand((char*)command.c_str());
                     }
                 }
             }

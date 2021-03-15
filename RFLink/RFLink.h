@@ -55,7 +55,7 @@ namespace RFLink {
     void setup();
     void mainLoop();
 
-    bool executeCliCommand(const char *cmd);
+    bool executeCliCommand(char *cmd);
     void sendMsgFromBuffer();
 
     void getStatusJsonString(JsonObject &output);
