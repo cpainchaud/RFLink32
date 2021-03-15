@@ -725,7 +725,8 @@ namespace RFLink
 
         bool getSignalFromJson(RawSignalStruct &signal, const char *json_str)
         {
-            DynamicJsonDocument json(2500);
+            int jsonSize = strlen(json_str) * 6;
+            DynamicJsonDocument json(jsonSize);
 
             if (deserializeJson(json, json_str) != DeserializationError::Ok)
             {
