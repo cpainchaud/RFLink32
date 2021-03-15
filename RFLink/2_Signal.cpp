@@ -809,6 +809,8 @@ namespace RFLink
                 if (!PluginRXCall(0, 0)){
                     Serial.println(F("No plugin has matched your signal"));
                 }
+                else
+                    RFLink::sendMsgFromBuffer();
 
                 RawSignal.readyForDecoder = false;
             }
