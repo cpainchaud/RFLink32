@@ -44,6 +44,10 @@ jobs:
         cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware.bin
         cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
         cp .pio/build/D1_sw/firmware.bin firmwares/esp8266-firmware.bin
+        cd firmwares
+        wget https://raw.githubusercontent.com/espressif/arduino-esp32/master/tools/partitions/boot_app0.bin
+        wget https://raw.githubusercontent.com/espressif/arduino-esp32/master/tools/sdk/bin/bootloader_dio_40m.bin
+        cd ..
 
     - name: Publish firmware
       uses: "marvinpinto/action-automatic-releases@latest"
