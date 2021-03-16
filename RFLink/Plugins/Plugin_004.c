@@ -62,8 +62,12 @@ boolean Plugin_004(byte function, const char *string)
       return true; // Home Easy, skip KAKU
    boolean Bit = 0;
    int i;
-   //int P0,P1,P2,P3;
-   byte P0, P1, P2, P3;
+#if defined(ESP32) || defined(ESP8266)
+    uint16_t P0,P1,P2,P3;
+#else
+    byte P0, P1, P2, P3;
+#endif
+
    byte dim = 0;
    byte dimbitpresent = 0;
    unsigned long bitstream = 0L;
