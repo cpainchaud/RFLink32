@@ -120,7 +120,8 @@ namespace RFLink { namespace Serial2Net {
             }
 
             void disconnectAndClear(){
-                close(fd());
+                //close(fd());
+                this->stop();
                 ignore = true;
                 buffer_end = 0;
             }
@@ -141,7 +142,7 @@ namespace RFLink { namespace Serial2Net {
                 Config::ConfigItem(json_name_port, Config::SectionId::Serial2Net_id,SERIAL2NET_PORT, paramsUpdatedCallback),
                 Config::ConfigItem()};
 
-        WiFiServer server;
+        WiFiServer server(1900);
 
         boolean alreadyConnected = false;
         const unsigned short clientsMax=5;
@@ -281,7 +282,7 @@ namespace RFLink { namespace Serial2Net {
                     clients[i].disconnectAndClear();
                 }
             }
-            server.end();
+            server.stop();
             if(show_message)
                 Serial.println(F("Serial2Net Server stopped!"));
         }
