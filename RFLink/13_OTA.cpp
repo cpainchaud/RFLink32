@@ -79,23 +79,8 @@ namespace RFLink
             http.setFollowRedirects(followRedirects_t::HTTPC_STRICT_FOLLOW_REDIRECTS);
             http.begin(url);
             //http.begin("https://github-releases.githubusercontent.com/330986901/fc934000-81e3-11eb-9549-66fb8ee40ece?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A/20210311/us-east-1/s3/aws4_request&X-Amz-Date=20210311T084152Z&X-Amz-Expires=300&X-Amz-Signature=463e4c91369342bc1055435ad505ac464c272424d83db1f61807ad07461cc341&X-Amz-SignedHeaders=host&actor_id=6696638&key_id=0&repo_id=330986901&response-content-disposition=attachment; filename=esp32-firmware.bin&response-content-type=application/octet-stream");
-            http.collectHeaders(headerKeys, numberOfHeaders);
+            //http.collectHeaders(headerKeys, numberOfHeaders);
             int httpCode = http.GET();
-
-            currentUrl = url;
-
-            if (httpCode == 302)
-            {
-                currentUrl = http.header("Location");
-                http.end();
-                delay(1);
-                Serial.printf_P(PSTR("Web server has replied with a code 302, we will follow link: %s\r\n"), currentUrl.c_str());
-                httpRelocated.begin(currentUrl);
-                httpCode = httpRelocated.GET();
-                currentHttpClient = &httpRelocated;
-                httpRelocated.end();
-                delay(1);
-            }
 
             if (httpCode != HTTP_CODE_OK)
             {
@@ -104,6 +89,32 @@ namespace RFLink
             }
 
             Serial.printf(PSTR("HTTP request returned status code %i\r\n"), httpCode);
+
+            t_httpUpdate_return ret;
+            Serial.println();
+            Serial.println("*********************");
+            Serial.println("FOTA : DOWNLOADING...");
+            httpUpdate.rebootOnUpdate(false);
+            ret = httpUpdate.update(client, url);
+
+
+            httpUpdate.rebootOnUpdate(false);
+            ret = httpUpdate.update(client, url);
+            switch (ret)
+            {
+                case HTTP_UPDATE_FAILED:
+                    Serial.println(String("FOTA : Uploading Error !") + httpUpdate.getLastError() + httpUpdate.getLastErrorString().c_str());
+                    break;
+                case HTTP_UPDATE_NO_UPDATES:
+                    Serial.println("FOTA : UpDate not Available");
+                    break;
+                case HTTP_UPDATE_OK:
+                    Serial.println("FOTA : Update OK !!!");
+                    Serial.println("*********************");
+                    Serial.println();
+                    break;
+            }
+
 
             /*
             bytesReceived = 0;
