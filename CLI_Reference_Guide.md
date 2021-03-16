@@ -29,7 +29,7 @@ Resets all the configurationd to factory defaults. Beware that you will need to 
 
 ## Test sample signal against plugins
 
-10;signal;testRF;{"pulses":[400,20,400,30,60,20,400,30,600]}`
+`10;signal;testRF;{"pulses":[400,20,400,30,60,20,400,30,600]}`
 - pulses (array of pulses, microseconds)
 
 ## Edit configuration
