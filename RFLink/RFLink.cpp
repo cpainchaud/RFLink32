@@ -84,9 +84,7 @@ namespace RFLink {
     power_timer0_enable(); // Timer 0
     power_usart0_enable(); // UART
     delay(250);            // Wait ESP-01S
-#ifdef RFM69_ENABLED
     power_spi_enable(); // SPI
-#endif
 #elif defined(ESP32)
         //btStop();
 #endif
@@ -126,7 +124,7 @@ namespace RFLink {
 
         Radio::set_Radio_mode(Radio::Radio_OFF);
 
-#if ((defined(ESP8266) || defined(ESP32)) && !defined(RFM69_ENABLED))
+#if defined(ESP8266) || defined(ESP32)
         Radio::show_Radio_Pin();
 #endif // ESP8266 || ESP32
 
