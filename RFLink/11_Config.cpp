@@ -119,7 +119,7 @@ namespace RFLink
             return nullptr;
         }
 
-        void init()
+        void setup()
         {
             Serial.print(F("Loading persistent filesystem... "));
 

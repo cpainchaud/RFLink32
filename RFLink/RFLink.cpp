@@ -107,7 +107,7 @@ namespace RFLink {
         Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
 
 #if defined(ESP32) || (ESP8266)
-        RFLink::Config::init();
+        RFLink::Config::setup();
 #endif
         RFLink::Radio::setup();
         RFLink::Signal::setup();

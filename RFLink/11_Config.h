@@ -9,7 +9,7 @@ namespace RFLink
     namespace Config
     {
 
-        void init();
+        void setup();
 
         enum ConfigItemType
         {
