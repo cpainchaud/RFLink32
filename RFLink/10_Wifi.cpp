@@ -10,6 +10,7 @@
 #endif
 #include "2_Signal.h"
 #include "6_MQTT.h"
+#include "9_Serial2Net.h"
 
 
 
@@ -296,6 +297,8 @@ void setup_WIFI_OFF()
 void reconnectServices() {
   if(RFLink::Mqtt::params::enabled)
     RFLink::Mqtt::reconnect(1, true);
+  if(RFLink::Serial2Net::params::enabled)
+      RFLink::Serial2Net::restartServer();
 }
 
 #ifdef ESP32

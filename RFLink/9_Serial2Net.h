@@ -7,14 +7,25 @@
 #define SERIAL2NET_PORT 1900
 #endif
 
+#include "11_Config.h"
+
 //#define RFLINK_SERIAL2NET_DEBUG
 
 namespace RFLink {
     namespace Serial2Net {
+
+        namespace params
+        {
+            extern bool enabled;
+            extern unsigned int port;
+        }
+
+        extern Config::ConfigItem configItems[];
+
         /**
          * Include in your setup loop after Wifi has been enabled
          * */
-        void startServer();
+        void setup();
         /**
          * Include in your main loop so connections can be handled properly!
          * */
@@ -24,6 +35,15 @@ namespace RFLink {
          * Send a message to all connected clients
          * */
         void broadcastMessage(const char *msg);
+
+        void paramsUpdatedCallback();
+        void refreshParametersFromConfig(bool triggerChanges=true);
+
+        void restartServer();
+        void startServer();
+        void stopServer(bool show_message=true);
+
+        void getStatusJsonString(JsonObject &output);
     }
 }
 

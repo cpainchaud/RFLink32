@@ -5,6 +5,7 @@
 #include "RFLink.h"
 #include "2_Signal.h"
 #include "6_MQTT.h"
+#include "9_Serial2Net.h"
 #include "11_Config.h"
 #include "10_Wifi.h"
 #include "13_OTA.h"
@@ -56,6 +57,7 @@ void serveApiStatusGet(AsyncWebServerRequest *request) {
     RFLink::Wifi::getStatusJsonString(obj);
     RFLink::Mqtt::getStatusJsonString(obj);
     RFLink::Signal::getStatusJsonString(obj);
+    RFLink::Serial2Net::getStatusJsonString(obj);
 
     String buffer;
     serializeJson(output, buffer);
