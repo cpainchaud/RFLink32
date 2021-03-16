@@ -115,6 +115,7 @@ namespace RFLink {
 #if defined(RFLINK_WIFI_ENABLED)
         RFLink::Portal::init();
         RFLink::Mqtt::setup_MQTT();
+        RFLink::Serial2Net::setup();
         RFLink::Wifi::setup();
 #endif // RFLINK_WIFI_ENABLED
 
@@ -154,7 +155,7 @@ namespace RFLink {
 #ifdef RFLINK_WIFI_ENABLED
         RFLink::Portal::start();
 #ifndef RFLINK_SERIAL2NET_DISABLED
-        RFLink::Serial2Net::startServer();
+        RFLink::Serial2Net::setup();
 #endif // !RFLINK_SERIAL2NET_DISABLED
 #endif
     }

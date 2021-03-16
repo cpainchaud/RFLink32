@@ -8,9 +8,10 @@
 #include <LITTLEFS.h>
 #endif
 
+#include "1_Radio.h"
 #include "2_Signal.h"
 #include "6_MQTT.h"
-#include "1_Radio.h"
+#include "9_Serial2Net.h"
 #include "10_Wifi.h"
 #include "12_Portal.h"
 
@@ -40,6 +41,7 @@ namespace RFLink
             "portal",
             "signal",
             "radio",
+            "serial2net",
             "root" // this is always the last one and matches index SectionId::EOF_id
         };
 #define jsonSections_count sizeof(jsonSections) / sizeof(char *)
@@ -54,6 +56,7 @@ namespace RFLink
             &RFLink::Portal::configItems[0],
             &RFLink::Signal::configItems[0],
             &RFLink::Radio::configItems[0],
+            &RFLink::Serial2Net::configItems[0],
         };
 #define configItemListsSize (sizeof(configItemLists) / sizeof(ConfigItem *))
 

@@ -826,7 +826,6 @@ namespace RFLink
             auto &&signal = output.createNestedObject("signal");
             signal[F("received_signal_count")] = counters::receivedSignalsCount;
             signal[F("successfully_decoded_count")] = counters::successfullyDecodedSignalsCount;
-
         }
 
     } // end of ns Signal
