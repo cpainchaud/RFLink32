@@ -55,6 +55,7 @@ jobs:
         cd ..
 
     - name: Publish firmware
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
