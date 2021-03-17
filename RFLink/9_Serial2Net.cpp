@@ -81,12 +81,13 @@ namespace RFLink { namespace Serial2Net {
                 int result = -1;
 
                 for(int i=buffer_end; i < buffer_end + newBytesCount; i++) {
-                    if(buffer[i] == 0x0d) {
+                    if(buffer[i] == 0x0d ||buffer[i] == 0x0a) {  // '\r' or "\n"
                         result = i-1;
 #if defined(RFLINK_SERIAL2NET_DEBUG) || defined(DEBUG)
                         debugmsg += "Serial2Net: end of command found at position " + String(result) ;
-                            Serial.println(debugmsg);
+                        Serial.println(debugmsg);
 #endif
+                        break;
                     }
                 }
                 buffer_end += newBytesCount;
@@ -108,7 +109,7 @@ namespace RFLink { namespace Serial2Net {
                 buffer[position+1] = 0;
                 String result(buffer);
 
-                if (buffer[position+2] == 0x0A) {
+                if (buffer[position+2] == 0x0A) { // "\n"
                     memcpy(buffer, buffer+position+3, buffer_end - position - 2);
                     buffer_end = buffer_end - position - 3;
                 }
