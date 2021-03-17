@@ -339,7 +339,8 @@ void set_Radio_mode(States new_State)
   if(hardware == HardwareType::HW_basic_t)
     set_Radio_mode_generic(new_State);
   else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
-    set_Radio_mode_RFM69_new(new_State);
+    //set_Radio_mode_RFM69_new(new_State);
+    set_Radio_mode_RFM69(new_State);
   else if( hardware == HardwareType::HW_SX7218_t )
     set_Radio_mode_SX7218(new_State);
   else
@@ -476,9 +477,11 @@ void set_Radio_mode_SX7218(States new_State)
     case Radio_OFF: {
       if( RFLink::Signal::params::async_mode_enabled )
           RFLink::Signal::AsyncSignalScanner::stopScanning();
-      auto result = radio_SX1278.beginFSK( 433.92F, 19.200F, 50.0F, 200.0F, 12, 16, true);
+      auto result = radio_SX1278.beginFSK( 433.92F, 32.767F, 50.0F, 200.0F, 12, 16, true);
       Serial.printf("Initialized SX1218, return code %i\r\n", result);
-      radio_SX1278.setOOK(true);
+
+      result = radio_SX1278.setOOK(true);
+      Serial.printf("SX1218, setOOK=%i\r\n", result);
 
       result = radio_SX1278.setEncoding(RADIOLIB_ENCODING_NRZ);
       Serial.printf("SX1218, set encoding result=%i\r\n", result);
