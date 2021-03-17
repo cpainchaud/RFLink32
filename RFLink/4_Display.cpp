@@ -11,7 +11,7 @@
 #include "4_Display.h"
 
 byte PKSequenceNumber = 0;       // 1 byte packet counter
-char dbuffer[30];                // Buffer for message chunk data
+char dbuffer[60];                // Buffer for message chunk data
 char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for complete message data
 
 // ------------------- //
@@ -46,7 +46,7 @@ void display_Footer(void)
 // Start message
 void display_Splash(void)
 {
-  sprintf_P(dbuffer, PSTR("%s%d.%d"), PSTR(";RFLink_ESP;VER="), BUILDNR, REVNR);
+  sprintf_P(dbuffer, PSTR("%s%d.%d;BUILD=%s"), PSTR(";RFLink_ESP;VER="), BUILDNR, REVNR, PSTR(RFLINK_BUILDNAME));
   strcat(pbuffer, dbuffer);
 }
 

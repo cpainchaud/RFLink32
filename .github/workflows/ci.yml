@@ -22,9 +22,12 @@ jobs:
         pio update
         pip install esptool
 
+    - name: Make a BUILDNAME
+      run: echo "RFLINK_BUILDNAME=\"$(date '+%Y%m%d-%H%M%S')-${GITHUB_REF#refs/heads/}\"" >> $GITHUB_ENV
 
     - name: ESP32_none_enabled
       run: |
+        echo "buid name $RFLINK_BUILDNAME"
         pio run --project-conf .travis.platformio.ini --environment ESP32_none_enabled
     - name: ESP32_sw
       run: |

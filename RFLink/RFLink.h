@@ -15,6 +15,10 @@
 #define BUILDNR 0x05 // 0x07       // shown in version
 #define REVNR 0x01   // 0X42       // shown in version and startup string
 
+#ifndef RFLINK_BUILDNAME
+#define RFLINK_BUILDNAME "unknown"
+#endif
+
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 //#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
                           // dont forget to set the URL in Crendentials.h  

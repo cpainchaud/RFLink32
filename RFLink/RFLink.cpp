@@ -1,9 +1,9 @@
 // *********************************************************************************************************************************
+// * Portions GPLv3 2021 Christophe Painchaud https://github.com/cpainchaud/RFLink
 // * Arduino Project RFLink-esp https://github.com/couin3/RFLink (Branch esp)
 // * Portions Free Software 2018..2020 StormTeam - Marc RIVES
 // * Portions Free Software 2015..2016 StuntTeam - (RFLink R29~R33)
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
-// * Portions GPLv3 2021 Christophe Painchaud
 // *
 // *                                       RFLink-esp
 // *
@@ -52,9 +52,9 @@ void CallReboot(void)
 #if (defined(ESP8266) || defined(ESP32))
 
 void CallReboot(void) {
-    RFLink::sendMsgFromBuffer();
-    delay(1);
-    ESP.restart();
+  RFLink::sendMsgFromBuffer();
+  delay(1);
+  ESP.restart();
 }
 
 #endif
@@ -66,19 +66,19 @@ namespace RFLink {
 
     void setup() {
 
-        delay(250);         // Time needed to switch back from Upload to Console
-        Serial.begin(BAUD); // Initialise the serial port
+      delay(250);         // Time needed to switch back from Upload to Console
+      Serial.begin(BAUD); // Initialise the serial port
 
-        Serial.setRxBufferSize(512);
-        Serial.setTimeout(1);
+      Serial.setRxBufferSize(512);
+      Serial.setTimeout(1);
 
-        if (gettimeofday(&timeAtBoot, NULL) != 0) {
-            Serial.println(F("Failed to obtain time"));
-        }
-        scheduledRebootTime.tv_sec = 0;
+      if (gettimeofday(&timeAtBoot, NULL) != 0) {
+        Serial.println(F("Failed to obtain time"));
+      }
+      scheduledRebootTime.tv_sec = 0;
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
-        // Low Power Arduino
+      // Low Power Arduino
     ADCSRA = 0;            // disable ADC
     power_all_disable();   // turn off all modules
     power_timer0_enable(); // Timer 0
@@ -86,264 +86,270 @@ namespace RFLink {
     delay(250);            // Wait ESP-01S
     power_spi_enable(); // SPI
 #elif defined(ESP32)
-        //btStop();
+      //btStop();
 #endif
 
 #if (defined(ESP32) || defined(ESP8266))
-        Serial.println(); // ESP "Garbage" message
-        Serial.print(F("Arduino IDE Version :\t"));
-        Serial.println(ARDUINO);
+      Serial.println(); // ESP "Garbage" message
+      Serial.print(F("Arduino IDE Version :\t"));
+      Serial.println(ARDUINO);
 #endif
 #ifdef ESP32
-        Serial.print(F("ESP SDK version:\t"));
-        Serial.println(ESP.getSdkVersion());
+      Serial.print(F("ESP SDK version:\t"));
+      Serial.println(ESP.getSdkVersion());
 #endif
 #ifdef ESP8266
-        Serial.print(F("ESP CoreVersion :\t"));
+      Serial.print(F("ESP CoreVersion :\t"));
         Serial.println(ESP.getCoreVersion());
 #endif // ESP8266
-        Serial.print(F("Sketch File :\t\t"));
-        Serial.println(__FILE__); // "RFLink.ino" version is in 20;00 Message
-        Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
+      Serial.print(F("Sketch File :\t\t"));
+      Serial.println(F(__FILE__)); // "RFLink.ino" version is in 20;00 Message
+      Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
+
+      display_Header();
+      display_Splash();
+      display_Footer();
+
+#ifdef SERIAL_ENABLED
+      Serial.print(pbuffer);
+#endif
+#ifdef OLED_ENABLED
+      splash_OLED();
+#endif
 
 #if defined(ESP32) || (ESP8266)
-        RFLink::Config::setup();
+      RFLink::Config::setup();
 #endif
-        RFLink::Radio::setup();
-        RFLink::Signal::setup();
+      RFLink::Radio::setup();
+      RFLink::Signal::setup();
 
 #if defined(RFLINK_WIFI_ENABLED)
-        RFLink::Portal::init();
-        RFLink::Mqtt::setup_MQTT();
-        RFLink::Serial2Net::setup();
-        RFLink::Wifi::setup();
+      RFLink::Portal::init();
+      RFLink::Mqtt::setup_MQTT();
+      RFLink::Serial2Net::setup();
+      RFLink::Wifi::setup();
 #endif // RFLINK_WIFI_ENABLED
 
 
-        PluginInit();
-        PluginTXInit();
+      PluginInit();
+      PluginTXInit();
 
-        Radio::set_Radio_mode(Radio::Radio_OFF);
+      Radio::set_Radio_mode(Radio::Radio_OFF);
 
 #if defined(ESP8266) || defined(ESP32)
-        Radio::show_Radio_Pin();
+      Radio::show_Radio_Pin();
 #endif // ESP8266 || ESP32
 
 #ifdef OLED_ENABLED
-        setup_OLED();
+      setup_OLED();
 #endif
 
-        display_Header();
-        display_Splash();
-        display_Footer();
-
-#ifdef SERIAL_ENABLED
-        Serial.print(pbuffer);
-#endif
-#ifdef OLED_ENABLED
-        splash_OLED();
-#endif
 
 #ifdef MQTT_ENABLED
-        //RFLink::Mqtt::publishMsg();
+      //RFLink::Mqtt::publishMsg();
 #endif
 
-        pbuffer[0] = 0;
-        Radio::set_Radio_mode(Radio::Radio_RX);
+      pbuffer[0] = 0;
+      Radio::set_Radio_mode(Radio::Radio_RX);
 
 
 #ifdef RFLINK_WIFI_ENABLED
-        RFLink::Portal::start();
+      RFLink::Portal::start();
 #ifndef RFLINK_SERIAL2NET_DISABLED
-        RFLink::Serial2Net::setup();
+      RFLink::Serial2Net::setup();
 #endif // !RFLINK_SERIAL2NET_DISABLED
 #endif
     }
 
     void mainLoop() {
-        RFLink::Mqtt::checkMQTTloop();
-        RFLink::sendMsgFromBuffer();
+      RFLink::Mqtt::checkMQTTloop();
+      RFLink::sendMsgFromBuffer();
 
 #if defined(RFLINK_WIFI_ENABLED)
-        RFLink::Wifi::mainLoop();
+      RFLink::Wifi::mainLoop();
 #endif
 
 #ifndef RFLINK_SERIAL2NET_DISABLED
-        RFLink::Serial2Net::serverLoop();
+      RFLink::Serial2Net::serverLoop();
 #endif // !RFLINK_SERIAL2NET_DISABLED
 
 #if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
-        readSerialAndExecute();
+      readSerialAndExecute();
 #endif
 
-        if (RFLink::Signal::ScanEvent())
-            RFLink::sendMsgFromBuffer();
+      if (RFLink::Signal::ScanEvent())
+        RFLink::sendMsgFromBuffer();
 
-        struct timeval now;
-        gettimeofday(&now, 0);
-        if (scheduledRebootTime.tv_sec != 0 && now.tv_sec > scheduledRebootTime.tv_sec) {
-            Serial.println(F("***** Rebooting now for scheduled reboot !!! *****"));
-            ESP.restart();
-        }
+      struct timeval now;
+      gettimeofday(&now, 0);
+      if (scheduledRebootTime.tv_sec != 0 && now.tv_sec > scheduledRebootTime.tv_sec) {
+        Serial.println(F("***** Rebooting now for scheduled reboot !!! *****"));
+        ESP.restart();
+      }
     }
 
     void sendMsgFromBuffer() {
-        if (pbuffer[0] != 0) {
+      if (pbuffer[0] != 0) {
 
 #ifdef SERIAL_ENABLED
-            Serial.print(pbuffer);
+        Serial.print(pbuffer);
 #endif
 
 #ifndef RFLINK_MQTT_DISABLED
-            RFLink::Mqtt::publishMsg();
+        RFLink::Mqtt::publishMsg();
 #endif // !RFLINK_MQTT_DISABLED
 
 
 #ifndef RFLINK_SERIAL2NET_DISABLED
-            RFLink::Serial2Net::broadcastMessage(pbuffer);
+        RFLink::Serial2Net::broadcastMessage(pbuffer);
 #endif // !RFLINK_SERIAL2NET_DISABLED
 
 #ifdef OLED_ENABLED
-            print_OLED();
+        print_OLED();
 #endif
 
-            pbuffer[0] = 0;
-        }
+        pbuffer[0] = 0;
+      }
     }
 
     bool executeCliCommand(char *cmd) {
-        static byte ValidCommand = 0;
-        if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
-            // 10;....;..;ON;
-            if (strncmp(cmd, "10;", 3) == 0) { // Command from Master to RFLink
-                // -------------------------------------------------------
-                // Handle Device Management Commands
-                // -------------------------------------------------------
-                if (strncasecmp(cmd + 3, "PING;", 5) == 0) {
-                    display_Header();
-                    display_Name(PSTR("PONG"));
-                    display_Footer();
-                } else if (strncasecmp(cmd + 3, "REBOOT;", 7) == 0) {
-                    display_Header();
-                    display_Name(PSTR("REBOOT"));
-                    display_Footer();
-                    CallReboot();
-                } else if (strncasecmp(cmd + 3, "RFDEBUG=O", 9) == 0) {
-                    if (cmd[12] == 'N' || cmd[12] == 'n') {
-                        RFDebug = true;    // full debug on
-                        QRFDebug = false;  // q full debug off
-                        RFUDebug = false;  // undecoded debug off
-                        QRFUDebug = false; // q undecoded debug off
-                        display_Header();
-                        display_Name(PSTR("RFDEBUG=ON"));
-                        display_Footer();
-                    } else {
-                        RFDebug = false; // full debug off
-                        display_Header();
-                        display_Name(PSTR("RFDEBUG=OFF"));
-                        display_Footer();
-                    }
-                } else if (strncasecmp(cmd + 3, "RFUDEBUG=O", 10) == 0) {
-                    if (cmd[13] == 'N' || cmd[13] == 'n') {
-                        RFDebug = false;   // full debug off
-                        QRFDebug = false;  // q debug off
-                        RFUDebug = true;   // undecoded debug on
-                        QRFUDebug = false; // q undecoded debug off
-                        display_Header();
-                        display_Name(PSTR("RFUDEBUG=ON"));
-                        display_Footer();
-                    } else {
-                        RFUDebug = false; // undecoded debug off
-                        display_Header();
-                        display_Name(PSTR("RFUDEBUG=OFF"));
-                        display_Footer();
-                    }
-                } else if (strncasecmp(cmd + 3, "QRFDEBUG=O", 10) == 0) {
-                    if (cmd[13] == 'N' || cmd[13] == 'n') {
-                        RFDebug = false;   // full debug off
-                        QRFDebug = true;   // q debug on
-                        RFUDebug = false;  // undecoded debug off
-                        QRFUDebug = false; // q undecoded debug off
-                        display_Header();
-                        display_Name(PSTR("QRFDEBUG=ON"));
-                        display_Footer();
-                    } else {
-                        QRFDebug = false; // q debug off
-                        display_Header();
-                        display_Name(PSTR("QRFDEBUG=OFF"));
-                        display_Footer();
-                    }
-                } else if (strncasecmp(cmd + 3, "QRFUDEBUG=O", 11) == 0) {
-                    if (cmd[14] == 'N' || cmd[14] == 'n') {
-                        RFDebug = false;  // full debug off
-                        QRFDebug = false; // q debug off
-                        RFUDebug = false; // undecoded debug off
-                        QRFUDebug = true; // q undecoded debug on
-                        display_Header();
-                        display_Name(PSTR("QRFUDEBUG=ON"));
-                        display_Footer();
-                    } else {
-                        QRFUDebug = false; // q undecode debug off
-                        display_Header();
-                        display_Name(PSTR("QRFUDEBUG=OFF"));
-                        display_Footer();
-                    }
-                } else if (strncasecmp(cmd + 3, "VERSION", 7) == 0) {
-                    display_Header();
-                    display_Splash();
-                    display_Footer();
-                } else if (strncasecmp(cmd + 3, "signal", 6) == 0) {
-                    Signal::executeCliCommand(cmd + 3 + 6 + 1);
-                } else if (strncasecmp(cmd + 3, "config", 6) == 0) {
-                    Config::executeCliCommand(cmd + 3 + 6 + 1);
-                } else {
-                    // -------------------------------------------------------
-                    // Handle Generic Commands / Translate protocol data into Nodo text commands
-                    // -------------------------------------------------------
-                    Radio::set_Radio_mode(Radio::Radio_TX);
-
-                    if (PluginTXCall(0, cmd))
-                        ValidCommand = 1;
-                    else // Answer that an invalid command was received?
-                        ValidCommand = 2;
-
-                    Radio::set_Radio_mode(Radio::Radio_RX);
-                }
-            }
-        } // if > 7
-        if (ValidCommand != 0) {
+      static byte ValidCommand = 0;
+      if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
+        // 10;....;..;ON;
+        if (strncmp(cmd, "10;", 3) == 0) { // Command from Master to RFLink
+          // -------------------------------------------------------
+          // Handle Device Management Commands
+          // -------------------------------------------------------
+          if (strncasecmp(cmd + 3, "PING;", 5) == 0) {
             display_Header();
-            if (ValidCommand == 1)
-                display_Name(PSTR("OK"));
-            else
-                display_Name(PSTR("CMD UNKNOWN"));
+            display_Name(PSTR("PONG"));
             display_Footer();
+          } else if (strncasecmp(cmd + 3, "REBOOT;", 7) == 0) {
+            display_Header();
+            display_Name(PSTR("REBOOT"));
+            display_Footer();
+            CallReboot();
+          } else if (strncasecmp(cmd + 3, "RFDEBUG=O", 9) == 0) {
+            if (cmd[12] == 'N' || cmd[12] == 'n') {
+              RFDebug = true;    // full debug on
+              QRFDebug = false;  // q full debug off
+              RFUDebug = false;  // undecoded debug off
+              QRFUDebug = false; // q undecoded debug off
+              display_Header();
+              display_Name(PSTR("RFDEBUG=ON"));
+              display_Footer();
+            } else {
+              RFDebug = false; // full debug off
+              display_Header();
+              display_Name(PSTR("RFDEBUG=OFF"));
+              display_Footer();
+            }
+          } else if (strncasecmp(cmd + 3, "RFUDEBUG=O", 10) == 0) {
+            if (cmd[13] == 'N' || cmd[13] == 'n') {
+              RFDebug = false;   // full debug off
+              QRFDebug = false;  // q debug off
+              RFUDebug = true;   // undecoded debug on
+              QRFUDebug = false; // q undecoded debug off
+              display_Header();
+              display_Name(PSTR("RFUDEBUG=ON"));
+              display_Footer();
+            } else {
+              RFUDebug = false; // undecoded debug off
+              display_Header();
+              display_Name(PSTR("RFUDEBUG=OFF"));
+              display_Footer();
+            }
+          } else if (strncasecmp(cmd + 3, "QRFDEBUG=O", 10) == 0) {
+            if (cmd[13] == 'N' || cmd[13] == 'n') {
+              RFDebug = false;   // full debug off
+              QRFDebug = true;   // q debug on
+              RFUDebug = false;  // undecoded debug off
+              QRFUDebug = false; // q undecoded debug off
+              display_Header();
+              display_Name(PSTR("QRFDEBUG=ON"));
+              display_Footer();
+            } else {
+              QRFDebug = false; // q debug off
+              display_Header();
+              display_Name(PSTR("QRFDEBUG=OFF"));
+              display_Footer();
+            }
+          } else if (strncasecmp(cmd + 3, "QRFUDEBUG=O", 11) == 0) {
+            if (cmd[14] == 'N' || cmd[14] == 'n') {
+              RFDebug = false;  // full debug off
+              QRFDebug = false; // q debug off
+              RFUDebug = false; // undecoded debug off
+              QRFUDebug = true; // q undecoded debug on
+              display_Header();
+              display_Name(PSTR("QRFUDEBUG=ON"));
+              display_Footer();
+            } else {
+              QRFUDebug = false; // q undecode debug off
+              display_Header();
+              display_Name(PSTR("QRFUDEBUG=OFF"));
+              display_Footer();
+            }
+          } else if (strncasecmp(cmd + 3, "VERSION", 7) == 0) {
+            display_Header();
+            display_Splash();
+            display_Footer();
+          } else if (strncasecmp(cmd + 3, "signal", 6) == 0) {
+            Signal::executeCliCommand(cmd + 3 + 6 + 1);
+          } else if (strncasecmp(cmd + 3, "config", 6) == 0) {
+            Config::executeCliCommand(cmd + 3 + 6 + 1);
+          } else {
+            // -------------------------------------------------------
+            // Handle Generic Commands / Translate protocol data into Nodo text commands
+            // -------------------------------------------------------
+            Radio::set_Radio_mode(Radio::Radio_TX);
+
+            if (PluginTXCall(0, cmd))
+              ValidCommand = 1;
+            else // Answer that an invalid command was received?
+              ValidCommand = 2;
+
+            Radio::set_Radio_mode(Radio::Radio_RX);
+          }
         }
-        ValidCommand = 0;
-        sendMsgFromBuffer(); // in case there is a response waiting to be sent
-        return true;
+      } // if > 7
+      if (ValidCommand != 0) {
+        display_Header();
+        if (ValidCommand == 1)
+          display_Name(PSTR("OK"));
+        else
+          display_Name(PSTR("CMD UNKNOWN"));
+        display_Footer();
+      }
+      ValidCommand = 0;
+      sendMsgFromBuffer(); // in case there is a response waiting to be sent
+      return true;
     }
 
     void scheduleReboot(unsigned int seconds) {
-        gettimeofday(&scheduledRebootTime, NULL);
-        scheduledRebootTime.tv_sec += seconds;
+      gettimeofday(&scheduledRebootTime, NULL);
+      scheduledRebootTime.tv_sec += seconds;
     }
 
     void getStatusJsonString(JsonObject &output) {
 
-        struct timeval now;
-        if (gettimeofday(&now, NULL) != 0) {
-            Serial.println(F("Failed to obtain time"));
-        }
+      char buffer[90];
 
-        output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
+      struct timeval now;
+      if (gettimeofday(&now, NULL) != 0) {
+        Serial.println(F("Failed to obtain time"));
+      }
 
-        output["heap_free"] = ESP.getFreeHeap();
+      output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
+
+      output["heap_free"] = ESP.getFreeHeap();
 #ifdef ESP8266
-        output["heap_frag"] = ESP.getHeapFragmentation();
-        output["stack_free_cont"] = ESP.getFreeContStack();
-        output["free_block_max_size"] = ESP.getMaxFreeBlockSize();
+      output["heap_frag"] = ESP.getHeapFragmentation();
+      output["stack_free_cont"] = ESP.getFreeContStack();
+      output["free_block_max_size"] = ESP.getMaxFreeBlockSize();
 #endif
+
+      sprintf_P(buffer, PSTR("RFLink_ESP_%d.%d-%s"), BUILDNR, REVNR, PSTR(RFLINK_BUILDNAME));
+      output["sw_version"] = buffer;
 
     }
 
