@@ -495,7 +495,7 @@ void set_Radio_mode_SX7218(States new_State)
       //result = radio_SX1278.setOokThresholdType(SX127X_OOK_THRESH_FIXED);
       //Serial.printf("SX1218, setOokThresholdType result=%i\r\n", result);
 
-      result = radio_SX1278.setOokFixedOrFloorThreshold(0x3C);
+      result = radio_SX1278.setOokFixedOrFloorThreshold(0x2C);
       Serial.printf("SX1218, setOokFixedOrFloorThreshold() result=%i\r\n", result);
 
 
