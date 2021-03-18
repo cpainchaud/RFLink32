@@ -243,6 +243,12 @@ namespace RFLink { namespace Serial2Net {
 #endif
 
                         if(command.length() > 0) { // Let's request RFLink to parse this command
+                            RFLink::sendRawPrint(F("\33[2K\r"));
+                            Serial.flush();
+                            RFLink::sendRawPrint(PSTR("Message arrived [Ser2Net]:"));
+                            RFLink::sendRawPrint(command.c_str());
+                            RFLink::sendRawPrint(PSTR("\r\n"));
+                            Serial.flush();
                             RFLink::executeCliCommand((char*)command.c_str());
                         }
                     }

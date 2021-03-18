@@ -65,10 +65,11 @@ public:
 boolean readSerialAndExecute() {
     if (ReadSerial()) {
 #ifdef SERIAL_ENABLED
-        Serial.print(F("\33[2K\r"));
+        RFLink::sendRawPrint(F("\33[2K\r"));
         Serial.flush();
-        Serial.printf_P(PSTR("Message arrived [Serial]:"));
-        Serial.println(InputBuffer_Serial);
+        RFLink::sendRawPrint(PSTR("Message arrived [Serial]:"));
+        RFLink::sendRawPrint(InputBuffer_Serial);
+        RFLink::sendRawPrint(PSTR("\r\n"));
         Serial.flush();
 #endif
         bool success = RFLink::executeCliCommand(InputBuffer_Serial);
