@@ -223,7 +223,11 @@ namespace RFLink { namespace Wifi {
             Serial.print(params::client_ssid.c_str());
             Serial.println(F(". A status will be given whenever it occurs."));
 
+#ifdef ESP32
             WiFi.setHostname(params::client_hostname.c_str());
+#else
+            WiFi.hostname(params::client_hostname);
+#endif
 
             if( !params::client_dhcp_enabled) {
               IPAddress ip, gateway, mask, dns;
@@ -379,18 +383,14 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
           refreshClientParametersFromConfig(false);
           refreshAccessPointParametersFromConfig(false);
 
-          WiFi.setHostname(params::client_hostname.c_str());
-
 #ifdef ESP32
           WiFi.onEvent(eventHandler_WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
           WiFi.onEvent(eventHandler_WiFiStationGotIp, SYSTEM_EVENT_STA_GOT_IP);
           WiFi.onEvent(eventHandler_WiFiStationLostIp, SYSTEM_EVENT_STA_LOST_IP);
-#endif // ESP32
-
-#ifdef ESP8266
+#else
           e1 = WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
-    e2 = WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
-    e3 = WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
+          e2 = WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);
+          e3 = WiFi.onStationModeDisconnected(&eventHandler_WiFiStationDisconnected);
 #endif
 
 #ifdef ESP32
