@@ -258,6 +258,14 @@ namespace RFLink { namespace Serial2Net {
             }
         }
 
+        void broadcastMessage(char c) {
+          for(int i=0; i<clientsMax; i++) {
+            if(!clients[i].ignore && clients[i].connected()) {
+              clients[i].write(c);
+            }
+          }
+        }
+
         void restartServer() {
             for(int i=0; i<clientsMax; i++) {
                 if(!clients[i].ignore && clients[i].connected()) {

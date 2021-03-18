@@ -38,13 +38,13 @@ boolean Plugin_254(byte function, const char *string)
    // ----------------------------------
    // Output
    // ----------------------------------
-   display_Header();
-   display_Name(PSTR("DEBUG"));
-   display_Footer();
+   //display_Header();
+   //display_Name(PSTR("DEBUG"));
+   //display_Footer();
    // ----------------------------------
-   Serial.print(F("20;XX;DEBUG;Pulses=")); // debug data
-   Serial.print(RawSignal.Number);         // print number of pulses
-   Serial.print(F(";Pulses(uSec)="));      // print pulse durations
+   RFLink::sendRawPrint(F("20;XX;DEBUG;Pulses=")); // debug data
+   RFLink::sendRawPrint(RawSignal.Number);         // print number of pulses
+   RFLink::sendRawPrint(F(";Pulses(uSec)="));      // print pulse durations
    // ----------------------------------
    char dbuffer[3];
 
@@ -53,16 +53,16 @@ boolean Plugin_254(byte function, const char *string)
       if (QRFUDebug == true)
       {
          sprintf(dbuffer, "%02x", RawSignal.Pulses[i]);
-         Serial.print(dbuffer);
+         RFLink::sendRawPrint(dbuffer);
       }
       else
       {
-         Serial.print(RawSignal.Pulses[i] * RawSignal.Multiply);
+         RFLink::sendRawPrint(RawSignal.Pulses[i] * RawSignal.Multiply);
          if (i < RawSignal.Number)
-            Serial.write(',');
+            RFLink::sendRawPrint(',');
       }
    }
-   Serial.print(F(";\r\n"));
+   RFLink::sendRawPrint(F(";\r\n"));
    // ----------------------------------
    RawSignal.Number = 0; // Last plugin, kill packet
    return true;          // stop processing

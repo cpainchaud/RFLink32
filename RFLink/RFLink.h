@@ -65,6 +65,13 @@ namespace RFLink {
 
     bool executeCliCommand(char *cmd);
     void sendMsgFromBuffer();
+    void sendRawPrint(const char *buf);
+    inline void sendRawPrint(const __FlashStringHelper *buf) {sendRawPrint(reinterpret_cast<const char *>(buf));};
+    void sendRawPrint(long n);
+    void sendRawPrint(unsigned long n);
+    void sendRawPrint(int n);
+    void sendRawPrint(unsigned int n);
+    void sendRawPrint(char c);
 
     void getStatusJsonString(JsonObject &output);
 

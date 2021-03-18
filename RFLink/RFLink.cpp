@@ -212,6 +212,69 @@ namespace RFLink {
       }
     }
 
+    void sendRawPrint(const char *buf) {
+      if (buf[0] != 0) {
+
+#ifdef SERIAL_ENABLED
+        Serial.print(buf);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+        RFLink::Serial2Net::broadcastMessage(buf);
+#endif // !RFLINK_SERIAL2NET_DISABLED
+
+      }
+    }
+
+    void sendRawPrint(long n)
+    {
+#ifdef SERIAL_ENABLED
+      Serial.print(n);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(String(n).c_str());
+#endif // !RFLINK_SERIAL2NET_DISABLED
+    }
+
+    void sendRawPrint(unsigned long n)
+    {
+#ifdef SERIAL_ENABLED
+      Serial.print(n);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(String(n).c_str());
+#endif // !RFLINK_SERIAL2NET_DISABLED
+    }
+
+    void sendRawPrint(int n)
+    {
+#ifdef SERIAL_ENABLED
+      Serial.print(n);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(String(n).c_str());
+#endif // !RFLINK_SERIAL2NET_DISABLED
+    }
+
+    void sendRawPrint(unsigned int n)
+    {
+#ifdef SERIAL_ENABLED
+      Serial.print(n);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(String(n).c_str());
+#endif // !RFLINK_SERIAL2NET_DISABLED
+    }
+
+    void sendRawPrint(char c)
+    {
+#ifdef SERIAL_ENABLED
+      Serial.write(c);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(c);
+#endif // !RFLINK_SERIAL2NET_DISABLED
+    }
+
     bool executeCliCommand(char *cmd) {
       static byte ValidCommand = 0;
       if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
