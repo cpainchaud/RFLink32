@@ -10,19 +10,6 @@
 
 #include "RFLink.h"
 
-// local AP
-#define WIFI_SSID "xxx"
-#define WIFI_PSWD "xxx"
-
-// DHCP or Static IP
-// #define USE_DHCP
-#ifndef USE_DHCP
-#define WIFI_IP "192.168.1.xxx"
-#define WIFI_DNS "192.168.1.xxx"
-#define WIFI_GATEWAY "192.168.1.xxx"
-#define WIFI_SUBNET "255.255.255.0"
-#endif
-
 // MQTT Server
 #define  MQTT_SERVER "192.168.1.xxx"
 #define  MQTT_PORT 1883

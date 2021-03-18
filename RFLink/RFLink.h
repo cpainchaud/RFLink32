@@ -19,6 +19,10 @@
 #define RFLINK_BUILDNAME "unknown"
 #endif
 
+#ifndef DEFAULT_WIFI_CLIENT_HOSTNAME
+#define DEFAULT_WIFI_CLIENT_HOSTNAME "RFLink-ESP"
+#endif
+
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 //#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
                           // dont forget to set the URL in Crendentials.h  
