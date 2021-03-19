@@ -122,7 +122,7 @@ namespace RFLink
     namespace Signal
     {
 
-        RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL}; // current message
+        RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, -9999.0F}; // current message
 
         namespace commands
         {
@@ -310,6 +310,9 @@ namespace RFLink
             RESET_TIMESTART; // next pulse starts now before we do anything else
             //Serial.print ("PulseLength: "); Serial.println (PulseLength_us);
             STORE_PULSE;
+
+            RawSignal.rssi = Radio::getCurrentRssi();
+
 
             noInterrupts(); // we must not be interrupted while are busy reading the rest of the signal
 

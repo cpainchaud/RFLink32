@@ -477,7 +477,9 @@ void set_Radio_mode_SX7218(States new_State)
     case Radio_OFF: {
       if( RFLink::Signal::params::async_mode_enabled )
           RFLink::Signal::AsyncSignalScanner::stopScanning();
-      auto result = radio_SX1278.beginFSK( 433.92F, 32.767F, 50.0F, 200.0F, 12, 16, true);
+      //auto result = radio_SX1278.beginFSK( 433.92F, 32.767F, 50.0F, 200.0F, 12, 16, true);
+      //auto result = radio_SX1278.beginFSK( 433.92F, 32.767F, 50.0F, 250.0F, 12, 16, true);
+      auto result = radio_SX1278.beginFSK( 433.92F, 9.600F, 50.0F, 250.0F, 12, 16, true);
       Serial.printf("Initialized SX1218, return code %i\r\n", result);
 
       result = radio_SX1278.setOOK(true);
@@ -495,11 +497,11 @@ void set_Radio_mode_SX7218(States new_State)
       //result = radio_SX1278.setOokThresholdType(SX127X_OOK_THRESH_FIXED);
       //Serial.printf("SX1218, setOokThresholdType result=%i\r\n", result);
 
-      result = radio_SX1278.setOokFixedOrFloorThreshold(0x2C);
+      result = radio_SX1278.setOokFixedOrFloorThreshold(0x3C);
       Serial.printf("SX1218, setOokFixedOrFloorThreshold() result=%i\r\n", result);
 
-
-
+      //result = radio_SX1278.setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_2_CHIP);
+      //Serial.printf("SX1218, setOokPeakThresholdDecrement() result=%i\r\n", result);
 
       //result = radio_SX1278.startReceive(0, SX127X_RXCONTINUOUS);
       //Serial.printf("SX7218, receive start code %i\r\n", result);
@@ -611,4 +613,12 @@ void set_Radio_mode_SX7218(States new_State)
         }
 
 
-}}
+    float getCurrentRssi() {
+      if(hardware == HardwareType::HW_SX7218_t)
+        return radio_SX1278.getRSSI(true);
+
+      return -9999.0F;
+    }
+
+  } // end of Radio namespace
+} // end of RFLink namespace

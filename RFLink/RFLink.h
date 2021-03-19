@@ -75,6 +75,7 @@ namespace RFLink {
     void sendRawPrint(unsigned long n);
     void sendRawPrint(int n);
     void sendRawPrint(unsigned int n);
+    void sendRawPrint(float f);
     void sendRawPrint(char c);
 
     void getStatusJsonString(JsonObject &output);

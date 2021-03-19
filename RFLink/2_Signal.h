@@ -46,6 +46,7 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
   byte Multiply;                    // Pulses[] * Multiply is the real pulse time in microseconds (to keep compatibility with Arduino)
   unsigned long Time;               // Timestamp indicating when the signal was received (millis())
   bool readyForDecoder;             // indicates if packet can be processed by decoders
+  float rssi;
   uint16_t Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
   // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
 };
@@ -73,7 +74,7 @@ namespace RFLink {
       extern unsigned long int min_pulse_len;       // US
       extern unsigned long int signal_end_timeout;  // US
       extern unsigned long int signal_repeat_time;  // MS
-      extern unsigned long int scan_high_time;      // MS 
+      extern unsigned long int scan_high_time;      // MS
     }
 
     namespace counters {

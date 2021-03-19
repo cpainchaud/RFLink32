@@ -181,6 +181,8 @@ namespace RFLink { namespace Radio {
      * */
     void disableTX_generic();
 
+    float getCurrentRssi();
+
 }}
 
 

@@ -181,8 +181,14 @@ namespace RFLink {
       readSerialAndExecute();
 #endif
 
-      if (RFLink::Signal::ScanEvent())
+      if (RFLink::Signal::ScanEvent()) {
+        if(pbuffer[0] != 0) {
+          RFLink::sendRawPrint(F("30;DEBUG;RSSI="));
+          RFLink::sendRawPrint((int)Signal::RawSignal.rssi);
+          RFLink::sendRawPrint(F("\r\n"));
+        }
         RFLink::sendMsgFromBuffer();
+      }
 
       struct timeval now;
       gettimeofday(&now, 0);
@@ -268,6 +274,16 @@ namespace RFLink {
       RFLink::Serial2Net::broadcastMessage(String(n).c_str());
 #endif // !RFLINK_SERIAL2NET_DISABLED
     }
+
+  void sendRawPrint(float f)
+  {
+#ifdef SERIAL_ENABLED
+    Serial.print(f);
+#endif
+#ifndef RFLINK_SERIAL2NET_DISABLED
+    RFLink::Serial2Net::broadcastMessage(String(f).c_str());
+#endif // !RFLINK_SERIAL2NET_DISABLED
+  }
 
     void sendRawPrint(char c)
     {
