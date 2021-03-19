@@ -399,7 +399,7 @@ namespace RFLink {
 
       struct timeval now;
       if (gettimeofday(&now, NULL) != 0) {
-        Serial.println(F("Failed to obtain time"));
+        RFLink::sendRawPrint(F("Failed to obtain time"));
       }
 
       output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
