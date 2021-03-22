@@ -76,7 +76,7 @@ namespace RFLink {
               buffer[buffer_end] = 0;
               return true;
             }
-            Serial.println("it was was first in array so it's ignored!");
+            //Serial.println("it was was first in array so it's ignored!");
           } else {
             buffer[buffer_end] = readByte;
             buffer_end++;
