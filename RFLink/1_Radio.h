@@ -28,6 +28,9 @@
 #define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
 #define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
 #define PIN_RF_RX_DATA_0 D6        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#define PIN_RF_RX_RESET NOT_A_PIN  // pin to reset transceiver
+#define PIN_RF_RX_CS NOT_A_PIN     // Used for SPI "Slave Select"
+
 #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
 #define PIN_RF_TX_NMOS_0 D7        // Low Side N-MOSFET, active on HIGH level
 #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
@@ -111,20 +114,22 @@ namespace RFLink { namespace Radio {
     extern Config::ConfigItem configItems[];
 
     namespace pins {
-        extern uint8_t RX_PMOS;
-        extern uint8_t RX_NMOS;
-        extern uint8_t RX_VCC;
-        extern uint8_t RX_GND;
-        extern uint8_t RX_NA;
-        extern uint8_t RX_DATA;
+        extern int8_t RX_PMOS;
+        extern int8_t RX_NMOS;
+        extern int8_t RX_VCC;
+        extern int8_t RX_GND;
+        extern int8_t RX_NA;
+        extern int8_t RX_DATA;
+        extern int8_t RX_RESET;
+        extern int8_t RX_CS;
         extern boolean PULLUP_RX_DATA;
 
-        extern uint8_t TX_PMOS;
-        extern uint8_t TX_NMOS;
-        extern uint8_t TX_VCC;
-        extern uint8_t TX_GND;
-        extern uint8_t TX_NA;
-        extern uint8_t TX_DATA;
+        extern int8_t TX_PMOS;
+        extern int8_t TX_NMOS;
+        extern int8_t TX_VCC;
+        extern int8_t TX_GND;
+        extern int8_t TX_NA;
+        extern int8_t TX_DATA;
     }
     
 

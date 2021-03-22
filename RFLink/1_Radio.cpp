@@ -27,24 +27,25 @@ namespace RFLink { namespace Radio  {
   HardwareType hardware;
 
   namespace pins {
-    uint8_t RX_PMOS = PIN_RF_RX_PMOS_0;
-    uint8_t RX_NMOS = PIN_RF_RX_NMOS_0;
-    uint8_t RX_VCC = PIN_RF_RX_VCC_0;
-    uint8_t RX_GND = PIN_RF_RX_GND_0;
-    uint8_t RX_NA = PIN_RF_RX_NA_0;
-    uint8_t RX_DATA = PIN_RF_RX_DATA_0;
-    uint8_t RX_RESET = PIN_RF_RX_RESET;
-    uint8_t RX_CS = PIN_RF_RX_CS;
+    int8_t RX_PMOS = PIN_RF_RX_PMOS_0;
+    int8_t RX_NMOS = PIN_RF_RX_NMOS_0;
+    int8_t RX_VCC = PIN_RF_RX_VCC_0;
+    int8_t RX_GND = PIN_RF_RX_GND_0;
+    int8_t RX_NA = PIN_RF_RX_NA_0;
+    int8_t RX_DATA = PIN_RF_RX_DATA_0;
+    int8_t RX_RESET = PIN_RF_RX_RESET;
+    int8_t RX_CS = PIN_RF_RX_CS;
 
     boolean PULLUP_RX_DATA = PULLUP_RF_RX_DATA_0;
 
 
-    uint8_t TX_PMOS = PIN_RF_TX_PMOS_0;
-    uint8_t TX_NMOS = PIN_RF_TX_NMOS_0;
-    uint8_t TX_VCC = PIN_RF_TX_VCC_0;
-    uint8_t TX_GND = PIN_RF_TX_GND_0;
-    uint8_t TX_NA = PIN_RF_TX_NA_0;
-    uint8_t TX_DATA = PIN_RF_TX_DATA_0;
+    int8_t TX_PMOS = PIN_RF_TX_PMOS_0;
+    int8_t TX_NMOS = PIN_RF_TX_NMOS_0;
+    int8_t TX_VCC = PIN_RF_TX_VCC_0;
+    int8_t TX_GND = PIN_RF_TX_GND_0;
+    int8_t TX_NA = PIN_RF_TX_NA_0;
+    int8_t TX_DATA = PIN_RF_TX_DATA_0;
+
   }
 
 
