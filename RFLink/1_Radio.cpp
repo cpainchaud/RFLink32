@@ -33,6 +33,8 @@ namespace RFLink { namespace Radio  {
     uint8_t RX_GND = PIN_RF_RX_GND_0;
     uint8_t RX_NA = PIN_RF_RX_NA_0;
     uint8_t RX_DATA = PIN_RF_RX_DATA_0;
+    uint8_t RX_RESET = PIN_RF_RX_RESET;
+    uint8_t RX_CS = PIN_RF_RX_CS;
 
     boolean PULLUP_RX_DATA = PULLUP_RF_RX_DATA_0;
 
@@ -68,6 +70,8 @@ const char json_name_rx_nmos[] =  "rx_nmos";
 const char json_name_rx_pmos[] =  "rx_pmos";
 const char json_name_rx_gnd[] =   "rx_gnd";
 const char json_name_rx_na[] =    "rx_na";
+const char json_name_rx_reset[] =    "rx_reset";
+const char json_name_rx_cs[] =    "rx_cs";
 
 const char json_name_tx_data[] =  "tx_data";
 const char json_name_tx_vcc[] =   "tx_vcc";
@@ -85,6 +89,8 @@ Config::ConfigItem configItems[] =  {
   Config::ConfigItem(json_name_rx_pmos,   Config::SectionId::Radio_id, PIN_RF_RX_PMOS_0, paramsUpdatedCallback),
   Config::ConfigItem(json_name_rx_gnd,    Config::SectionId::Radio_id, PIN_RF_RX_GND_0, paramsUpdatedCallback),
   Config::ConfigItem(json_name_rx_na,     Config::SectionId::Radio_id, PIN_RF_RX_NA_0, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_reset,  Config::SectionId::Radio_id, PIN_RF_RX_RESET, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_rx_cs,  Config::SectionId::Radio_id, PIN_RF_RX_CS, paramsUpdatedCallback),
 
   Config::ConfigItem(json_name_tx_data,   Config::SectionId::Radio_id, PIN_RF_TX_DATA_0, paramsUpdatedCallback),
   Config::ConfigItem(json_name_tx_vcc,    Config::SectionId::Radio_id, PIN_RF_TX_VCC_0, paramsUpdatedCallback),
@@ -160,6 +166,17 @@ void refreshParametersFromConfig() {
     pins::RX_NA = item->getLongIntValue();
   }
 
+  item = Config::findConfigItem(json_name_rx_reset, Config::SectionId::Radio_id);
+  if( pins::RX_RESET != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::RX_RESET = item->getLongIntValue();
+  }
+
+  item = Config::findConfigItem(json_name_rx_cs, Config::SectionId::Radio_id);
+  if( pins::RX_CS != item->getLongIntValue() ) {
+    changesDetected = true;
+    pins::RX_CS = item->getLongIntValue();
+  }
 
   // TX
 
