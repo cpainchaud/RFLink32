@@ -57,6 +57,10 @@
 
 namespace RFLink {
 
+    namespace params {
+      extern String ntpServer;
+    }
+
     extern struct timeval timeAtBoot; // used to calculate update
     extern struct timeval scheduledRebootTime;
 

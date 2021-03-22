@@ -61,6 +61,10 @@ void CallReboot(void) {
 
 namespace RFLink {
 
+    namespace params {
+      String ntpServer("pool.ntp.org");
+    }
+
     struct timeval timeAtBoot;
     struct timeval scheduledRebootTime;
 
@@ -100,7 +104,7 @@ namespace RFLink {
 #endif
 #ifdef ESP8266
       Serial.print(F("ESP CoreVersion :\t"));
-        Serial.println(ESP.getCoreVersion());
+      Serial.println(ESP.getCoreVersion());
 #endif // ESP8266
       Serial.print(F("Sketch File :\t\t"));
       Serial.println(F(__FILE__)); // "RFLink.ino" version is in 20;00 Message

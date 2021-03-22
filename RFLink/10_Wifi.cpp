@@ -11,6 +11,7 @@
 #include "2_Signal.h"
 #include "6_MQTT.h"
 #include "9_Serial2Net.h"
+#include <time.h> // for NTP
 
 
 
@@ -309,7 +310,61 @@ namespace RFLink { namespace Wifi {
 #endif
         }
 
+        #ifdef ESP8266
+        bool getLocalTime(struct tm * info, uint32_t ms=5000)
+        {
+            uint32_t start = millis();
+            time_t now;
+            while((millis()-start) <= ms) {
+                time(&now);
+                localtime_r(&now, info);
+                if(info->tm_year > (2016 - 1900)){
+                    return true;
+                }
+                delay(10);
+            }
+            return false;
+        }
+        #endif
+
+        void printLocalTime()
+        {
+          struct tm timeinfo;
+          if(!getLocalTime(&timeinfo)){
+            Serial.println(F("Failed to obtain time"));
+            return;
+          }
+          Serial.printf_P(PSTR("Current time is %04i-%02i%02i %02i:%02i:%02i\r\n"),
+                          timeinfo.tm_year+1900, timeinfo.tm_mon, timeinfo.tm_mday,
+                          timeinfo.tm_hour, timeinfo.tm_hour, timeinfo.tm_sec);
+          //Serial.println(&timeinfo, "Current time is %A, %B %d %Y %H:%M:%S UTC");
+
+        }
+
         void reconnectServices() {
+          #ifdef ESP32
+          { // in case NTP forces a time drift we need to recalculate timeAtBoot
+            struct timeval currentTime, newTime;
+
+            if (gettimeofday(&currentTime, nullptr) != 0) {
+              RFLink::sendRawPrint(F("Failed to obtain time"));
+            }
+
+            unsigned long timeShift = currentTime.tv_sec - RFLink::timeAtBoot.tv_sec;
+
+            configTime(0, 0, RFLink::params::ntpServer.c_str());
+            printLocalTime();
+
+            if (gettimeofday(&newTime, nullptr) != 0) {
+              RFLink::sendRawPrint(F("Failed to obtain time"));
+            }
+
+            RFLink::timeAtBoot.tv_sec = newTime.tv_sec - timeShift;
+            RFLink::timeAtBoot.tv_usec = newTime.tv_usec;
+          }
+          #endif
+
+
           if(RFLink::Mqtt::params::enabled)
             RFLink::Mqtt::reconnect(1, true);
           if(RFLink::Serial2Net::params::enabled)
@@ -367,6 +422,7 @@ void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected
 WiFiEventHandler e2;
 void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
   Serial.printf_P(PSTR("WiFi Client has received a new IP: %s\r\n"), WiFi.localIP().toString().c_str());
+  Serial.flush();
   reconnectServices();
 }
 WiFiEventHandler e3;
