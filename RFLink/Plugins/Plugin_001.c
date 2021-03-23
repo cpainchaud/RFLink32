@@ -217,7 +217,7 @@ boolean Plugin_001(byte function, const char *string)
       RFLink::sendRawPrint(RawSignal.Number);         // print number of pulses
       RFLink::sendRawPrint(F(";Pulses(uSec)="));      // print pulse durations
       // ----------------------------------
-      char dbuffer[3];
+      char dbuffer[10];
 
       for (i = 1; i < RawSignal.Number + 1; i++)
       {
@@ -233,7 +233,24 @@ boolean Plugin_001(byte function, const char *string)
                RFLink::sendRawPrint(',');
          }
       }
+      RFLink::sendRawPrint(";RSSI=");
+      sprintf(dbuffer, "%i;", (int)RawSignal.rssi);
+      RFLink::sendRawPrint(dbuffer);
       RFLink::sendRawPrint(F(";\r\n"));
+
+      RFLink::sendRawPrint(F("20;XX;DEBUG")); // debug data
+      RFLink::sendRawPrint(F(";RSSIs(uSec)="));      // print pulse durations
+      // ----------------------------------
+
+      for (i = 2; i < RawSignal.Number + 1; i+=2)
+      {
+            RFLink::sendRawPrint((int)RawSignal.Rssis[i]);
+            if (i < RawSignal.Number)
+               RFLink::sendRawPrint(',');
+      }
+      RFLink::sendRawPrint(F(";\r\n"));
+
+
       // ----------------------------------
       //RawSignal.Number = 0; // Last plugin, kill packet
       //return true;          // stop processing

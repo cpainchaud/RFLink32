@@ -34,36 +34,7 @@
 
 #define RF69OOK_SPI_CS  SS // SS is the SPI slave select pin, for instance D10 on atmega328
 
-// INT0 on AVRs should be connected to RFM69's DIO0 (ex on Atmega328 it's D2, on Atmega644/1284 it's D2)
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega88) || defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__)
-  #define RF69OOK_IRQ_PIN          3
-  #define RF69OOK_IRQ_NUM          1
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
-  #define RF69OOK_IRQ_PIN          10
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(__AVR_ATmega32U4__)
-  #define RF69OOK_IRQ_PIN          3
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(CORE_TEENSY) && defined(__MK20DX128__)
-  #define RF69OOK_IRQ_PIN          4
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(CORE_TEENSY) && defined(__MK20DX256__)
-  #define RF69OOK_IRQ_PIN          4
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(CORE_TEENSY) && defined(__MK66FX1M0__)
-  #define RF69OOK_IRQ_PIN          4
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(ARDUINO_SAMD_ZERO)
-  #define RF69OOK_IRQ_PIN          6
-  #define RF69OOK_IRQ_NUM          0
-  #define RF69OOK_RST_PIN          NOT_A_PIN
-#elif defined(ESP32) || defined(ESP8266)
+#if defined(ESP32) || defined(ESP8266)
   #define RF69OOK_RST_PIN          4
   //#define RF69OOK_SPI_CS           5
 #endif

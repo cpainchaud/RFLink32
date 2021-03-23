@@ -55,6 +55,7 @@
 #define RFUDebug_0 false  // debug RF signals with plugin 254 (decode 1st)
 #define QRFUDebug_0 false // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
+
 namespace RFLink {
 
     namespace params {
@@ -70,13 +71,18 @@ namespace RFLink {
     bool executeCliCommand(char *cmd);
     void sendMsgFromBuffer();
     void sendRawPrint(const char *buf);
-    inline void sendRawPrint(const __FlashStringHelper *buf) {sendRawPrint(reinterpret_cast<const char *>(buf));};
+    void sendRawPrint(const __FlashStringHelper *buf) ;
     void sendRawPrint(long n);
     void sendRawPrint(unsigned long n);
     void sendRawPrint(int n);
     void sendRawPrint(unsigned int n);
     void sendRawPrint(float f);
     void sendRawPrint(char c);
+    inline void sendRawPrintln() {sendRawPrint(F("\r\n"));};
+    //static void sendRawPrintf(const char *format, va_list args);
+    //#define broadcastMessage_P(format, ...) sendRawPrintf(format, __VA_ARGS__)
+
+    //void sendRawPrintf_P(PGM_P, ...);
 
     void getStatusJsonString(JsonObject &output);
 

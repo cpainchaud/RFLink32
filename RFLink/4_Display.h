@@ -10,7 +10,7 @@
 
 #include <Arduino.h>
 
-#define PRINT_BUFFER_SIZE 90 // 90         // Maximum number of characters that a command should print in one go via the print buffer.
+#define PRINT_BUFFER_SIZE 120 // 90         // Maximum number of characters that a command should print in one go via the print buffer.
 
 // extern byte PKSequenceNumber;     // 1 byte packet counter
 extern char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data

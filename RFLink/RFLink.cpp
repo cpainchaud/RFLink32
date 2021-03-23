@@ -182,11 +182,6 @@ namespace RFLink {
 #endif
 
       if (RFLink::Signal::ScanEvent()) {
-        if(pbuffer[0] != 0) {
-          RFLink::sendRawPrint(F("30;DEBUG;RSSI="));
-          RFLink::sendRawPrint((int)Signal::RawSignal.rssi);
-          RFLink::sendRawPrint(F("\r\n"));
-        }
         RFLink::sendMsgFromBuffer();
       }
 
@@ -294,6 +289,15 @@ namespace RFLink {
       RFLink::Serial2Net::broadcastMessage(c);
 #endif // !RFLINK_SERIAL2NET_DISABLED
     }
+
+    void sendRawPrint(const __FlashStringHelper *buf){
+      #ifdef SERIAL_ENABLED
+      Serial.print(buf);
+      #endif
+      #ifndef RFLINK_SERIAL2NET_DISABLED
+      RFLink::Serial2Net::broadcastMessage(buf);
+      #endif // !RFLINK_SERIAL2NET_DISABLED
+    };
 
     bool executeCliCommand(char *cmd) {
       static byte ValidCommand = 0;

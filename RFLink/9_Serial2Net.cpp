@@ -235,6 +235,14 @@ namespace RFLink {
       }
     }
 
+    void broadcastMessage(const __FlashStringHelper *buf) {
+      for (auto & client : clients) {
+        if (!client.ignore && client.connected()) {
+          client.print(buf);
+        }
+      }
+    }
+
     void broadcastMessage(char c) {
       for (auto & client : clients) {
         if (!client.ignore && client.connected()) {

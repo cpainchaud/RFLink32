@@ -67,18 +67,21 @@ namespace RFLink { namespace Radio {
         Radio_TX,
         Radio_NA
     };
+    extern States current_State;
 
     enum HardwareType
     {
-        HW_basic_t,
+        HW_basic_t=0,
         HW_RFM69CW_t,
         HW_RFM69HCW_t,
-        HW_SX7218_t,
+        HW_SX1278_t,
+        HW_RFM69NEW_t,
         HW_EOF_t,
     };
-
     extern HardwareType hardware;
-    extern States current_State;
+
+    extern bool hardwareProperlyInitialized;
+
 
     extern Config::ConfigItem configItems[];
 
@@ -104,6 +107,7 @@ namespace RFLink { namespace Radio {
 
     
     void setup();
+    void mainLoop();
     void paramsUpdatedCallback();
     void refreshParametersFromConfig();
 
@@ -131,7 +135,7 @@ namespace RFLink { namespace Radio {
     /**
      * don't use directly unless you know what you are doing.
      * */
-    void set_Radio_mode_SX7218(States new_state);
+    void set_Radio_mode_SX1278(States new_state);
     
     /**
      * don't use directly unless you know what you are doing.
@@ -151,6 +155,12 @@ namespace RFLink { namespace Radio {
     void disableTX_generic();
 
     float getCurrentRssi();
+
+    void initializeHardware(HardwareType newHardware, bool force = false);
+
+    bool initialize_SX1278();
+    bool initialize_RFM69();
+    bool initialize_RFM69_legacy();
 
 }}
 

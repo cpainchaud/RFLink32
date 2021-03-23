@@ -35,6 +35,7 @@ namespace RFLink {
          * Send a message to all connected clients
          * */
         void broadcastMessage(const char *msg);
+        void broadcastMessage(const __FlashStringHelper *buf);
         void broadcastMessage(char c);
 
         void paramsUpdatedCallback();

@@ -47,6 +47,7 @@ struct RawSignalStruct // Raw signal variabelen places in a struct
   unsigned long Time;               // Timestamp indicating when the signal was received (millis())
   bool readyForDecoder;             // indicates if packet can be processed by decoders
   float rssi;
+  float Rssis[RAW_BUFFER_SIZE + 1];
   uint16_t Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
   // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
 };

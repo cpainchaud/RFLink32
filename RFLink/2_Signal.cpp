@@ -9,6 +9,7 @@
 #include "1_Radio.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
+#include "4_Display.h"
 
 unsigned long SignalCRC = 0L;   // holds the bitstream value for some plugins to identify RF repeats
 unsigned long SignalCRC_1 = 0L; // holds the previous SignalCRC (for mixed burst protocols)
@@ -281,7 +282,7 @@ namespace RFLink
 #define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
 #define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
 #define SWITCH_TOGGLE Toggle = !Toggle
-#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate
+#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi()
 
             // ***   Init Vars   ***
             Toggle = true;
@@ -314,8 +315,6 @@ namespace RFLink
             RawSignal.rssi = Radio::getCurrentRssi();
 
 
-            noInterrupts(); // we must not be interrupted while are busy reading the rest of the signal
-
             // ************************
             // ***   Message Loop   ***
             // ************************
@@ -336,7 +335,6 @@ namespace RFLink
                 if (PulseLength_us < params::min_pulse_len)
                 {
                     // NO RawCodeLength++;
-                    interrupts();
                     return false; // Or break; instead, if you think it may worth it.
                 }
 
@@ -347,13 +345,20 @@ namespace RFLink
                     break;
                 }
 
+                if(RawCodeLength%2 == 0) { // has RSSI gone up? then we reset the packet
+                    auto newRssi = Radio::getCurrentRssi();
+                    if( RawSignal.rssi+10 < newRssi ) {
+                        RawCodeLength = 0;
+                        RawSignal.rssi = newRssi;
+                    }
+                }
+
                 // ***   Prepare Next   ***
                 SWITCH_TOGGLE;
 
                 // ***   Store Pulse   ***
                 STORE_PULSE;
             }
-            interrupts();
 
             if (RawCodeLength >= params::min_raw_pulses)
             {
@@ -392,6 +397,9 @@ namespace RFLink
                         { // Check all plugins to see which plugin can handle the received signal.
                             counters::successfullyDecodedSignalsCount++;
                             RepeatingTimer = millis() + params::signal_repeat_time;
+                            auto responseLength = strlen(pbuffer);
+                            if(responseLength>1)
+                                sprintf(&pbuffer[responseLength-2], "RSSI=%i;\r\n", (int)RawSignal.rssi);
                             return true;
                         }
                     }
