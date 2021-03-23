@@ -57,37 +57,6 @@
 #define PIN_RF_TX_DATA_0 2         // Data to the 433Mhz transmitter on this pin
 #endif
 
-#ifdef __AVR_ATmega328P__
-#define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_RX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_RX_VCC_0 4          // Power to the receiver on this pin
-#define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
-#define PIN_RF_RX_NA_0 3           // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA_0 2         // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
-#define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
-#define PIN_RF_TX_DATA_0 NOT_A_PIN // Data to the 433Mhz transmitter on this pin
-#endif
-
-#ifdef __AVR_ATmega2560__
-#define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_RX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_RX_VCC_0 16         // Power to the receiver on this pin
-#define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
-#define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
-#define PIN_RF_RX_DATA_0 19        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
-#define PIN_RF_TX_VCC_0 15         // +5 volt / Vcc power to the transmitter on this pin
-#define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
-#define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
-#define PIN_RF_TX_DATA_0 14        // Data to the 433Mhz transmitter on this pin
-#endif
-
-
 
 namespace RFLink { namespace Radio {
 
