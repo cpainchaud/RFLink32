@@ -191,6 +191,8 @@ namespace RFLink {
         Serial.println(F("***** Rebooting now for scheduled reboot !!! *****"));
         ESP.restart();
       }
+
+      Radio::mainLoop();
     }
 
     void sendMsgFromBuffer() {

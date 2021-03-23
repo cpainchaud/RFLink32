@@ -66,11 +66,11 @@ boolean readSerialAndExecute() {
     if (ReadSerial()) {
 #ifdef SERIAL_ENABLED
         RFLink::sendRawPrint(F("\33[2K\r"));
-        Serial.flush();
-        RFLink::sendRawPrint(PSTR("Message arrived [Serial]:"));
+        //Serial.flush();
+        RFLink::sendRawPrint(F("Message arrived [Serial]:"));
         RFLink::sendRawPrint(InputBuffer_Serial);
-        RFLink::sendRawPrint(PSTR("\r\n"));
-        Serial.flush();
+        RFLink::sendRawPrint(F("\r\n"));
+        //Serial.flush();
 #endif
         bool success = RFLink::executeCliCommand(InputBuffer_Serial);
         resetSerialBuffer();
@@ -83,7 +83,7 @@ boolean readSerialAndExecute() {
 boolean CheckMQTT(byte *byte_in) {
     if (CopySerial((char *) byte_in)) {
 #ifdef SERIAL_ENABLED
-        Serial.flush();
+        //Serial.flush();
         Serial.print(F("Message arrived [MQTT] "));
         Serial.println(InputBuffer_Serial);
 #endif

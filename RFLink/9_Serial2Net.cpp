@@ -39,15 +39,16 @@ namespace RFLink {
         int keepInterval = 3;
         int keepCount = 3;
 
-#ifdef ESP8266
+        #ifdef ESP8266
         this->keepAlive(keepIdle, keepInterval, keepCount);
-#else
+        #else
         setSocketOption(SO_KEEPALIVE, (char *) &keepAlive, sizeof(keepAlive));
         setOption(TCP_KEEPIDLE, &keepIdle);
         setOption(TCP_KEEPINTVL, &keepInterval);
         setOption(TCP_KEEPCNT, &keepCount);
+        #endif
+        
         println(F("This is RFLink-ESP, welcome!"));
-#endif
       }
 
       /**
@@ -215,11 +216,11 @@ namespace RFLink {
         if (!client.ignore) {
           if (client.hasCommandAvailable()) {
             RFLink::sendRawPrint(F("\33[2K\r"));
-            Serial.flush();
-            RFLink::sendRawPrint(PSTR("Message arrived [Ser2Net]:"));
+            //Serial.flush();
+            RFLink::sendRawPrint(F("Message arrived [Ser2Net]:"));
             RFLink::sendRawPrint(client.buffer);
-            RFLink::sendRawPrint(PSTR("\r\n"));
-            Serial.flush();
+            RFLink::sendRawPrint(F("\r\n"));
+            //Serial.flush();
             RFLink::executeCliCommand(client.buffer);
             client.consumeCommand();
           }
@@ -255,8 +256,7 @@ namespace RFLink {
     void restartServer() {
       for (auto & client : clients) {
         if (!client.ignore && client.connected()) {
-          client.printf(PSTR("\nSerial2Net will restart on port %ui\r\n"), params::port);
-          client.flush();
+          client.printf(PSTR("\nSerial2Net will restart on port %u\r\n"), params::port);
         }
       }
       stopServer(false);
@@ -273,7 +273,6 @@ namespace RFLink {
         if (!client.ignore && client.connected()) {
           if (show_message) {
             client.printf(PSTR("\nSerial2Net will now stop!\n"));
-            client.flush();
           }
           client.disconnectAndClear();
         }

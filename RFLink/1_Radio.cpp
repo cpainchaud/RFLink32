@@ -498,7 +498,7 @@ namespace RFLink { namespace Radio  {
 
             auto success = radio_SX1278->receiveDirect();
             if(success != 0) {
-              Serial.printf_P(PSTR("Failed to put hardware in in receive mode (code=%i), we will try to reinitialize it later"), (int) success);
+              Serial.printf_P(PSTR("Failed to put hardware in RX mode (code=%i), we will try to reinitialize it later"), (int) success);
               hardwareProperlyInitialized = false;
             }
 
@@ -519,13 +519,13 @@ namespace RFLink { namespace Radio  {
 
             auto success = radio_SX1278->transmitDirect();
             if(success != 0) {
-              Serial.printf_P(PSTR("Failed to put hardware in transmit mode (code=%i), we will try to reinitialize it later"), (int) success);
+              Serial.printf_P(PSTR("Failed to put hardware in TX mode (code=%i), we will try to reinitialize it later"), (int) success);
               hardwareProperlyInitialized = false;
             }
 
             success = radio_SX1278->setOutputPower(13);
             if(success != 0) {
-              Serial.printf_P(PSTR("Failed setup hardware transmit power (code=%i), we will try to reinitialize it later"), (int) success);
+              Serial.printf_P(PSTR("Failed setup hardware TX power (code=%i), we will try to reinitialize it later"), (int) success);
               hardwareProperlyInitialized = false;
             }
 
@@ -616,12 +616,17 @@ namespace RFLink { namespace Radio  {
 
       hardwareProperlyInitialized = false;
 
-
-      RFLink::sendRawPrint(F("Switching from Radio hardware "));
-      RFLink::sendRawPrint(hardwareNames[hardware]);
-      RFLink::sendRawPrint(F(" to "));
-      RFLink::sendRawPrint(hardwareNames[newHardware]);
-      RFLink::sendRawPrintln();
+      if( newHardware != hardware ) {
+        RFLink::sendRawPrint(F("Switching from Radio hardware "));
+        RFLink::sendRawPrint(hardwareNames[hardware]);
+        RFLink::sendRawPrint(F(" to "));
+        RFLink::sendRawPrint(hardwareNames[newHardware]);
+        RFLink::sendRawPrintln();
+      } else {
+        RFLink::sendRawPrint(F("Now trying to initialize hardware"));
+        RFLink::sendRawPrint(hardwareNames[hardware]);
+        RFLink::sendRawPrint(hardwareNames[newHardware]);
+      }
 
       //RFLink::sendRawPrintf_P(PSTR("Switching from Radio hardware '%s' to '%s'\r\n"), "hello", hardwareNames[newHardware]);
       //RFLink::sendRawPrintf("Switching from Radio hardware '%s' to '%s'\r\n", "hello", hardwareNames[newHardware]);
@@ -745,8 +750,15 @@ namespace RFLink { namespace Radio  {
     }
 
     void mainLoop() {
+      static time_t nextEnablementAttemptTime = 0;
+
+      // check if hardware is properly initialized, if not retry every 5 seconds
       if(!hardwareProperlyInitialized) {
-        initializeHardware(hardware, true);
+        time_t now = time(nullptr);
+        if(now > nextEnablementAttemptTime) {
+          nextEnablementAttemptTime = now + 5;
+          initializeHardware(hardware, true);
+        }
       }
     }
 
