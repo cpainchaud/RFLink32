@@ -117,25 +117,25 @@ namespace RFLink { namespace Radio {
      * */
     HardwareType hardwareIDFromString(const char *);
 
-    void set_Radio_mode(States new_state);
+    void set_Radio_mode(States new_state, bool force=false);
     void show_Radio_Pin();
 
     /**
      * don't use directly unless you know what you are doing.
      * */
-    void set_Radio_mode_generic(States new_state);
+    void set_Radio_mode_generic(States new_state, bool force=false);
     /**
      * don't use directly unless you know what you are doing.
      * */
-    void set_Radio_mode_RFM69_new(States new_state);
+    void set_Radio_mode_RFM69_new(States new_state, bool force=false);
     /**
     * don't use directly unless you know what you are doing.
     * */
-    void set_Radio_mode_RFM69(States new_state);
+    void set_Radio_mode_RFM69(States new_state, bool force=false);
     /**
      * don't use directly unless you know what you are doing.
      * */
-    void set_Radio_mode_SX1278(States new_state);
+    void set_Radio_mode_SX1278(States new_state, bool force=false);
     
     /**
      * don't use directly unless you know what you are doing.

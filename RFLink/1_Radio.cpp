@@ -251,9 +251,9 @@ namespace RFLink { namespace Radio  {
       return HardwareType::HW_EOF_t;
     }
 
-    void set_Radio_mode_generic(States new_State)
+    void set_Radio_mode_generic(States new_State, bool force)
     {
-      if (current_State != new_State)
+      if (current_State != new_State || force)
       {
         switch (new_State)
         {
@@ -360,17 +360,17 @@ namespace RFLink { namespace Radio  {
     }
 #endif // ESP8266 || ESP32
 
-    void set_Radio_mode(States new_State)
+    void set_Radio_mode(States new_State, bool force)
     {
       if(hardware == HardwareType::HW_basic_t)
-        set_Radio_mode_generic(new_State);
+        set_Radio_mode_generic(new_State, force);
       else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
         //set_Radio_mode_RFM69_new(new_State);
-        set_Radio_mode_RFM69(new_State);
+        set_Radio_mode_RFM69(new_State, force);
       else if( hardware == HardwareType::HW_RFM69NEW_t)
-        set_Radio_mode_RFM69_new(new_State);
+        set_Radio_mode_RFM69_new(new_State, force);
       else if( hardware == HardwareType::HW_SX1278_t )
-        set_Radio_mode_SX1278(new_State);
+        set_Radio_mode_SX1278(new_State, force);
       else
         Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'\r\n"), new_State);
     }
@@ -448,10 +448,10 @@ namespace RFLink { namespace Radio  {
       pinMode(pins::TX_GND, INPUT);
     }
 
-    void set_Radio_mode_RFM69(States new_State)
+    void set_Radio_mode_RFM69(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
-      if (current_State != new_State)
+      if (current_State != new_State || force)
       {
         switch (new_State)
         {
@@ -487,10 +487,10 @@ namespace RFLink { namespace Radio  {
       }
     }
 
-    void set_Radio_mode_SX1278(States new_State)
+    void set_Radio_mode_SX1278(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
-      if (current_State != new_State)
+      if (current_State != new_State || force)
       {
         switch (new_State)
         {
@@ -552,10 +552,10 @@ namespace RFLink { namespace Radio  {
       }
     }
 
-    void set_Radio_mode_RFM69_new(States new_State)
+    void set_Radio_mode_RFM69_new(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
-      if (current_State != new_State)
+      if (current_State != new_State || force)
       {
         switch (new_State)
         {
@@ -670,6 +670,7 @@ namespace RFLink { namespace Radio  {
       } else {
         Serial.println(F("Hardware initialization was successful!"));
         hardwareProperlyInitialized = true;
+        Radio::set_Radio_mode(Radio::current_State, true);
       }
     }
 
@@ -750,6 +751,10 @@ namespace RFLink { namespace Radio  {
 
       result = radio_RFM69->setEncoding(RADIOLIB_ENCODING_NRZ);
       Serial.printf_P(PSTR("RFM69 setEncoding()=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_RFM69->setLnaTestBoost(true);
+      Serial.printf_P(PSTR("RFM69 setLnaTestBoost()=%i\r\n"), result);
       finalResult |= result;
 
       return finalResult == 0;
