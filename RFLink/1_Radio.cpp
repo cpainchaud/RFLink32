@@ -614,6 +614,8 @@ namespace RFLink { namespace Radio  {
     float getCurrentRssi() {
       if(hardware == HardwareType::HW_SX1278_t)
         return radio_SX1278->getRSSI(true);
+      if(hardware == HardwareType::HW_RFM69NEW_t)
+        return radio_RFM69->getRSSI();
 
       return -9999.0F;
     }
@@ -733,8 +735,8 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      //auto result = radio_RFM69->begin(433.92F, 19.200F, 50.0F, 250.0F, 12, 16);
-      auto result = radio_RFM69->begin();
+      auto result = radio_RFM69->begin(433.92F, 19.200F, 50.0F, 250.0F, 12, 16);
+      //auto result = radio_RFM69->begin();
       Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
 

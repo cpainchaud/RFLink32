@@ -503,7 +503,7 @@ namespace RFLink
                 {
                     bool success;
 
-                    if(Radio::hardware == Radio::HardwareType::HW_SX1278_t)
+                    if(Radio::hardware == Radio::HardwareType::HW_SX1278_t || Radio::hardware == Radio::HardwareType::HW_RFM69NEW_t)
                       success = FetchSignal_sync_rssi();
                     else
                       success = FetchSignal_sync();
