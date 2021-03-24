@@ -283,7 +283,6 @@ namespace RFLink
 #define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
 #define SWITCH_TOGGLE Toggle = !Toggle
 #define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate;
-//#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi()
 
             // ***   Init Vars   ***
             Toggle = true;
@@ -312,9 +311,6 @@ namespace RFLink
             RESET_TIMESTART; // next pulse starts now before we do anything else
             //Serial.print ("PulseLength: "); Serial.println (PulseLength_us);
             STORE_PULSE;
-
-            RawSignal.rssi = Radio::getCurrentRssi();
-
 
             // ************************
             // ***   Message Loop   ***
@@ -379,6 +375,120 @@ namespace RFLink
             return false;
         }
 
+        boolean FetchSignal_sync_rssi()
+      {
+        // *********************************************************************************
+        static bool Toggle;
+        static unsigned long timeStartSeek_ms;
+        static unsigned long timeStartLoop_us;
+        static unsigned int RawCodeLength;
+        static unsigned long PulseLength_us;
+        static const bool Start_Level = LOW;
+        // *********************************************************************************
+
+#define RESET_SEEKSTART timeStartSeek_ms = millis();
+#define RESET_TIMESTART timeStartLoop_us = micros();
+#define CHECK_RF ((digitalRead(Radio::pins::RX_DATA) == Start_Level) ^ Toggle)
+#define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
+#define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
+#define SWITCH_TOGGLE Toggle = !Toggle
+#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate;
+//#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi()
+
+        // ***   Init Vars   ***
+        Toggle = true;
+        RawCodeLength = 0;
+        PulseLength_us = 0;
+
+        // ***********************************
+        // ***   Scan for Preamble Pulse   ***
+        // ***********************************
+        RESET_SEEKSTART;
+
+        while (PulseLength_us < params::min_preamble)
+        {
+          while (CHECK_RF && CHECK_TIMEOUT)
+            ;
+          RESET_TIMESTART;
+          SWITCH_TOGGLE;
+          while (CHECK_RF && CHECK_TIMEOUT)
+            ;
+          GET_PULSELENGTH;
+          SWITCH_TOGGLE;
+          if (!CHECK_TIMEOUT)
+            return false;
+        }
+
+        RESET_TIMESTART; // next pulse starts now before we do anything else
+        //Serial.print ("PulseLength: "); Serial.println (PulseLength_us);
+        STORE_PULSE;
+
+        RawSignal.rssi = Radio::getCurrentRssi();
+
+
+        // ************************
+        // ***   Message Loop   ***
+        // ************************
+        while (RawCodeLength < RAW_BUFFER_SIZE)
+        {
+
+          while (CHECK_RF)
+          {
+            GET_PULSELENGTH;
+            if (PulseLength_us > params::signal_end_timeout)
+              break;
+          }
+
+          // next Pulse starts now (while we are busy doing calculation)
+          RESET_TIMESTART;
+
+          // ***   Too short Pulse Check   ***
+          if (PulseLength_us < params::min_pulse_len)
+          {
+            // NO RawCodeLength++;
+            return false; // Or break; instead, if you think it may worth it.
+          }
+
+          // ***   Ending Pulse Check   ***
+          if (PulseLength_us > params::signal_end_timeout) // Again, in main while this time
+          {
+            RawCodeLength++;
+            break;
+          }
+
+          if(RawCodeLength%2 == 0) { // has RSSI gone up? then we reset the packet
+            auto newRssi = Radio::getCurrentRssi();
+            if( RawSignal.rssi+10 < newRssi ) {
+              RawCodeLength = 0;
+              RawSignal.rssi = newRssi;
+            }
+          }
+
+          // ***   Prepare Next   ***
+          SWITCH_TOGGLE;
+
+          // ***   Store Pulse   ***
+          STORE_PULSE;
+        }
+
+        if (RawCodeLength >= params::min_raw_pulses)
+        {
+          RawSignal.Pulses[RawCodeLength] = params::signal_end_timeout;  // Last element contains the timeout.
+          RawSignal.Number = RawCodeLength - 1; // Number of received pulse times (pulsen *2)
+          RawSignal.Multiply = params::sample_rate;
+          RawSignal.Time = millis(); // Time the RF packet was received (to keep track of retransmits
+          //Serial.print ("D");
+          //Serial.print (RawCodeLength);
+          return true;
+        }
+        else
+        {
+          RawSignal.Number = 0;
+        }
+
+        return false;
+      }
+
         boolean ScanEvent()
         {
             if (Radio::current_State != Radio::States::Radio_RX)
@@ -391,7 +501,14 @@ namespace RFLink
 
                 while (Timer > millis()) // || RepeatingTimer > millis())
                 {
-                    if (FetchSignal_sync())
+                    bool success;
+
+                    if(Radio::hardware == Radio::HardwareType::HW_SX1278_t)
+                      success = FetchSignal_sync_rssi();
+                    else
+                      success = FetchSignal_sync();
+
+                    if (success)
                     { // RF: *** data start ***
                         counters::receivedSignalsCount++;
                         if (PluginRXCall(0, 0))
