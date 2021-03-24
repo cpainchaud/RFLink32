@@ -236,13 +236,12 @@ boolean Plugin_001(byte function, const char *string)
       RFLink::sendRawPrint(";RSSI=");
       sprintf(dbuffer, "%i;", (int)RawSignal.rssi);
       RFLink::sendRawPrint(dbuffer);
-      RFLink::sendRawPrint(F(";\r\n"));
+      RFLink::sendRawPrint(F("\r\n"));
 
+      /* only for debugging purposes
       RFLink::sendRawPrint(F("20;XX;DEBUG")); // debug data
       RFLink::sendRawPrint(F(";RSSIs(uSec)="));      // print pulse durations
       // ----------------------------------
-
-      /* only for debugging purposes
        for (i = 2; i < RawSignal.Number + 1; i+=2)
       {
             RFLink::sendRawPrint((int)RawSignal.Rssis[i]);
