@@ -316,6 +316,16 @@ namespace RFLink { namespace Radio  {
         else
           Serial.println();
       }
+      if (pins::RX_CS != NOT_A_PIN)
+      {
+        Serial.print(F("Radio pin RF_RX_CS :\t"));
+        Serial.println(GPIO2String(pins::RX_CS));
+      }
+      if (pins::RX_RESET != NOT_A_PIN)
+      {
+        Serial.print(F("Radio pin RF_RX_RESET :\t"));
+        Serial.println(GPIO2String(pins::RX_RESET));
+      }
       //
       if (pins::TX_PMOS != NOT_A_PIN)
       {
@@ -357,10 +367,12 @@ namespace RFLink { namespace Radio  {
       else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
         //set_Radio_mode_RFM69_new(new_State);
         set_Radio_mode_RFM69(new_State);
+      else if( hardware == HardwareType::HW_RFM69NEW_t)
+        set_Radio_mode_RFM69_new(new_State);
       else if( hardware == HardwareType::HW_SX1278_t )
         set_Radio_mode_SX1278(new_State);
       else
-        Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'"), new_State);
+        Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'\r\n"), new_State);
     }
 
     void setup() {
@@ -608,8 +620,7 @@ namespace RFLink { namespace Radio  {
 
     void initializeHardware(HardwareType newHardware, bool force) {
 
-      if(newHardware == hardware && !force) {
-        hardwareProperlyInitialized = true;
+      if(newHardware == hardware && !force && hardwareProperlyInitialized) {
         RFLink::sendRawPrint(F("initializeHardware() requested but new and old hardware are the same\r\n"));
         return;
       }
@@ -623,9 +634,9 @@ namespace RFLink { namespace Radio  {
         RFLink::sendRawPrint(hardwareNames[newHardware]);
         RFLink::sendRawPrintln();
       } else {
-        RFLink::sendRawPrint(F("Now trying to initialize hardware"));
+        RFLink::sendRawPrint(F("Now trying to initialize hardware "));
         RFLink::sendRawPrint(hardwareNames[hardware]);
-        RFLink::sendRawPrint(hardwareNames[newHardware]);
+        RFLink::sendRawPrintln();
       }
 
       //RFLink::sendRawPrintf_P(PSTR("Switching from Radio hardware '%s' to '%s'\r\n"), "hello", hardwareNames[newHardware]);
@@ -639,6 +650,9 @@ namespace RFLink { namespace Radio  {
       }
       else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69HCW_t){
         success = initialize_RFM69_legacy();
+      }
+      else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69NEW_t){
+        success = initialize_RFM69();
       }
       else if(newHardware == HardwareType::HW_basic_t){
         success = true;
@@ -719,8 +733,9 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      auto result = radio_RFM69->begin(433.92F, 19.200F, 50.0F, 250.0F, 12, 16);
-      Serial.printf_P(PSTR("RFM69 being()=%i\r\n"), result);
+      //auto result = radio_RFM69->begin(433.92F, 19.200F, 50.0F, 250.0F, 12, 16);
+      auto result = radio_RFM69->begin();
+      Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
 
       radio_RFM69->setOOK(true);

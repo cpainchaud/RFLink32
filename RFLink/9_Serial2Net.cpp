@@ -47,7 +47,7 @@ namespace RFLink {
         setOption(TCP_KEEPINTVL, &keepInterval);
         setOption(TCP_KEEPCNT, &keepCount);
         #endif
-        
+
         println(F("This is RFLink-ESP, welcome!"));
       }
 
