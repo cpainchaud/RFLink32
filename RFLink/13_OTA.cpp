@@ -126,7 +126,40 @@ namespace RFLink
           RFLink::scheduleReboot(10);
           break;
       }
+    }
+
+    void getHttpUpdateStatus(JsonObject &json) {
+      
+      switch(currentHttpUpdateStatus) {
+        case Idle: {
+          json[F("status")] = F("idle");
+          break;
+        }
+        case InProgress: {
+          json[F("status")] = F("in_progress");
+          break;
+        }
+        case Scheduled: {
+          json[F("status")] = F("scheduled");
+          break;
+        }
+        case PendingReboot: {
+          json[F("status")] = F("pending_reboot");
+          break;
+        }
+        case Failed: {
+          json[F("status")] = F("error");
+          json[F("message")] = currentHttpUpdateErrorMsg;
+          break;
+        }
+        default: {
+          json[F("status")] = F("error");
+          json[F("message")] = F("Unexpected error");
+        }
+
+      }
 
     }
+
   } // end of AutoOTA namespace
 } // end of RFLink namespace

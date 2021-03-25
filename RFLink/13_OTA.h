@@ -2,6 +2,7 @@
 #define _13_OTA_H_
 
 #include <WString.h>
+#include <ArduinoJson.h>
 
 namespace RFLink
 {
@@ -22,6 +23,8 @@ namespace RFLink
      *
      **/
     bool scheduleHttpUpdate(const char *url, String &errmsg);
+
+    void getHttpUpdateStatus(JsonObject &json);
 
     void mainLoop();
 

@@ -556,7 +556,6 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
 
         }
 
-
     } // end of Wifi namespace
 
 

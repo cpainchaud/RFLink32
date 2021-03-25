@@ -48,7 +48,7 @@ namespace RFLink { namespace Portal {
         }
 
         void serveApiStatusGet(AsyncWebServerRequest *request) {
-          DynamicJsonDocument output(10000);
+          DynamicJsonDocument output(3000);
 
           auto && obj = output.to<JsonObject>();
 
@@ -60,6 +60,7 @@ namespace RFLink { namespace Portal {
           RFLink::Serial2Net::getStatusJsonString(obj);
 
           String buffer;
+          buffer.reserve(512);
           serializeJson(output, buffer);
 
           request->send(200, "application/json", buffer);
@@ -68,6 +69,16 @@ namespace RFLink { namespace Portal {
         void serveApiReboot(AsyncWebServerRequest *request) {
           request->send(200, F("text/plain"), F("Rebooting in 5 seconds"));
           RFLink::scheduleReboot(5);
+        }
+
+        void serveApiFirmwareHttpUpdateGetStatus(AsyncWebServerRequest *request){
+          DynamicJsonDocument output(500);
+          JsonObject && root = output.to<JsonObject>();
+          OTA::getHttpUpdateStatus(root);
+          String buffer;
+          buffer.reserve(256);
+          serializeJson(output, buffer);
+          request->send(200, "application/json", buffer);
         }
 
         void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &json)
@@ -231,6 +242,7 @@ namespace RFLink { namespace Portal {
           server.on(PSTR("/api/reboot"), HTTP_GET, serveApiReboot);
 
           server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
+          server.on(PSTR("/api/firmware/http_update_status"), HTTP_GET, serveApiFirmwareHttpUpdateGetStatus);
 
           AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler(PSTR("/api/config"), serverApiConfigPush, 4000);
           server.addHandler(handler);
