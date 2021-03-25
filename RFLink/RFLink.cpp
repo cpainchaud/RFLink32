@@ -30,6 +30,7 @@
 #include "10_Wifi.h"
 #include "11_Config.h"
 #include "12_Portal.h"
+#include "13_OTA.h"
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -193,6 +194,7 @@ namespace RFLink {
       }
 
       Radio::mainLoop();
+      OTA::mainLoop();
     }
 
     void sendMsgFromBuffer() {

@@ -1,5 +1,6 @@
 #include "13_OTA.h"
 
+#include "RFLink.h"
 
 #ifdef ESP32
 #include <HTTPClient.h>
@@ -18,153 +19,114 @@ Ticker ticker;
 
 namespace RFLink
 {
-    namespace OTA
-    {
-        unsigned bytesReceived;
-        String currentUrl;
+  namespace OTA
+  {
+    unsigned bytesReceived;
+    String currentHttpUpdateUrl;
+    String currentHttpUpdateErrorMsg;
 
-        void sendRequest(){
-            if(request.readyState() == 0 || request.readyState() == 4){
-                request.open("GET", currentUrl.c_str());
-                request.send();
-            }
-        }
+    statusEnum currentHttpUpdateStatus = statusEnum::Idle;
 
-        void requestStateChangedCallback(void* optParm, asyncHTTPrequest* request, int readyState){
-            /*
-             *     enum    readyStates {
-                readyStateUnsent = 0,           // Client created, open not yet called
-                readyStateOpened =  1,          // open() has been called, connected
-                readyStateHdrsRecvd = 2,        // send() called, response headers available
-                readyStateLoading = 3,          // receiving, partial data available
-                readyStateDone = 4} _readyState; // Request complete, all data available
-             */
-            Serial.println(F("Request has changed state : %i\r\n"));
-            if(readyState == 4){
-                Serial.println(request->responseText());
-                Serial.println();
-                request->setDebug(false);
-            }
-        }
+    void sendRequest(){
+      if(request.readyState() == 0 || request.readyState() == 4){
+        request.open("GET", currentHttpUpdateUrl.c_str());
+        request.send();
+      }
+    }
 
-        void dataReceived(void* optParm, asyncHTTPrequest *req, size_t byteCount) {
-            uint8_t buff[256];
+    void requestStateChangedCallback(void* optParm, asyncHTTPrequest* request, int readyState){
+      /*
+       *     enum    readyStates {
+          readyStateUnsent = 0,           // Client created, open not yet called
+          readyStateOpened =  1,          // open() has been called, connected
+          readyStateHdrsRecvd = 2,        // send() called, response headers available
+          readyStateLoading = 3,          // receiving, partial data available
+          readyStateDone = 4} _readyState; // Request complete, all data available
+       */
+      Serial.println(F("Request has changed state : %i\r\n"));
+      if(readyState == 4){
+        Serial.println(request->responseText());
+        Serial.println();
+        request->setDebug(false);
+      }
+    }
 
-            auto remaining = request.available();
-            size_t amountToRead = 0;
+    void dataReceived(void* optParm, asyncHTTPrequest *req, size_t byteCount) {
+      uint8_t buff[256];
 
-            while( remaining > 0) {
-                amountToRead = sizeof(buff);
+      auto remaining = request.available();
+      size_t amountToRead = 0;
 
-                if( remaining < sizeof(buff) )
-                    amountToRead = remaining;
+      while( remaining > 0) {
+        amountToRead = sizeof(buff);
 
-                request.responseRead(buff, sizeof(buff));
-                bytesReceived += amountToRead;
-                remaining = request.available();
-            }
-            Serial.printf_P(PSTR("Total read so far %u\r\n"), bytesReceived);
-        }
+        if( remaining < sizeof(buff) )
+          amountToRead = remaining;
 
-        void downloadFromUrl(const char *url)
-        {
-            HTTPClient http;
-            HTTPClient httpRelocated;
-            HTTPClient *currentHttpClient = &http;// fix for HTTPClient issue in Espressif framework https://github.com/espressif/arduino-esp32/issues/4931
+        request.responseRead(buff, sizeof(buff));
+        bytesReceived += amountToRead;
+        remaining = request.available();
+      }
+      Serial.printf_P(PSTR("Total read so far %u\r\n"), bytesReceived);
+    }
 
-            WiFiClient client;
+    bool scheduleHttpUpdate(const char *url, String &errmsg) {
+      if(currentHttpUpdateStatus == statusEnum::InProgress ||currentHttpUpdateStatus == statusEnum::Scheduled){
+        errmsg = F("Another OTA update is already in progress");
+        return false;
+      }
+      if(currentHttpUpdateStatus == statusEnum::PendingReboot){
+        errmsg = F("Another OTA update has been applied and requires a reboot");
+        return false;
+      }
 
-            const char * headerKeys[] = {"Location"};
-            const size_t numberOfHeaders = 1;
+      currentHttpUpdateStatus = statusEnum::Scheduled;
+      currentHttpUpdateUrl = url;
+      currentHttpUpdateErrorMsg = "";
 
-            http.setFollowRedirects(followRedirects_t::HTTPC_STRICT_FOLLOW_REDIRECTS);
-            http.begin(url);
-            //http.begin("https://github-releases.githubusercontent.com/330986901/fc934000-81e3-11eb-9549-66fb8ee40ece?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A/20210311/us-east-1/s3/aws4_request&X-Amz-Date=20210311T084152Z&X-Amz-Expires=300&X-Amz-Signature=463e4c91369342bc1055435ad505ac464c272424d83db1f61807ad07461cc341&X-Amz-SignedHeaders=host&actor_id=6696638&key_id=0&repo_id=330986901&response-content-disposition=attachment; filename=esp32-firmware.bin&response-content-type=application/octet-stream");
-            //http.collectHeaders(headerKeys, numberOfHeaders);
-            int httpCode = http.GET();
+      Serial.printf_P(PSTR("An HttpUpdate has been scheduled with URL: %s\r\n"), url);
 
-            if (httpCode != HTTP_CODE_OK)
-            {
-                Serial.printf_P(PSTR("HTTP request returned status code %i\r\n"), httpCode);
-                return;
-            }
+      return true;
+    }
 
-            Serial.printf(PSTR("HTTP request returned status code %i\r\n"), httpCode);
+    void mainLoop() {
+      if(currentHttpUpdateStatus != statusEnum::Scheduled)
+        return;
 
-            t_httpUpdate_return ret;
-            Serial.println();
-            Serial.println("*********************");
-            Serial.println("FOTA : DOWNLOADING...");
-            httpUpdate.rebootOnUpdate(false);
-            ret = httpUpdate.update(client, url);
+      WiFiClient client;
+      WiFiClientSecure clientS;
+      clientS.setInsecure();
 
+      currentHttpUpdateStatus = statusEnum::InProgress;
 
-            httpUpdate.rebootOnUpdate(false);
-            ret = httpUpdate.update(client, url);
-            switch (ret)
-            {
-                case HTTP_UPDATE_FAILED:
-                    Serial.println(String("FOTA : Uploading Error !") + httpUpdate.getLastError() + httpUpdate.getLastErrorString().c_str());
-                    break;
-                case HTTP_UPDATE_NO_UPDATES:
-                    Serial.println("FOTA : UpDate not Available");
-                    break;
-                case HTTP_UPDATE_OK:
-                    Serial.println("FOTA : Update OK !!!");
-                    Serial.println("*********************");
-                    Serial.println();
-                    break;
-            }
+      t_httpUpdate_return ret;
+      Serial.print(F("HttpUpdate started ... "));
+      httpUpdate.rebootOnUpdate(false);
+      httpUpdate.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+      if(currentHttpUpdateUrl.startsWith("https"))
+        ret = httpUpdate.update(clientS, currentHttpUpdateUrl);
+      else
+        ret = httpUpdate.update(client, currentHttpUpdateUrl);
 
+      switch (ret)
+      {
+        case HTTP_UPDATE_FAILED:
+          currentHttpUpdateErrorMsg =  httpUpdate.getLastError() + httpUpdate.getLastErrorString();
+          Serial.printf_P(PSTR("HttpUpdate error: %s\r\n"), currentHttpUpdateErrorMsg.c_str());
+          currentHttpUpdateStatus = statusEnum::Failed;
+          break;
+        case HTTP_UPDATE_NO_UPDATES:
+          currentHttpUpdateErrorMsg = F("No update found at provided URL");
+          Serial.println(currentHttpUpdateUrl.c_str());
+          currentHttpUpdateStatus = statusEnum::Failed;
+          break;
+        case HTTP_UPDATE_OK:
+          currentHttpUpdateStatus = statusEnum::PendingReboot;
+          Serial.println(F("HttpUpdate successful! Reboot is scheduled in 10 seconds"));
+          RFLink::scheduleReboot(10);
+          break;
+      }
 
-            /*
-            bytesReceived = 0;
-            request.setDebug(true);
-            request.onReadyStateChange(requestStateChangedCallback);
-            request.onData(dataReceived);
-            ticker.attach(0.5, sendRequest);*/
-
-
-            /*
-            FirmWareDispo = http.header((size_t)0);
-            http.end();
-
-            // Check Date of UpDate
-            Serial.println("FOTA : Firware available = " + FirmWareDispo);
-            if (CurrentFirmware == "" || CurrentFirmware == FirmWareDispo)
-            {
-                Serial.println("FOTA : no new UpDate !");
-                return;
-            }
-
-            //Download process
-            //httpUpdate.setLedPin(Led_Pin, LOW); // Value for LED ON
-            t_httpUpdate_return ret;
-            Serial.println();
-            Serial.println("*********************");
-            Serial.println("FOTA : DOWNLOADING...");
-            httpUpdate.rebootOnUpdate(false);
-            ret = httpUpdate.update(client, url);
-            switch (ret)
-            {
-            case HTTP_UPDATE_FAILED:
-                Serial.println(String("FOTA : Uploading Error !") + httpUpdate.getLastError() + httpUpdate.getLastErrorString().c_str());
-                break;
-            case HTTP_UPDATE_NO_UPDATES:
-                Serial.println("FOTA : UpDate not Available");
-                break;
-            case HTTP_UPDATE_OK:
-                Serial.println("FOTA : Update OK !!!");
-                Serial.println("*********************");
-                Serial.println();
-                NVS.begin();
-                NVS.setString("FirmWare", FirmWareDispo);
-                NVS.close();
-                WiFi.persistent(true);
-                delay(1000);
-                ESP.restart();
-                break;
-                */
-        }
-    } // end of AutoOTA namespace
+    }
+  } // end of AutoOTA namespace
 } // end of RFLink namespace

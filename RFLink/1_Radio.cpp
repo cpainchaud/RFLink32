@@ -753,6 +753,10 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("RFM69 setEncoding()=%i\r\n"), result);
       finalResult |= result;
 
+      result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_PEAK);
+      Serial.printf_P(PSTR("RFM69 setOokThresholdType()=%i\r\n"), result);
+      finalResult |= result;
+
       result = radio_RFM69->setLnaTestBoost(true);
       Serial.printf_P(PSTR("RFM69 setLnaTestBoost()=%i\r\n"), result);
       finalResult |= result;

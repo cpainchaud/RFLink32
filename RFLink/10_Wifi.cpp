@@ -334,7 +334,7 @@ namespace RFLink { namespace Wifi {
             Serial.println(F("Failed to obtain time"));
             return;
           }
-          Serial.printf_P(PSTR("Current time is %04i-%02i%02i %02i:%02i:%02i\r\n"),
+          Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
                           timeinfo.tm_year+1900, timeinfo.tm_mon, timeinfo.tm_mday,
                           timeinfo.tm_hour, timeinfo.tm_hour, timeinfo.tm_sec);
           //Serial.println(&timeinfo, "Current time is %A, %B %d %Y %H:%M:%S UTC");

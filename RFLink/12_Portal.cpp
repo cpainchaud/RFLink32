@@ -97,9 +97,15 @@ namespace RFLink { namespace Portal {
             return;
           }
 
-          RFLink::OTA::downloadFromUrl(url);
+          String errmsg;
+          errmsg.reserve(256);
 
+          if(!RFLink::OTA::scheduleHttpUpdate(url, errmsg)) {
+            request->send(400, F("text/plain"), errmsg.c_str());
+            return;
+          }
 
+          request->send(200, F("text/plain"), F("HTTP OTA scheduled"));
         }
 
         void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
