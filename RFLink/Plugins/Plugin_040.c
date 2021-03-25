@@ -63,8 +63,12 @@ boolean Plugin_040(byte function, const char *string)
    const long MEBUS_PULSEMINMAX = MEBUS_PULSEMINMAX_D / RawSignal.Multiply;
    const long MEBUS_PULSEMAXMIN = MEBUS_PULSEMAXMIN_D / RawSignal.Multiply;
 
-   if (RawSignal.Number != MEBUS_PULSECOUNT)
-      return false;
+   if (RawSignal.Number != MEBUS_PULSECOUNT) {
+     #ifdef PLUGIN_040_DEBUG
+     Serial.println(F("Mebus: failed  RawSignal.Number != MEBUS_PULSECOUNT"));
+     #endif
+     return false;
+   }
 
    unsigned long bitstream = 0L;
    unsigned int temperature = 0;
@@ -77,18 +81,30 @@ boolean Plugin_040(byte function, const char *string)
    //==================================================================================
    for (byte x = 2; x <= MEBUS_PULSECOUNT - 2; x += 2)
    {
-      if (RawSignal.Pulses[x + 1] > MEBUS_MIDHI)
-         return false; // make sure inbetween pulses are not too long
+      if (RawSignal.Pulses[x + 1] > MEBUS_MIDHI) {
+        #ifdef PLUGIN_040_DEBUG
+        Serial.println(F("Mebus: failed  RawSignal.Pulses[x + 1] > MEBUS_MIDHI"));
+        #endif
+        return false; // make sure inbetween pulses are not too long
+      }
 
       bitstream <<= 1; // Always shift
       if (RawSignal.Pulses[x] > MEBUS_PULSEMAXMIN)
          bitstream |= 0x1;
       else
       {
-         if (RawSignal.Pulses[x] > MEBUS_PULSEMINMAX)
-            return false; // invalid pulse length
-         if (RawSignal.Pulses[x] < MEBUS_PULSEMIN)
-            return false; // invalid pulse length
+         if (RawSignal.Pulses[x] > MEBUS_PULSEMINMAX) {
+           #ifdef PLUGIN_040_DEBUG
+           Serial.println(F("Mebus: failed  RawSignal.Pulses[x] > MEBUS_PULSEMINMAX"));
+           #endif
+           return false; // invalid pulse length
+         }
+         if (RawSignal.Pulses[x] < MEBUS_PULSEMIN) {
+           #ifdef PLUGIN_040_DEBUG
+           Serial.println(F("Mebus: failed  RawSignal.Pulses[x] < MEBUS_PULSEMIN"));
+           #endif
+           return false; // invalid pulse length
+         }
 
          // bitstream |= 0x0;
       }
@@ -118,8 +134,12 @@ boolean Plugin_040(byte function, const char *string)
    // Perform checksum calculations
    //==================================================================================
    checksum = (checksum - 1) & 0xF;
-   if (checksum != data[0])
-      return false;
+   if (checksum != data[0]) {
+     #ifdef PLUGIN_040_DEBUG
+     Serial.println(F("Mebus: failed checksum != data[0]"));
+     #endif
+     return false;
+   }
    //==================================================================================
    // Now process the various sensor types
    //==================================================================================
@@ -129,14 +149,22 @@ boolean Plugin_040(byte function, const char *string)
    if (temperature > 3000)
    {
       temperature = 4096 - temperature; // fix for minus temperatures
-      if (temperature > 0x258)
-         return false;                    // temperature out of range ( > -60.0 degrees)
+      if (temperature > 0x258) {
+        #ifdef PLUGIN_040_DEBUG
+        Serial.println(F("Mebus: failed temperature > 0x258"));
+        #endif
+        return false;                    // temperature out of range ( > -60.0 degrees)
+      }
       temperature = temperature | 0x8000; // turn highest bit on for minus values
    }
    else
    {
-      if (temperature > 0x258)
-         return false; // temperature out of range ( > 60.0 degrees)
+      if (temperature > 0x258) {
+        #ifdef PLUGIN_040_DEBUG
+        Serial.println(F("Mebus: failed temperature > 0x258"));
+        #endif
+        return false; // temperature out of range ( > 60.0 degrees)
+      }
    }
    //==================================================================================
    // Output
