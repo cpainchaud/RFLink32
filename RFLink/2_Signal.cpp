@@ -743,7 +743,7 @@ namespace RFLink
             JsonArrayConst pulsesJson = root.getMember("pulses");
 
 
-            signal.Number = pulsesJson.size() + 1;
+            signal.Number = pulsesJson.size();
 
             if(signal.Number < 2) {
                 Serial.println(F("error, your signal has 0 pulse defined!"));
@@ -806,6 +806,8 @@ namespace RFLink
                     RawSignal.readyForDecoder = false;
                     return;
                 }
+
+                Serial.printf_P(PSTR("Sending your signal to Plugins (%i pulses)\r\n"), RawSignal.Number);
 
                 if (!PluginRXCall(0, 0)){
                     Serial.println(F("No plugin has matched your signal"));
