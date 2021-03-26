@@ -80,7 +80,6 @@ namespace RFLink {
       if (gettimeofday(&timeAtBoot, NULL) != 0) {
         Serial.println(F("Failed to obtain time"));
       }
-      scheduledRebootTime.tv_sec = 0;
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
       // Low Power Arduino

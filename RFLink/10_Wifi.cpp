@@ -327,42 +327,44 @@ namespace RFLink { namespace Wifi {
         }
         #endif
 
-        void printLocalTime()
+        void printLocalTime(struct timeval *newTime = nullptr)
         {
-          struct tm timeinfo;
-          if(!getLocalTime(&timeinfo)){
-            Serial.println(F("Failed to obtain time"));
-            return;
+          struct tm tmp;
+          struct tm *timeinfo;
+
+          if(newTime == nullptr) {
+            if(!getLocalTime(&tmp)){
+              Serial.println(F("Failed to obtain time"));
+              return;
+            }
+            timeinfo = &tmp;
           }
+          else {
+            timeinfo = localtime(&newTime->tv_sec);
+          }
+
           Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
-                          timeinfo.tm_year+1900, timeinfo.tm_mon, timeinfo.tm_mday,
-                          timeinfo.tm_hour, timeinfo.tm_hour, timeinfo.tm_sec);
+                          timeinfo->tm_year+1900, timeinfo->tm_mon, timeinfo->tm_mday,
+                          timeinfo->tm_hour, timeinfo->tm_hour, timeinfo->tm_sec);
           //Serial.println(&timeinfo, "Current time is %A, %B %d %Y %H:%M:%S UTC");
+        }
+
+        void ntpUpdateCallback(struct timeval *newTime){
+
+          if(timeAtBoot.tv_sec < 10000 ) {
+            timeAtBoot.tv_sec = newTime->tv_sec - 10;
+            printLocalTime(newTime);
+          }
 
         }
 
         void reconnectServices() {
           #ifdef ESP32
-          { // in case NTP forces a time drift we need to recalculate timeAtBoot
-            struct timeval currentTime, newTime;
-
-            if (gettimeofday(&currentTime, nullptr) != 0) {
-              RFLink::sendRawPrint(F("Failed to obtain time"));
-            }
-
-            unsigned long timeShift = currentTime.tv_sec - RFLink::timeAtBoot.tv_sec;
-
-            configTime(0, 0, RFLink::params::ntpServer.c_str());
-            printLocalTime();
-
-            if (gettimeofday(&newTime, nullptr) != 0) {
-              RFLink::sendRawPrint(F("Failed to obtain time"));
-            }
-
-            RFLink::timeAtBoot.tv_sec = newTime.tv_sec - timeShift;
-            RFLink::timeAtBoot.tv_usec = newTime.tv_usec;
-          }
+          // in case NTP forces a time drift we need to recalculate timeAtBoot
+          sntp_set_time_sync_notification_cb(ntpUpdateCallback);
           #endif
+
+          configTime(0, 0, RFLink::params::ntpServer.c_str());
 
 
           if(RFLink::Mqtt::params::enabled)
