@@ -37,7 +37,7 @@
 #define FA20_PLUGIN_ID 080
 #define PLUGIN_DESC_080 "FA20RF"
 
-#define FA20_PULSECOUNT 52
+#define FA20_PULSECOUNT 50
 
 #define FA20_MIDHI_D 1000
 #define FA20_PULSEMIN_D 1000
@@ -63,7 +63,7 @@ boolean Plugin_080(byte function, const char *string)
    //==================================================================================
    // Get all 24 bits
    //==================================================================================
-   for (byte x = 4; x < FA20_PULSECOUNT; x += 2)
+   for (byte x = 2; x < FA20_PULSECOUNT; x += 2)
    {
       if (RawSignal.Pulses[x - 1] > FA20_MIDHI)
          return false; // every preceding pulse must be below 1000!
