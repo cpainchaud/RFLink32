@@ -242,7 +242,7 @@ boolean Plugin_001(byte function, const char *string)
       RFLink::sendRawPrint(F("20;XX;DEBUG")); // debug data
       RFLink::sendRawPrint(F(";RSSIs(uSec)="));      // print pulse durations
       // ----------------------------------
-       for (i = 2; i < RawSignal.Number + 1; i+=2)
+       for (i = 1; i < RawSignal.Number + 1; i+=2)
       {
             RFLink::sendRawPrint((int)RawSignal.Rssis[i]);
             if (i < RawSignal.Number)
