@@ -833,7 +833,7 @@ namespace RFLink
 
             //RawSignal.Pulses[RawSignal.Number]=1;                                   // due to a bug in Arduino 1.0.1
 
-            for (byte y = 0; y < signal->Repeats; y++)
+            for (byte y = 0; y <= signal->Repeats; y++)
             { // herhaal verzenden RF code
                 x = 1;
                 noInterrupts();
@@ -845,7 +845,7 @@ namespace RFLink
                     delayMicroseconds(signal->Pulses[x++] * signal->Multiply); // min een kleine correctie
                 }
                 interrupts();
-                if (y + 1 < signal->Repeats)
+                if (y != signal->Repeats)
                     delay(signal->Delay); // Delay buiten het gebied waar de interrupts zijn uitgeschakeld! Anders werkt deze funktie niet.
             }
 
