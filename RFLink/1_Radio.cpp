@@ -24,6 +24,17 @@ SX1278 *radio_SX1278 = nullptr;
 RF69 *radio_RFM69 = nullptr;
 
 
+enum RssiThresholdTypesEnum {
+  Undefined = -1,  // Keep this one first in the list
+  Fixed,      // Keep this one second in the list
+  Average,
+  Peak,
+  RssiThresholdTypes_EOF,
+};
+
+#define RssiThresholdType_default_RFM69 RssiThresholdTypesEnum::Fixed
+#define RssiFixedThresholdValue_undefined -9999
+#define RssiFixedThresholdValue_default_RFM69 -32
 
 namespace RFLink { namespace Radio  {
 
@@ -51,6 +62,13 @@ namespace RFLink { namespace Radio  {
       int8_t TX_DATA = PIN_RF_TX_DATA_0;
     }
 
+    namespace params {
+
+      RssiThresholdTypesEnum rssiThresholdType = RssiThresholdTypesEnum::Undefined;
+      int16_t fixedRssiThreshold = RssiFixedThresholdValue_undefined;
+
+    }
+
 
     States current_State = Radio_NA;
 
@@ -75,7 +93,7 @@ namespace RFLink { namespace Radio  {
     const char json_name_rx_pmos[] =  "rx_pmos";
     const char json_name_rx_gnd[] =   "rx_gnd";
     const char json_name_rx_na[] =    "rx_na";
-    const char json_name_rx_reset[] =    "rx_reset";
+    const char json_name_rx_reset[] = "rx_reset";
     const char json_name_rx_cs[] =    "rx_cs";
 
     const char json_name_tx_data[] =  "tx_data";
@@ -83,6 +101,9 @@ namespace RFLink { namespace Radio  {
     const char json_name_tx_nmos[] =  "tx_nmos";
     const char json_name_tx_pmos[] =  "tx_pmos";
     const char json_name_tx_gnd[] =   "tx_gnd";
+
+    const char json_name_rssi_thresh_type[] = "rssi_thres_type";
+    const char json_name_rssi_thresh_value[] = "rssi_thres_value";
 
 
     Config::ConfigItem configItems[] =  {
@@ -103,6 +124,8 @@ namespace RFLink { namespace Radio  {
             Config::ConfigItem(json_name_tx_pmos,   Config::SectionId::Radio_id, PIN_RF_TX_PMOS_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_tx_gnd,    Config::SectionId::Radio_id, PIN_RF_TX_GND_0, paramsUpdatedCallback),
 
+            Config::ConfigItem(json_name_rssi_thresh_type,  Config::SectionId::Radio_id, RssiThresholdTypesEnum::Undefined, paramsUpdatedCallback, true),
+            Config::ConfigItem(json_name_rssi_thresh_value, Config::SectionId::Radio_id, RssiFixedThresholdValue_undefined, paramsUpdatedCallback, true),
 
             Config::ConfigItem()
     };
@@ -228,7 +251,55 @@ namespace RFLink { namespace Radio  {
         pins::TX_GND = item->getLongIntValue();
       }
 
-      initializeHardware(newHardwareId);
+      long int value;
+
+      item = Config::findConfigItem(json_name_rssi_thresh_type, Config::SectionId::Radio_id);
+      if(item->isUndefined()){
+        if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
+          changesDetected = true;
+        params::rssiThresholdType = RssiThresholdTypesEnum::Undefined;
+      }
+      else {
+        value = item->getLongIntValue();
+        if (value < RssiThresholdTypesEnum::Undefined || value >= RssiThresholdTypesEnum::RssiThresholdTypes_EOF ) {
+          Serial.println(F("Invalid RssiThresholdType provided, resetting to default value"));
+          if(item->canBeNull) {
+            item->deleteJsonRecord();
+          }
+          else {
+            item->setLongIntValue(item->getLongIntDefaultValue());
+          }
+          changesDetected = true;
+        } else if (params::rssiThresholdType != value) {
+          changesDetected = true;
+          params::rssiThresholdType = (RssiThresholdTypesEnum) value;
+        }
+      }
+
+      item = Config::findConfigItem(json_name_rssi_thresh_value, Config::SectionId::Radio_id);
+      if(item->isUndefined()){
+        if( params::fixedRssiThreshold != RssiFixedThresholdValue_undefined )
+          changesDetected = true;
+        params::fixedRssiThreshold = RssiFixedThresholdValue_undefined;
+      }
+      else {
+        value = item->getLongIntValue();
+        if (value > 0 && value < 128 ) {
+          Serial.println(F("Invalid RssiFixedThresholdValue provided, resetting to default value"));
+          if(item->canBeNull) {
+            item->deleteJsonRecord();
+          }
+          else
+            item->setLongIntValue(item->getLongIntDefaultValue());
+          changesDetected = true;
+        } else if (params::fixedRssiThreshold != value) {
+          changesDetected = true;
+          params::fixedRssiThreshold = value;
+        }
+      }
+
+      if(changesDetected)
+        initializeHardware(newHardwareId, true);
 
       // restore to RX state
       if( savedState != States::Radio_OFF && savedState != States::Radio_NA) {
@@ -467,8 +538,6 @@ namespace RFLink { namespace Radio  {
             radio.receiveBegin();
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::startScanning();
-            //detachInterrupt(0);
-            //detachInterrupt(1);
             break;
 
           case Radio_TX:
@@ -476,8 +545,8 @@ namespace RFLink { namespace Radio  {
               RFLink::Signal::AsyncSignalScanner::stopScanning();
             radio.receiveEnd();
             pinMode(pins::TX_DATA, OUTPUT);
+            radio.setPowerLevel(1);
             radio.transmitBegin();
-            radio.setPowerLevel(31);
             break;
 
           case Radio_NA:
@@ -753,13 +822,25 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("RFM69 setEncoding()=%i\r\n"), result);
       finalResult |= result;
 
-      //result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_PEAK);
-      result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_FIXED);
-      Serial.printf_P(PSTR("RFM69 setOokThresholdType()=%i\r\n"), result);
+
+      RssiThresholdTypesEnum newType = RssiThresholdType_default_RFM69;
+      if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
+        newType = params::rssiThresholdType;
+      if(newType == RssiThresholdTypesEnum::Peak)
+        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_PEAK);
+      else if(newType == RssiThresholdTypesEnum::Fixed)
+        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_FIXED);
+      else if(newType == RssiThresholdTypesEnum::Average)
+        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_AVERAGE);
+      Serial.printf_P(PSTR("RFM69 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
-      result = radio_RFM69->setOokFixedThreshold(0x40);
-      Serial.printf_P(PSTR("RFM69 setOokFixedThreshold()=%i\r\n"), result);
+      int newValue = RssiFixedThresholdValue_default_RFM69;
+      if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
+        newValue = params::fixedRssiThreshold;
+      newValue = - newValue*2;
+      result = radio_RFM69->setOokFixedThreshold(newValue);
+      Serial.printf_P(PSTR("RFM69 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
 
       result = radio_RFM69->setLnaTestBoost(true);
