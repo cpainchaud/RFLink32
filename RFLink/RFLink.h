@@ -70,8 +70,8 @@ namespace RFLink {
 
     bool executeCliCommand(char *cmd);
     void sendMsgFromBuffer();
-    void sendRawPrint(const char *buf);
-    void sendRawPrint(const __FlashStringHelper *buf) ;
+    void sendRawPrint(const char *buf, bool end_of_line=false);
+    void sendRawPrint(const __FlashStringHelper *buf, bool end_of_line=false) ;
     void sendRawPrint(long n);
     void sendRawPrint(unsigned long n);
     void sendRawPrint(int n);
