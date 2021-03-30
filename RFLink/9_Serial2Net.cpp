@@ -14,7 +14,11 @@ namespace RFLink {
     class Serial2NetClient : public WiFiClient {
 
     private:
+      #ifdef ESP32
+      static const uint16_t __buffer_size = 1024;
+      #else
       static const uint16_t __buffer_size = 128;
+      #endif
       uint16_t buffer_end;
 
     public:
