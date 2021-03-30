@@ -149,7 +149,6 @@ namespace RFLink
             Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
 #endif
 
-      // DEBUG ONLY? Let's iterate over all registered configItems and count them/sanitize
       for (unsigned int i = 0; i < configItemListsSize; i++)
       {
         ConfigItem *item = configItemLists[i];
@@ -159,24 +158,20 @@ namespace RFLink
           if (item->typeIsChar())
           {
 #ifdef DEBUG_RFLINK_CONFIG
-            Serial.printf(PSTR("added configitem '%s' with default_value="), item->json_name);
-                        Serial.println(item->getCharDefaultValue());
+            Serial.printf_P(PSTR("Registered configItem '%s' with default_value="), item->json_name);
+            Serial.println(item->getCharDefaultValue());
 #endif
           }
           else if (item->typeIsLongInt())
           {
 #ifdef DEBUG_RFLINK_CONFIG
-            sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
-                        Serial.print(tmp);
-                        Serial.println(item->getLongIntDefaultValue());
+            Serial.printf_P(PSTR("Registered configItem '%s' with default_value=%ld (long)\r\n"), item->json_name, item->getLongIntDefaultValue());
 #endif
           }
           else if (item->typeIsBool())
           {
 #ifdef DEBUG_RFLINK_CONFIG
-            sprintf(tmp, "added configitem '%s' with default_value=", item->json_name);
-                        Serial.print(tmp);
-                        Serial.println(item->getBoolDefaultValue());
+            Serial.printf_P(PSTR("Registered configItem '%s' with default_value=%i (bool)\r\n"), item->json_name, (int) item->getBoolDefaultValue());
 #endif
           }
           else
@@ -241,7 +236,7 @@ namespace RFLink
           ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
           if (item == nullptr)
           {
-            Serial.printf_P(PSTR("section '%s' has extra configuration item named '%s'  it will be dicarded\r\n"), kv.key().c_str(), section_kv.key().c_str());
+            Serial.printf_P(PSTR("section '%s' has extra configuration item named '%s' it will be dicarded\r\n"), kv.key().c_str(), section_kv.key().c_str());
             sectionObject.remove(section_kv.key().c_str());
             fileHasChanged = true;
             continue;
@@ -261,11 +256,17 @@ namespace RFLink
 
           if (sectionVariant.isUndefined())
           {
+            #ifdef DEBUG_RFLINK_CONFIG
+            Serial.printf_P(PSTR("Config: created missing section Object '%s'\r\n"), jsonSections[item->section]);
+            #endif
             fileHasChanged = true;
             sectionObject = doc.createNestedObject(jsonSections[item->section]);
           }
           else if (!sectionVariant.is<JsonObject>())
           {
+            #ifdef DEBUG_RFLINK_CONFIG
+            Serial.printf_P(PSTR("Config: section '%s' is not an Object it will recreated\r\n"), jsonSections[item->section]);
+            #endif
             fileHasChanged = true;
             doc.remove(sectionVariant);
             sectionObject = doc.createNestedObject(jsonSections[item->section]);
@@ -277,6 +278,9 @@ namespace RFLink
 
           if (item->checkOrCreateValueInJsonObject(sectionObject))
           {
+            #ifdef DEBUG_RFLINK_CONFIG
+            Serial.printf_P(PSTR("Config: created missing object '%s' in section '%s'\r\n"), item->json_name, jsonSections[item->section]);
+            #endif
             fileHasChanged = true;
           }
 
@@ -544,8 +548,8 @@ namespace RFLink
 
       if (value.isUndefined() || value.isNull())
       {
-        if(this->canBeNull)
-          return true;
+        if(this->canBeNull) // no need to create it it can be null/nonexistent
+          return false;
 
         createInJsonObject(obj);
         return true;
