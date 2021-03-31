@@ -26,23 +26,6 @@
 #define RFLINK_SIGNAL_RSSI_DEBUG
 #endif
 
-struct RawSignalStruct // Raw signal variabelen places in a struct
-{
-  int Number;                       // Number of pulses, times two as every pulse has a mark and a space.
-  byte Repeats;                     // Number of re-transmits on transmit actions.
-  byte Delay;                       // Delay in ms. after transmit of a single RF pulse packet
-  byte Multiply;                    // Pulses[] * Multiply is the real pulse time in microseconds (to keep compatibility with Arduino)
-  unsigned long Time;               // Timestamp indicating when the signal was received (millis())
-  bool readyForDecoder;             // indicates if packet can be processed by decoders
-  float rssi;
-  #ifdef RFLINK_SIGNAL_RSSI_DEBUG
-  float Rssis[RAW_BUFFER_SIZE + 1];
-  #endif
-  uint16_t Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
-  // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
-};
-
-
 extern unsigned long SignalCRC;   // holds the bitstream value for some plugins to identify RF repeats
 extern unsigned long SignalCRC_1; // holds the previous SignalCRC (for mixed burst protocols)
 extern byte SignalHash;           // holds the processed plugin number
@@ -52,7 +35,34 @@ extern unsigned long RepeatingTimer;
 namespace RFLink {
   namespace Signal {
 
+    enum EndReasons {
+      Unknown,
+      ReachedLongPulseTimeOut,
+      AttemptedNoiseFilter,
+      DynamicGapLengthReached,
+      SignalEndTimeout,
+      REASONS_EOF,
+    };
+
+    struct RawSignalStruct // Raw signal variabelen places in a struct
+    {
+      int Number;                       // Number of pulses, times two as every pulse has a mark and a space.
+      byte Repeats;                     // Number of re-transmits on transmit actions.
+      byte Delay;                       // Delay in ms. after transmit of a single RF pulse packet
+      byte Multiply;                    // Pulses[] * Multiply is the real pulse time in microseconds (to keep compatibility with Arduino)
+      unsigned long Time;               // Timestamp indicating when the signal was received (millis())
+      bool readyForDecoder;             // indicates if packet can be processed by decoders
+      float rssi;
+      EndReasons endReason;
+      #ifdef RFLINK_SIGNAL_RSSI_DEBUG
+      float Rssis[RAW_BUFFER_SIZE + 1];
+      #endif
+      uint16_t Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
+      // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
+    };
+
     extern RawSignalStruct RawSignal;
+
 
     namespace params {
       // All json variable names
@@ -91,6 +101,8 @@ namespace RFLink {
     void getStatusJsonString(JsonObject &output);
 
     void displaySignal(RawSignalStruct &signal);
+
+    const char * endReasonToString(EndReasons reason);
 
     inline void setVerboseSignalFetchLoop(bool value=true) {
       runtime::verboseSignalFetchLoop = value;
