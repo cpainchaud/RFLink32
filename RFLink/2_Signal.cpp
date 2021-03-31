@@ -22,18 +22,22 @@ namespace RFLink
   namespace Signal
   {
 
-    RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, -9999.0F}; // current message
+    RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false, -9999.0F}; // current message
 
     namespace commands
     {
       String sendRF("sendRF");
       String testRF("testRF");
+      String testRFMoveForward("testRFMoveForward");
     }
 
-    namespace counters
-    {
+    namespace counters {
       unsigned long int receivedSignalsCount;
       unsigned long int successfullyDecodedSignalsCount;
+    }
+
+    namespace runtime {
+      bool verboseSignalFetchLoop = false;
     }
 
     namespace params
@@ -48,7 +52,6 @@ namespace RFLink
       unsigned long int signal_end_timeout; // US
       unsigned long int signal_repeat_time; // MS
       unsigned long int scan_high_time;     // MS
-
     }
 
     const char json_name_async_mode_enabled[] = "async_mode_enabled";
@@ -287,18 +290,15 @@ namespace RFLink
       unsigned long gapsTotalLength; // To make statistics on Gaps length and find an earlier end to the signal
       unsigned long averagedGapsLength;
       unsigned long dynamicGapEnd_us;
+
+      float longPulseRssiReference;    // with high gains, output can remain high forever so RSSI must be checked from time to time
+      int longPulseRssiTimer;
       // *********************************************************************************
 
-#define RESET_SEEKSTART timeStartSeek_ms = millis();
-#define RESET_TIMESTART timeStartLoop_us = micros();
-#define CHECK_RF ((digitalRead(Radio::pins::RX_DATA) == Start_Level) ^ Toggle)
-#define CHECK_TIMEOUT ((millis() - timeStartSeek_ms) < params::seek_timeout)
-#define GET_PULSELENGTH PulseLength_us = micros() - timeStartLoop_us
-#define SWITCH_TOGGLE Toggle = !Toggle
 #ifdef RFLINK_SIGNAL_RSSI_DEBUG
-#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi();
+#define STORE_PULSE (RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi();)
 #else
-#define STORE_PULSE RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate
+#define STORE_PULSE (RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate)
 #endif
 
       // ***   Init Vars   ***
@@ -316,11 +316,11 @@ namespace RFLink
 
       while (PulseLength_us < params::min_preamble)
       {
-        while (CHECK_RF && CHECK_TIMEOUT)
+        while (CHECK_RF && CHECK_TIMEOUT) // wait until output goes LOW
           ;
         RESET_TIMESTART;
         SWITCH_TOGGLE;
-        while (CHECK_RF && CHECK_TIMEOUT)
+        while (CHECK_RF && CHECK_TIMEOUT) // wait until output goes HIGH
           ;
         GET_PULSELENGTH;
         SWITCH_TOGGLE;
@@ -328,8 +328,14 @@ namespace RFLink
           return false;
       }
 
+      /*sprintf_P(printBuf, PSTR("at first loop exit (pin=%i toggle=%i sample_rate=%i pulse_len=%lu)"),
+                (int) digitalRead(Radio::pins::RX_DATA),
+                (int) Toggle,
+                (int) params::sample_rate,
+                PulseLength_us);
+      RFLink::sendRawPrint(printBuf, true);*/
+
       RESET_TIMESTART; // next pulse starts now before we do anything else
-      //Serial.print ("PulseLength: "); Serial.println (PulseLength_us);
       STORE_PULSE;
 
       RawSignal.rssi = Radio::getCurrentRssi();
@@ -340,6 +346,11 @@ namespace RFLink
       // ************************
       while (RawCodeLength < RAW_BUFFER_SIZE)
       {
+        if(Toggle) {
+          longPulseRssiTimer = 0;
+          longPulseRssiReference = Radio::getCurrentRssi();
+        }
+
         while (CHECK_RF)
         {
           GET_PULSELENGTH;
@@ -347,6 +358,28 @@ namespace RFLink
             break;
           if (dynamicGapEnd_us > 200 && !Toggle &&  PulseLength_us > dynamicGapEnd_us) // if this is a gap and we've over the dynamic limit
             break;
+
+          //
+          if( RawCodeLength == 1 && Toggle && (micros() - timeStartLoop_us) / 80 > longPulseRssiTimer) { // let's run it every 80 us since getCurrentRssi() takes 30us to run
+            longPulseRssiTimer++;
+            /*sprintf_P(printBuf, PSTR("(pin=%i)"),
+                      (int) digitalRead(Radio::pins::RX_DATA));
+            RFLink::sendRawPrint(printBuf, true);*/
+            if (longPulseRssiReference + 10 < Radio::getCurrentRssi()) {
+              if(runtime::verboseSignalFetchLoop) {
+                sprintf_P(printBuf,
+                          PSTR("LONG Pulse reset because of RSSI gap within it (refRssi=%.0f length=%lu toggle=%i)"),
+                          longPulseRssiReference,
+                          micros() - timeStartLoop_us,
+                          (int) Toggle);
+                RFLink::sendRawPrint(printBuf, true);
+              }
+              timeStartLoop_us = micros() - 35;
+              longPulseRssiTimer = 0;
+            }
+          }
+
+
         }
 
         // next Pulse starts now (while we are busy doing calculation)
@@ -356,30 +389,45 @@ namespace RFLink
         if (PulseLength_us < params::min_pulse_len)
         {
           if(Toggle) { // current loop is the beginning of a Gap so current PulseLength_us is previous Pulse length
+
             // if previous pulse is happening after a long Gap, may be it's some noise that is corrupting our signal_end so we should keep the transmission
             if(dynamicGapEnd_us > 0) // we have seen enough Pulses to make statistical assumptions
             {
-              if( ((unsigned long)RawSignal.Pulses[RawCodeLength])*(unsigned long)params::sample_rate >= ((unsigned long)averagedGapsLength)*(unsigned long)150/(unsigned long)100 ) {
+              if( ((unsigned long)RawSignal.Pulses[RawCodeLength-1])*(unsigned long)params::sample_rate >= ((unsigned long)averagedGapsLength)*(unsigned long)150/(unsigned long)100 ) {
                 // if previous Gap is 1.5x the average of Gaps we will try to decode still!
-                //Serial.println("attempted noise filter");
+                if(runtime::verboseSignalFetchLoop) {
+                  RFLink::sendRawPrint(F("attempted noise filter"), true);
+                }
                 break;
               }
             }
           }
-          return false; // it seems to be noise se we're out !
+          return false; // it seems to be noise so we're out !
         }
 
         if (dynamicGapEnd_us > 200 && !Toggle && PulseLength_us > dynamicGapEnd_us)
         {
           STORE_PULSE;
-          //Serial.printf_P(PSTR("Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)\r\n"), PulseLength_us, dynamicGapEnd_us, (int) RawCodeLength);
+          if(runtime::verboseSignalFetchLoop) {
+            sprintf_P(printBuf,
+                      PSTR("Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)"),
+                      PulseLength_us, dynamicGapEnd_us, (int) RawCodeLength);
+            RFLink::sendRawPrint(printBuf, true);
+          }
           break;
         }
 
         // ***   Ending Pulse Check   ***
         if (PulseLength_us > params::signal_end_timeout)
         {
-          STORE_PULSE;
+          if(!Toggle) // if it's a Gap we are currently seeing then we need to store it to the packet has the right length
+            STORE_PULSE;
+
+          if(runtime::verboseSignalFetchLoop) {
+            sprintf_P(printBuf, PSTR("Signal ended because of signal_end_timeout (toggle=%i pos=%i)"), (int) Toggle,
+                      (int) RawCodeLength);
+            RFLink::sendRawPrint(printBuf, true);
+          }
           break;
         }
 
@@ -390,7 +438,10 @@ namespace RFLink
           auto newRssi = Radio::getCurrentRssi();
           if( RawSignal.rssi+10 < newRssi ) {
             // has RSSI gone up? then we reset the packet
-            //Serial.printf_P(PSTR("Restart signal because of RSSI gap: old=%.0f new=%.0f at pos %i\r\n"), RawSignal.rssi, newRssi, RawCodeLength);
+            if(runtime::verboseSignalFetchLoop) {
+              sprintf_P(printBuf, PSTR("Restart signal because of RSSI gap: old=%.0f new=%.0f at pos %i"), RawSignal.rssi, newRssi, RawCodeLength);
+              RFLink::sendRawPrint(printBuf, true);
+            }
             RawCodeLength = 0;
             gapsTotalLength = 0;
             averagedGapsLength = 0;
@@ -401,7 +452,8 @@ namespace RFLink
           if(RawCodeLength > 15) {
             averagedGapsLength = gapsTotalLength/(RawCodeLength/2);
             dynamicGapEnd_us = averagedGapsLength*3;
-            //Serial.printf_P(PSTR("averagedGaps=%lu vs PulseLength_us=%lu\r\n"), averagedGapsLength, PulseLength_us);
+            //sprintf_P(printBuf,(PSTR("averagedGaps=%lu vs PulseLength_us=%lu\r\n"), averagedGapsLength, PulseLength_us);
+            //RFLink::sendRawPrint(printBuf, true);
             /*if( PulseLength_us > gapsTotalLength/(RawCodeLength/2) * 2 )  {
               RFLink::sendRawPrint(F("Ended signal because of averaged gaps"), true);
               STORE_PULSE;
@@ -873,6 +925,34 @@ namespace RFLink
         RawSendRF(&signal);
         Serial.println(F("done"));
       }
+      else if (strncasecmp(commands::testRFMoveForward.c_str(), cmd, commands::testRFMoveForward.length()) == 0)
+      {
+        if(!getSignalFromJson(RawSignal, commaIndex+1)) {
+          Serial.println(FPSTR(error_command_aborted));
+          RawSignal.readyForDecoder = false;
+          return;
+        }
+
+        while(RawSignal.Number >= params::min_raw_pulses) {
+
+          Serial.printf_P(PSTR("Sending your signal to Plugins (%i pulses)\r\n"), RawSignal.Number);
+          displaySignal(RawSignal);
+          RawSignal.readyForDecoder = true;
+
+          if (!PluginRXCall(0, 0)) {
+            Serial.println(F("No plugin has matched your signal"));
+          }
+          else {
+            RFLink::sendMsgFromBuffer();
+            break;
+          }
+
+          RawSignal.Number -= 2;
+          memcpy((void *)&RawSignal.Pulses[1], (void *)&RawSignal.Pulses[3], sizeof(uint16_t)*RawSignal.Number);
+          yield();
+        }
+
+      }
       else if (strncasecmp(commands::testRF.c_str(), cmd, commands::testRF.length()) == 0)
       {
         RawSignal.readyForDecoder = true;
@@ -897,6 +977,8 @@ namespace RFLink
       {
         Serial.printf_P(PSTR("Error : unknown command '%s'\r\n"), cmd);
       }
+
+      RawSignal.readyForDecoder = false;
     }
 
     void getStatusJsonString(JsonObject &output)
@@ -904,6 +986,33 @@ namespace RFLink
       auto &&signal = output.createNestedObject("signal");
       signal[F("received_signal_count")] = counters::receivedSignalsCount;
       signal[F("successfully_decoded_count")] = counters::successfullyDecodedSignalsCount;
+    }
+
+    void displaySignal(RawSignalStruct &signal) {
+      RFLink::sendRawPrint(F("20;XX;DEBUG;Pulses=")); // debug data
+      RFLink::sendRawPrint(signal.Number);         // print number of pulses
+      RFLink::sendRawPrint(F(";Pulses(uSec)="));      // print pulse durations
+      // ----------------------------------
+      char dbuffer[10];
+
+      for (int i = 1; i < signal.Number + 1; i++)
+      {
+        if (QRFDebug == true)
+        {
+          sprintf(dbuffer, "%02x", signal.Pulses[i]);
+          RFLink::sendRawPrint(dbuffer);
+        }
+        else
+        {
+          RFLink::sendRawPrint(signal.Pulses[i] * signal.Multiply);
+          if (i < signal.Number)
+            RFLink::sendRawPrint(',');
+        }
+      }
+      RFLink::sendRawPrint(PSTR(";RSSI="));
+      sprintf_P(dbuffer, PSTR("%i;"), (int)signal.rssi);
+      RFLink::sendRawPrint(dbuffer);
+      RFLink::sendRawPrint(F("\r\n"));
     }
 
   } // end of ns Signal

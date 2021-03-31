@@ -65,6 +65,8 @@ namespace RFLink {
     extern struct timeval timeAtBoot; // used to calculate update
     extern struct timeval scheduledRebootTime;
 
+    extern char printBuf[300];
+
     void setup();
     void mainLoop();
 
