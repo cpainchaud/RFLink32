@@ -59,12 +59,16 @@ namespace RFLink {
       extern bool async_mode_enabled;
       extern unsigned short int sample_rate;
       extern unsigned long int min_raw_pulses;
-      extern unsigned long int seek_timeout;        // MS
-      extern unsigned long int min_preamble;        // US
-      extern unsigned long int min_pulse_len;       // US
-      extern unsigned long int signal_end_timeout;  // US
-      extern unsigned long int signal_repeat_time;  // MS
-      extern unsigned long int scan_high_time;      // MS
+      extern unsigned long int seek_timeout;        // milliseconds
+      extern unsigned long int min_preamble;        // microseconds
+      extern unsigned long int min_pulse_len;       // microseconds
+      extern unsigned long int signal_end_timeout;  // microseconds
+      extern unsigned long int signal_repeat_time;  // milliseconds
+      extern unsigned long int scan_high_time;      // milliseconds
+    }
+
+    namespace runtime {
+      extern bool verboseSignalFetchLoop;
     }
 
     namespace counters {
@@ -85,6 +89,12 @@ namespace RFLink {
 
     bool ScanEvent();
     void getStatusJsonString(JsonObject &output);
+
+    void displaySignal(RawSignalStruct &signal);
+
+    inline void setVerboseSignalFetchLoop(bool value=true) {
+      runtime::verboseSignalFetchLoop = value;
+    }
 
     namespace AsyncSignalScanner {
       extern unsigned long int lastChangedState_us;     // time last state change occured

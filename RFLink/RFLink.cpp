@@ -68,6 +68,7 @@ namespace RFLink {
 
     struct timeval timeAtBoot;
     struct timeval scheduledRebootTime;
+    char printBuf[300];
 
     void setup() {
 
