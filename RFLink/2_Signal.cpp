@@ -26,9 +26,11 @@ namespace RFLink
 
     namespace commands
     {
-      String sendRF("sendRF");
-      String testRF("testRF");
-      String testRFMoveForward("testRFMoveForward");
+      const char sendRF[] PROGMEM = "sendRF";
+      const char testRF[] PROGMEM = "testRF";
+      const char testRFMoveForward[] PROGMEM = "testRFMoveForward";
+      const char enableVerboseSignalFetchLoop[] PROGMEM = "enableVerboseSignalFetchLoop";
+      const char disableVerboseSignalFetchLoop[] PROGMEM = "disableVerboseSignalFetchLoop";
     }
 
     namespace counters {
@@ -317,16 +319,58 @@ namespace RFLink
 
       while (PulseLength_us < params::min_preamble)
       {
-        while (CHECK_RF && CHECK_TIMEOUT) // wait until output goes LOW
-          ;
+        longPulseRssiReference = Radio::getCurrentRssi();
+        RawCodeLength = 0;
+
+        while (CHECK_RF && CHECK_TIMEOUT) {// wait until output goes LOW
+
+          // If we're catching a long PULSE here with a RSSI GAP then it's a signal and we MUST exit this loop in a way
+          //that signal will still be scanned. This is helping with very high sensitivity receivers which may see Pulses
+          // for a long time
+
+          unsigned long timeBeforeRssi = micros();
+          float newRssi = Radio::getCurrentRssi();
+
+          if (longPulseRssiReference + 6 < newRssi) { // 6 empirical value found by experimentation
+            if(runtime::verboseSignalFetchLoop) {
+              sprintf_P(printBuf,
+                        PSTR("LONG Pulse EARLY reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu pos=%u)"),
+                        longPulseRssiReference,
+                        newRssi,
+                        micros() - timeStartLoop_us,
+                        RawCodeLength);
+              RFLink::sendRawPrint(printBuf, true);
+            }
+            timeStartLoop_us = timeBeforeRssi+130; // 130 empirical value found by experimentation
+            longPulseRssiReference = newRssi;
+            RawCodeLength = 1; // to restart signal from scratch
+          } else {
+            if(longPulseRssiReference < newRssi)
+              longPulseRssiReference = newRssi;
+          }
+
+        }
+
+        GET_PULSELENGTH;
         RESET_TIMESTART;
         SWITCH_TOGGLE;
+
+        if(RawCodeLength > 0) {
+          STORE_PULSE;
+        }
+
         while (CHECK_RF && CHECK_TIMEOUT) // wait until output goes HIGH
           ;
         GET_PULSELENGTH;
         SWITCH_TOGGLE;
-        if (!CHECK_TIMEOUT)
+        if (!CHECK_TIMEOUT){
+          if(runtime::verboseSignalFetchLoop) {
+            sprintf_P(printBuf, PSTR("Early signal dropped because of seek_timeout (pulseLen=%lu)"),
+                      PulseLength_us);
+            RFLink::sendRawPrint(printBuf, true);
+          }
           return false;
+        }
       }
 
       /*sprintf_P(printBuf, PSTR("at first loop exit (pin=%i toggle=%i sample_rate=%i pulse_len=%lu)"),
@@ -340,6 +384,8 @@ namespace RFLink
       STORE_PULSE;
 
       RawSignal.rssi = Radio::getCurrentRssi();
+      if(longPulseRssiReference > RawSignal.rssi)
+        RawSignal.rssi = longPulseRssiReference;
 
 
       // ************************
@@ -361,28 +407,32 @@ namespace RFLink
             break;
 
           //
-          if( RawCodeLength == 1 && Toggle && (micros() - timeStartLoop_us) / 80 > longPulseRssiTimer) { // let's run it every 80 us since getCurrentRssi() takes 30us to run
+          if( /*RawCodeLength == 1 &&*/ Toggle && (micros() - timeStartLoop_us) / 80 > longPulseRssiTimer) { // let's run it every 80 us since getCurrentRssi() takes 30us to run
             longPulseRssiTimer++;
             /*sprintf_P(printBuf, PSTR("(pin=%i)"),
                       (int) digitalRead(Radio::pins::RX_DATA));
             RFLink::sendRawPrint(printBuf, true);*/
             float newRssi = Radio::getCurrentRssi();
-            if (longPulseRssiReference + 6 < newRssi) {
+            if (longPulseRssiReference + 5 < newRssi) {
               if(runtime::verboseSignalFetchLoop) {
                 sprintf_P(printBuf,
-                          PSTR("LONG Pulse reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i)"),
+                          PSTR("LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
                           longPulseRssiReference,
                           newRssi,
                           micros() - timeStartLoop_us,
-                          (int) Toggle);
+                          (int) Toggle,
+                          RawCodeLength);
                 RFLink::sendRawPrint(printBuf, true);
               }
-              timeStartLoop_us = micros() - 35;
+              timeStartLoop_us = micros() + 30;
               longPulseRssiTimer = 0;
               longPulseRssiReference = newRssi;
+              RawSignal.rssi = newRssi;
+              gapsTotalLength = 0;
+              dynamicGapEnd_us = 0;
+              RawCodeLength = 1; // to restart signal from scratch
             }
           }
-
 
         }
 
@@ -406,6 +456,10 @@ namespace RFLink
                 break;
               }
             }
+          }
+          if(runtime::verboseSignalFetchLoop) {
+            sprintf_P(printBuf, PSTR("Dropped signal due to short pulse (RawCodeLength=%u, pulseLen=%lu)"), RawCodeLength, PulseLength_us);
+            RFLink::sendRawPrint(printBuf, true);
           }
           return false; // it seems to be noise so we're out !
         }
@@ -442,6 +496,8 @@ namespace RFLink
 
 
         } else { // This is the beginning of a Pulse so current PulseLength_us is previous Gap length
+
+          /*
           auto newRssi = Radio::getCurrentRssi();
           if( RawSignal.rssi+10 < newRssi ) {
             // has RSSI gone up? then we reset the packet
@@ -453,19 +509,13 @@ namespace RFLink
             gapsTotalLength = 0;
             averagedGapsLength = 0;
             dynamicGapEnd_us = 0;
+            gapsTotalLength = 0;
             RawSignal.rssi = newRssi;
-          }
+          }*/
 
           if(RawCodeLength > 15) {
             averagedGapsLength = gapsTotalLength/(RawCodeLength/2);
             dynamicGapEnd_us = averagedGapsLength*3;
-            //sprintf_P(printBuf,(PSTR("averagedGaps=%lu vs PulseLength_us=%lu\r\n"), averagedGapsLength, PulseLength_us);
-            //RFLink::sendRawPrint(printBuf, true);
-            /*if( PulseLength_us > gapsTotalLength/(RawCodeLength/2) * 2 )  {
-              RFLink::sendRawPrint(F("Ended signal because of averaged gaps"), true);
-              STORE_PULSE;
-              break;
-            }*/
           }
           gapsTotalLength += PulseLength_us / params::sample_rate;
         }
@@ -489,6 +539,10 @@ namespace RFLink
       }
       else
       {
+        if(runtime::verboseSignalFetchLoop) {
+          sprintf_P(printBuf, PSTR("Dropped signal because it's too short (RawCodeLength=%u)"), RawCodeLength);
+          RFLink::sendRawPrint(printBuf, true);
+        }
         RawSignal.Number = 0;
       }
 
@@ -919,9 +973,11 @@ namespace RFLink
         return;
       }
 
+      int commandSize = commaIndex - cmd;
+
       *commaIndex = 0; // replace ';' with null termination
 
-      if (strncasecmp(commands::sendRF.c_str(), cmd, commands::sendRF.length()) == 0)
+      if (strncasecmp(cmd, commands::sendRF, commandSize) == 0)
       {
         if(!getSignalFromJson(signal, commaIndex + 1)) {
           RFLink::sendRawPrint(FPSTR(error_command_aborted), true);
@@ -932,7 +988,7 @@ namespace RFLink
         RawSendRF(&signal);
         Serial.println(F("done"));
       }
-      else if (strncasecmp(commands::testRFMoveForward.c_str(), cmd, commands::testRFMoveForward.length()) == 0)
+      else if (strncasecmp_P(cmd, commands::testRFMoveForward, commandSize) == 0)
       {
         if(!getSignalFromJson(RawSignal, commaIndex+1)) {
           Serial.println(FPSTR(error_command_aborted));
@@ -960,7 +1016,7 @@ namespace RFLink
         }
 
       }
-      else if (strncasecmp(commands::testRF.c_str(), cmd, commands::testRF.length()) == 0)
+      else if (strncasecmp_P(cmd, commands::testRF, commandSize) == 0)
       {
         RawSignal.readyForDecoder = true;
 
@@ -979,6 +1035,16 @@ namespace RFLink
           RFLink::sendMsgFromBuffer();
 
         RawSignal.readyForDecoder = false;
+      }
+      else if (strncasecmp_P(cmd, commands::enableVerboseSignalFetchLoop, commandSize) == 0) {
+        runtime::verboseSignalFetchLoop = true;
+        sendRawPrint(PSTR("30;verboseSignalFetchLoop"));
+        sendRawPrint(PSTR(" enabled;"),true);
+      }
+      else if (strncasecmp_P(cmd, commands::disableVerboseSignalFetchLoop, commandSize) == 0) {
+        runtime::verboseSignalFetchLoop = false;
+        sendRawPrint(PSTR("30;verboseSignalFetchLoop"));
+        sendRawPrint(PSTR(" disabled;"),true);
       }
       else
       {
@@ -1030,7 +1096,7 @@ namespace RFLink
       "SignalEndTimeout",
       "REASONS_EOF"
     };
-    static_assert(sizeof(EndReasonsStrings)/sizeof(char *) == EndReasons::REASONS_EOF+1, "EndReasonsStrings has missing/extra names, please compare with EndReasonse enum declarations");
+    static_assert(sizeof(EndReasonsStrings)/sizeof(char *) == EndReasons::REASONS_EOF+1, "EndReasonsStrings has missing/extra names, please compare with EndReasons enum declarations");
 
     const char * endReasonToString(EndReasons reason) {
       return EndReasonsStrings[(int) reason];
