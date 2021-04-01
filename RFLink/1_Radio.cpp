@@ -33,8 +33,10 @@ enum RssiThresholdTypesEnum {
 };
 
 #define RssiThresholdType_default_RFM69 RssiThresholdTypesEnum::Fixed
+#define RssiThresholdType_default_SX127X RssiThresholdTypesEnum::Peak
 #define RssiFixedThresholdValue_undefined -9999
 #define RssiFixedThresholdValue_default_RFM69 -32
+#define RssiFixedThresholdValue_default_SX127X -115
 
 namespace RFLink { namespace Radio  {
 
@@ -772,11 +774,27 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278, setGain() result=%i\r\n"), result);
       finalResult |= result;
 
-      //result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_FIXED);
-      //Serial.printf("SX1278, setOokThresholdType result=%i\r\n", result);
-      //finalResult |= result;
+      RssiThresholdTypesEnum newType = RssiThresholdType_default_SX127X;
+      if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
+        newType = params::rssiThresholdType;
+      if(newType == RssiThresholdTypesEnum::Peak)
+        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_PEAK);
+      else if(newType == RssiThresholdTypesEnum::Fixed)
+        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_FIXED);
+      else if(newType == RssiThresholdTypesEnum::Average)
+        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_AVERAGE);
+      Serial.printf_P(PSTR("SX1278 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
+      finalResult |= result;
 
-      //result = radio_SX1278->setOokFixedOrFloorThreshold(0x0C);
+      int newValue = RssiFixedThresholdValue_default_SX127X;
+      if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
+        newValue = params::fixedRssiThreshold;
+      newValue = newValue*2 + 256;
+      result = radio_SX1278->setOokFixedOrFloorThreshold(newValue);
+      Serial.printf_P(PSTR("SX1278 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
+      finalResult |= result;
+
+      //result = radio_SX1278->setOokFixedOrFloorThreshold(0x1C);
       //Serial.printf("SX1278, setOokFixedOrFloorThreshold() result=%i\r\n", result);
       //finalResult |= result;
 
