@@ -40,21 +40,21 @@ advise you to make a backup of your configurations first!
 
 At first menu, select Developper Mode:
 
-![esp_tool1](https://github.com/cpainchaud/RFLink/blob/master/pictures/espressif_tool_dev_mode.png)
+![esp_tool1](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_dev_mode.png)
 
 Then pick your model:
 
-![esp_tool2](https://github.com/cpainchaud/RFLink/blob/master/pictures/espressif_tool_pick_model.png)
+![esp_tool2](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_pick_model.png)
 
 Select your firmware file and make sure you input address=0x10000, then select your COM PORT
 and click start!
 
-![esp_tool3](https://github.com/cpainchaud/RFLink/blob/master/pictures/espressif_tool_fill_fields.png)
+![esp_tool3](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_fill_fields.png)
 
 A progress bar will show up (you may have to keep pressing your BOOT button
 until the process starts)
 
-![esp_tool4](https://github.com/cpainchaud/RFLink/blob/master/pictures/espressif_tool_progress.png)
+![esp_tool4](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_progress.png)
 
 Reboot and enjoy!
 
