@@ -48,7 +48,7 @@ namespace RFLink {
         setOption(TCP_KEEPCNT, &keepCount);
         #endif
 
-        println(F("This is RFLink-ESP, welcome!"));
+        println(F("This is RFLink32, welcome!"));
       }
 
       /**

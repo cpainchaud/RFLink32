@@ -1,5 +1,5 @@
 // ************************************* //
-// * Arduino Project RFLink-esp        * //
+// * Arduino Project RFLink32        * //
 // * https://github.com/couin3/RFLink  * //
 // * 2018..2020 Stormteam - Marc RIVES * //
 // * More details in RFLink.ino file   * //
@@ -20,7 +20,7 @@
 #endif
 
 #ifndef DEFAULT_WIFI_CLIENT_HOSTNAME
-#define DEFAULT_WIFI_CLIENT_HOSTNAME "RFLink-ESP"
+#define DEFAULT_WIFI_CLIENT_HOSTNAME "RFLink32"
 #endif
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial

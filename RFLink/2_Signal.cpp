@@ -1,5 +1,5 @@
 // ************************************* //
-// * Arduino Project RFLink-esp        * //
+// * Arduino Project RFLink32        * //
 // * https://github.com/couin3/RFLink  * //
 // * 2018..2020 Marc RIVES             * //
 // * More details in RFLink.ino file   * //
