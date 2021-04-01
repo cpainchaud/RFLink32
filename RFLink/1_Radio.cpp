@@ -770,10 +770,6 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278, set data shaping result=%i\r\n"), result);
       finalResult |= result;
 
-      result = radio_SX1278->setGain(6);
-      Serial.printf_P(PSTR("SX1278, setGain() result=%i\r\n"), result);
-      finalResult |= result;
-
       RssiThresholdTypesEnum newType = RssiThresholdType_default_SX127X;
       if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
         newType = params::rssiThresholdType;
@@ -800,6 +796,10 @@ namespace RFLink { namespace Radio  {
 
       result = radio_SX1278->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_4_CHIP);
       Serial.printf_P(PSTR("SX1278, setOokPeakThresholdDecrement() result=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_SX1278->setGain(6);
+      Serial.printf_P(PSTR("SX1278, setGain() result=%i\r\n"), result);
       finalResult |= result;
 
       //result = radio_SX1278->startReceive(0, SX127X_RXCONTINUOUS);
