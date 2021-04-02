@@ -49,6 +49,13 @@ namespace RFLink {
       REASONS_EOF,
     };
 
+    enum Slicer {
+      Default = -1,
+      Legacy,
+      RSSI_Advanced,
+      SLICERS_EOF,
+    };
+
     struct RawSignalStruct // Raw signal variabelen places in a struct
     {
       int Number;                       // Number of pulses, times two as every pulse has a mark and a space.
@@ -84,6 +91,7 @@ namespace RFLink {
 
     namespace runtime {
       extern bool verboseSignalFetchLoop;
+      extern Slicer appliedSlicer;
     }
 
     namespace counters {
@@ -112,6 +120,8 @@ namespace RFLink {
     inline void setVerboseSignalFetchLoop(bool value=true) {
       runtime::verboseSignalFetchLoop = value;
     }
+
+    bool updateSlicer(Slicer newSlicer);
 
     namespace AsyncSignalScanner {
       extern unsigned long int lastChangedState_us;     // time last state change occured
