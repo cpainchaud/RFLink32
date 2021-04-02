@@ -701,19 +701,13 @@ namespace RFLink { namespace Radio  {
       hardwareProperlyInitialized = false;
 
       if( newHardware != hardware ) {
-        RFLink::sendRawPrint(F("Switching from Radio hardware "));
-        RFLink::sendRawPrint(hardwareNames[hardware]);
-        RFLink::sendRawPrint(F(" to "));
-        RFLink::sendRawPrint(hardwareNames[newHardware]);
-        RFLink::sendRawPrintln();
+        sprintf(printBuf, PSTR("Switching from Radio hardware '%s' to '%s'"), hardwareNames[hardware], hardwareNames[newHardware]);
+        RFLink::sendRawPrint(printBuf, true);
       } else {
-        RFLink::sendRawPrint(F("Now trying to initialize hardware "));
-        RFLink::sendRawPrint(hardwareNames[hardware]);
-        RFLink::sendRawPrintln();
+        sprintf(printBuf, PSTR("Now trying to initialize hardware '%s"), hardwareNames[hardware]);
+        RFLink::sendRawPrint(printBuf, true);
       }
 
-      //RFLink::sendRawPrintf_P(PSTR("Switching from Radio hardware '%s' to '%s'\r\n"), "hello", hardwareNames[newHardware]);
-      //RFLink::sendRawPrintf("Switching from Radio hardware '%s' to '%s'\r\n", "hello", hardwareNames[newHardware]);
 
       bool success = false;
       hardware = newHardware;
@@ -737,9 +731,9 @@ namespace RFLink { namespace Radio  {
       }
 
       if(!success) {
-        Serial.println(F("Hardware failed to initialize, we will retry later!"));
+        RFLink::sendRawPrint(F("Hardware failed to initialize, we will retry later!"), true);
       } else {
-        Serial.println(F("Hardware initialization was successful!"));
+        RFLink::sendRawPrint(F("Hardware initialization was successful!"), true);
         hardwareProperlyInitialized = true;
         Radio::set_Radio_mode(Radio::current_State, true);
       }
@@ -755,6 +749,7 @@ namespace RFLink { namespace Radio  {
       int finalResult = 0;
 
       auto result = radio_SX1278->beginFSK( 433.92F, 9.600F, 50.0F, 250.0F, 12, 16, true);
+      //auto result = radio_SX1278->beginFSK( 433.92F, 19.200F, 50.0F, 250.0F, 12, 16, true);
       Serial.printf_P(PSTR("Initialized SX1278, return code %i\r\n"), result);
       finalResult |= result;
 
@@ -790,17 +785,17 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
 
-      //result = radio_SX1278->setOokFixedOrFloorThreshold(0x1C);
-      //Serial.printf("SX1278, setOokFixedOrFloorThreshold() result=%i\r\n", result);
-      //finalResult |= result;
-
-      result = radio_SX1278->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_4_CHIP);
+      result = radio_SX1278->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
       Serial.printf_P(PSTR("SX1278, setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
       result = radio_SX1278->setGain(6);
       Serial.printf_P(PSTR("SX1278, setGain() result=%i\r\n"), result);
       finalResult |= result;
+
+      //result = radio_SX1278->setFrequencyDeviation(200.0F);
+      //Serial.printf_P(PSTR("SX1278, setFrequencyDeviation() result=%i\r\n"), result);
+      //finalResult |= result;
 
       //result = radio_SX1278->startReceive(0, SX127X_RXCONTINUOUS);
       //Serial.printf("sx1278, receive start code %i\r\n", result);
@@ -823,7 +818,7 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      auto result = radio_RFM69->begin(433.92F, 19.200F, 50.0F, 250.0F, 12, 16);
+      auto result = radio_RFM69->begin(433.92F, 9.600F, 50.0F, 250.0F, 12, 16);
       //auto result = radio_RFM69->begin();
       Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
