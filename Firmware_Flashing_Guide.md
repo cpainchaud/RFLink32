@@ -18,8 +18,20 @@ If you are already installed RFLink on your device, beware the following will ov
 all your existing configurations. Please have a look at the OTA Update if you just looking 
 to upgrade an existing RFLink-ESP device!
 
-Using Esptool:
-`python.exe esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.bin`
+### Using Esptool:
+If you have not yet installed 'esptool' module for python:
+
+`python -m pip install esptool`
+
+Erase flash entirely to ensure nothing will go wrong
+
+`python esptool.py --chip esp32 --baud 460800 erase_flash`
+
+Install the firmware
+
+`python esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.img`
+
+Sub-sequent updates should be done via OTA mechanisms.
 
 ## OTA updates
 
