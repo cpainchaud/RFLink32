@@ -3,7 +3,7 @@
 
 ## Downloading firmwares
 
-Releases can be find here https://github.com/cpainchaud/RFLink/releases
+Releases can be find here https://github.com/cpainchaud/RFLink32/releases
 
 Nightly/Development released are the latest firmware compiled from latest commits,
 they are the only ones available today at this early stage of the project.
