@@ -748,7 +748,7 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      auto result = radio_SX1278->beginFSK( 433.92F, 9.600F, 50.0F, 250.0F, 12, 16, true);
+      auto result = radio_SX1278->beginFSK( 433.92F, 9.600F, 50.0F, 125.0F, 12, 16, true);
       //auto result = radio_SX1278->beginFSK( 433.92F, 19.200F, 50.0F, 250.0F, 12, 16, true);
       Serial.printf_P(PSTR("Initialized SX1278, return code %i\r\n"), result);
       finalResult |= result;
@@ -818,7 +818,7 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      auto result = radio_RFM69->begin(433.92F, 9.600F, 50.0F, 250.0F, 12, 16);
+      auto result = radio_RFM69->begin(433.92F, 9.600F, 50.0F, 125.0F, 12, 16);
       //auto result = radio_RFM69->begin();
       Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
