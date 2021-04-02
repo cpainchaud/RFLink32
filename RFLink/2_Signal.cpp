@@ -407,13 +407,13 @@ namespace RFLink
             break;
 
           //
-          if( /*RawCodeLength == 1 &&*/ Toggle && (micros() - timeStartLoop_us) / 80 > longPulseRssiTimer) { // let's run it every 80 us since getCurrentRssi() takes 30us to run
+          if( /*RawCodeLength == 1 &&*/ Toggle /*&& (micros() - timeStartLoop_us) / 80 > longPulseRssiTimer*/) { // let's run it every 80 us since getCurrentRssi() takes 30us to run
             longPulseRssiTimer++;
             /*sprintf_P(printBuf, PSTR("(pin=%i)"),
                       (int) digitalRead(Radio::pins::RX_DATA));
             RFLink::sendRawPrint(printBuf, true);*/
             float newRssi = Radio::getCurrentRssi();
-            if (longPulseRssiReference + 5 < newRssi) {
+            if (longPulseRssiTimer > 100 && longPulseRssiReference + 3 < newRssi) {
               if(runtime::verboseSignalFetchLoop) {
                 sprintf_P(printBuf,
                           PSTR("LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
@@ -431,6 +431,9 @@ namespace RFLink
               gapsTotalLength = 0;
               dynamicGapEnd_us = 0;
               RawCodeLength = 1; // to restart signal from scratch
+            }
+            if(longPulseRssiReference < newRssi){
+              longPulseRssiReference = newRssi;
             }
           }
 
@@ -497,22 +500,6 @@ namespace RFLink
 
         } else { // This is the beginning of a Pulse so current PulseLength_us is previous Gap length
 
-          /*
-          auto newRssi = Radio::getCurrentRssi();
-          if( RawSignal.rssi+10 < newRssi ) {
-            // has RSSI gone up? then we reset the packet
-            if(runtime::verboseSignalFetchLoop) {
-              sprintf_P(printBuf, PSTR("Restart signal because of RSSI gap: old=%.0f new=%.0f at pos %i"), RawSignal.rssi, newRssi, RawCodeLength);
-              RFLink::sendRawPrint(printBuf, true);
-            }
-            RawCodeLength = 0;
-            gapsTotalLength = 0;
-            averagedGapsLength = 0;
-            dynamicGapEnd_us = 0;
-            gapsTotalLength = 0;
-            RawSignal.rssi = newRssi;
-          }*/
-
           if(RawCodeLength > 15) {
             averagedGapsLength = gapsTotalLength/(RawCodeLength/2);
             dynamicGapEnd_us = averagedGapsLength*3;
@@ -529,6 +516,9 @@ namespace RFLink
 
       if (RawCodeLength >= params::min_raw_pulses)
       {
+        if(RawCodeLength >= RAW_BUFFER_SIZE){
+          RawSignal.endReason = EndReasons::TooLong;
+        }
         RawSignal.Pulses[RawCodeLength] = params::signal_end_timeout;  // Last element contains the timeout.
         RawSignal.Number = RawCodeLength - 1; // Number of received pulse times (pulse *2)
         RawSignal.Multiply = params::sample_rate;
@@ -1088,12 +1078,13 @@ namespace RFLink
       RFLink::sendRawPrint(F("\r\n"));
     }
 
-    const char *EndReasonsStrings[] = {
+    const char * const EndReasonsStrings[] PROGMEM = {
       "Unknown",
       "ReachedLongPulseTimeOut",
       "AttemptedNoiseFilter",
       "DynamicGapLengthReached",
       "SignalEndTimeout",
+      "TooLong",
       "REASONS_EOF"
     };
     static_assert(sizeof(EndReasonsStrings)/sizeof(char *) == EndReasons::REASONS_EOF+1, "EndReasonsStrings has missing/extra names, please compare with EndReasons enum declarations");
