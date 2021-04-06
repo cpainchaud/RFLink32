@@ -6,6 +6,7 @@
 #else
 #include <FS.h>
 #include <LITTLEFS.h>
+#define LittleFS LITTLEFS
 #endif
 
 #include "1_Radio.h"
@@ -64,13 +65,8 @@ namespace RFLink
 
         void resetConfig()
         {
-#ifdef ESP32
-            if (LITTLEFS.exists(configFileName))
-                LITTLEFS.remove(configFileName);
-#else
             if (LittleFS.exists(configFileName))
                 LittleFS.remove(configFileName);
-#endif
 
             Serial.println(F("Config has been reset and requires a reboot to complete"));
         }
@@ -79,12 +75,7 @@ namespace RFLink
         {
             // Open file for reading
             Serial.println(F("Now dumping JSON file content:"));
-#ifdef ESP32
-            File file = LITTLEFS.open(configFileName, "r");
-#else
             File file = LittleFS.open(configFileName, "r");
-#endif
-
             if (!file)
             {
                 Serial.println(F("Failed to read file"));
@@ -126,23 +117,16 @@ namespace RFLink
         {
             Serial.print(F("Loading persistent filesystem... "));
 
+            if (!LittleFS.begin(true))
+            {
+                Serial.println(F(" FAILED!!"));
+                return;
+            }
+            Serial.print(F("OK. "));
+
 #ifdef ESP32
-            if (!LITTLEFS.begin(true))
-            {
-                Serial.println(F(" FAILED!!"));
-                return;
-            }
-            Serial.print(F("OK. "));
-
-            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LITTLEFS.usedBytes() / 1024, LITTLEFS.totalBytes() / 1024);
+            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
 #else // this is ESP8266
-            if (!LittleFS.begin())
-            {
-                Serial.println(F(" FAILED!!"));
-                return;
-            }
-            Serial.print(F("OK. "));
-
             FSInfo info;
             LittleFS.info(info);
             Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
@@ -192,12 +176,7 @@ namespace RFLink
 
             Serial.printf(PSTR("Now opening JSON config file '%s'\r\n"), configFileName);
 
-#ifdef ESP32
-            File file = LITTLEFS.open(configFileName, "r");
-#else
             File file = LittleFS.open(configFileName, "r");
-#endif
-
             DeserializationError error = deserializeJson(doc, file);
             if (error)
                 Serial.println(F("Failed to read file, using default configuration"));
@@ -636,15 +615,9 @@ namespace RFLink
             Serial.print(F("Saving JSON config to FLASH.... "));
             Signal::AsyncSignalScanner::stopScanning();
 
-#ifdef ESP32
-            if (LITTLEFS.exists(F("/tmp.json")))
-                LITTLEFS.remove(F("/tmp.json"));
-            File file = LITTLEFS.open(F("/tmp.json"), "w");
-#else
             if (LittleFS.exists(F("/tmp.json")))
                 LittleFS.remove(F("/tmp.json"));
             File file = LittleFS.open(F("/tmp.json"), "w");
-#endif
 
             auto bytes_written = serializeJson(doc, file);
             file.close();
@@ -657,15 +630,9 @@ namespace RFLink
             }
             else
             {
-#ifdef ESP32
-                if (LITTLEFS.exists(configFileName))
-                    LITTLEFS.remove(configFileName);
-                LITTLEFS.rename(F("/tmp.json"), configFileName);
-#else
                 if (LittleFS.exists(configFileName))
                     LittleFS.remove(configFileName);
                 LittleFS.rename(F("/tmp.json"), configFileName);
-#endif
                 Serial.println(F("OK"));
             }
 
