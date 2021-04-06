@@ -24,8 +24,8 @@ namespace RFLink
 
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false, -9999.0F, EndReasons::Unknown}; // current message
 
-    #define SLICER_DEFAULT_RFM69 Slicer::Legacy
-    #define SLICER_DEFAULT_SX1278 Slicer::RSSI_Advanced
+    #define SLICER_DEFAULT_RFM69 Slicer_enum::Legacy
+    #define SLICER_DEFAULT_SX1278 Slicer_enum::RSSI_Advanced
 
     namespace commands
     {
@@ -43,7 +43,7 @@ namespace RFLink
 
     namespace runtime {
       bool verboseSignalFetchLoop = false;
-      Slicer appliedSlicer = Slicer::Default;
+      Slicer_enum appliedSlicer = Slicer_enum::Default;
     }
 
     namespace params
@@ -59,7 +59,7 @@ namespace RFLink
       unsigned long int signal_repeat_time;
       unsigned long int scan_high_time;
 
-      Slicer slicer = Slicer::Default;
+      Slicer_enum slicer = Slicer_enum::Default;
     }
 
     const char json_name_async_mode_enabled[] = "async_mode_enabled";
@@ -84,7 +84,7 @@ namespace RFLink
             Config::ConfigItem(json_name_signal_repeat_time, Config::SectionId::Signal_id, SIGNAL_REPEAT_TIME_MS, paramsUpdatedCallback),
             Config::ConfigItem(json_name_scan_high_time, Config::SectionId::Signal_id, SCAN_HIGH_TIME_MS, paramsUpdatedCallback),
 
-            Config::ConfigItem(json_name_slicer, Config::SectionId::Signal_id, Slicer::Default, paramsUpdatedCallback, true),
+            Config::ConfigItem(json_name_slicer, Config::SectionId::Signal_id, Slicer_enum::Default, paramsUpdatedCallback, true),
 
             Config::ConfigItem()};
 
@@ -166,13 +166,13 @@ namespace RFLink
       long int value;
       item = Config::findConfigItem(json_name_slicer, Config::SectionId::Signal_id);
       if(item->isUndefined()){
-        if(params::slicer != Slicer::Default)
+        if(params::slicer != Slicer_enum::Default)
           changesDetected = true;
-        params::slicer = Slicer::Default;
+        params::slicer = Slicer_enum::Default;
       }
       else {
         value = item->getLongIntValue();
-        if (value < Slicer::Default || value >= Slicer::SLICERS_EOF ) {
+        if (value < Slicer_enum::Default || value >= Slicer_enum::SLICERS_EOF ) {
           Serial.println(F("Invalid Slicer provided, resetting to default value"));
           if(item->canBeNull) {
             item->deleteJsonRecord();
@@ -183,9 +183,10 @@ namespace RFLink
           changesDetected = true;
         } else if (params::slicer != value) {
           changesDetected = true;
-          params::slicer = (Slicer) value;
+          params::slicer = (Slicer_enum) value;
         }
       }
+
       updateSlicer(params::slicer);
 
 
@@ -347,6 +348,7 @@ namespace RFLink
       gapsTotalLength = 0;
       averagedGapsLength = 0;
       dynamicGapEnd_us = 0;
+      RawSignal.Time = micros();
       RawSignal.endReason = EndReasons::Unknown;
 
       // ***********************************
@@ -374,7 +376,8 @@ namespace RFLink
 
             if(runtime::verboseSignalFetchLoop) {
               sprintf_P(printBuf,
-                        PSTR("LONG Pulse EARLY reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu pos=%u)"),
+                        PSTR("%.4X LONG Pulse EARLY reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu pos=%u)"),
+                        RawSignal.Time,
                         longPulseRssiReference,
                         newRssi,
                         PulseLength_us,
@@ -405,7 +408,8 @@ namespace RFLink
         SWITCH_TOGGLE;
         if (!CHECK_TIMEOUT){
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("Early signal dropped because of seek_timeout (pulseLen=%lu)"),
+            sprintf_P(printBuf, PSTR("%.4X Early signal dropped because of seek_timeout (pulseLen=%lu)"),
+                      RawSignal.Time,
                       PulseLength_us);
             RFLink::sendRawPrint(printBuf, true);
           }
@@ -456,7 +460,8 @@ namespace RFLink
             if (longPulseRssiTimer > 100 && longPulseRssiReference + 3 < newRssi) {
               if(runtime::verboseSignalFetchLoop) {
                 sprintf_P(printBuf,
-                          PSTR("LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
+                          PSTR("%.4X LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
+                          RawSignal.Time,
                           longPulseRssiReference,
                           newRssi,
                           micros() - timeStartLoop_us,
@@ -493,7 +498,8 @@ namespace RFLink
               if( ((unsigned long)RawSignal.Pulses[RawCodeLength-1])*(unsigned long)params::sample_rate >= ((unsigned long)averagedGapsLength)*(unsigned long)150/(unsigned long)100 ) {
                 // if previous Gap is 1.5x the average of Gaps we will try to decode still!
                 if(runtime::verboseSignalFetchLoop) {
-                  RFLink::sendRawPrint(F("attempted noise filter"), true);
+                  sprintf_P(printBuf, PSTR("%.4X attempted noise filter"), RawSignal.Time);
+                  RFLink::sendRawPrint(printBuf, true);
                 }
                 RawSignal.endReason = EndReasons::AttemptedNoiseFilter;
                 break;
@@ -501,7 +507,7 @@ namespace RFLink
             }
           }
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("Dropped signal due to short pulse (RawCodeLength=%u, pulseLen=%lu)"), RawCodeLength, PulseLength_us);
+            sprintf_P(printBuf, PSTR("%.4X Dropped signal due to short pulse (RawCodeLength=%u, pulseLen=%lu)"), RawSignal.Time, RawCodeLength, PulseLength_us);
             RFLink::sendRawPrint(printBuf, true);
           }
           return false; // it seems to be noise so we're out !
@@ -512,7 +518,8 @@ namespace RFLink
           STORE_PULSE;
           if(runtime::verboseSignalFetchLoop) {
             sprintf_P(printBuf,
-                      PSTR("Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)"),
+                      PSTR("%.4X Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)"),
+                      RawSignal.Time,
                       PulseLength_us, dynamicGapEnd_us, (int) RawCodeLength);
             RFLink::sendRawPrint(printBuf, true);
           }
@@ -527,7 +534,9 @@ namespace RFLink
             STORE_PULSE;
 
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("Signal ended because of signal_end_timeout (toggle=%i pos=%i)"), (int) Toggle,
+            sprintf_P(printBuf, PSTR("%.4X Signal ended because of signal_end_timeout (toggle=%i pos=%i)"),
+                      RawSignal.Time,
+                      (int) Toggle,
                       (int) RawCodeLength);
             RFLink::sendRawPrint(printBuf, true);
           }
@@ -570,7 +579,7 @@ namespace RFLink
       else
       {
         if(runtime::verboseSignalFetchLoop) {
-          sprintf_P(printBuf, PSTR("Dropped signal because it's too short (RawCodeLength=%u)"), RawCodeLength);
+          sprintf_P(printBuf, PSTR("%.4X Dropped signal because it's too short (RawCodeLength=%u)"), RawSignal.Time, RawCodeLength);
           RFLink::sendRawPrint(printBuf, true);
         }
         RawSignal.Number = 0;
@@ -593,9 +602,9 @@ namespace RFLink
         {
           bool success = false;
 
-          if(runtime::appliedSlicer == Slicer::Legacy)
+          if(runtime::appliedSlicer == Slicer_enum::Legacy)
             success = FetchSignal_sync();
-          else if (runtime::appliedSlicer == Slicer::RSSI_Advanced)
+          else if (runtime::appliedSlicer == Slicer_enum::RSSI_Advanced)
             success = FetchSignal_sync_rssi();
           else {
             sprintf_P(printBuf, PSTR("Invalid slicer selected (%i)"), (int) runtime::appliedSlicer);
@@ -1136,12 +1145,24 @@ namespace RFLink
       return EndReasonsStrings[(int) reason];
     }
 
-    bool updateSlicer(Slicer newSlicer) {
+    const char * const SlicerNamesStrings[] PROGMEM = {
+            "Legacy",
+            "RSSI_advanced"
+    };
+    static_assert(sizeof(SlicerNamesStrings)/sizeof(char *) == Slicer_enum::SLICERS_EOF, "SlicerNamesStrings has missing/extra names, please compare with Slicer_enum enum declarations");
 
-      runtime::appliedSlicer = Slicer::Legacy;
+    const char * slicerIdToString(Slicer_enum slicer) {
+      return  SlicerNamesStrings[(int) slicer];
+    }
 
+    bool updateSlicer(Slicer_enum newSlicer) {
 
-      if(newSlicer == Slicer::Default){
+      runtime::appliedSlicer = Slicer_enum::Legacy;
+
+      //sprintf_P(printBuf, PSTR("requested Slicer ID '%i'"), (int) runtime::appliedSlicer);
+      //sendRawPrint(printBuf, true);
+
+      if(newSlicer == Slicer_enum::Default){
         if(Radio::hardware == Radio::HardwareType::HW_SX1278_t)
           runtime::appliedSlicer = SLICER_DEFAULT_SX1278;
         else if(Radio::hardware == Radio::HardwareType::HW_RFM69NEW_t)
@@ -1152,6 +1173,9 @@ namespace RFLink
       else {
         runtime::appliedSlicer = newSlicer;
       }
+
+      sprintf_P(printBuf, PSTR("Applied slicer '%s'"), slicerIdToString(runtime::appliedSlicer));
+      sendRawPrint(printBuf, true);
 
       return true;
     }

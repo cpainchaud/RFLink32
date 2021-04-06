@@ -49,7 +49,7 @@ namespace RFLink {
       REASONS_EOF,
     };
 
-    enum Slicer {
+    enum Slicer_enum {
       Default = -1,
       Legacy,
       RSSI_Advanced,
@@ -91,7 +91,7 @@ namespace RFLink {
 
     namespace runtime {
       extern bool verboseSignalFetchLoop;
-      extern Slicer appliedSlicer;
+      extern Slicer_enum appliedSlicer;
     }
 
     namespace counters {
@@ -121,7 +121,7 @@ namespace RFLink {
       runtime::verboseSignalFetchLoop = value;
     }
 
-    bool updateSlicer(Slicer newSlicer);
+    bool updateSlicer(Slicer_enum newSlicer);
 
     namespace AsyncSignalScanner {
       extern unsigned long int lastChangedState_us;     // time last state change occured

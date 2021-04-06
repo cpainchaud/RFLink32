@@ -750,19 +750,19 @@ namespace RFLink { namespace Radio  {
 
       auto result = radio_SX1278->beginFSK( 433.92F, 9.600F, 50.0F, 125.0F, 12, 16, true);
       //auto result = radio_SX1278->beginFSK( 433.92F, 19.200F, 50.0F, 250.0F, 12, 16, true);
-      Serial.printf_P(PSTR("Initialized SX1278, return code %i\r\n"), result);
+      Serial.printf_P(PSTR("Initialized SX1278 return code %i\r\n"), result);
       finalResult |= result;
 
       result = radio_SX1278->setOOK(true);
-      Serial.printf_P(PSTR("SX1278, setOOK=%i\r\n"), result);
+      Serial.printf_P(PSTR("SX1278 setOOK=%i\r\n"), result);
       finalResult |= result;
 
       result = radio_SX1278->setEncoding(RADIOLIB_ENCODING_NRZ);
-      Serial.printf_P(PSTR("SX1278, set encoding result=%i\r\n"), result);
+      Serial.printf_P(PSTR("SX1278 set encoding result=%i\r\n"), result);
       finalResult |= result;
 
       result = radio_SX1278->setDataShapingOOK(0);
-      Serial.printf_P(PSTR("SX1278, set data shaping result=%i\r\n"), result);
+      Serial.printf_P(PSTR("SX1278 set data shaping result=%i\r\n"), result);
       finalResult |= result;
 
       RssiThresholdTypesEnum newType = RssiThresholdType_default_SX127X;
@@ -786,23 +786,23 @@ namespace RFLink { namespace Radio  {
       finalResult |= result;
 
       result = radio_SX1278->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
-      Serial.printf_P(PSTR("SX1278, setOokPeakThresholdDecrement() result=%i\r\n"), result);
+      Serial.printf_P(PSTR("SX1278 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
       result = radio_SX1278->setGain(6);
-      Serial.printf_P(PSTR("SX1278, setGain() result=%i\r\n"), result);
+      Serial.printf_P(PSTR("SX1278 setGain() result=%i\r\n"), result);
       finalResult |= result;
 
       //result = radio_SX1278->setFrequencyDeviation(200.0F);
-      //Serial.printf_P(PSTR("SX1278, setFrequencyDeviation() result=%i\r\n"), result);
+      //Serial.printf_P(PSTR("SX1278 setFrequencyDeviation() result=%i\r\n"), result);
       //finalResult |= result;
 
       //result = radio_SX1278->startReceive(0, SX127X_RXCONTINUOUS);
-      //Serial.printf("sx1278, receive start code %i\r\n", result);
+      //Serial.printf("sx1278 receive start code %i\r\n", result);
       //finalResult |= result;
 
       //result = radio_SX1278->startDirect();
-      //Serial.printf("sx1278, startDirect code %i\r\n", result)
+      //Serial.printf("sx1278 startDirect code %i\r\n", result)
       //finalResult |= result;
 
       return finalResult == 0;
