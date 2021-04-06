@@ -49,6 +49,10 @@ boolean Plugin_045(byte function, const char *string)
    if (RawSignal.Number != AURIOL_PULSECOUNT)
       return false;
 
+   #ifdef PLUGIN_045_DEBUG
+   char tmpbuf[100];
+   #endif
+
    const long AURIOL_MIDHI = AURIOL_MIDHI_D / RawSignal.Multiply;
    const long AURIOL_PULSEMIN = AURIOL_PULSEMIN_D / RawSignal.Multiply;
    const long AURIOL_PULSEMINMAX = AURIOL_PULSEMINMAX_D / RawSignal.Multiply;
@@ -64,8 +68,13 @@ boolean Plugin_045(byte function, const char *string)
    //==================================================================================
    for (byte x = 2; x < AURIOL_PULSECOUNT; x += 2)
    {
-      if (RawSignal.Pulses[x + 1] > AURIOL_MIDHI)
-         return false; // in between pulses should not exceed a length of 550
+      if (RawSignal.Pulses[x + 1] > AURIOL_MIDHI) {
+        #ifdef PLUGIN_045_DEBUG
+        sprintf_P(tmpbuf, PSTR("Auriol: failed Pulses[x + 1] > AURIOL_MIDHI at pulse#=%i length=%i"), x+1, RawSignal.Pulses[x + 1]*RawSignal.Multiply);
+        RFLink::sendRawPrint(tmpbuf, true);
+        #endif
+        return false; // in between pulses should not exceed a length of 550
+      }
 
       bitstream <<= 1; // Always shift
 
@@ -73,10 +82,20 @@ boolean Plugin_045(byte function, const char *string)
          bitstream |= 0x1; // long bit = 1
       else
       {
-         if (RawSignal.Pulses[x] < AURIOL_PULSEMIN)
-            return false; // pulse length too short to be valid?
-         if (RawSignal.Pulses[x] > AURIOL_PULSEMINMAX)
-            return false; // pulse length between 2000 - 3000 is invalid
+         if (RawSignal.Pulses[x] < AURIOL_PULSEMIN) {
+           #ifdef PLUGIN_045_DEBUG
+           sprintf_P(tmpbuf, PSTR("Auriol: failed Pulses[x] < AURIOL_PULSEMIN at pulse#=%i length=%i"), x, RawSignal.Pulses[x]*RawSignal.Multiply);
+           RFLink::sendRawPrint(tmpbuf, true);
+           #endif
+           return false; // pulse length too short to be valid?
+         }
+         if (RawSignal.Pulses[x] > AURIOL_PULSEMINMAX) {
+           #ifdef PLUGIN_045_DEBUG
+           sprintf_P(tmpbuf, PSTR("Auriol: failed Pulses[x] > AURIOL_PULSEMINMAX at pulse#=%i length=%i"), x, RawSignal.Pulses[x]*RawSignal.Multiply);
+           RFLink::sendRawPrint(tmpbuf, true);
+           #endif
+           return false; // pulse length between 2000 - 3000 is invalid
+         }
 
          // bitstream |= 0x0; // short bit = 0
       }
@@ -84,8 +103,12 @@ boolean Plugin_045(byte function, const char *string)
    //==================================================================================
    // Perform a quick sanity check
    //==================================================================================
-   if (bitstream == 0)
-      return false;
+   if (bitstream == 0) {
+     #ifdef PLUGIN_045_DEBUG
+     RFLink::sendRawPrint(F("Auriol: failed bitstream == 0"), true);
+     #endif
+     return false;
+   }
    //==================================================================================
    // Prevent repeating signals from showing up
    //==================================================================================
@@ -100,8 +123,12 @@ boolean Plugin_045(byte function, const char *string)
    { // Perform a checksum calculation to make sure the received packet is a valid Auriol packet
       checksumcalc ^= ((bitstream >> i) & 0x01);
    }
-   if (checksumcalc != (bitstream & 0x01))
-      return false;
+   if (checksumcalc != (bitstream & 0x01)) {
+     #ifdef PLUGIN_045_DEBUG
+     RFLink::sendRawPrint(F("Auriol:failed checksumcalc != (bitstream & 0x01)"), true);
+     #endif
+     return false;
+   }
    rc = (bitstream >> 20) & 0x07; // get 3 bits to perform another sanity check
    if (rc != 0)
       return false; // selected bits should always be 000
@@ -114,14 +141,22 @@ boolean Plugin_045(byte function, const char *string)
    if (temperature > 3000)
    {
       temperature = 4096 - temperature; // fix for minus temperatures
-      if (temperature > 0x258)
-         return false;                    // temperature out of range ( > -60.0 degrees)
+      if (temperature > 0x258) {
+        #ifdef PLUGIN_045_DEBUG
+        RFLink::sendRawPrint(F("Auriol:failed temperature > 0x258"), true);
+        #endif
+        return false;                    // temperature out of range ( > -60.0 degrees)
+      }
       temperature = temperature | 0x8000; // turn highest bit on for minus values
    }
    else
    {
-      if (temperature > 0x258)
-         return false; // temperature out of range ( > 60.0 degrees)
+      if (temperature > 0x258) {
+        #ifdef PLUGIN_045_DEBUG
+        RFLink::sendRawPrint(F("Auriol:failed temperature > 0x258"), true);
+        #endif
+        return false; // temperature out of range ( > 60.0 degrees)
+      }
    }
    //==================================================================================
    // Output

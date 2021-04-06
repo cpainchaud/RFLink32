@@ -42,7 +42,7 @@ jobs:
         pio run --project-conf .travis.platformio.ini --environment D1_sw
 
     - name: Copy firmwares in 1 place
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      if: github.event_name == 'push'
       run: |
         mkdir firmwares
         cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware-OTA.bin
@@ -54,7 +54,7 @@ jobs:
         python ../tools/esp32-makeimg.py bootloader_dio_40m.bin esp32-partitions.bin boot_app0.bin esp32-firmware-OTA.bin esp32-full.img
         cd ..
 
-    - name: Publish firmware
+    - name: Publish firmware for Master branch
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -65,6 +65,16 @@ jobs:
         files: |
           firmwares/*
 
+    - name: Publish firmware for RadioLib branch
+      if: github.ref == 'refs/heads/RadioLib' && github.event_name == 'push'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "nightly-RadioLib"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          firmwares/*
 
 
 

@@ -68,6 +68,7 @@ namespace RFLink {
 
     struct timeval timeAtBoot;
     struct timeval scheduledRebootTime;
+    char printBuf[300];
 
     void setup() {
 
@@ -220,14 +221,18 @@ namespace RFLink {
       }
     }
 
-    void sendRawPrint(const char *buf) {
+    void sendRawPrint(const char *buf, bool end_of_line) {
       if (buf[0] != 0) {
 
 #ifdef SERIAL_ENABLED
         Serial.print(buf);
+        if(end_of_line)
+          Serial.println();
 #endif
 #ifndef RFLINK_SERIAL2NET_DISABLED
         RFLink::Serial2Net::broadcastMessage(buf);
+        if(end_of_line)
+          RFLink::Serial2Net::broadcastMessage(F("\r\n"));
 #endif // !RFLINK_SERIAL2NET_DISABLED
 
       }
@@ -293,12 +298,16 @@ namespace RFLink {
 #endif // !RFLINK_SERIAL2NET_DISABLED
     }
 
-    void sendRawPrint(const __FlashStringHelper *buf){
+    void sendRawPrint(const __FlashStringHelper *buf, bool end_of_line){
       #ifdef SERIAL_ENABLED
       Serial.print(buf);
+      if(end_of_line)
+        Serial.println();
       #endif
       #ifndef RFLINK_SERIAL2NET_DISABLED
       RFLink::Serial2Net::broadcastMessage(buf);
+      if(end_of_line)
+        RFLink::Serial2Net::broadcastMessage(F("\r\n"));
       #endif // !RFLINK_SERIAL2NET_DISABLED
     };
 

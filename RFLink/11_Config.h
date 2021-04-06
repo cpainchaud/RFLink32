@@ -45,11 +45,12 @@ namespace RFLink
             void (*update_callback)();
             void *defaultValue;
             JsonVariant jsonRef;
+            bool canBeNull;
 
-            ConfigItem(const char *name, SectionId section, const char *default_value, void (*update_callback)());
-            ConfigItem(const char *name, SectionId section, long int default_value, void (*update_callback)());
-            ConfigItem(const char *name, SectionId section, int default_value, void (*update_callback)()) : ConfigItem(name, section, (long int)default_value, update_callback){};
-            ConfigItem(const char *name, SectionId section, bool default_value, void (*update_callback)());
+            ConfigItem(const char *name, SectionId section, const char *default_value, void (*update_callback)(), bool can_be_null = false);
+            ConfigItem(const char *name, SectionId section, long int default_value, void (*update_callback)(), bool can_be_null = false);
+            ConfigItem(const char *name, SectionId section, int default_value, void (*update_callback)(), bool can_be_null = false) : ConfigItem(name, section, (long int)default_value, update_callback, can_be_null){};
+            ConfigItem(const char *name, SectionId section, bool default_value, void (*update_callback)(), bool can_be_null = false);
             ConfigItem();
 
             JsonVariant createInJsonObject(JsonObject &object);
@@ -59,6 +60,18 @@ namespace RFLink
             inline bool typeIsLongInt() { return this->type == ConfigItemType::LONG_INT_t; }
             inline bool typeIsBool() { return this->type == ConfigItemType::BOOLEAN_t; }
             inline bool typeIsEOF() { return this->type == ConfigItemType::EOF_t; }
+
+            inline void deleteJsonRecord(){
+                jsonRef.clear();
+            }
+
+            inline bool isUndefined(){
+                return jsonRef.isUndefined() ||jsonRef.isNull();
+            }
+
+          inline void assignJsonRef(JsonVariant &json){
+              this->jsonRef = json;
+          }
 
             inline const char *getCharDefaultValue()
             {
@@ -77,7 +90,10 @@ namespace RFLink
 
             inline const char *getCharValue()
             {
-                return (const char *)this->jsonRef.as<const char *>();
+              if(isUndefined())
+                return getCharDefaultValue();
+
+              return (const char *)this->jsonRef.as<const char *>();
             }
 
             /**
@@ -85,12 +101,15 @@ namespace RFLink
                  */
             inline void setCharValue(const char *newValue)
             {
-                this->jsonRef.set((char *)newValue);
+              this->jsonRef.set((char *)newValue);
             }
 
             inline long int getLongIntValue()
             {
-                return (long int)this->jsonRef.as<signed long>();
+              if(isUndefined())
+                return getLongIntDefaultValue();
+
+              return (long int)this->jsonRef.as<signed long>();
             }
 
             inline void setLongIntValue(long int newValue)
@@ -100,7 +119,10 @@ namespace RFLink
 
             inline bool getBoolValue()
             {
-                return this->jsonRef.as<bool>();
+              if(isUndefined())
+                return getBoolDefaultValue();
+
+              return this->jsonRef.as<bool>();
             }
 
             inline void setBoolValue(bool newValue)
@@ -118,6 +140,7 @@ namespace RFLink
          * @return SectionId::EOF_id is not found
          *  */
         SectionId getSectionIdFromString(const char *);
+        JsonVariant createElementInSection(SectionId, const char *name);
 
         bool saveConfigToFlash();
 

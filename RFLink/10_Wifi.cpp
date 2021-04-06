@@ -375,14 +375,13 @@ namespace RFLink { namespace Wifi {
 
 #ifdef ESP32
         void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
-          Serial.println(F("Connected to AP!"));
 
-          Serial.print(F("SSID: "));
+          Serial.print(F("Connected to AP SSID:"));
           for(int i=0; i<info.connected.ssid_len; i++){
             Serial.print((char) info.connected.ssid[i]);
           }
 
-          Serial.print("\r\nBSSID: ");
+          Serial.print("  BSSID: ");
           for(int i=0; i<6; i++){
             Serial.printf("%02X", info.connected.bssid[i]);
 
@@ -391,10 +390,10 @@ namespace RFLink { namespace Wifi {
             }
           }
 
-          Serial.print(F("\r\nChannel: "));
-          Serial.println(info.connected.channel);
+          Serial.print(F("  Channel: "));
+          Serial.print(info.connected.channel);
 
-          Serial.print(F("Auth mode: "));
+          Serial.print(F("  Auth mode: "));
           Serial.println(info.connected.authmode);
 
         }

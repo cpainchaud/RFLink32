@@ -44,6 +44,10 @@ boolean Plugin_034(byte function, const char *string)
    if ((RawSignal.Number < CRESTA_MIN_PULSECOUNT) || (RawSignal.Number > CRESTA_MAX_PULSECOUNT))
       return false;
 
+   #ifdef PLUGIN_034_DEBUG
+   char tmpbuf[100];
+   #endif
+
    const long CRESTA_PULSEMID = CRESTA_PULSEMID_D / RawSignal.Multiply;
 
    byte bytecounter = 0;  // used for counting the number of received bytes
@@ -73,14 +77,24 @@ boolean Plugin_034(byte function, const char *string)
    do
    {
       if (RawSignal.Pulses[pulseposition] > CRESTA_PULSEMID)
-      {                    // high value = 1 bit
-         if (halfbit == 1) // cant receive a 1 bit after a single low value
-            return false;  // pulse error, must not be a Cresta packet or reception error
+      {                      // high value = 1 bit
+         if (halfbit == 1) { // cant receive a 1 bit after a single low value
+            #ifdef PLUGIN_034_DEBUG
+            sprintf_P(tmpbuf, PSTR("Cresta: failed halfbit == 1 at pulse#=%i length=%i"), pulseposition, RawSignal.Pulses[pulseposition]*RawSignal.Multiply);
+            RFLink::sendRawPrint(tmpbuf, true);
+            #endif
+            return false;    // pulse error, must not be a Cresta packet or reception error
+         }
 
          if (bitcounter == 8)
          {
-            if (parity != 1) // now receiving parity bit
-               return false; // parity error, must not be a Cresta packet or reception error
+            if (parity != 1) {  // now receiving parity bit
+              #ifdef PLUGIN_034_DEBUG
+              sprintf_P(tmpbuf, PSTR("Cresta: failed parity != 1 at pulse#=%i length=%i"), pulseposition, RawSignal.Pulses[pulseposition]*RawSignal.Multiply);
+              RFLink::sendRawPrint(tmpbuf, true);
+              #endif
+              return false;    // parity error, must not be a Cresta packet or reception error
+            }
             else
             {
                bitcounter = 0; // reset for next byte
@@ -106,8 +120,13 @@ boolean Plugin_034(byte function, const char *string)
          {
             if (bitcounter == 8)
             {
-               if (parity != 0) // now receiving parity bit
-                  return false; // parity error, must not be a Cresta packet or reception error
+               if (parity != 0) { // now receiving parity bit
+                  #ifdef PLUGIN_034_DEBUG
+                  sprintf_P(tmpbuf, PSTR("Cresta: failed parity != 0 at pulse#=%i length=%i"), pulseposition, RawSignal.Pulses[pulseposition]*RawSignal.Multiply);
+                  RFLink::sendRawPrint(tmpbuf, true);
+                  #endif
+                  return false;   // parity error, must not be a Cresta packet or reception error
+               }
                else
                {
                   bitcounter = 0; // reset for next byte
@@ -139,17 +158,32 @@ boolean Plugin_034(byte function, const char *string)
    // get packet length
    length = data[2] & 0x3F; // drop bits 6 and 7
    length >>= 1;            // drop bit 0
-   if (length > 20)
-      return false; // Additional check for illegal packet lengths to protect against false positives.
-   if (length == 0)
-      return false; // Additional check for illegal packet lengths to protect against false positives.
+   if (length > 20) {
+     #ifdef PLUGIN_034_DEBUG
+     sprintf_P(tmpbuf, PSTR("Cresta: failed length > 20 at length=%i"), (int) length);
+     RFLink::sendRawPrint(tmpbuf, true);
+     #endif
+     return false; // Additional check for illegal packet lengths to protect against false positives.
+   }
+   if (length == 0) {
+     #ifdef PLUGIN_034_DEBUG
+     sprintf_P(tmpbuf, PSTR("Cresta: failed length ==0"));
+     RFLink::sendRawPrint(tmpbuf, true);
+     #endif
+     return false; // Additional check for illegal packet lengths to protect against false positives.
+   }
    // Checksum: XOR of all bytes from byte 1 till byte length+2, should result in 0
    checksum = 0;
    for (byte i = 1; i < length + 2; i++)
       checksum ^= data[i];
 
-   if (checksum != 0)
-      return false;
+   if (checksum != 0) {
+     #ifdef PLUGIN_034_DEBUG
+     sprintf_P(tmpbuf, PSTR("Cresta: failed checksum != 0"));
+     RFLink::sendRawPrint(tmpbuf, true);
+     #endif
+     return false;
+   }
    // ==================================================================================
    // now process the various sensor types
    // ==================================================================================

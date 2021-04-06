@@ -18,7 +18,7 @@
  * CAME-TOP-432 is a common Gate/Door system
  * Their radio receiver is usually equiped with a 8 bit switch to generate a unique code
  * 
- * Sample signals, usually repeated :
+ * Sample signals, 26 pulses repeated at least 4 times with 20ms delay between pulses:
  * 20;XX;DEBUG;Pulses=26;Pulses(uSec)=368,608,384,192,768,224,768,208,800,192,768,624,368,624,352,624,352,208,768,224,752,624,352,240,736,896;
  * 20;XX;DEBUG;Pulses=26;Pulses(uSec)=384,592,384,176,784,208,768,208,784,208,768,640,352,624,352,640,352,224,752,224,752,640,336,224,752,896;
  * 20;XX;DEBUG;Pulses=26;Pulses(uSec)=384,608,368,192,784,192,784,208,768,208,768,624,352,624,352,624,352,224,752,224,752,640,336,224,128,896;
@@ -157,7 +157,7 @@ boolean Plugin_076(byte function, const char *string)
     display_Footer();
 
     RawSignal.Repeats = 4;
-    RawSignal.Delay = 15;
+    RawSignal.Delay = 20;
 
 
     return true;

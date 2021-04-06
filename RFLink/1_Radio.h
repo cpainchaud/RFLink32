@@ -154,6 +154,10 @@ namespace RFLink { namespace Radio {
      * */
     void disableTX_generic();
 
+    /**
+     * Takes 19-32us to execute
+     * @return
+     */
     float getCurrentRssi();
 
     void initializeHardware(HardwareType newHardware, bool force = false);
