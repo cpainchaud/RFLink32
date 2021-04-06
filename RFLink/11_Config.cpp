@@ -118,7 +118,11 @@ namespace RFLink
     {
       Serial.print(F("Loading persistent filesystem... "));
 
+      #ifdef ESP32
       if (!LittleFS.begin(true))
+      #else
+      if( !LittleFS.begin())
+      #endif
       {
         Serial.println(F(" FAILED!!"));
         return;
@@ -129,8 +133,8 @@ namespace RFLink
       Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
 #else // this is ESP8266
       FSInfo info;
-            LittleFS.info(info);
-            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
+      LittleFS.info(info);
+      Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
 #endif
 
 
