@@ -103,7 +103,10 @@ boolean retrieve_End();
 #define VALUE_LIMIT 82
 #define VALUE_ALLON 141
 
+#define str2int(x) atoi(x)
+
 int str2cmd(const char *);
+
 void replacechar(char *, char, char);
 
 #if (defined(ESP8266) || defined(ESP32))
