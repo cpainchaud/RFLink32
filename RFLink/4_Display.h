@@ -35,7 +35,11 @@ enum CMD_OnOff
     CMD_On,
     CMD_Bright,
     CMD_Dim,
-    CMD_Unknown
+    CMD_Unknown,
+    CMD_Up,
+    CMD_Down,
+    CMD_Stop,
+    CMD_Pair
 };
 void display_CMD(boolean, byte);
 void display_SET_LEVEL(byte);

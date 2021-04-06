@@ -119,6 +119,18 @@ void display_CMD(boolean all, byte on)
   case CMD_Dim:
     sprintf_P(dbuffer, PSTR("%s"), PSTR("DIM"));
     break;
+  case CMD_Up:
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("UP"));
+    break;
+  case CMD_Down:
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("DOWN"));
+    break;
+  case CMD_Stop:
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("STOP"));
+    break;
+  case CMD_Pair:
+    sprintf_P(dbuffer, PSTR("%s"), PSTR("PAIR"));
+    break;
   case CMD_Unknown:
   default:
     sprintf_P(dbuffer, PSTR("%s"), PSTR("UNKNOWN"));
