@@ -64,24 +64,24 @@ namespace RFLink
 
     StaticJsonDocument<4096> doc;
 
-        void resetConfig()
-        {
-            if (LittleFS.exists(configFileName))
-                LittleFS.remove(configFileName);
+    void resetConfig()
+    {
+      if (LittleFS.exists(configFileName))
+        LittleFS.remove(configFileName);
 
       Serial.println(F("Config has been reset and requires a reboot to complete"));
     }
 
-        void printFile()
-        {
-            // Open file for reading
-            Serial.println(F("Now dumping JSON file content:"));
-            File file = LittleFS.open(configFileName, "r");
-            if (!file)
-            {
-                Serial.println(F("Failed to read file"));
-                return;
-            }
+    void printFile()
+    {
+      // Open file for reading
+      Serial.println(F("Now dumping JSON file content:"));
+      File file = LittleFS.open(configFileName, "r");
+      if (!file)
+      {
+        Serial.println(F("Failed to read file"));
+        return;
+      }
 
       // Extract each characters by one by one
       while (file.available())
@@ -118,24 +118,21 @@ namespace RFLink
     {
       Serial.print(F("Loading persistent filesystem... "));
 
-        void setup()
-        {
-            Serial.print(F("Loading persistent filesystem... "));
-
-            if (!LittleFS.begin(true))
-            {
-                Serial.println(F(" FAILED!!"));
-                return;
-            }
-            Serial.print(F("OK. "));
+      if (!LittleFS.begin(true))
+      {
+        Serial.println(F(" FAILED!!"));
+        return;
+      }
+      Serial.print(F("OK. "));
 
 #ifdef ESP32
-            Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
+      Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
 #else // this is ESP8266
-            FSInfo info;
+      FSInfo info;
             LittleFS.info(info);
             Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
 #endif
+
 
       for (unsigned int i = 0; i < configItemListsSize; i++)
       {
@@ -176,11 +173,11 @@ namespace RFLink
 
       Serial.printf(PSTR("Now opening JSON config file '%s'\r\n"), configFileName);
 
-            File file = LittleFS.open(configFileName, "r");
-            DeserializationError error = deserializeJson(doc, file);
-            if (error)
-                Serial.println(F("Failed to read file, using default configuration"));
-            file.close();
+      File file = LittleFS.open(configFileName, "r");
+      DeserializationError error = deserializeJson(doc, file);
+      if (error)
+        Serial.println(F("Failed to read file, using default configuration"));
+      file.close();
 
       Serial.printf_P(PSTR("JSON file mem usage: %u / %u\r\n"), doc.memoryUsage(), doc.memoryPool().capacity());
 
@@ -617,26 +614,71 @@ namespace RFLink
       this->boolDefaultValue = default_value;
     }
 
-            if (LittleFS.exists(F("/tmp.json")))
-                LittleFS.remove(F("/tmp.json"));
-            File file = LittleFS.open(F("/tmp.json"), "w");
+    ConfigItem::ConfigItem()
+    {
+      this->json_name = nullptr;
+      this->section = SectionId::EOF_id;
+      this->type = ConfigItemType::EOF_t;
+      this->update_callback = nullptr;
+      this->canBeNull = false;
+    }
+
+    void dumpConfigToString(String &destination)
+    {
+      //serializeJson(doc, destination);
+      serializeJsonPretty(doc, destination);
+    }
+
+    void dumpConfigToSerial()
+    {
+      serializeJson(doc, Serial);
+      Serial.println();
+    }
+
+    SectionId getSectionIdFromString(const char *name)
+    {
+
+      for (unsigned int i = 0; i < jsonSections_count; i++)
+      {
+        if (strcmp(name, jsonSections[i]) == 0)
+          return (SectionId)i;
+      }
+
+      return SectionId::EOF_id;
+    }
+
+    JsonVariant createElementInSection(SectionId section, const char *name)
+    {
+      JsonVariant ret = doc.getMember(jsonSections[section]).getOrAddMember((char*)name); // casting to char* forces a copy! avoids crash!
+      return ret;
+    }
+
+    bool saveConfigToFlash()
+    {
+
+      Serial.print(F("Saving JSON config to FLASH.... "));
+      Signal::AsyncSignalScanner::stopScanning();
+
+      if (LittleFS.exists(F("/tmp.json")))
+        LittleFS.remove(F("/tmp.json"));
+      File file = LittleFS.open(F("/tmp.json"), "w");
 
       auto bytes_written = serializeJson(doc, file);
       file.close();
 
-            if (bytes_written == 0)
-            {
-                Serial.println(F("failed!"));
-                Signal::AsyncSignalScanner::startScanning();
-                return false;
-            }
-            else
-            {
-                if (LittleFS.exists(configFileName))
-                    LittleFS.remove(configFileName);
-                LittleFS.rename(F("/tmp.json"), configFileName);
-                Serial.println(F("OK"));
-            }
+      if (bytes_written == 0)
+      {
+        Serial.println(F("failed!"));
+        Signal::AsyncSignalScanner::startScanning();
+        return false;
+      }
+      else
+      {
+        if (LittleFS.exists(configFileName))
+          LittleFS.remove(configFileName);
+        LittleFS.rename(F("/tmp.json"), configFileName);
+        Serial.println(F("OK"));
+      }
 
       Signal::AsyncSignalScanner::startScanning();
 
