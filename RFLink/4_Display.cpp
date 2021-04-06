@@ -353,13 +353,15 @@ void display_CHAN(byte channel)
 // get label shared func //
 // --------------------- //
 
+char retrieveBuffer[INPUT_COMMAND_SIZE];
 char *ptr;
 const char c_delim[2] = ";";
 char c_label[12];
 
 void retrieve_Init()
 {
-  ptr = strtok(InputBuffer_Serial, c_delim);
+  memcpy(retrieveBuffer, InputBuffer_Serial, INPUT_COMMAND_SIZE);
+  ptr = strtok(retrieveBuffer, c_delim);
 }
 
 boolean retrieve_Name(const char *c_Name)
@@ -375,67 +377,138 @@ boolean retrieve_Name(const char *c_Name)
     return false;
 }
 
-boolean retrieve_ID(unsigned long &ul_ID)
+boolean retrieve_hasPrefix(const char* prefix)
 {
-  // ID
-  char c_ID[10];
-
-  if (ptr != NULL)
+  if (ptr != NULL && prefix != NULL)
   {
-    strcpy(c_label, "ID=");
-    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-      ptr += strlen(c_label);
-
-    if (strlen(ptr) > 8)
+    int prefixLength = strlen(prefix);
+    if (strncasecmp(ptr, prefix, prefixLength) != 0)
       return false;
-
-    for (byte i = 0; i < strlen(ptr); i++)
-      if (!isxdigit(ptr[i]))
-        return false;
-
-    strcpy(c_ID, ptr);
-    c_ID[8] = 0;
-
-    ul_ID = strtoul(c_ID, NULL, HEX);
-    ul_ID &= 0x03FFFFFF;
-
-    ptr = strtok(NULL, c_delim);
+    ptr += prefixLength;
     return true;
   }
   else
     return false;
 }
 
-boolean retrieve_Switch(byte &b_Switch)
+boolean retrieve_decimalNumber(unsigned long &value, byte maxDigits, const char* prefix)
 {
-  // Switch
-  char c_Switch[10];
-
   if (ptr != NULL)
   {
-    strcpy(c_label, "SWITCH=");
-    if (strncasecmp(ptr, c_label, strlen(c_label)) == 0)
-      ptr += strlen(c_label);
+    if ((prefix != NULL) && (strncasecmp(ptr, prefix, strlen(prefix)) == 0))
+      ptr += strlen(prefix);
 
-    if (strlen(ptr) > 1)
+    if (strlen(ptr) > maxDigits)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isdigit(ptr[i]))
+        return false;
+
+    value = strtoul(ptr, NULL, DEC);
+
+    ptr = strtok(NULL, c_delim);
+    return true;
+  }
+
+  return false;
+}
+
+boolean retrieve_hexNumber(unsigned long &value, byte maxNibbles, const char* prefix)
+{
+  if (ptr != NULL)
+  {
+    if ((prefix != NULL) && (strncasecmp(ptr, prefix, strlen(prefix)) == 0))
+      ptr += strlen(prefix);
+
+    if (strlen(ptr) > maxNibbles)
       return false;
 
     for (byte i = 0; i < strlen(ptr); i++)
       if (!isxdigit(ptr[i]))
         return false;
 
-    strcpy(c_Switch, ptr);
-
-    b_Switch = (byte)strtoul(c_Switch, NULL, HEX);
-    b_Switch--; // 1 to 16 -> 0 to 15 (displayed value is one more)
-    if (b_Switch > 0xF)
-      return false; // invalid address
+    value = strtoul(ptr, NULL, HEX);
 
     ptr = strtok(NULL, c_delim);
     return true;
   }
-  else
-    return false;
+
+  return false;
+}
+
+boolean retrieve_Command(byte &value, const char* prefix)
+{
+  if (ptr != NULL)
+  {
+    if ((prefix != NULL) && (strncasecmp(ptr, prefix, strlen(prefix)) == 0))
+      ptr += strlen(prefix);
+
+    if (strlen(ptr) > 7)
+      return false;
+
+    for (byte i = 0; i < strlen(ptr); i++)
+      if (!isalnum(ptr[i]))
+        return false;
+
+    value = str2cmd(ptr); // Get ON/OFF etc. command
+    if (value != false)
+        ptr = strtok(NULL, c_delim);
+
+    return (value != false);
+  }
+  
+  return false;
+}
+
+boolean retrieve_long(unsigned long &value, const char* prefix)
+{
+    return retrieve_hexNumber(value, 8, prefix);
+}
+
+boolean retrieve_word(uint16_t &value, const char* prefix)
+{
+    unsigned long retrievedValue;
+    bool result = retrieve_hexNumber(retrievedValue, 4, prefix);
+    if (result)
+        value = (uint16_t)retrievedValue;
+    return result;
+}
+
+boolean retrieve_byte(byte &value, const char* prefix)
+{
+    unsigned long retrievedValue;
+    bool result = retrieve_hexNumber(retrievedValue, 2, prefix);
+    if (result)
+        value = (byte)retrievedValue;
+    return result;
+}
+
+boolean retrieve_nibble(byte &value, const char* prefix)
+{
+    unsigned long retrievedValue;
+    bool result = retrieve_hexNumber(retrievedValue, 1, prefix);
+    if (result)
+        value = (byte)retrievedValue;
+    return result;
+}
+
+boolean retrieve_ID(unsigned long &ul_ID)
+{
+    boolean result = retrieve_long(ul_ID, "ID=");
+    if (result)
+        ul_ID &= 0x03FFFFFF; 
+    return result;
+}
+
+boolean retrieve_Switch(byte &b_Switch)
+{
+    return retrieve_nibble(b_Switch, "SWITCH=");
+}
+
+boolean retrieve_Command(byte &b_Cmd)
+{
+    return retrieve_Command(b_Cmd, "CMD=");
 }
 
 boolean retrieve_Command(byte &b_Cmd, byte &b_Cmd2)
