@@ -510,7 +510,7 @@ boolean retrieve_End()
 /*********************************************************************************************\
    Convert string to command code
 \*********************************************************************************************/
-int str2cmd(char *command)
+int str2cmd(const char *command)
 {
   if (strcasecmp(command, "ON") == 0)
     return VALUE_ON;
