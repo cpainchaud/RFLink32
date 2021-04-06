@@ -1019,7 +1019,7 @@ namespace RFLink
 
       *commaIndex = 0; // replace ';' with null termination
 
-      if (strncasecmp(cmd, commands::sendRF, commandSize) == 0)
+      if (strncasecmp_P(cmd, commands::sendRF, commandSize) == 0)
       {
         if(!getSignalFromJson(signal, commaIndex + 1)) {
           RFLink::sendRawPrint(FPSTR(error_command_aborted), true);
@@ -1029,6 +1029,26 @@ namespace RFLink
         Serial.printf_P(PSTR("** sending RF signal with the following properties: pulses=%i, repeat=%i, delay=%i, multiply=%i... "), signal.Number, signal.Repeats, signal.Delay, signal.Multiply);
         RawSendRF(&signal);
         Serial.println(F("done"));
+      }
+      else if (strncasecmp_P(cmd, commands::testRF, commandSize) == 0)
+      {
+        RawSignal.readyForDecoder = true;
+
+        if(!getSignalFromJson(RawSignal, commaIndex+1)) {
+          Serial.println(FPSTR(error_command_aborted));
+          RawSignal.readyForDecoder = false;
+          return;
+        }
+
+        Serial.printf_P(PSTR("Sending your signal to Plugins (%i pulses)\r\n"), RawSignal.Number);
+
+        if (!PluginRXCall(0, 0)){
+          Serial.println(F("No plugin has matched your signal"));
+        }
+        else
+          RFLink::sendMsgFromBuffer();
+
+        RawSignal.readyForDecoder = false;
       }
       else if (strncasecmp_P(cmd, commands::testRFMoveForward, commandSize) == 0)
       {
@@ -1057,26 +1077,6 @@ namespace RFLink
           yield();
         }
 
-      }
-      else if (strncasecmp_P(cmd, commands::testRF, commandSize) == 0)
-      {
-        RawSignal.readyForDecoder = true;
-
-        if(!getSignalFromJson(RawSignal, commaIndex+1)) {
-          Serial.println(FPSTR(error_command_aborted));
-          RawSignal.readyForDecoder = false;
-          return;
-        }
-
-        Serial.printf_P(PSTR("Sending your signal to Plugins (%i pulses)\r\n"), RawSignal.Number);
-
-        if (!PluginRXCall(0, 0)){
-          Serial.println(F("No plugin has matched your signal"));
-        }
-        else
-          RFLink::sendMsgFromBuffer();
-
-        RawSignal.readyForDecoder = false;
       }
       else if (strncasecmp_P(cmd, commands::enableVerboseSignalFetchLoop, commandSize) == 0) {
         runtime::verboseSignalFetchLoop = true;
