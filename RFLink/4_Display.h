@@ -83,12 +83,38 @@ void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
 
+// These functions are here to help writing the emitting part of a plugin by interpreting the received command
+// A local copy of the original InputBuffer_Serial is split by semi colons into tokens seperated when calling
+// retrieve_Init(). The token "pointer" is located at the first found token.
+// After that, each retrieve_XX method looks for a given value, with an optional case insensitive prefix, and 
+// returns wether it has found it or not. In that is case, the token "pointer" is moved to the next token, ready 
+// to be parsed by a call to another retrieve_XX function. 
+// Note that if the token bytes do not match the expected format, the method returns false and the token 
+// "pointer" is left unchanged. 
+// This can be quite convenient to test for  multiple names with the retrieve_Name method, for instance.
 void retrieve_Init();
-boolean retrieve_Name(const char *);
-boolean retrieve_ID(unsigned long &);
-boolean retrieve_Switch(byte &);
-boolean retrieve_Command(byte &, byte &);
-boolean retrieve_End();
+boolean retrieve_Name(const char *);  // checks if the next token is equal (case insensitive) to the given string
+
+boolean retrieve_hasPrefix(const char*);  // checks if the next token starts (case insensitive) with the given string. If that is the case, the pointer is advanced to the character right next to the prefix, effectively skipping it.
+
+boolean retrieve_decimalNumber(unsigned long &, byte maxDigits, const char* = NULL); // retrieves a long, expressed as at most maxDigits decimal digits. Returns false if value contains non digits or too much of them. Sets 0 if no digits is found. 
+boolean retrieve_hexNumber(unsigned long &, byte maxNibbles, const char* = NULL); // retrieves a long, expressed as at most maxNibbles hex digits. Returns false if value contains non hex digits or too much of them. Sets 0 if no hex digits is found.
+boolean retrieve_Command(byte &, const char*); // retrieves a command, returns false if the string value is not accepted by str2cmd
+
+boolean retrieve_long(unsigned long &, const char* = NULL);  // calls retrieve_hexNumber(, 8, )
+boolean retrieve_word(uint16_t &, const char* = NULL);  // calls retrieve_hexNumber(, 4, )
+boolean retrieve_byte(byte &, const char* = NULL);  // calls retrieve_hexNumber(, 2, )
+boolean retrieve_nibble(byte &, const char* = NULL);  // calls retrieve_hexNumber(, 1, )
+
+boolean retrieve_ID(unsigned long &);  // calls retrieve_long(, "ID=") and limits the value to 0x03FFFFFF (26 bits)
+boolean retrieve_Switch(byte &);  // calls retrieve_nibble(, "SWITCH=")
+boolean retrieve_Command(byte &); // calls retrieve_command(, "CMD=") 
+
+boolean retrieve_End();  // returns true if the token "pointer" is at the end of the input string
+
+// This is a specialized method that allows for "SET_LEVEL=" or "CMD=" prefix and if the value is a command, then
+// sets its first parameter to constants depending on the command. If not, it sets its second argument to the value.
+boolean retrieve_Command(byte &, byte &);  
 
 #define VALUE_PAIR 44
 #define VALUE_ALLOFF 55
