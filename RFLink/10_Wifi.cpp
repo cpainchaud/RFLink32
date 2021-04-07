@@ -344,10 +344,10 @@ namespace RFLink { namespace Wifi {
           }
 
           Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
-                          timeinfo->tm_year+1900, timeinfo->tm_mon, timeinfo->tm_mday,
-                          timeinfo->tm_hour, timeinfo->tm_hour, timeinfo->tm_sec);
-          //Serial.println(&timeinfo, "Current time is %A, %B %d %Y %H:%M:%S UTC");
+                          timeinfo->tm_year+1900, timeinfo->tm_mon+1, timeinfo->tm_mday,
+                          timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         }
+
 
         void ntpUpdateCallback(struct timeval *newTime){
 
@@ -364,8 +364,7 @@ namespace RFLink { namespace Wifi {
           sntp_set_time_sync_notification_cb(ntpUpdateCallback);
           #endif
 
-          configTime(0, 0, RFLink::params::ntpServer.c_str());
-
+          configTzTime("UTC", RFLink::params::ntpServer.c_str());
 
           if(RFLink::Mqtt::params::enabled)
             RFLink::Mqtt::reconnect(1, true);
