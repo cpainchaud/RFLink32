@@ -2,6 +2,7 @@
     Various utility functions for use by device drivers.
 
     Copyright (C) 2015 Tommy Vestermark
+    Copyright (C) 2021 Olivier Sannier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -353,6 +354,26 @@ int add_nibbles(uint8_t const message[], unsigned num_bytes)
         result += (message[i] >> 4) + (message[i] & 0x0f);
     }
     return result;
+}
+
+inline bool value_between(int value, int min, int max)
+{
+    return (value > min && value < max);
+}
+
+inline bool value_between(uint8_t value, uint8_t min, uint8_t max)
+{
+    return (value > min && value < max);
+}
+
+inline bool value_between(uint16_t value, uint16_t min, uint16_t max)
+{
+    return (value > min && value < max);
+}
+
+inline bool value_between(uint32_t value, uint32_t min, uint32_t max)
+{
+    return (value > min && value < max);
 }
 
 // Unit testing

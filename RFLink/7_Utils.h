@@ -175,4 +175,15 @@ int add_bytes(uint8_t const message[], unsigned num_bytes);
 /// @return summation value
 int add_nibbles(uint8_t const message[], unsigned num_bytes);
 
+/// Returns true if value is between the min and max arguments (excluded)
+///
+/// @param value   the value to test
+/// @param min     the lower value to test against
+/// @param max     the upper value to test against
+/// @return true if value is between min and max
+inline bool value_between(int value, int min, int max);
+inline bool value_between(uint8_t value, uint8_t min, uint8_t max);
+inline bool value_between(uint16_t value, uint16_t min, uint16_t max);
+inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
+
 #endif /* INCLUDE_UTIL_H_ */
