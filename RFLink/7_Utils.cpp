@@ -11,6 +11,7 @@
 */
 
 #include "7_Utils.h"
+#include "4_Display.h"
 // #include <stdlib.h>
 // #include <stdio.h>
 // #include <string.h>
@@ -375,6 +376,49 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max)
 {
     return (value > min && value < max);
 }
+
+bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration)
+{
+    if (pulseIndex + expectedBitCount * 2 > pulsesCount)
+        return false;
+
+    const uint8_t bitsPerByte = 8;
+    //const uint8_t expectedByteCount = expectedBitCount / bitsPerByte;
+
+    for(int8_t bitIndex = expectedBitCount - 1; bitIndex >= 0; bitIndex--)
+    {
+        int currentFrameByteIndex = bitIndex / bitsPerByte;
+        uint16_t bitDuration = pulses[pulseIndex];
+        uint8_t bitMask = (1 << (bitIndex % bitsPerByte));
+
+        if (value_between(bitDuration, shortPulseMinDuration, shortPulseMaxDuration))
+        {
+            frame[currentFrameByteIndex] &= ~bitMask;
+        }
+        else if (value_between(bitDuration, longPulseMinDuration, longPulseMaxDuration))
+        {
+            frame[currentFrameByteIndex] |= bitMask;
+        }
+        else
+        {
+            #ifdef PWM_DEBUG
+            Serial.print(F("PWM: Invalid duration at pulse "));
+            Serial.print(pulseIndex);
+            Serial.print(F(" - bit "));
+            Serial.print(bitIndex);
+            Serial.print(F(": "));
+            Serial.println(bitDuration * RawSignal.Multiply);         
+            #endif
+            return false; // unexpected bit duration, invalid format
+        }
+
+
+        pulseIndex += 2;
+    }
+
+    return true;
+}
+
 
 // Unit testing
 #ifdef _TEST
