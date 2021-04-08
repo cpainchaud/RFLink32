@@ -2,6 +2,7 @@
     Various utility functions for use by device drivers.
 
     Copyright (C) 2015 Tommy Vestermark
+    Copyright (C) 2021 Olivier Sannier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -187,6 +188,58 @@ inline bool value_between(uint16_t value, uint16_t min, uint16_t max);
 inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
 
 /**
+ *  Decodes the pulses as a PWM encoded series of pulses
+ * 
+ *  @param frame                  the buffer where to place the decoded bits
+ *  @param expectedBitCount       the expected bit count
+ *  @param pulses                 the pulses to decode
+ *  @param pulsesCount            the numnber of items inside @pulses
+ *  @param pulseIndex             the index of the first pulse to be decoded
+ *  @param shortPulseMinDuration  the minimum duration of a half bit
+ *  @param shortPulseMaxDuration  the maximum duration of a half bit
+ *  @param longPulseMinDuration   the minimum duration of a half bit
+ *  @param longPulseMaxDuration   the maximum duration of a half bit
+ *  @return true if pulses could be decoded, giving enough bits, false if not or pulses were not of valid lengths
+
+    The PWM encoding uses pair of pulses like this:
+    
+    Long then short : ----__
+    Short then long : --____ 
+    
+    So, for instance, we would receive this: ----__----__----__--____
+    This gives 4 pairs, hence 4 bits, long/short, long/short, long/short, short/long 
+
+    This method uses the following truth table
+
+       Pair      |  Value
+     ------------+--------  
+      long/short |    1
+      short/long |    0
+
+    If you need the opposite, simply use the ~ operator on the frame bytes
+
+    Note that for efficiency reasons, this method does not consider the second pulse of the pair and thus does not test
+    it for duration validity.
+    
+    Bits are placed in the frame in the order they appear, ie MSB first. To illustrate, consider the following set of pulses:
+
+    --_-__--_--_--_--_-__--_--_-__-__--_--_--_-__-__-__--_-__--_--_--_-__-__
+    1  0  1  1  1  1  0  1  1  0  0  1  1  1  0  0  0  1  0  1  1  1  0  0
+         B     |     D     |     9     |     C     |     5     |     C       
+
+    This is decoded as 24 bits and inside the frame parameter, you will  receive the following 3 bytes:
+      index    0  1  2  
+      value   BD 9C 5C
+
+    Note that if you expect 32 bits or less and because the ESP32 is a little endian architecture, you can easily pass a uint32_t as 
+    the frame parameter and still receive a proper value. Simply cast it like so: 
+
+        uint32_t frame = 0;
+        decode_pwm((uint_8t *)&frame, 32, ...
+*/
+bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration);
+
+/**
  *  Decodes the pulses as a Manchester encoded series of pulses
  * 
  *  @param frame               the buffer where to place the decoded bits
@@ -254,5 +307,6 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
 
 */
 bool decode_manchester(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint8_t nextBit, bool secondPulse, uint16_t halfBitMinDuration, uint16_t halfBitMaxDuration);
+
 
 #endif /* INCLUDE_UTIL_H_ */
