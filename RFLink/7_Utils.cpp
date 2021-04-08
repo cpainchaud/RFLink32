@@ -419,6 +419,76 @@ bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses
     return true;
 }
 
+bool decode_manchester(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint8_t nextBit, bool secondPulse, uint16_t halfBitMinDuration, uint16_t halfBitMaxDuration)
+{
+    int bitIndex = 0;
+    const uint8_t bitsPerByte = 8;
+    const uint8_t expectedByteCount = expectedBitCount / bitsPerByte;
+    const uint16_t fullBitMinDuration = halfBitMinDuration * 2;
+    const uint16_t fullBitMaxDuration = halfBitMaxDuration * 2;
+
+    while ((pulseIndex < pulsesCount) && (bitIndex < expectedBitCount))
+    {
+        uint16_t pulseDuration = pulses[pulseIndex];
+        int currentFrameByteIndex = bitIndex / bitsPerByte;
+
+        if (value_between(pulseDuration, fullBitMinDuration, fullBitMaxDuration))
+        {
+            if (!secondPulse)
+            {
+                #ifdef MANCHESTER_DEBUG
+                Serial.print(F("Manchester: Cannot have long pulse as a first pulse: index = "));
+                Serial.print(pulseIndex);
+                Serial.print(" - value = ");
+                Serial.println(pulseDuration);
+                #endif
+                return false;
+            }
+
+            frame[currentFrameByteIndex] <<= 1;
+            frame[currentFrameByteIndex] |= nextBit;
+
+            nextBit = 1 - nextBit;
+            bitIndex++;
+        }
+        else if (value_between(pulseDuration, halfBitMinDuration, halfBitMaxDuration))
+        {
+            if (secondPulse)
+            {
+                frame[currentFrameByteIndex] <<= 1;
+                frame[currentFrameByteIndex] |= nextBit;
+
+                bitIndex++;
+            }
+
+            secondPulse = !secondPulse;
+        }
+        else
+        {
+            #ifdef MANCHESTER_DEBUG
+            Serial.print(F("Manchester: Pulse has unexpected duration: index = "));
+            Serial.print(pulseIndex);
+            Serial.print(" - value = ");
+            Serial.println(pulseDuration);
+            #endif
+            return false;
+        }
+
+        pulseIndex++;
+    }
+
+    // The low part of the down front gets mixed with the interframe silence and is thus too long to be placed in the pulses
+    // This means the last bit is never placed in the frame and we must manually add it into the last byte
+    if ((pulseIndex == pulsesCount) && (bitIndex == expectedBitCount - 1))
+    {
+        frame[expectedByteCount - 1] <<= 1;
+        frame[expectedByteCount - 1] |= nextBit;
+        bitIndex++;
+    }
+
+    return (bitIndex == expectedBitCount);
+}
+
 
 // Unit testing
 #ifdef _TEST

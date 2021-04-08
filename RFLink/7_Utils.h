@@ -239,4 +239,74 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
 */
 bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration);
 
+/**
+ *  Decodes the pulses as a Manchester encoded series of pulses
+ * 
+ *  @param frame               the buffer where to place the decoded bits
+ *  @param expectedBitCount    the expected bit count
+ *  @param pulses              the pulses to decode
+ *  @param pulsesCount         the numnber of items inside @pulses
+ *  @param pulseIndex          the index of the first pulse to be decoded
+ *  @param nextBit             the value of the next bit to use when a transition occurs
+ *  @param secondPulse         true if the first pulse (as indicated by pulseIndex) is the second part of the first transition
+ *  @param halfBitMinDuration  the minimum duration of a half bit
+ *  @param halfBitMaxDuration  the maximum duration of a half bit
+ *  @return true if pulses could be decoded, giving enough bits
+
+    The manchester encoding uses transitions to encode a bit value like this:
+    
+    From low to high : _- 
+    From high to low : -_
+    
+    So, for instance, we would receive this: _-_--__-
+    This gives 4 transitions, hence 4 bits, low to high, low to high, high to low, low to high
+
+    As we are receiving pulses, you can see that these four bits are encoded as 6 pulses which means we have to consider short/long changes.
+    Usually, the encoded part is preceded by other pulses which means that we have 4 possible situations:
+   
+    Pulses before | Manchester data
+               ___|_-
+               ___|-_
+               ---|_-
+               ---|-_
+
+    As you can see, in two of the four cases, the pulse before is "mixed" with the first manchester encoded half bit.
+    You, the caller, have to figure this out and set secondPulse to true if that is the case, along with making sure pulseIndex indicates the 
+    pulse that is the second half bit.
+    If the pulse is not mixed with the halfbit, then secondPulse is set to false and pulseIndex indicates the pulse that is the first half bit.
+
+    The value of nextBit is also the responsibility of the caller to accomodate the two possible representations of a low to high transition.
+    It can be either a 1 or a 0, the high to low transition being the opposite. Obviously, its value will also depend on the above pulse mixing
+    at the start of the manchester encoded pulses.
+
+    Here is a truth table for the most common case, the one where low to high is interpred as a 1:
+     
+            pulseIndex  secondPulse  nextBit
+    ___|_-       1          true        1
+    ___|-_       1         false        0
+    ---|_-       1         false        1
+    ---|-_       1          true        0
+
+    If you wanted the low to high transition to represent a 0, simply invert the values of nextBit in the above table.
+
+    When pulses are received, the last one is always a high one, the usual silence at the end being ignored and not given in the pulses
+    array which means we will not have the final transition if it is from high to low.
+    This decoder method takes this into account by considering that if there is one last bit to decode but no pulses left, then a final
+    transition is implied and the next bit gets pushed into the frame.
+
+    Bits are placed in the frame in the order they appear, ie MSB first. To illustrate, consider the following set of pulses:
+
+    _-_-_-_--_-__--__-_--__-_-_--_-__-_-_-_-_-_-_--_-_-__-_--__-_--__--_-__--_-_-_-_-_-_-_-__-_-_-_-_--__--__--__--
+     1 1 1 1 0 0 1 0 1 1 0 1 1 1 0 0 1 1 1 1 1 1 1 0 0 0 1 1 0 1 1 0 1 0 0 1 0 0 0 0 0 0 0 0 1 1 1 1 1 0 1 0 1 0 1 0
+        F   |   2   |   D   |   C   |   F   |   E   |   3   |   6   |   9   |   0   |   0   |   F   |   A   |   A
+
+    This is decoded as 56 bits, with the last one being decoded because of the "last pulse" rule mentionned above.
+    Inside the frame parameter, you will thus receive the following 7 bytes:
+      index    0  1  2  3  4  5  6 
+      value   F2 DC FE 36 90 0F AA
+
+*/
+bool decode_manchester(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint8_t nextBit, bool secondPulse, uint16_t halfBitMinDuration, uint16_t halfBitMaxDuration);
+
+
 #endif /* INCLUDE_UTIL_H_ */
