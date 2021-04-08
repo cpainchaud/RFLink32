@@ -215,7 +215,7 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
     }
     sensorId += readBit;
   }
-  display_IDn(sensorId, 2);
+  display_IDn(sensorId, 4);
 
   // temperature reading
   int16_t temperatureRaw = 0;

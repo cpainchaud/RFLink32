@@ -618,8 +618,8 @@ namespace RFLink
               counters::successfullyDecodedSignalsCount++;
               RepeatingTimer = millis() + params::signal_repeat_time;
               auto responseLength = strlen(pbuffer);
-              if(responseLength>1)
-                sprintf(&pbuffer[responseLength-2], "RSSI=%i;\r\n", (int)RawSignal.rssi);
+              //if(responseLength>1)
+              //  sprintf(&pbuffer[responseLength-2], "RSSI=%i;\r\n", (int)RawSignal.rssi);
               return true;
             }
           }
