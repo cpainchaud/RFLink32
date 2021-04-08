@@ -348,7 +348,7 @@ namespace RFLink { namespace Wifi {
                           timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         }
 
-
+        
         void ntpUpdateCallback(struct timeval *newTime){
 
           if(timeAtBoot.tv_sec < 10000 ) {

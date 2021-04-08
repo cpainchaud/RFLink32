@@ -543,7 +543,7 @@ boolean Plugin_001(byte function, const char *string)
    #define PULSE700_D 700
    const long PULSE700 = PULSE700_D / RawSignal.Multiply;
 
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   if (RawSignal.Number >= 290 )
    {
       for (byte i = 1; i < 25; i++)
       {
@@ -569,7 +569,7 @@ boolean Plugin_001(byte function, const char *string)
    // ==========================================================================
    // Also Beginning of Signal translation for Auriol & Xiro (046)
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   if (RawSignal.Number >= 290)
    {
       for (int offset = 0; offset < 74; offset++)
       {
@@ -700,7 +700,7 @@ boolean Plugin_001(byte function, const char *string)
    // ==========================================================================
    // Beginning of Signal translation for SelectPlus
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   if (RawSignal.Number >= 290)
    {
       for (j = 2; j < 37; j++)
       { // Only check the total RF packet length we are looking for
@@ -733,7 +733,7 @@ boolean Plugin_001(byte function, const char *string)
    // ==========================================================================
    // Beginning of Signal translation for Byron Doorbell
    // ==========================================================================
-   if (RawSignal.Number == RAW_BUFFER_SIZE - 1)
+   if (RawSignal.Number >= 290)
    {
       for (j = 2; j < 90 /*RawSignal.Number*/; j++)
       { // Only check twice the total RF packet length we are looking for
@@ -763,11 +763,11 @@ boolean Plugin_001(byte function, const char *string)
    // ==========================================================================
    // End of Signal translation
    // ==========================================================================
-   if (RawSignal.Number > OVERSIZED_LIMIT)
-   {                        // unknown and unsupported long packet (290 is the max. pulse length used at the Oregon plugin)
-      RawSignal.Number = 0; // no need to show this to any of the other plugins for processing
-      return true;          // abort processing completely
-   }                        // as there is no support for it anyway
+   //if (RawSignal.Number > OVERSIZED_LIMIT)
+   //{                        // unknown and unsupported long packet (290 is the max. pulse length used at the Oregon plugin)
+   //   RawSignal.Number = 0; // no need to show this to any of the other plugins for processing
+   //   return true;          // abort processing completely
+   //}                        // as there is no support for it anyway
    return false;
 
 }
