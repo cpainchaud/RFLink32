@@ -9,7 +9,9 @@
 #include "RFLink.h"
 #include "2_Signal.h"
 #include "5_Plugin.h"
+#include "7_Utils.h"
 
+using namespace RFLink::Utils;
 using namespace RFLink::Signal;
 using namespace RFLink;
 

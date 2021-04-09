@@ -106,13 +106,11 @@
 #define LACROSSE_TX141W_BITLEN 65
 #define LACROSSE_TX141_BITLEN_MIN 32
 
-
 //#define PLUGIN_049_DEBUG
 
 #ifdef PLUGIN_049
 
 #include "../4_Display.h"
-
 
 uint16_t LACROSSE49_PREAMBLE_PULSE_LENGTH_MIN;
 uint16_t LACROSSE49_PREAMBLE_PULSE_LENGTH_MAX;
@@ -196,45 +194,83 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
     deviceType = LACROSSE_TX141BV3_BITLEN;
   }
 
+  BitArray data;
+  #ifdef PLUGIN_049_DEBUG
+  data.storage[0] = 0;
+  sprintf(printBuf, PSTR("LaCrosseTX141 %.2X"), (int) data.storage[0]);
+  sendRawPrint(printBuf, true);
+  #endif
+
+  if(!data.fillFromPwmPulses(deviceType, RawSignal.Pulses, RawSignal.Number, fromPosition + 8, LACROSSE49_SHORT_PULSE_MIN, LACROSSE49_SHORT_PULSE_MAX, LACROSSE49_LONG_PULSE_MIN, LACROSSE49_LONG_PULSE_MAX)){
+    #ifdef PLUGIN_049_DEBUG
+    sprintf(printBuf, PSTR("LaCrosseTX141 failed to decode PWM"));
+    sendRawPrint(printBuf, true);
+    #endif
+  }
+
+  #ifdef PLUGIN_049_DEBUG
+  sprintf(printBuf, PSTR("LaCrosseTX141 %.2X"), (int) data.storage[0]);
+  sendRawPrint(printBuf, true);
+  #endif
+
   display_Header();
-  display_Name(PSTR("LaCrosse-TX141"));
 
-  short int readBit;
+  if(deviceType == LACROSSE_TX141B_BITLEN) {
+    display_Name(PSTR("LaCrosse-TX141B"));
+  } else if(deviceType == LACROSSE_TX141_BITLEN) {
+    display_Name(PSTR("LaCrosse-TX141Bv2"));
+  } else if(deviceType == LACROSSE_TX141BV3_BITLEN) {
+    display_Name(PSTR("LaCrosse-TX141Bv3"));
+  } else {
+    display_Name(PSTR("LaCrosse-TX141THBv2"));
+  }
 
-  // sensor ID
-  unsigned short int sensorId = 0;
-  for(int i=0; i<8*2; i+=2) {
-    sensorId <<= 1;
-    readBit = PLUGIN_049_decode_pulse((fromPosition+8) + i);
-    if(readBit < 0) {
+  if (deviceType == LACROSSE_TX141W_BITLEN) {
+    if (crc8(data.storage, 8, 0x31, 0x00) ){
       #ifdef PLUGIN_049_DEBUG
-      sprintf(printBuf, PSTR("LaCrosseTX141 invalid pulse timing %u %u"), RawSignal.Pulses[(fromPosition+8) + i],  RawSignal.Pulses[(fromPosition+8) + i + 1]);
+      sprintf(printBuf, PSTR("LACROSSE_TX141W Failed CRC %.2X"));
       sendRawPrint(printBuf, true);
       #endif
       return false;
     }
-    sensorId += readBit;
+
+    uint32_t id = data.getUInt(6, 22);
+    display_IDn(id, 4);
+
+    bool battery_low = data.getUInt(3*8 + 0, 1);
+    uint8_t type = data.getUInt(3*8 + 4, 4);
+    int16_t temp_raw = (int16_t)data.getUInt(4*8 + 4, 8);
+    uint8_t humidity = data.getUInt(5*8 + 4, 12);
+
+
+    if (type == 1) {
+      // Temp/Hum
+
+      display_TEMP(temp_raw-500);
+      display_HUM(humidity, true);
+
+    } else if (type == 2) {
+      // wind direction is in humidity field
+
+      display_WINDIR(humidity);
+      display_WINSP(temp_raw);
+    }
+
+    display_BAT(!battery_low);
+
+    display_Footer();
+
+    return true;
   }
+  
+  // sensor ID
+  unsigned short int sensorId = data.getUInt(0, 8);
   display_IDn(sensorId, 4);
 
   // temperature reading
-  int16_t temperatureRaw = 0;
-  uint16_t position;
+  int16_t temperatureRaw = sensorId = data.getUInt(12, 12);;
 
-  for(int i=0; i<12*2; i+=2) { // 12bit so 24 pulses
-    temperatureRaw <<= 1;
-    position = (fromPosition+8+12*2) + i; //temperature starts at 13th bit after preamble
-    readBit = PLUGIN_049_decode_pulse(position);
-    if(readBit < 0) {
-      #ifdef PLUGIN_049_DEBUG
-      sprintf(printBuf, PSTR("LaCrosseTX141 invalid pulse timing %u %u"), RawSignal.Pulses[position],  RawSignal.Pulses[position+1]);
-      sendRawPrint(printBuf, true);
-      #endif
-      return false;
-    }
-    //Serial.printf("position %i=%i pulses=%u/%u\r\n", i/2, readBit, RawSignal.Pulses[position],  RawSignal.Pulses[position+1]);
-    temperatureRaw += readBit;
-  }
+
   //Serial.printf("%.4X\r\n", (long int) temperatureRaw);
   temperatureRaw = temperatureRaw - 500;
   //Serial.println( ((float)temperatureRaw) * 0.1f );
@@ -242,16 +278,7 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
   display_TEMP(temperatureRaw);
 
   // battery status
-  position = (fromPosition+8) + 8*2;
-  readBit = PLUGIN_049_decode_pulse(position);
-  if(readBit < 0 ) {
-    #ifdef PLUGIN_049_DEBUG
-    sprintf(printBuf, PSTR("LaCrosseTX141 invalid pulse timing %u %u pos=%i"), RawSignal.Pulses[position],  RawSignal.Pulses[position], position);
-    sendRawPrint(printBuf, true);
-    #endif
-    return false;
-  }
-  display_BAT( (readBit == 1) ^ !(deviceType == LACROSSE_TX141_BITLEN || deviceType == LACROSSE_TX141BV3_BITLEN) );
+  display_BAT( (data.getBit(8)) ^ !(deviceType == LACROSSE_TX141_BITLEN || deviceType == LACROSSE_TX141BV3_BITLEN) );
 
   display_Footer();
 

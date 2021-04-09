@@ -528,7 +528,7 @@ namespace RFLink {
       int32_t result = 0;
       for (uint16_t i = firstBitPosition; i < firstBitPosition + length; i++) {
         result <<= 1;
-        Serial.printf("byte %i bit %i = %i\r\n", (int) i / 8, (int) i % 8, (storage[i / 8] & (0x80 >> (i%8)) ) != 0);
+        //Serial.printf("byte %i bit %i = %i\r\n", (int) i / 8, (int) i % 8, (storage[i / 8] & (0x80 >> (i%8)) ) != 0);
         if ((storage[i / 8] & (0x80 >> (i%8)) ) != 0)
           result += 1;
       }
