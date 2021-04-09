@@ -309,4 +309,50 @@ bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses
 bool decode_manchester(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint8_t nextBit, bool secondPulse, uint16_t halfBitMinDuration, uint16_t halfBitMaxDuration);
 
 
+
+namespace RFLink {
+  namespace Utils {
+
+    class BitArray {
+
+    private:
+      static const uint8_t _masks[8];
+      static constexpr int _sizeOfStorageInBytes = 64;
+
+    public:
+
+      uint8_t storage[_sizeOfStorageInBytes];
+      uint16_t currentSize;
+
+      BitArray();
+
+      inline bool fillFromPwmPulses(uint8_t expectedBitCount,
+                                    uint16_t const pulses[],
+                                    const int pulsesCount,
+                                    int pulseIndex,
+                                    uint16_t shortPulseMinDuration,
+                                    uint16_t shortPulseMaxDuration,
+                                    uint16_t longPulseMinDuration,
+                                    uint16_t longPulseMaxDuration) {
+
+        return decode_pwm(this->storage, expectedBitCount,
+                          pulses, pulsesCount,
+                          pulseIndex,
+                          shortPulseMinDuration, shortPulseMaxDuration,
+                          longPulseMinDuration, longPulseMaxDuration);
+
+      }
+
+      inline bool getBit(const uint16_t bitNumber) {
+        return (storage[bitNumber / 8] & (0x80 >> (bitNumber%8))) != 0;
+      }
+
+      uint32_t getUInt(const uint16_t firstBitPosition, const uint16_t length);
+
+    }; // end of BitArray class
+
+
+  } // end of Utils namespace
+} //end of RFLink namespace
+
 #endif /* INCLUDE_UTIL_H_ */

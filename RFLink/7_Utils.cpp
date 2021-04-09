@@ -489,6 +489,43 @@ bool decode_manchester(uint8_t frame[], uint8_t expectedBitCount, uint16_t const
     return (bitIndex == expectedBitCount);
 }
 
+namespace RFLink {
+  namespace Utils {
+
+    const uint8_t BitArray::_masks[8] = {128, 64, 32, 16, 8, 4, 2, 1};
+
+    BitArray::BitArray() {
+      currentSize = 0;
+
+      /*
+      storage[0]= 0x40;
+      storage[1]= 0xf2;
+      storage[2]= 0xa5;
+      storage[3]= 0x49;
+
+      *((uint32_t*) (&storage[4])) = 0x12345678;
+
+      Serial.printf("BitArrayDebug: %.8X\r\n", getUInt(0, 32));
+      Serial.printf("BitArrayDebug: %.8X\r\n", getUInt(32, 32));*/
+
+    }
+
+    uint32_t BitArray::getUInt(const uint16_t firstBitPosition, const uint16_t length) {
+
+      int32_t result = 0;
+      for (uint16_t i = firstBitPosition; i < firstBitPosition + length; i++) {
+        result <<= 1;
+        Serial.printf("byte %i bit %i = %i\r\n", (int) i / 8, (int) i % 8, (storage[i / 8] & (0x80 >> (i%8)) ) != 0);
+        if ((storage[i / 8] & (0x80 >> (i%8)) ) != 0)
+          result += 1;
+      }
+
+      return result;
+    }
+
+  } //end of Utils namespace
+} // end of RFLink namespace
+
 
 // Unit testing
 #ifdef _TEST
