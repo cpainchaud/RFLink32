@@ -12,6 +12,7 @@
 
 #include "7_Utils.h"
 #include "4_Display.h"
+#include "2_Signal.h"
 // #include <stdlib.h>
 // #include <stdio.h>
 // #include <string.h>
@@ -380,16 +381,28 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max)
 bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration)
 {
     if (pulseIndex + expectedBitCount * 2 > pulsesCount)
+    {
+        #ifdef PWM_DEBUG
+        Serial.print(F("PWM: Not enough pulses: pulseIndex = "));
+        Serial.print(pulseIndex);
+        Serial.print(F(" - expectedBitCount = "));
+        Serial.print(expectedBitCount);
+        Serial.print(F(" - pulsesCount = "));
+        Serial.print(pulsesCount);
+        Serial.print(F(" - min required pulses = "));
+        Serial.println(pulseIndex + expectedBitCount * 2);         
+        #endif
         return false;
+    }
 
     const uint8_t bitsPerByte = 8;
     //const uint8_t expectedByteCount = expectedBitCount / bitsPerByte;
 
-    for(int8_t bitIndex = expectedBitCount - 1; bitIndex >= 0; bitIndex--)
+    for(int8_t bitIndex = 0; bitIndex < expectedBitCount; bitIndex++)
     {
         int currentFrameByteIndex = bitIndex / bitsPerByte;
         uint16_t bitDuration = pulses[pulseIndex];
-        uint8_t bitMask = (1 << (bitIndex % bitsPerByte));
+        uint8_t bitMask = (0x80 >> (bitIndex % bitsPerByte));
 
         if (value_between(bitDuration, shortPulseMinDuration, shortPulseMaxDuration))
         {
@@ -407,7 +420,7 @@ bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses
             Serial.print(F(" - bit "));
             Serial.print(bitIndex);
             Serial.print(F(": "));
-            Serial.println(bitDuration * RawSignal.Multiply);         
+            Serial.println(bitDuration * RFLink::Signal::RawSignal.Multiply);         
             #endif
             return false; // unexpected bit duration, invalid format
         }
