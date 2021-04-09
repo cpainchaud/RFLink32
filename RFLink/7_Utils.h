@@ -231,11 +231,13 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
       index    0  1  2  
       value   BD 9C 5C
 
-    Note that if you expect 32 bits or less and because the ESP32 is a little endian architecture, you can easily pass a uint32_t as 
-    the frame parameter and still receive a proper value. Simply cast it like so: 
+    Note that if you expect 32 bits or less, you can easily pass a uint32_t as the frame parameter, simply cast like so: 
 
         uint32_t frame = 0;
         decode_pwm((uint_8t *)&frame, 32, ...
+
+    But because the ESP32 is a little endian architecture, the bytes will be reversed two by two (0 - 3, 1 - 2)
+    Using ntohs or ntohl from <netinet/in.h> is thus recommended in that case
 */
 bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration);
 
