@@ -152,7 +152,6 @@ namespace RFLink { namespace Radio  {
     void refreshParametersFromConfig() {
       States savedState = current_State;
       bool pinsHaveChanged = false;
-      HardwareType currentHardware = hardware;
       HardwareType newHardwareId = hardware;
 
       //yield();
@@ -175,6 +174,10 @@ namespace RFLink { namespace Radio  {
           newHardwareId = HardwareType::HW_basic_t;
           item->setCharValue(hardwareNames[newHardwareId]);
         }
+        else if(newHardwareId != hardware) {
+          changesDetected = true;
+        }
+        // changes will be applied at the end of this function
       }
 
       item = Config::findConfigItem(json_name_rx_data, Config::SectionId::Radio_id);
