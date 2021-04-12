@@ -43,6 +43,7 @@ namespace RFLink { namespace Radio  {
     HardwareType hardware = HardwareType::HW_basic_t;
     bool hardwareProperlyInitialized = false;
 
+
     namespace pins {
       int8_t RX_PMOS = PIN_RF_RX_PMOS_0;
       int8_t RX_NMOS = PIN_RF_RX_NMOS_0;
@@ -65,6 +66,14 @@ namespace RFLink { namespace Radio  {
     }
 
     namespace params {
+
+      const int32_t default_frequency = 433920000;
+      const int32_t default_BitRate = 9600;
+      const int32_t default_rxBandwidth = 125000;
+
+      int32_t frequency;
+      int32_t rxBandwidth;
+      int32_t bitrate;
 
       RssiThresholdTypesEnum rssiThresholdType = RssiThresholdTypesEnum::Undefined;
       int16_t fixedRssiThreshold = RssiFixedThresholdValue_undefined;
@@ -107,6 +116,10 @@ namespace RFLink { namespace Radio  {
     const char json_name_rssi_thresh_type[] = "rssi_thres_type";
     const char json_name_rssi_thresh_value[] = "rssi_thres_value";
 
+    const char json_name_frequency[] = "rx_freq";
+    const char json_name_rx_bandwidth[] = "rx_bandwidth";
+    const char json_name_bitrate[] = "rx_bitrate";
+
 
     Config::ConfigItem configItems[] =  {
             Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[HardwareType::HW_basic_t], paramsUpdatedCallback),
@@ -128,6 +141,10 @@ namespace RFLink { namespace Radio  {
 
             Config::ConfigItem(json_name_rssi_thresh_type,  Config::SectionId::Radio_id, RssiThresholdTypesEnum::Undefined, paramsUpdatedCallback, true),
             Config::ConfigItem(json_name_rssi_thresh_value, Config::SectionId::Radio_id, RssiFixedThresholdValue_undefined, paramsUpdatedCallback, true),
+
+            Config::ConfigItem(json_name_frequency,   Config::SectionId::Radio_id, params::default_frequency, paramsUpdatedCallback, true),
+            Config::ConfigItem(json_name_rx_bandwidth,Config::SectionId::Radio_id, params::default_rxBandwidth, paramsUpdatedCallback, true),
+            Config::ConfigItem(json_name_bitrate,     Config::SectionId::Radio_id, params::default_BitRate, paramsUpdatedCallback, true),
 
             Config::ConfigItem()
     };
@@ -271,6 +288,7 @@ namespace RFLink { namespace Radio  {
           else {
             item->setLongIntValue(item->getLongIntDefaultValue());
           }
+          params::rssiThresholdType = RssiThresholdTypesEnum::Undefined;
           changesDetected = true;
         } else if (params::rssiThresholdType != value) {
           changesDetected = true;
@@ -294,11 +312,85 @@ namespace RFLink { namespace Radio  {
           else
             item->setLongIntValue(item->getLongIntDefaultValue());
           changesDetected = true;
+          params::fixedRssiThreshold = RssiFixedThresholdValue_undefined;
         } else if (params::fixedRssiThreshold != value) {
           changesDetected = true;
           params::fixedRssiThreshold = value;
         }
       }
+
+
+      item = Config::findConfigItem(json_name_frequency, Config::SectionId::Radio_id);
+      if(item->isUndefined()){
+        if( params::frequency != params::default_frequency )
+          changesDetected = true;
+        params::frequency = params::default_frequency;
+      }
+      else {
+        value = item->getLongIntValue();
+        if (value < 0 || value > 1000000000 ) {
+          Serial.println(F("Invalid frequency provided, resetting to default value"));
+          if(item->canBeNull) {
+            item->deleteJsonRecord();
+          }
+          else
+            item->setLongIntValue(params::default_frequency);
+          params::frequency = params::default_frequency;
+          changesDetected = true;
+        } else if (params::frequency != value) {
+          changesDetected = true;
+          params::frequency = value;
+        }
+      }
+
+
+      item = Config::findConfigItem(json_name_rx_bandwidth, Config::SectionId::Radio_id);
+      if(item->isUndefined()){
+        if( params::rxBandwidth != params::default_rxBandwidth )
+          changesDetected = true;
+        params::rxBandwidth = params::default_rxBandwidth;
+      }
+      else {
+        value = item->getLongIntValue();
+        if (value < 0 || value > 500000 ) {
+          Serial.println(F("Invalid rxBandwidth provided, resetting to default value"));
+          if(item->canBeNull) {
+            item->deleteJsonRecord();
+          }
+          else
+            item->setLongIntValue(params::default_rxBandwidth);
+          params::rxBandwidth = params::default_rxBandwidth;
+          changesDetected = true;
+        } else if (params::rxBandwidth != value) {
+          changesDetected = true;
+          params::rxBandwidth = value;
+        }
+      }
+
+
+      item = Config::findConfigItem(json_name_bitrate, Config::SectionId::Radio_id);
+      if(item->isUndefined()){
+        if( params::bitrate != params::default_BitRate )
+          changesDetected = true;
+        params::bitrate = params::default_BitRate;
+      }
+      else {
+        value = item->getLongIntValue();
+        if (value < 0 || value > 500000 ) {
+          Serial.println(F("Invalid BitRate provided, resetting to default value"));
+          if(item->canBeNull) {
+            item->deleteJsonRecord();
+          }
+          else
+            item->setLongIntValue(params::default_BitRate);
+          params::bitrate = params::default_BitRate;
+          changesDetected = true;
+        } else if (params::bitrate != value) {
+          changesDetected = true;
+          params::bitrate = value;
+        }
+      }
+
 
       if(changesDetected)
         initializeHardware(newHardwareId, true);
@@ -748,10 +840,17 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      //auto result = radio_SX1278->beginFSK( 433.92F, 4.800F, 50.0F, 125.0F, 12, 16, true);
-      auto result = radio_SX1278->beginFSK( 433.92F, 9.600F, 50.0F, 125.0F, 12, 16, true);
-      //auto result = radio_SX1278->beginFSK( 433.92F, 19.200F, 50.0F, 250.0F, 12, 16, true);
-      Serial.printf_P(PSTR("Initialized SX1278 return code %i\r\n"), result);
+      auto result = radio_SX1278->beginFSK( (float)params::frequency/1000000,
+                                            (float)params::bitrate/1000,
+                                            50.0F,
+                                            (float)params::rxBandwidth/1000,
+                                            12, 16, true);
+      Serial.printf_P(PSTR("Initialized SX1278(freq=%.2fMhz,br=%.3fkbps,rxbw=%.1fkhz)=%i\r\n"),
+                      (float)params::frequency/1000000,
+                      (float)params::bitrate/1000,
+                      (float)params::rxBandwidth/1000,
+                      result);
+
       finalResult |= result;
 
       result = radio_SX1278->setOOK(true);
@@ -819,8 +918,17 @@ namespace RFLink { namespace Radio  {
 
       int finalResult = 0;
 
-      auto result = radio_RFM69->begin(433.92F, 9.600F, 50.0F, 125.0F, 12, 16);
-      //auto result = radio_RFM69->begin();
+      auto result = radio_RFM69->begin( (float)params::frequency/1000000,
+                                            (float)params::bitrate/1000,
+                                            50.0F,
+                                            (float)params::rxBandwidth/1000,
+                                            12, 16);
+      Serial.printf_P(PSTR("Initialized RFM69(freq=%.2fMhz,br=%.3fkbps,rxbw=%.1fkhz)=%i\r\n"),
+                      (float)params::frequency/1000000,
+                      (float)params::bitrate/1000,
+                      (float)params::rxBandwidth/1000,
+                      result);
+
       Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
 
