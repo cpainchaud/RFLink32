@@ -709,7 +709,7 @@ namespace RFLink
         unsigned long pulseLength_us = changeTime_us - lastChangedState_us;
         lastChangedState_us = changeTime_us;
 
-        if (pulseLength_us < MIN_PULSE_LENGTH_US)
+        if (pulseLength_us < params::min_pulse_len)
         {                              // this is too short, noise?
           nextPulseTimeoutTime_us = 0; // stop watching for a timeout
           RawSignal.Number = 0;
