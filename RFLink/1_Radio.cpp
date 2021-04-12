@@ -813,7 +813,7 @@ namespace RFLink { namespace Radio  {
       else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69HCW_t){
         success = initialize_RFM69_legacy();
       }
-      else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69NEW_t){
+      else if(newHardware == HardwareType::HW_RFM69NEW_t){
         success = initialize_RFM69();
       }
       else if(newHardware == HardwareType::HW_basic_t){
@@ -931,8 +931,6 @@ namespace RFLink { namespace Radio  {
                       (float)params::bitrate/1000,
                       (float)params::rxBandwidth/1000,
                       result);
-
-      Serial.printf_P(PSTR("RFM69 begin()=%i\r\n"), result);
       finalResult |= result;
 
       radio_RFM69->setOOK(true);
@@ -963,7 +961,7 @@ namespace RFLink { namespace Radio  {
       int newValue = RssiFixedThresholdValue_default_RFM69;
       if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
         newValue = params::fixedRssiThreshold;
-      newValue = - newValue*2;
+      newValue = 256 + newValue*2;
       result = radio_RFM69->setOokFixedThreshold(newValue);
       Serial.printf_P(PSTR("RFM69 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
