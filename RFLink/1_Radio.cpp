@@ -32,7 +32,7 @@ enum RssiThresholdTypesEnum {
   RssiThresholdTypes_EOF,
 };
 
-#define RssiThresholdType_default_RFM69 RssiThresholdTypesEnum::Fixed
+#define RssiThresholdType_default_RFM69 RssiThresholdTypesEnum::Peak
 #define RssiThresholdType_default_SX127X RssiThresholdTypesEnum::Peak
 #define RssiFixedThresholdValue_undefined -9999
 #define RssiFixedThresholdValue_default_RFM69 -32
