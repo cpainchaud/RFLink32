@@ -939,7 +939,7 @@ namespace RFLink { namespace Radio  {
                       result);
       finalResult |= result;
 
-      radio_RFM69->setOOK(true);
+      result = radio_RFM69->setOOK(true);
       Serial.printf_P(PSTR("RFM69 SetOOK()=%i\r\n"), result);
       finalResult |= result;
 
