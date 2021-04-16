@@ -234,12 +234,14 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
       return false;
     }
 
-    uint32_t id = data.getUInt(6, 22);
+    uint32_t id = data.getUInt(0*8 + 5, 19);
     display_IDn(id, 4);
+
+    display_CHAN(data.getUInt(3*8 + 2, 2));
 
     bool battery_low = data.getUInt(3*8 + 0, 1);
     uint8_t type = data.getUInt(3*8 + 4, 4);
-    int16_t temp_raw = (int16_t)data.getUInt(4*8 + 4, 8);
+    int16_t temp_raw = (int16_t)data.getUInt(4*8, 12);
     uint8_t humidity = data.getUInt(5*8 + 4, 12);
 
 
