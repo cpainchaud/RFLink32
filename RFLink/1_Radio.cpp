@@ -35,8 +35,8 @@ enum RssiThresholdTypesEnum {
 #define RssiThresholdType_default_RFM69 RssiThresholdTypesEnum::Peak
 #define RssiThresholdType_default_SX127X RssiThresholdTypesEnum::Peak
 #define RssiFixedThresholdValue_undefined -9999
-#define RssiFixedThresholdValue_default_RFM69 -32
-#define RssiFixedThresholdValue_default_SX127X -115
+#define RssiFixedThresholdValue_default_RFM69 6
+#define RssiFixedThresholdValue_default_SX127X 6
 
 namespace RFLink { namespace Radio  {
 
@@ -886,10 +886,10 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
-      int newValue = RssiFixedThresholdValue_default_SX127X;
+      uint16_t newValue = RssiFixedThresholdValue_default_SX127X;
       if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
         newValue = params::fixedRssiThreshold;
-      newValue = newValue*2 + 256;
+      newValue = newValue*2;
       result = radio_SX1278->setOokFixedOrFloorThreshold(newValue);
       Serial.printf_P(PSTR("SX1278 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
@@ -964,10 +964,9 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("RFM69 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
-      int newValue = RssiFixedThresholdValue_default_RFM69;
+      uint16_t newValue = RssiFixedThresholdValue_default_RFM69;
       if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
         newValue = params::fixedRssiThreshold;
-      newValue = 256 + newValue*2;
       result = radio_RFM69->setOokFixedThreshold(newValue);
       Serial.printf_P(PSTR("RFM69 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
