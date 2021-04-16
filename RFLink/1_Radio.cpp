@@ -741,7 +741,13 @@ namespace RFLink { namespace Radio  {
 
             auto success = radio_RFM69->receiveDirect();
             if(success != 0 ) {
-              Serial.printf_P(PSTR("Failed to switch to RX mode (code=%i), we will try to reinitialize it later\r\n"), (int) success);
+              Serial.printf_P(PSTR("ERROR: RFM69 receiveDirect()=%i, we will try to reinitialize it later\r\n"), (int) success);
+              hardwareProperlyInitialized = false;
+            }
+
+            success = radio_RFM69->disableContinuousModeBitSync();
+            if(success != 0 ) {
+              Serial.printf_P(PSTR("ERROR: RFM69 disableContinuousModeBitSync()=%i, we will try to reinitialize it later\r\n"), (int) success);
               hardwareProperlyInitialized = false;
             }
 
@@ -964,6 +970,10 @@ namespace RFLink { namespace Radio  {
       newValue = 256 + newValue*2;
       result = radio_RFM69->setOokFixedThreshold(newValue);
       Serial.printf_P(PSTR("RFM69 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
+      finalResult |= result;
+
+      result = radio_RFM69->setOokPeakThresholdDecrement(RF69_OOK_PEAK_THRESH_DEC_1_8_CHIP);
+      Serial.printf_P(PSTR("RFM69 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
       result = radio_RFM69->setLnaTestBoost(true);
