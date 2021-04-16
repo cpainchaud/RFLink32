@@ -258,7 +258,7 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
       // Temp/Hum
 
       display_TEMP(temp_raw-500);
-      display_HUM(humidity, true);
+      display_HUM(humidity);
 
     } else if (type == 2) {
       // wind direction is in humidity field

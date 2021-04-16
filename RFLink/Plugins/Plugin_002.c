@@ -217,7 +217,7 @@ boolean Plugin_002(byte function, const char *string)
       display_Header();
       display_Name(PSTR("LaCrosseV2"));
       display_IDc(c_ID);
-      display_HUM(humidity, HUM_BCD);
+      display_HUM(humidity);
       display_Footer();
    }
    else if (sensortype == B0010)

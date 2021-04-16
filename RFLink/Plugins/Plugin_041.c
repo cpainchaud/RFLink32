@@ -190,7 +190,7 @@ boolean Plugin_041(byte function, const char *string)
 
       sensor_data = (data[7] * 10);
       sensor_data += (data[6]);
-      display_HUM(((byte)sensor_data), HUM_HEX);
+      display_HUM(((byte)sensor_data));
 
       sensor_data = (data[10] * 100);
       sensor_data += (data[9] * 10);

@@ -166,7 +166,7 @@ boolean Plugin_029(byte function, const char *string)
     display_Name(PSTR("Alecto V2"));
   display_IDn(rc, 4);
   display_TEMP(temp);
-  display_HUM(hum, HUM_HEX);
+  display_HUM(hum);
   display_WINSP(wspeed);
   display_WINGS(wgust);
   display_RAIN(rain);

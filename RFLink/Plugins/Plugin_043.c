@@ -252,7 +252,7 @@ boolean Plugin_043(byte function, const char *string)
       char c_ID[5];
       sprintf(c_ID, "%02X%02X", data[3], data[4]);
       display_IDc(c_ID);
-      display_HUM(humidity, HUM_HEX);
+      display_HUM(humidity);
       display_Footer();
       //==================================================================================
       RawSignal.Repeats = true;

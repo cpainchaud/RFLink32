@@ -178,7 +178,7 @@ boolean Plugin_011(byte function, const char *string)
          display_Header();
          display_Name(PSTR("HomeConfort"));
          display_IDn((bitstream1 & 0xFFFFFF), 6); //"%S%06lx"
-         display_HUM(hygro, HUM_HEX);
+         display_HUM(hygro);
          display_Footer();
       }
    else if ( (bitstream2 & 0xFFFFBF) == 0x0 ) 

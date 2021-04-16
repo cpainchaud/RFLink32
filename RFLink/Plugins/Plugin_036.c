@@ -117,7 +117,7 @@ boolean Plugin_036(byte function, const char *string)
    display_Name(PSTR("F007_TH"));
    display_IDn(ID, 4);
    display_TEMP(realtemp);
-   display_HUM(hygro, HUM_HEX);
+   display_HUM(hygro);
    display_BAT(battery);
    display_Footer();
 

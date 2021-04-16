@@ -166,7 +166,7 @@ boolean Plugin_032(byte function, const char *string)
    display_IDc(c_ID);
    display_TEMP(temperature);
    if (humidity < 99) // Only report valid humidty values
-      display_HUM(humidity, HUM_HEX);
+      display_HUM(humidity);
    display_BAT(battery);
    display_Footer();
    //==================================================================================

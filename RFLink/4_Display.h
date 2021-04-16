@@ -44,12 +44,7 @@ enum CMD_OnOff
 void display_CMD(boolean, byte);
 void display_SET_LEVEL(byte);
 void display_TEMP(unsigned int);
-enum HUM_Type
-{
-    HUM_HEX,
-    HUM_BCD
-};
-void display_HUM(byte, boolean);
+void display_HUM(byte);
 void display_BARO(unsigned int);
 void display_HSTATUS(byte);
 void display_BFORECAST(byte);

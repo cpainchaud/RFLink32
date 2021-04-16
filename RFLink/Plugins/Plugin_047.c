@@ -181,7 +181,7 @@ boolean Plugin_047(byte function, const char *string)
    sprintf(c_ID, "%02X%02X", rc, channel);
    display_IDc(c_ID);
    display_TEMP(temperature);
-   display_HUM(humidity, HUM_HEX);
+   display_HUM(humidity);
    display_BAT(bat);
    display_Footer();
    //==================================================================================
