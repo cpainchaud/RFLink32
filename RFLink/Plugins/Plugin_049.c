@@ -221,14 +221,23 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
     display_Name(PSTR("LaCrosse-TX141Bv2"));
   } else if(deviceType == LACROSSE_TX141BV3_BITLEN) {
     display_Name(PSTR("LaCrosse-TX141Bv3"));
+  } else if(deviceType == LACROSSE_TX141W_BITLEN) {
+    display_Name(PSTR("LaCrosse-TX141W"));
   } else {
     display_Name(PSTR("LaCrosse-TX141THBv2"));
+    if (lfsr_digest8_reflect(data.storage, 4, 0x31, 0xf4) != data.storage[4]) {
+      #ifdef PLUGIN_049_DEBUG
+      sprintf(printBuf, PSTR("LACROSSE_TX141THBv2 Failed CRC"));
+      sendRawPrint(printBuf, true);
+      #endif
+      return false;
+    }
   }
 
   if (deviceType == LACROSSE_TX141W_BITLEN) {
     if (crc8(data.storage, 8, 0x31, 0x00) ){
       #ifdef PLUGIN_049_DEBUG
-      sprintf(printBuf, PSTR("LACROSSE_TX141W Failed CRC %.2X"));
+      sprintf(printBuf, PSTR("LACROSSE_TX141W Failed CRC"));
       sendRawPrint(printBuf, true);
       #endif
       return false;
@@ -256,6 +265,12 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
 
       display_WINDIR(humidity);
       display_WINSP(temp_raw);
+    } else {
+      #ifdef PLUGIN_049_DEBUG
+      sprintf(printBuf, PSTR("LACROSSE_TX141W failed packet type=%i"), (int) type);
+      sendRawPrint(printBuf, true);
+      #endif
+      return false;
     }
 
     display_BAT(!battery_low);
