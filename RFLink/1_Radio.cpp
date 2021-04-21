@@ -898,6 +898,10 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
+      result = radio_SX1278->disableBitSync();
+      Serial.printf_P(PSTR("SX1278 disableBitSync() result=%i\r\n"), result);
+      finalResult |= result;
+
       result = radio_SX1278->setGain(6);
       Serial.printf_P(PSTR("SX1278 setGain() result=%i\r\n"), result);
       finalResult |= result;
