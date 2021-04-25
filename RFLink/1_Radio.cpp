@@ -307,7 +307,7 @@ namespace RFLink { namespace Radio  {
       }
       else {
         value = item->getLongIntValue();
-        if (value > 0 && value < 128 ) {
+        if (value <= 0 || value > 128 ) {
           Serial.println(F("Invalid RssiFixedThresholdValue provided, resetting to default value"));
           if(item->canBeNull) {
             item->deleteJsonRecord();
