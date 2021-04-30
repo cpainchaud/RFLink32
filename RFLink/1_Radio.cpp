@@ -410,6 +410,34 @@ namespace RFLink { namespace Radio  {
       refreshParametersFromConfig();
     }
 
+    int32_t getFrequency() 
+    {
+      return params::frequency;
+    }
+
+    /// Sets the frequency of the transceiver, and returns the previously set frequency
+    int32_t setFrequency(int32_t newFrequency)
+    {
+      int32_t result = getFrequency();
+      switch(hardware)  
+      {
+        case HardwareType::HW_RFM69CW_t:
+        case HardwareType::HW_RFM69HCW_t:
+          radio.setFrequency(newFrequency);
+          break;
+        case HardwareType::HW_SX1278_t:
+          radio_SX1278->setFrequency(newFrequency / 1000000.0);
+          break;
+        case HardwareType::HW_RFM69NEW_t:
+          radio_RFM69->setFrequency(newFrequency / 1000000.0);
+          break;
+        default:
+          return 0;  // other hardware cannot change its frequency
+      }
+      params::frequency = newFrequency;
+      return result;
+    }
+
     HardwareType hardwareIDFromString(const char *name) {
       for(int i=0; i<hardwareNames_count; i++) {
         if(strcmp(hardwareNames[i], name) == 0)
