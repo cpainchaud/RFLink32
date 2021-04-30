@@ -111,6 +111,12 @@ namespace RFLink { namespace Radio {
     void paramsUpdatedCallback();
     void refreshParametersFromConfig();
 
+    /// Returns the current frequency of the transceiver in Hertz
+    int32_t getFrequency();
+
+    /// Sets the frequency of the transceiver in Hertz, and returns the previously set frequency, or 0 if it does not support setting the frequency
+    int32_t setFrequency(int32_t newFrequency);
+
 
     /**
      * return HardwareType::HW_EOF_t when not found

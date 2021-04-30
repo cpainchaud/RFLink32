@@ -34,6 +34,7 @@
 #define PLUGIN_014 // Ikea Koppla
 #define PLUGIN_015 // Home Easy EU
 #define PLUGIN_017 // RTS
+#define PLUGIN_016 // Silvercrest
 // -------------------
 // Weather sensors
 // -------------------
@@ -112,6 +113,7 @@
 // #define PLUGIN_TX_013           // Powerfix/Quigg
 // #define PLUGIN_TX_015           // Home Easy EU     (14)
 #define PLUGIN_TX_017           // RTS
+#define PLUGIN_TX_016           // Silvercrest
 // -------------------
 // Doorbells
 // -------------------

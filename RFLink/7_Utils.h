@@ -10,6 +10,22 @@
     (at your option) any later version.
 */
 
+// Use the SerialDebugXX() methods to write debug information to the serial port only
+// if SerialDebugActivated is defined.
+// As this set of definitions is outside the #ifndef INCLUDE_UTIL_H_, you can define
+// SerialDebugActivated on a plugin by plugin basis, right before including this 
+// header file 
+#ifdef SerialDebugActivated
+#undef SerialDebug
+#define SerialDebug(method, arguments...)  Serial.method(arguments)
+#else
+#undef SerialDebug
+#define SerialDebug(method, arguments...)  /**/
+#endif
+#define SerialDebugPrintln(arguments...)   SerialDebug(println, arguments)
+#define SerialDebugPrint(arguments...)     SerialDebug(print, arguments)
+#undef SerialDebugActivated
+
 #ifndef INCLUDE_UTIL_H_
 #define INCLUDE_UTIL_H_
 
