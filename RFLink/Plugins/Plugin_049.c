@@ -206,6 +206,7 @@ inline bool PLUGIN_049_decode(int fromPosition, int toPosition ) {
     sprintf(printBuf, PSTR("LaCrosseTX141 failed to decode PWM"));
     sendRawPrint(printBuf, true);
     #endif
+    return false;
   }
 
   #ifdef PLUGIN_049_DEBUG
