@@ -9,7 +9,7 @@
 #define Radio_h
 
 #include <Arduino.h>
-#include <11_Config.h>
+#include "11_Config.h"
 
 #define TRANSMITTER_STABLE_DELAY_US 500 // 500        // Delay to let the transmitter become stable (Note: Aurel RTX MID needs 500µS/0,5ms).
 #define PULLUP_RF_RX_DATA_0 false       // false      // Sometimes a pullup in needed on RX data pin
