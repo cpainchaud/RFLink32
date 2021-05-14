@@ -21,6 +21,7 @@ RFM69OOK radio;
 
 Module radioLibModule(5, -1, 4, -1);
 SX1278 *radio_SX1278 = nullptr;
+SX1276 *radio_SX1276 = nullptr;
 RF69 *radio_RFM69 = nullptr;
 
 
@@ -69,7 +70,7 @@ namespace RFLink { namespace Radio  {
 
       const int32_t default_frequency = 433920000;
       const int32_t default_BitRate = 9600;
-      const int32_t default_rxBandwidth = 125000;
+      const int32_t default_rxBandwidth = 250000;
 
       int32_t frequency;
       int32_t rxBandwidth;
@@ -89,6 +90,7 @@ namespace RFLink { namespace Radio  {
             "RFM69HCW",
             "SX1278",
             "RFM69TEST_RADIOLIB",
+            "SX1276",
             "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
     };
 #define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
@@ -428,6 +430,9 @@ namespace RFLink { namespace Radio  {
         case HardwareType::HW_SX1278_t:
           radio_SX1278->setFrequency(newFrequency / 1000000.0);
           break;
+        case HardwareType::HW_SX1276_t:
+          radio_SX1276->setFrequency(newFrequency / 1000000.0);
+          break;
         case HardwareType::HW_RFM69NEW_t:
           radio_RFM69->setFrequency(newFrequency / 1000000.0);
           break;
@@ -567,6 +572,8 @@ namespace RFLink { namespace Radio  {
         set_Radio_mode_RFM69_new(new_State, force);
       else if( hardware == HardwareType::HW_SX1278_t )
         set_Radio_mode_SX1278(new_State, force);
+      else if( hardware == HardwareType::HW_SX1276_t )
+        set_Radio_mode_SX1276(new_State, force);
       else
         Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'\r\n"), new_State);
     }
@@ -746,6 +753,71 @@ namespace RFLink { namespace Radio  {
       }
     }
 
+    void set_Radio_mode_SX1276(States new_State, bool force)
+    {
+      // @TODO : review compatibility with ASYNC mode
+      if (current_State != new_State || force)
+      {
+        switch (new_State)
+        {
+          case Radio_OFF: {
+            if( RFLink::Signal::params::async_mode_enabled )
+              RFLink::Signal::AsyncSignalScanner::stopScanning();
+
+            auto success = radio_SX1276->standby();
+            if(success != 0) {
+              Serial.printf_P(PSTR("Failed to switch to standby mode (code=%i), we will try to reinitialize it later"), (int) success);
+              hardwareProperlyInitialized = false;
+            }
+            break;
+          }
+
+          case Radio_RX: {
+
+            auto success = radio_SX1276->receiveDirect();
+            if(success != 0) {
+              Serial.printf_P(PSTR("Failed to put hardware in RX mode (code=%i), we will try to reinitialize it later"), (int) success);
+              hardwareProperlyInitialized = false;
+            }
+
+            pinMode(pins::RX_DATA, INPUT);
+
+            if( RFLink::Signal::params::async_mode_enabled )
+              RFLink::Signal::AsyncSignalScanner::startScanning();
+
+            break;
+          }
+
+          case Radio_TX: {
+
+            if( RFLink::Signal::params::async_mode_enabled )
+              RFLink::Signal::AsyncSignalScanner::stopScanning();
+
+            pinMode(pins::TX_DATA, OUTPUT);
+
+            auto success = radio_SX1276->transmitDirect();
+            if(success != 0) {
+              Serial.printf_P(PSTR("Failed to put hardware in TX mode (code=%i), we will try to reinitialize it later"), (int) success);
+              hardwareProperlyInitialized = false;
+            }
+
+            success = radio_SX1276->setOutputPower(13);
+            if(success != 0) {
+              Serial.printf_P(PSTR("Failed setup hardware TX power (code=%i), we will try to reinitialize it later"), (int) success);
+              hardwareProperlyInitialized = false;
+            }
+
+            break;
+          }
+
+          case Radio_NA:
+            break;
+        }
+
+        current_State = new_State;
+      }
+    }
+
     void set_Radio_mode_RFM69_new(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
@@ -814,6 +886,8 @@ namespace RFLink { namespace Radio  {
     float getCurrentRssi() {
       if(hardware == HardwareType::HW_SX1278_t)
         return radio_SX1278->getRSSI(true);
+      if(hardware == HardwareType::HW_SX1276_t)
+        return radio_SX1276->getRSSI(true);
       if(hardware == HardwareType::HW_RFM69NEW_t)
         return radio_RFM69->getRSSI();
 
@@ -843,6 +917,9 @@ namespace RFLink { namespace Radio  {
 
       if(newHardware == HardwareType::HW_SX1278_t){
         success = initialize_SX1278();
+      }
+      else if(newHardware == HardwareType::HW_SX1276_t){
+        success = initialize_SX1276();
       }
       else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69HCW_t){
         success = initialize_RFM69_legacy();
@@ -944,6 +1021,87 @@ namespace RFLink { namespace Radio  {
 
       //result = radio_SX1278->startDirect();
       //Serial.printf("sx1278 startDirect code %i\r\n", result)
+      //finalResult |= result;
+
+      return finalResult == 0;
+    }
+
+    bool initialize_SX1276() {
+      radioLibModule = Module(pins::RX_CS, -1, pins::RX_RESET, -1);
+      if(radio_SX1276 == nullptr)
+        radio_SX1276 = new SX1276(&radioLibModule);
+      else
+        *radio_SX1276 = &radioLibModule;
+
+      int finalResult = 0;
+
+      auto result = radio_SX1276->beginFSK( (float)params::frequency/1000000,
+                                            (float)params::bitrate/1000,
+                                            50.0F,
+                                            (float)params::rxBandwidth/1000,
+                                            12, 16, true);
+      Serial.printf_P(PSTR("Initialized SX1276(freq=%.2fMhz,br=%.3fkbps,rxbw=%.1fkhz)=%i\r\n"),
+                      (float)params::frequency/1000000,
+                      (float)params::bitrate/1000,
+                      (float)params::rxBandwidth/1000,
+                      result);
+
+      finalResult |= result;
+
+      result = radio_SX1276->setOOK(true);
+      Serial.printf_P(PSTR("SX1276 setOOK=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_SX1276->setEncoding(RADIOLIB_ENCODING_NRZ);
+      Serial.printf_P(PSTR("SX1276 set encoding result=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_SX1276->setDataShapingOOK(0);
+      Serial.printf_P(PSTR("SX1276 set data shaping result=%i\r\n"), result);
+      finalResult |= result;
+
+      RssiThresholdTypesEnum newType = RssiThresholdType_default_SX127X;
+      if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
+        newType = params::rssiThresholdType;
+      if(newType == RssiThresholdTypesEnum::Peak)
+        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_PEAK);
+      else if(newType == RssiThresholdTypesEnum::Fixed)
+        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_FIXED);
+      else if(newType == RssiThresholdTypesEnum::Average)
+        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_AVERAGE);
+      Serial.printf_P(PSTR("SX1276 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
+      finalResult |= result;
+
+      uint16_t newValue = RssiFixedThresholdValue_default_SX127X;
+      if(params::fixedRssiThreshold != RssiFixedThresholdValue_undefined)
+        newValue = params::fixedRssiThreshold;
+      newValue = newValue*2;
+      result = radio_SX1276->setOokFixedOrFloorThreshold(newValue);
+      Serial.printf_P(PSTR("SX1276 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
+      finalResult |= result;
+
+      result = radio_SX1276->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
+      Serial.printf_P(PSTR("SX1276 setOokPeakThresholdDecrement() result=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_SX1276->disableBitSync();
+      Serial.printf_P(PSTR("SX1276 disableBitSync() result=%i\r\n"), result);
+      finalResult |= result;
+
+      result = radio_SX1276->setGain(6);
+      Serial.printf_P(PSTR("SX1276 setGain() result=%i\r\n"), result);
+      finalResult |= result;
+
+      //result = radio_SX1276->setFrequencyDeviation(200.0F);
+      //Serial.printf_P(PSTR("SX1276 setFrequencyDeviation() result=%i\r\n"), result);
+      //finalResult |= result;
+
+      //result = radio_SX1276->startReceive(0, SX127X_RXCONTINUOUS);
+      //Serial.printf("SX1276 receive start code %i\r\n", result);
+      //finalResult |= result;
+
+      //result = radio_SX1276->startDirect();
+      //Serial.printf("SX1276 startDirect code %i\r\n", result)
       //finalResult |= result;
 
       return finalResult == 0;
