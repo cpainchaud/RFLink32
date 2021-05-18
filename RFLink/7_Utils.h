@@ -39,6 +39,9 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define PulseIsHigh(pulseIndex) (pulseIndex % 2 == 1)
+#define PulseIsLow(pulseIndex) (!PulseIsHigh(pulseIndex))
+
 /// Reverse (reflect) the bits in an 8 bit byte.
 ///
 /// @param x input byte
