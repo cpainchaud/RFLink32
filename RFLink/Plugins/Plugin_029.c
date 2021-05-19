@@ -66,14 +66,14 @@ uint8_t Plugin_029_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
 
 boolean Plugin_029(byte function, const char *string)
 {
-  const long DKW2012_PULSEMINMAX = DKW2012_PULSEMINMAX_D / RawSignal.Multiply;
-
   if (!(
           ((RawSignal.Number >= ACH2010_MIN_PULSECOUNT) &&
            (RawSignal.Number <= ACH2010_MAX_PULSECOUNT)) ||
           ((RawSignal.Number >= DKW2012_MIN_PULSECOUNT) &&
            (RawSignal.Number <= DKW2012_MAX_PULSECOUNT))))
     return false;
+
+  const long DKW2012_PULSEMINMAX = DKW2012_PULSEMINMAX_D / RawSignal.Multiply;
 
   byte c = 0;
   byte data[10];

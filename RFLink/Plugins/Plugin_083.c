@@ -44,12 +44,12 @@
 
 boolean Plugin_083(byte function, const char *string)
 {
-   const long DOOYA_MIDVALUE = DOOYA_MIDVALUE_D / RawSignal.Multiply;
-   
-   char dbuffer[64];
-
       if ( RawSignal.Number == DOOYA_PULSECOUNT_1 ) 
       {
+         const long DOOYA_MIDVALUE = DOOYA_MIDVALUE_D / RawSignal.Multiply;
+        
+         char dbuffer[64];
+
          byte bbuffer[128];
 
 #ifdef PLUGIN_083_DEBUG

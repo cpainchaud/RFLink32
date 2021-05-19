@@ -54,12 +54,12 @@
 
 boolean Plugin_004(byte function, const char *string)
 {
-   const long NewKAKU_mT = NewKAKU_mT_D / RawSignal.Multiply;
    // nieuwe KAKU bestaat altijd uit start bit + 32 bits + evt 4 dim bits. Ongelijk, dan geen NewKAKU
    if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength))
       return false;
    if (RawSignal.Pulses[0] == 15)
       return true; // Home Easy, skip KAKU
+   const long NewKAKU_mT = NewKAKU_mT_D / RawSignal.Multiply;
    boolean Bit = 0;
    int i;
 #if defined(ESP32) || defined(ESP8266)

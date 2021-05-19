@@ -103,15 +103,15 @@
 
 boolean Plugin_043(byte function, const char *string)
 {
+   if ((RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4))
+      return false;
+
    const long LACROSSE43_MIDLO = LACROSSE43_MIDLO_D / RawSignal.Multiply;
    const long LACROSSE43_MIDHI = LACROSSE43_MIDHI_D / RawSignal.Multiply;      //1500 //1050
    const long LACROSSE43_PULSEMINMAX = LACROSSE43_PULSEMINMAX_D / RawSignal.Multiply; //810 //570
    const long LACROSSE43_PULSEMAXMIN = LACROSSE43_PULSEMAXMIN_D / RawSignal.Multiply; //1410 //990
    const long LACROSSE43_PULSEMAX = LACROSSE43_PULSEMAX_D / RawSignal.Multiply;   //2100 //1500
 
-
-   if ((RawSignal.Number < LACROSSE43_PULSECOUNT - 4) || (RawSignal.Number > LACROSSE43_PULSECOUNT + 4))
-      return false;
 
    unsigned long bitstream1 = 0L; // holds first 5x4=20 bits
    unsigned long bitstream2 = 0L; // holds last  6x4=24 bits

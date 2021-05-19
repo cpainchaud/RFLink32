@@ -94,11 +94,11 @@
 
 boolean Plugin_041(byte function, const char *string)
 {
-   const long LACROSSE41_PULSEMID = LACROSSE41_PULSEMID_D / RawSignal.Multiply;
-
    if ((RawSignal.Number != LACROSSE41_PULSECOUNT1) && (RawSignal.Number != LACROSSE41_PULSECOUNT2) &&
        (RawSignal.Number != LACROSSE41_PULSECOUNT3) && (RawSignal.Number != LACROSSE41_PULSECOUNT4))
       return false;
+
+   const long LACROSSE41_PULSEMID = LACROSSE41_PULSEMID_D / RawSignal.Multiply;
 
    byte data[18];
    byte bitcounter = 0;  // counts number of received bits (converted from pulses)

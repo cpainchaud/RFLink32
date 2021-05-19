@@ -227,9 +227,6 @@
 
 boolean Plugin_003(byte function, const char *string)
 {
-   const long KAKU_R = KAKU_R_D / RawSignal.Multiply;
-   const long KAKU_PULSEMID = KAKU_PULSEMID_D / RawSignal.Multiply;
-
    if (RawSignal.Number != (KAKU_CodeLength * 4) + 2)
       return false; // conventionele KAKU bestaat altijd uit 12 data bits plus stop. Ongelijk, dan geen KAKU!
    if (RawSignal.Pulses[0] == 15)
@@ -239,6 +236,9 @@ boolean Plugin_003(byte function, const char *string)
    if (RawSignal.Pulses[0] == 19)
       return false; // No need to test, packet for plugin 19
    // -------------------------------------------
+   const long KAKU_R = KAKU_R_D / RawSignal.Multiply;
+   const long KAKU_PULSEMID = KAKU_PULSEMID_D / RawSignal.Multiply;
+
    int i, j;
    boolean error = false;
    unsigned long bitstream = 0L;  // to store a 12 bit code (ARC type)

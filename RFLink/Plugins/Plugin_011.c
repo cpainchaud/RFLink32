@@ -90,12 +90,13 @@
 
 boolean Plugin_011(byte function, const char *string)
 {
+  if (RawSignal.Number != HC_PULSECOUNT) // Incorrect pulse count
+      return false;
+
    const long HC_PULSE_PREAMBLE = HC_PULSE_PREAMBLE_D / RawSignal.Multiply;
    const long HC_PULSE_MID = HC_PULSE_MID_D / RawSignal.Multiply;
    const long HC_PULSE_MAX = HC_PULSE_MAX_D / RawSignal.Multiply;
 
-  if (RawSignal.Number != HC_PULSECOUNT) // Incorrect pulse count
-      return false;
   if (RawSignal.Pulses[1] < HC_PULSE_PREAMBLE )
       return false; // First (start) pulse needs to be long
 
