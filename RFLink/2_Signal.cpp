@@ -259,13 +259,14 @@ namespace RFLink
       // ************************
       // ***   Message Loop   ***
       // ************************
+      int end_timeout = 20000; //params::signal_end_timeout; 
       while (RawCodeLength < RAW_BUFFER_SIZE)
       {
 
         while (CHECK_RF)
         {
           GET_PULSELENGTH;
-          if (PulseLength_us > params::signal_end_timeout)
+          if (PulseLength_us > end_timeout)
             break;
         }
 
@@ -280,7 +281,7 @@ namespace RFLink
         }
 
         // ***   Ending Pulse Check   ***
-        if (PulseLength_us > params::signal_end_timeout) // Again, in main while this time
+        if (PulseLength_us > end_timeout) // Again, in main while this time
         {
           RawCodeLength++;
           break;
@@ -303,7 +304,7 @@ namespace RFLink
 
       if (RawCodeLength >= params::min_raw_pulses)
       {
-        RawSignal.Pulses[RawCodeLength] = params::signal_end_timeout;  // Last element contains the timeout.
+        RawSignal.Pulses[RawCodeLength] = end_timeout;  // Last element contains the timeout.
         RawSignal.Number = RawCodeLength - 1; // Number of received pulse times (pulsen *2)
         RawSignal.Multiply = params::sample_rate;
         RawSignal.Time = millis(); // Time the RF packet was received (to keep track of retransmits
@@ -617,6 +618,14 @@ namespace RFLink
           { 
             rtl_433Bridge::processReceivedData(); 
 
+            for (int i = 1; i < RawSignal.Number; i++) 
+                if (RawSignal.Pulses[i] > params::signal_end_timeout)
+                {
+                    RawSignal.Number = i - 0;
+                    //Serial.printf("Breaking at pulse %d\r\n", i - 0);
+                    break;
+                }
+              
             // RF: *** data start ***
             counters::receivedSignalsCount++;
             if (PluginRXCall(0, 0))
