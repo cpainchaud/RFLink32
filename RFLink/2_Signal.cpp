@@ -10,6 +10,7 @@
 #include "2_Signal.h"
 #include "5_Plugin.h"
 #include "4_Display.h"
+#include "14_rtl_433Bridge.h"
 
 unsigned long SignalCRC = 0L;   // holds the bitstream value for some plugins to identify RF repeats
 unsigned long SignalCRC_1 = 0L; // holds the previous SignalCRC (for mixed burst protocols)
@@ -613,7 +614,10 @@ namespace RFLink
           }
 
           if (success)
-          { // RF: *** data start ***
+          { 
+            rtl_433Bridge::processReceivedData(); 
+
+            // RF: *** data start ***
             counters::receivedSignalsCount++;
             if (PluginRXCall(0, 0))
             { // Check all plugins to see which plugin can handle the received signal.
