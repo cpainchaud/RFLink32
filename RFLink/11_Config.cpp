@@ -14,6 +14,7 @@
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
 #include "12_Portal.h"
+#include "14_rtl_433Bridge.h"
 
 #if defined(DEBUG) || defined(RFLINK_DEBUG)
 #define DEBUG_RFLINK_CONFIG
@@ -297,6 +298,9 @@ namespace RFLink
       }
 
       printFile();
+
+      // register rtl_433 protocols
+      rtl_433Bridge::register_all_protocols(0);
     }
 
     class CallbackManager
