@@ -1,3 +1,50 @@
+# This the rtl_433 branch
+    
+**This branch only supports ESP32 boards, ESP8266 does not have enough onobard RAM.**
+
+This branch allows the inclusion of [rtl_433](https://github.com/merbanan/rtl_433) plugins in RFLink32 following these instructions:
+
+1. Checkout this branch
+1. Create the `RFLink\rtl_433` folder
+1. Copy the original `include` folder from rtl_433 inside `RFLink\rtl_433`
+1. Copy the original `util.c` from rtl_433 inside `RFLink\rtl_433`
+1. Create the `RFLink\rtl_433\src` folder
+1. Copy those files from the original `src` folder from rtl_433 inside `RFLink\rtl_433\src`
+    * abuf.c
+    * bitbuffer.c
+    * compat_time.c
+    * data.c
+    * decoder_util.c
+    * fileformat.c
+    * list.c
+    * pulse_demod.c
+    * r_api.c
+1. Edit `src\data.c` to add the following lines right before the first `typedef void`
+    ```cpp
+    #ifdef ESP32
+        #define _POSIX_HOST_NAME_MAX  16 
+    #endif
+    ```
+1. Edit `src\devices\secplus_v2.c` at the end of the file to change the value for `disabled` to `1` as this plugin uses too much stack
+1. Make sure the main task is configured to use a 24kb stack
+    1. Open `C:\Users\YOURLOGIN\.platformio\packages\framework-arduinoespressif32\cores\esp32\main.cpp`
+    1. On the call to `xTaskCreateUniversal` near the end, replace `CONFIG_ARDUINO_LOOP_STACK_SIZE` by `24576`
+    
+    Note that this local edit will not be required once the following [PR](https://github.com/espressif/arduino-esp32/pull/5173) has been released as it will allow us to simply change the value from the `platformio.ini` file 
+    
+**What's next / Questions**
+
+1. Create a PR at rtl_433 for the change in `src\data.c`
+    Is the value 16 coherent? Not that it would matter much, it is used in the `data_output_syslog_t` structure that I believe can't be used anyway on ESP32 (no syslog?) 
+1. Create an issue at rtl_433 for discussing the possibility of making `bitbuffer_t` an opaque pointer, thus forcing to allocate on heap which will save stack space. This structure is used a lot and is the main culprit for stack consumption.
+    This has to be tested on the real rtl_433 first: I have already started investigating as I have no problem building under VisualStudio   
+3. Modify `data_acquired_handler` inside the bridge so that it converts the `data_t` element it receives to items that are valid for the various `display_XX` methods
+    This would avoid the conversion to json and allow calling `RFLink::sendMsgFromBuffer()` that takes care of sending to Ser2Net, MQTT and the serial port as if it was a more regular plugin.
+1. Should `processReceivedData()` return the number of decoded messages? 
+    This could then be used to break out of `ScanEvent` early but it should return `false` to prevent the caller of `ScanEvent` from sending the same message as already sent by `data_acquired_handler`  
+    
+----------
+
 # RFLink ESP
 
 This is a Radio Frequency to MQTT/Serial/TCP gateway built for ESP32 and ESP8266 boards (see #MCU for more).
