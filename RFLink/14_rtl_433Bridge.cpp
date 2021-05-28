@@ -114,13 +114,7 @@ namespace RFLink
             /*for (int deviceIndex = 0; deviceIndex < num_r_devices; deviceIndex++)
               Serial.println(r_devices[deviceIndex].name);*/
 
-            //pulse_data_t data;
-            pulse_data_t* pulseData = (pulse_data_t*)malloc(sizeof(*pulseData));
-            if (!pulseData)
-            {
-                Serial.println("Unable to get memory for pulsedata!");
-                return;
-            }
+            static pulse_data_t pulseData = {0}; 
             int dataPulseIndex = 0;
 
             for (int pulseIndex = 0; pulseIndex < Signal::RawSignal.Number; pulseIndex++)
@@ -128,26 +122,25 @@ namespace RFLink
                 int pulseDuration = Signal::RawSignal.Pulses[pulseIndex] * Signal::RawSignal.Multiply;
                 if (PulseIsHigh(pulseIndex))
                 {
-                    pulseData->pulse[dataPulseIndex] = pulseDuration;
+                    pulseData.pulse[dataPulseIndex] = pulseDuration;
                 }
                 else
                 {
-                    pulseData->gap[dataPulseIndex] = pulseDuration;
+                    pulseData.gap[dataPulseIndex] = pulseDuration;
                     dataPulseIndex++;
                 }
             }
-            pulseData->num_pulses = dataPulseIndex;
-            pulseData->sample_rate = 1.0e6;
+            pulseData.num_pulses = dataPulseIndex;
+            pulseData.sample_rate = 1.0e6;
 
 
             //Serial.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
-            int decodedCount = run_ook_demods(&r_devs, pulseData);
+            int decodedCount = run_ook_demods(&r_devs, &pulseData);
             //int decodedCount = pulse_demod_ppm(pulseData, &tfa_pool_thermometer);
             //int decodedCount = pulse_demod_ppm(NULL, &tfa_pool_thermometer);
             //int decodedCount = pulse_demod_ppm(pulseData, NULL);
             //Serial.printf("rtl_433 decoded %d messages", decodedCount);
             //Serial.println();
-            free(pulseData);
 
             //Serial.printf("stack free: %d", uxTaskGetStackHighWaterMark(NULL));
             //Serial.println();
