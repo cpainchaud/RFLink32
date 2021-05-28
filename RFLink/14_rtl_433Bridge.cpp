@@ -59,6 +59,7 @@ namespace RFLink
             display_Name(buffer);
             display_Footer();
             */
+            data_free(data);
         }
 
         void register_protocol(const r_device *r_dev, char *arg)
