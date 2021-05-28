@@ -32,7 +32,7 @@ namespace RFLink
         };
         const int num_r_devices = sizeof(r_devices) / sizeof(r_device);
 
-        list_t r_devs;
+        list_t r_devs = {0};
 
         void data_acquired_handler(r_device *r_dev, data_t *data)
         {
