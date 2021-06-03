@@ -11,6 +11,8 @@ This branch allows the inclusion of [rtl_433](https://github.com/merbanan/rtl_43
     
     Note that this local edit will not be required once the following [PR](https://github.com/espressif/arduino-esp32/pull/5173) has been released as it will allow us to simply change the value from the `platformio.ini` file
     
+The edits in `secplus_v2.c` and `main.cpp` can be avoided if you apply the changes suggested in this [issue](https://github.com/merbanan/rtl_433/issues/1726)  
+    
 **What's next / Questions**
 
 1. Should `processReceivedData()` return the number of decoded messages? 
