@@ -29,6 +29,16 @@ void display_Header(void)
   strcat(pbuffer, dbuffer);
 }
 
+void display_FieldSeparator()
+{
+    strcat(pbuffer, ";");
+}
+
+void display_RawString(const char *input)
+{
+  strcat(pbuffer, input);
+}
+
 // Plugin Name
 void display_Name(const char *input)
 {
@@ -48,6 +58,19 @@ void display_Splash(void)
 {
   sprintf_P(dbuffer, PSTR("%s%d.%d;BUILD=%s"), PSTR(";RFLink_ESP;VER="), BUILDNR, REVNR, PSTR(RFLINK_BUILDNAME));
   strcat(pbuffer, dbuffer);
+}
+
+void display_ID(unsigned long id)
+{
+    int numBytes = 8;
+    if (id < 0xFFFFFF)
+        numBytes = 6;
+    if (id < 0xFFFF)
+        numBytes = 4;
+    if (id < 0xFF)
+        numBytes = 2;
+
+    display_IDn(id, numBytes);
 }
 
 // ID=9999 => device ID (often a rolling code and/or device channel number) (Hexadecimal)
@@ -159,7 +182,7 @@ void display_HUM(byte input)
   strcat(pbuffer, dbuffer);
 }
 
-// BARO=9999 => Barometric pressure (hexadecimal)
+// BARO=9999 => Barometric pressure (hexadecimal) in hPa
 void display_BARO(unsigned int input)
 {
   sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";BARO="), input);
@@ -357,6 +380,53 @@ void display_CHAN(byte channel)
   sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";CHN="), channel);
   strcat(pbuffer, dbuffer);
 }
+
+bool str2cmdenum(const char* command, bool& all, enum CMD_OnOff& displayCmd)
+{
+    int cmd = str2cmd(command);
+    if (cmd)
+    {
+        all = false;
+        switch (cmd)
+        {
+            case VALUE_PAIR:
+                displayCmd = CMD_Pair;
+                break;
+            case VALUE_ALLOFF:
+                all = true;
+            case VALUE_OFF:
+                displayCmd = CMD_Off;
+                break;
+            case VALUE_ALLON:
+                all = true;
+            case VALUE_ON:
+                displayCmd = CMD_On;
+                break;
+            case VALUE_DIM:
+                displayCmd = CMD_Dim;
+                break;
+            case VALUE_BRIGHT:
+                displayCmd = CMD_Bright;
+                break;
+            case VALUE_UP:
+                displayCmd = CMD_Up;
+                break;
+            case VALUE_DOWN:
+                displayCmd = CMD_Down;
+                break;
+            case VALUE_STOP:
+                displayCmd = CMD_Stop;
+                break;
+            case VALUE_CONFIRM:
+            case VALUE_LIMIT:
+                return false;
+        }
+        return true;
+    }
+    else
+        return false;
+}
+
 
 // --------------------- //
 // get label shared func //

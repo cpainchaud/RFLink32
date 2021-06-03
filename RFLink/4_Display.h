@@ -16,9 +16,12 @@
 extern char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
 
 void display_Header(void);
+void display_FieldSeparator(); 
+void display_RawString(const char *); // does not add the ';' separator
 void display_Name(const char *);
 void display_Footer(void);
 void display_Splash(void);
+void display_ID(unsigned long);
 void display_IDn(unsigned long, byte);
 void display_IDc(const char *);
 void display_SWITCH(byte);
@@ -81,6 +84,8 @@ void display_DIST(unsigned int);
 void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
+
+bool str2cmdenum(const char*, bool&, enum CMD_OnOff&);
 
 // These functions are here to help writing the emitting part of a plugin by interpreting the received command
 // A local copy of the original InputBuffer_Serial is split by semi colons into tokens seperated when calling
