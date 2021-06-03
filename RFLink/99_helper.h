@@ -12,6 +12,9 @@ extern "C" {
 void SerialPrintLn(const char* msg);
 void SerialPrintMsg(const char* msg);
 void SerialPrint(int value);
+void SerialPrintFreeHeap();
+void SerialPrintMaxAllocHeap();
+void SerialPrintFreeMemInfo();
 #ifdef __cplusplus
 }
 #endif
