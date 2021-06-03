@@ -4,6 +4,7 @@
 #include "7_Utils.h"
 #include "11_Config.h"
 #include "14_rtl_433Bridge.h"
+#include "14_rtl_433BridgeFieldMappings.h"
 
 // rtl_433 is built by the C compiler, so we must make sure the method
 // definitions are imported unmangled
@@ -14,6 +15,7 @@ extern "C" {
 #include "pulse_detect.h"
 #include "pulse_demod.h"
 #include "r_api.h"
+#include "r_util.h"
 #include "r_device.h"
 #include "rtl_433_devices.h"
 }
@@ -39,6 +41,110 @@ namespace RFLink
             /*Serial.print("rtl_433: received data from ");
             Serial.print(r_dev->name);
             Serial.println(":");*/
+
+            display_Header();
+            for (data_t *d = data; d; d = d->next) 
+            {
+                const field_mapping* mapping = get_field_mapping(d->key);
+                switch (d->type)
+                {
+                    case DATA_STRING:
+                        if (mapping && mapping->display_functions.str_display_fn)
+                        {
+                            const char* str = (const char*)(d->value.v_ptr);
+                            mapping->display_functions.str_display_fn(str);
+                        }
+                        else
+                        {
+                            display_unknown_data(d);
+                        }
+                        break;
+                    case DATA_DOUBLE:
+                        if (mapping) 
+                        {
+                            double dblValue = d->value.v_dbl;
+
+                            // Convert fields ending in _F to _C
+                            if (str_endswith(d->key, "_F"))
+                                dblValue = fahrenheit2celsius(dblValue);
+
+                            // Convert fields ending in _mph or _mi_h to _kph
+                            if (str_endswith(d->key, "_mph") || str_endswith(d->key, "_mi_h")) 
+                                dblValue = mph2kmph(dblValue);
+
+                            // Convert fields ending in _in to _mm
+                            if (str_endswith(d->key, "_in") || str_endswith(d->key, "_inch"))
+                                dblValue = inch2mm(dblValue);
+
+                            // Convert fields ending in _in_h to _mm_h
+                            if (str_endswith(d->key, "_in_h"))
+                                dblValue = inch2mm(dblValue);
+
+                            // Convert fields ending in _inHg to _hPa
+                            if (str_endswith(d->key, "_inHg"))
+                                dblValue = inhg2hpa(dblValue);
+
+                            // Convert fields ending in _PSI to _hPa
+                            if (str_endswith(d->key, "_PSI")) 
+                                dblValue = psi2kpa(dblValue) * 10.0;
+
+                            // Convert fields ending in _m_s in _kph
+                            if (str_endswith(d->key, "_m_s"))
+                                dblValue = 3.6 * dblValue;
+
+                            if (mapping->display_functions.double_display_fn)
+                            {
+                                mapping->display_functions.double_display_fn((mapping->multiply_value_by_ten) ? dblValue * 10.0: dblValue);
+                            }
+                            else 
+                            {
+                                int intValue = (mapping->multiply_value_by_ten) ? multiply_by_ten(dblValue) : (unsigned int)round(dblValue);
+
+                                if (mapping->display_functions.uint_display_fn)
+                                    mapping->display_functions.uint_display_fn(intValue);
+                                else if (mapping->display_functions.ulong_display_fn)
+                                    mapping->display_functions.ulong_display_fn(intValue);
+                                else if (mapping->display_functions.byte_display_fn)
+                                    mapping->display_functions.byte_display_fn(intValue);
+                                else
+                                    display_unknown_data(d);
+                            }
+                        }
+                        else
+                        {
+                            display_unknown_data(d);
+                        }
+                        break;
+                    case DATA_INT:
+                        if (mapping) 
+                        {
+                            unsigned int intValue = d->value.v_int;
+                            if (mapping->multiply_value_by_ten)
+                                intValue = intValue * 10;
+
+                            if (mapping->display_functions.uint_display_fn)
+                                mapping->display_functions.uint_display_fn(intValue);
+                            else if (mapping->display_functions.ulong_display_fn)
+                                mapping->display_functions.ulong_display_fn(intValue);
+                            else if (mapping->display_functions.byte_display_fn)
+                                mapping->display_functions.byte_display_fn(intValue);
+                            else
+                                display_unknown_data(d);
+                        }
+                        else
+                        {
+                            display_unknown_data(d);
+                        }
+                        break;
+                    case DATA_DATA:
+                    case DATA_ARRAY:
+                    case DATA_COND:
+                    case DATA_COUNT:
+                    case DATA_FORMAT:
+                        break;
+                }
+            }
+            display_Footer();
 
             const int bufferLength = 1024;
             char buffer[bufferLength];
