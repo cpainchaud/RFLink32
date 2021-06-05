@@ -5,30 +5,11 @@
 This branch allows the inclusion of [rtl_433](https://github.com/merbanan/rtl_433) plugins in RFLink32 following these instructions:
 
 1. Checkout this branch
-1. Create the `RFLink\rtl_433` folder
-1. Copy the original `include` folder from rtl_433 inside `RFLink\rtl_433`
-1. Copy the original `util.c` from rtl_433 inside `RFLink\rtl_433`
-1. Create the `RFLink\rtl_433\src` folder
-1. Copy those files from the original `src` folder from rtl_433 inside `RFLink\rtl_433\src`
-    * abuf.c
-    * bitbuffer.c
-    * compat_time.c
-    * data.c
-    * decoder_util.c
-    * fileformat.c
-    * list.c
-    * pulse_demod.c
-    * r_api.c
-    * r_util.c
-1. Apply the changes from this [PR](https://github.com/merbanan/rtl_433/pull/1728)
-1. Edit `src\devices\secplus_v2.c` at the end of the file to change the value for `disabled` to `1` as this plugin uses too much stack
-1. Make sure the main task is configured to use a 24kb stack
+1. Make sure the main task is configured to use a 12kb stack
     1. Open `C:\Users\YOURLOGIN\.platformio\packages\framework-arduinoespressif32\cores\esp32\main.cpp`
-    1. On the call to `xTaskCreateUniversal` near the end, replace `CONFIG_ARDUINO_LOOP_STACK_SIZE` by `24576`
+    1. On the call to `xTaskCreateUniversal` near the end, replace `CONFIG_ARDUINO_LOOP_STACK_SIZE` by `12288`
     
     Note that this local edit will not be required once the following [PR](https://github.com/espressif/arduino-esp32/pull/5173) has been released as it will allow us to simply change the value from the `platformio.ini` file
-    
-The edits in `secplus_v2.c` and `main.cpp` can be avoided if you apply the changes suggested in this [issue](https://github.com/merbanan/rtl_433/issues/1726)  
     
 **What's next / Questions**
 
