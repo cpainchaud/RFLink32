@@ -33,21 +33,12 @@ jobs:
       run: |
         pio run --project-conf .travis.platformio.ini --environment ESP32_sw
 
-
-    - name: D1_none_enabled
-      run: |
-        pio run --project-conf .travis.platformio.ini --environment D1_none_enabled
-    - name: D1_sw
-      run: |
-        pio run --project-conf .travis.platformio.ini --environment D1_sw
-
     - name: Copy firmwares in 1 place
       if: github.event_name == 'push'
       run: |
         mkdir firmwares
         cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware-OTA.bin
         cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
-        cp .pio/build/D1_sw/firmware.bin firmwares/esp8266-firmware.bin
         cd firmwares
         cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin .
         cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/sdk/bin/bootloader_dio_40m.bin .
@@ -73,6 +64,17 @@ jobs:
         automatic_release_tag: "nightly-RadioLib"
         prerelease: true
         title: "Development Build"
+        files: |
+          firmwares/*
+
+    - name: Publish firmware for rtl_433 branch
+      if: github.ref == 'refs/heads/rtl_433' && github.event_name == 'push'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "nightly-RTL_433"
+        prerelease: true
+        title: "RTL_433 Development Build"
         files: |
           firmwares/*
 
