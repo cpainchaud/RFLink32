@@ -1015,14 +1015,6 @@ namespace RFLink { namespace Radio  {
       //Serial.printf_P(PSTR("SX1278 setFrequencyDeviation() result=%i\r\n"), result);
       //finalResult |= result;
 
-      //result = radio_SX1278->startReceive(0, SX127X_RXCONTINUOUS);
-      //Serial.printf("sx1278 receive start code %i\r\n", result);
-      //finalResult |= result;
-
-      //result = radio_SX1278->startDirect();
-      //Serial.printf("sx1278 startDirect code %i\r\n", result)
-      //finalResult |= result;
-
       return finalResult == 0;
     }
 
@@ -1094,14 +1086,6 @@ namespace RFLink { namespace Radio  {
 
       //result = radio_SX1276->setFrequencyDeviation(200.0F);
       //Serial.printf_P(PSTR("SX1276 setFrequencyDeviation() result=%i\r\n"), result);
-      //finalResult |= result;
-
-      //result = radio_SX1276->startReceive(0, SX127X_RXCONTINUOUS);
-      //Serial.printf("SX1276 receive start code %i\r\n", result);
-      //finalResult |= result;
-
-      //result = radio_SX1276->startDirect();
-      //Serial.printf("SX1276 startDirect code %i\r\n", result)
       //finalResult |= result;
 
       return finalResult == 0;
