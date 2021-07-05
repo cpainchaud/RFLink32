@@ -376,7 +376,7 @@ namespace RFLink
 
             if(runtime::verboseSignalFetchLoop) {
               sprintf_P(printBuf,
-                        PSTR("%.4X LONG Pulse EARLY reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu pos=%u)"),
+                        PSTR("%.4lX LONG Pulse EARLY reset because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu pos=%u)"),
                         RawSignal.Time,
                         longPulseRssiReference,
                         newRssi,
@@ -408,7 +408,7 @@ namespace RFLink
         SWITCH_TOGGLE;
         if (!CHECK_TIMEOUT){
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("%.4X Early signal dropped because of seek_timeout (pulseLen=%lu)"),
+            sprintf_P(printBuf, PSTR("%.4lX Early signal dropped because of seek_timeout (pulseLen=%lu)"),
                       RawSignal.Time,
                       PulseLength_us);
             RFLink::sendRawPrint(printBuf, true);
@@ -460,7 +460,7 @@ namespace RFLink
             if (longPulseRssiTimer > 100 && longPulseRssiReference + 3 < newRssi) {
               if(runtime::verboseSignalFetchLoop) {
                 sprintf_P(printBuf,
-                          PSTR("%.4X LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
+                          PSTR("%.4lX LONG Pulse resets signal because of RSSI gap within it (refRssi=%.0f newRssi=%.0f length=%lu toggle=%i pos=%u)"),
                           RawSignal.Time,
                           longPulseRssiReference,
                           newRssi,
@@ -498,7 +498,7 @@ namespace RFLink
               if( ((unsigned long)RawSignal.Pulses[RawCodeLength-1])*(unsigned long)params::sample_rate >= ((unsigned long)averagedGapsLength)*(unsigned long)150/(unsigned long)100 ) {
                 // if previous Gap is 1.5x the average of Gaps we will try to decode still!
                 if(runtime::verboseSignalFetchLoop) {
-                  sprintf_P(printBuf, PSTR("%.4X attempted noise filter"), RawSignal.Time);
+                  sprintf_P(printBuf, PSTR("%.4lX attempted noise filter"), RawSignal.Time);
                   RFLink::sendRawPrint(printBuf, true);
                 }
                 RawSignal.endReason = EndReasons::AttemptedNoiseFilter;
@@ -507,7 +507,7 @@ namespace RFLink
             }
           }
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("%.4X Dropped signal due to short pulse (RawCodeLength=%u, pulseLen=%lu)"), RawSignal.Time, RawCodeLength, PulseLength_us);
+            sprintf_P(printBuf, PSTR("%.4lX Dropped signal due to short pulse (RawCodeLength=%u, pulseLen=%lu)"), RawSignal.Time, RawCodeLength, PulseLength_us);
             RFLink::sendRawPrint(printBuf, true);
           }
           return false; // it seems to be noise so we're out !
@@ -518,7 +518,7 @@ namespace RFLink
           STORE_PULSE;
           if(runtime::verboseSignalFetchLoop) {
             sprintf_P(printBuf,
-                      PSTR("%.4X Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)"),
+                      PSTR("%.4lX Ended signal because of dynamic gap length reached (pulse=%lu dynamicGap=%lu pos=%i)"),
                       RawSignal.Time,
                       PulseLength_us, dynamicGapEnd_us, (int) RawCodeLength);
             RFLink::sendRawPrint(printBuf, true);
@@ -534,7 +534,7 @@ namespace RFLink
             STORE_PULSE;
 
           if(runtime::verboseSignalFetchLoop) {
-            sprintf_P(printBuf, PSTR("%.4X Signal ended because of signal_end_timeout (toggle=%i pos=%i)"),
+            sprintf_P(printBuf, PSTR("%.4lX Signal ended because of signal_end_timeout (toggle=%i pos=%i)"),
                       RawSignal.Time,
                       (int) Toggle,
                       (int) RawCodeLength);
@@ -579,7 +579,7 @@ namespace RFLink
       else
       {
         if(runtime::verboseSignalFetchLoop) {
-          sprintf_P(printBuf, PSTR("%.4X Dropped signal because it's too short (RawCodeLength=%u)"), RawSignal.Time, RawCodeLength);
+          sprintf_P(printBuf, PSTR("%.4lX Dropped signal because it's too short (RawCodeLength=%u)"), RawSignal.Time, RawCodeLength);
           RFLink::sendRawPrint(printBuf, true);
         }
         RawSignal.Number = 0;

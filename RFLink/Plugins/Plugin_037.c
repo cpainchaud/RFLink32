@@ -184,7 +184,7 @@ boolean Plugin_037(byte function, const char *string)
    display_Header();
    display_Name(PSTR("AcuRite 986"));
    char c_ID[5];
-   sprintf(c_ID, "%02x%02x", (rc & 0xFF), rc2);
+   sprintf(c_ID, "%02lx%02x", (rc & 0xFF), rc2);
    display_IDc(c_ID);
    display_TEMP(temperature);
    display_BAT(battery);
