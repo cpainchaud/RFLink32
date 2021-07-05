@@ -176,6 +176,8 @@ namespace RFLink
             display_Footer();
             */
             data_free(data);
+            
+            RFLink::sendMsgFromBuffer();
         }
 
         void register_protocol(const r_device *r_dev, char *arg)
