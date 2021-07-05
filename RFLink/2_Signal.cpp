@@ -616,7 +616,7 @@ namespace RFLink
 
           if (success)
           { 
-            rtl_433Bridge::processReceivedData(); 
+            counters::receivedSignalsCount += rtl_433Bridge::processReceivedData(); 
 
             for (int i = 1; i < RawSignal.Number; i++) 
                 if (RawSignal.Pulses[i] > params::signal_end_timeout)
