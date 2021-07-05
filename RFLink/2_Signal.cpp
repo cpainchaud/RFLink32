@@ -617,7 +617,7 @@ namespace RFLink
             { // Check all plugins to see which plugin can handle the received signal.
               counters::successfullyDecodedSignalsCount++;
               RepeatingTimer = millis() + params::signal_repeat_time;
-              auto responseLength = strlen(pbuffer);
+              //auto responseLength = strlen(pbuffer);
               //if(responseLength>1)
               //  sprintf(&pbuffer[responseLength-2], "RSSI=%i;\r\n", (int)RawSignal.rssi);
               return true;

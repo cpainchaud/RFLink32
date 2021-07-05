@@ -54,8 +54,6 @@
 boolean Plugin_037(byte function, const char *string)
 {
    const long ACURITE_MIDHI = ACURITE_MIDHI_D / RawSignal.Multiply;
-   const long ACURITE_PULSEMIN = ACURITE_PULSEMIN_D / RawSignal.Multiply;
-   const long ACURITE_PULSEMINMAX = ACURITE_PULSEMINMAX_D / RawSignal.Multiply;
    const long ACURITE_PULSEMAXMIN = ACURITE_PULSEMAXMIN_D / RawSignal.Multiply;
 
    if (RawSignal.Number < ACURITE_PULSECOUNT || RawSignal.Number > (ACURITE_PULSECOUNT + 4))
