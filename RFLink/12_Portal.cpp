@@ -95,12 +95,12 @@ namespace RFLink { namespace Portal {
             return;
           }
 
-          if(!url.is<char *>()) {
+          if(!url.is<const char *>()) {
             request->send(400, F("text/plain"), F("malformed request data"));
             return;
           }
 
-          const char *url_str = url.as<char *>();
+          const char *url_str = url.as<const char *>();
           int url_length = strlen(url_str);
 
           if(url_length < 7)  {
