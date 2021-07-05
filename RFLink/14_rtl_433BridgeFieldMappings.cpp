@@ -282,6 +282,7 @@ namespace RFLink
             {
                 case DATA_STRING:
                     display_RawString((const char*)(d->value.v_ptr));
+                    break;
                 case DATA_DOUBLE:
                     snprintf(buffer, buffer_size, (d->format) ? d->format : "%.3f", d->value.v_dbl);
                     display_RawString(buffer);
