@@ -338,6 +338,7 @@ namespace RFLink
 #ifdef RFLINK_SIGNAL_RSSI_DEBUG
 #define STORE_PULSE (RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate; RawSignal.Rssis[RawCodeLength] = Radio::getCurrentRssi();)
 #else
+#undef STORE_PULSE
 #define STORE_PULSE (RawSignal.Pulses[RawCodeLength++] = PulseLength_us / params::sample_rate)
 #endif
 
