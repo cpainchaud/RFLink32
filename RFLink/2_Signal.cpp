@@ -331,8 +331,8 @@ namespace RFLink
       unsigned long averagedGapsLength;
       unsigned long dynamicGapEnd_us;
 
-      float longPulseRssiReference;    // with high gains, output can remain high forever so RSSI must be checked from time to time
-      int longPulseRssiTimer;
+      float longPulseRssiReference = 0.0;    // with high gains, output can remain high forever so RSSI must be checked from time to time
+      int longPulseRssiTimer = 0;
       // *********************************************************************************
 
 #ifdef RFLINK_SIGNAL_RSSI_DEBUG
