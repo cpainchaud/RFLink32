@@ -16,7 +16,7 @@ namespace RFLink
     namespace rtl_433Bridge 
     {
         void register_all_protocols(unsigned disabled);
-        void processReceivedData();
+        int processReceivedData();
     }
 }
 #endif

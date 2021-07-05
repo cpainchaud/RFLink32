@@ -225,7 +225,7 @@ namespace RFLink
             }
         }
 
-        void processReceivedData()
+        int processReceivedData()
         {
             //Serial.println("rtl_433 trying to process messages");
             /*for (int deviceIndex = 0; deviceIndex < num_r_devices; deviceIndex++)
@@ -261,6 +261,8 @@ namespace RFLink
 
             //Serial.printf("stack free: %d", uxTaskGetStackHighWaterMark(NULL));
             //Serial.println();
+
+            return decodedCount;
         }
     }
 }
