@@ -41,7 +41,7 @@ enum RssiThresholdTypesEnum {
 
 namespace RFLink { namespace Radio  {
 
-    HardwareType hardware = HardwareType::HW_basic_t;
+    HardwareType hardware = RFLink_default_Radio_HardwareType;
     bool hardwareProperlyInitialized = false;
 
 

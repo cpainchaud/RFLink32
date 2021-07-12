@@ -79,6 +79,10 @@ namespace RFLink { namespace Radio {
         HW_SX1276_t,
         HW_EOF_t,
     };
+    #ifndef RFLink_default_Radio_HardwareType
+      #define RFLink_default_Radio_HardwareType HardwareType::HW_basic_t
+    #endif
+
     extern HardwareType hardware;
 
     extern bool hardwareProperlyInitialized;
