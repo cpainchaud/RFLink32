@@ -153,7 +153,6 @@ namespace RFLink { namespace Radio  {
 
     void refreshParametersFromConfig() {
       States savedState = current_State;
-      bool pinsHaveChanged = false;
       HardwareType newHardwareId = hardware;
 
       //yield();
@@ -185,56 +184,48 @@ namespace RFLink { namespace Radio  {
       item = Config::findConfigItem(json_name_rx_data, Config::SectionId::Radio_id);
       if( pins::RX_DATA != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_DATA = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_vcc, Config::SectionId::Radio_id);
       if( pins::RX_VCC != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_VCC = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_nmos, Config::SectionId::Radio_id);
       if( pins::RX_NMOS != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_NMOS = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_pmos, Config::SectionId::Radio_id);
       if( pins::RX_PMOS != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_PMOS = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_gnd, Config::SectionId::Radio_id);
       if( pins::RX_GND != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_GND = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_na, Config::SectionId::Radio_id);
       if( pins::RX_NA != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_NA = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_reset, Config::SectionId::Radio_id);
       if( pins::RX_RESET != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_RESET = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_rx_cs, Config::SectionId::Radio_id);
       if( pins::RX_CS != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::RX_CS = item->getLongIntValue();
       }
 
@@ -243,35 +234,30 @@ namespace RFLink { namespace Radio  {
       item = Config::findConfigItem(json_name_tx_data, Config::SectionId::Radio_id);
       if( pins::TX_DATA != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::TX_DATA = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_tx_vcc, Config::SectionId::Radio_id);
       if( pins::TX_VCC != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::TX_VCC = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_tx_nmos, Config::SectionId::Radio_id);
       if( pins::TX_NMOS != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::TX_NMOS = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_tx_pmos, Config::SectionId::Radio_id);
       if( pins::TX_PMOS != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::TX_PMOS = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_tx_gnd, Config::SectionId::Radio_id);
       if( pins::TX_GND != item->getLongIntValue() ) {
         changesDetected = true;
-        pinsHaveChanged = true;
         pins::TX_GND = item->getLongIntValue();
       }
 

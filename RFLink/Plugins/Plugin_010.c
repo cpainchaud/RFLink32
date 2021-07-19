@@ -67,10 +67,6 @@ boolean Plugin_010(byte function, const char *string)
 
    const long RGB_PULSE_STHI = RGB_PULSE_STHI_D / RawSignal.Multiply;
    const long RGB_PULSE_STLO = RGB_PULSE_STLO_D / RawSignal.Multiply;
-   const long RGB_PULSE_HIHI = RGB_PULSE_HIHI_D / RawSignal.Multiply;
-   const long RGB_PULSE_HILO = RGB_PULSE_HILO_D / RawSignal.Multiply;
-   const long RGB_PULSE_LOHI = RGB_PULSE_LOHI_D / RawSignal.Multiply;
-   const long RGB_PULSE_LOLO = RGB_PULSE_LOLO_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L; // holds first 32 bits
 

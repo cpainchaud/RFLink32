@@ -410,7 +410,7 @@ namespace RFLink
 
           if (item->typeIsChar())
           {
-            if (!remoteVariant.is<char *>())
+            if (!remoteVariant.is<const char *>())
             {
               message += F("section '");
               message += kv.key().c_str();
@@ -543,9 +543,9 @@ namespace RFLink
 
       if (this->typeIsChar())
       {
-        if (!value.is<char *>())
+        if (!value.is<const char *>())
         {
-          value.set((char *)this->getCharDefaultValue());
+          value.set((const char *)this->getCharDefaultValue());
           return true;
         }
       }

@@ -90,18 +90,18 @@
 boolean Plugin_001(byte function, const char *string)
 {
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
-   const long PULSE500 = PULSE500_D / RawSignal.Multiply;
+   //const long PULSE500 = PULSE500_D / RawSignal.Multiply;
    const long PULSE1100 = PULSE1100_D / RawSignal.Multiply;
-   const long PULSE1600 = PULSE1600_D / RawSignal.Multiply;
-   const long PULSE2000 = PULSE2000_D / RawSignal.Multiply;
-   const long PULSE4000 = PULSE4000_D / RawSignal.Multiply;
-   const long PULSE4200 = PULSE4200_D / RawSignal.Multiply;
+   //const long PULSE1600 = PULSE1600_D / RawSignal.Multiply;
+   //const long PULSE2000 = PULSE2000_D / RawSignal.Multiply;
+   //const long PULSE4000 = PULSE4000_D / RawSignal.Multiply;
+   //const long PULSE4200 = PULSE4200_D / RawSignal.Multiply;
    const long PULSE3300 = PULSE3300_D / RawSignal.Multiply;
    const long PULSE2500 = PULSE2500_D / RawSignal.Multiply;
    const long PULSE3000 = PULSE3000_D / RawSignal.Multiply;
    const long PULSE5000 = PULSE5000_D / RawSignal.Multiply;
-   const long PULSE6000 = PULSE6000_D / RawSignal.Multiply;
-   const long PULSE6500 = PULSE6500_D / RawSignal.Multiply;
+   //const long PULSE6000 = PULSE6000_D / RawSignal.Multiply;
+   //const long PULSE6500 = PULSE6500_D / RawSignal.Multiply;
 
    int i, j;
    // ==========================================================================
