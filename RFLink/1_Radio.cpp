@@ -1145,7 +1145,7 @@ namespace RFLink { namespace Radio  {
     bool initialize_RFM69_legacy() {
       radio.reset();
       radio.initialize();
-      radio.setFrequency(433920000);
+      radio.setFrequency(params::frequency);
       Serial.printf_P(PSTR("RFM69 initialized with Freq = %.2f\r\n"), (double)radio.getFrequency()/1000000);
       //Serial.print("Temp = "); Serial.println(radio.readTemperature());
       if(hardware == HardwareType::HW_RFM69HCW_t)
