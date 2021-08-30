@@ -313,6 +313,10 @@ namespace RFLink {
 
     bool executeCliCommand(char *cmd) {
       static byte ValidCommand = 0;
+
+      // Copy input command to InputBuffer_Serial, because many plugins are based on it !
+      memcpy(InputBuffer_Serial, cmd, INPUT_COMMAND_SIZE);
+
       if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
         // 10;....;..;ON;
         if (strncmp(cmd, "10;", 3) == 0) { // Command from Master to RFLink
