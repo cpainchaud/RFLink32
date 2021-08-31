@@ -379,12 +379,8 @@ boolean PluginTX_017(byte function, const char *string)
                 return false;
             }
 
-            Serial.print(F("RTS Record: "));
-            Serial.print(recordNumber);
-            Serial.print(F(" Address: "));
-            Serial.print(addressInFile & 0xFFFFFF, 16);
-            Serial.print(F(" RC: "));
-            Serial.println(codeInFile, 16);
+            sprintf(printBuf, PSTR("RTS Record: %d  Address: %06X  RC: %04X"), recordNumber, (addressInFile & 0xFFFFFF), codeInFile);
+            sendRawPrint(printBuf, true);
         }
         file.close();
         return true;
@@ -546,7 +542,7 @@ boolean PluginTX_017(byte function, const char *string)
         sendFrame(frame, false);
 
     // store next code 
-    saveRTSRecord(eepromRecordNumber, address, code++);
+    saveRTSRecord(eepromRecordNumber, address, ++code);
 
     return true;
 }
@@ -563,6 +559,7 @@ void saveRTSRecord(uint8_t eepromRecordNumber, uint32_t address, uint16_t rollin
 void sendFrame(uint8_t* frame, bool isFirst)
 {
     uint32_t originalFrequency = Radio::setFrequency(433420000);
+    RawSignal.Multiply = 1;
 
     const int RTS_HalfBitPulseDuration = 640 / RawSignal.Multiply;
     const int RTS_WakeUpPulseDuration = 9415 / RawSignal.Multiply;
@@ -580,7 +577,7 @@ void sendFrame(uint8_t* frame, bool isFirst)
     }
 
     // Hardware sync: two sync for the first frame, seven for the following ones.
-    for (int i = 0; i < (isFirst) ? 2 : 7; i++) {
+    for (int i = 0; i < (isFirst ? 2 : 7) ; i++) {
         digitalWrite(Radio::pins::TX_DATA, HIGH);
         delayMicroseconds(4 * RTS_HalfBitPulseDuration);
         digitalWrite(Radio::pins::TX_DATA, LOW);
@@ -615,6 +612,7 @@ void sendFrame(uint8_t* frame, bool isFirst)
     digitalWrite(Radio::pins::TX_DATA, LOW);
     delayMicroseconds(RTS_InterframeSilenceDuration); // Inter-frame silence
 
+    RawSignal.Multiply = RFLink::Signal::params::sample_rate; // restore setting
     Radio::setFrequency(originalFrequency);
 }
 
