@@ -379,12 +379,8 @@ boolean PluginTX_017(byte function, const char *string)
                 return false;
             }
 
-            Serial.print(F("RTS Record: "));
-            Serial.print(recordNumber);
-            Serial.print(F(" Address: "));
-            Serial.print(addressInFile & 0xFFFFFF, 16);
-            Serial.print(F(" RC: "));
-            Serial.println(codeInFile, 16);
+            sprintf(printBuf, PSTR("RTS Record: %d  Address: %06X  RC: %04X"), recordNumber, (addressInFile & 0xFFFFFF), codeInFile);
+            sendRawPrint(printBuf, true);
         }
         file.close();
         return true;
