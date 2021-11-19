@@ -1,8 +1,11 @@
+#include "RFLink.h"
+
+#ifndef RFLINK_PORTAL_DISABLED
+
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
 #include <index.html.gz.h>
 
-#include "RFLink.h"
 #include "2_Signal.h"
 #include "6_MQTT.h"
 #include "9_Serial2Net.h"
@@ -261,3 +264,5 @@ namespace RFLink { namespace Portal {
 
     } // end of Portal namespace
 } // end of RFLink namespace
+
+#endif // RFLINK_PORTAL_DISABLED

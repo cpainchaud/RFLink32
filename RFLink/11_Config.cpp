@@ -54,11 +54,13 @@ namespace RFLink
 #if defined(RFLINK_WIFI_ENABLED)
             &RFLink::Wifi::configItems[0],
             &RFLink::Mqtt::configItems[0],
-#endif
+            &RFLink::Serial2Net::configItems[0],
+            #ifndef RFLINK_PORTAL_DISABLED
             &RFLink::Portal::configItems[0],
+            #endif // RFLINK_PORTAL_DISABLED
+#endif
             &RFLink::Signal::configItems[0],
             &RFLink::Radio::configItems[0],
-            &RFLink::Serial2Net::configItems[0],
     };
 #define configItemListsSize (sizeof(configItemLists) / sizeof(ConfigItem *))
 

@@ -2,6 +2,9 @@
 #define _12_PORTAL_H_
 
 #include "RFLink.h"
+
+#ifndef RFLINK_PORTAL_DISABLED
+
 #include "11_Config.h"
 
 namespace RFLink {
@@ -18,5 +21,6 @@ namespace RFLink {
     }
 }
 
+#endif // RFLINK_PORTAL_DISABLED
 
 #endif
