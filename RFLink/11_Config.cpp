@@ -53,7 +53,9 @@ namespace RFLink
     ConfigItem *configItemLists[] = {
 #if defined(RFLINK_WIFI_ENABLED)
             &RFLink::Wifi::configItems[0],
+            #ifndef RFLINK_MQTT_DISABLED
             &RFLink::Mqtt::configItems[0],
+            #endif // RFLINK_MQTT_DISABLED
             &RFLink::Serial2Net::configItems[0],
             #ifndef RFLINK_PORTAL_DISABLED
             &RFLink::Portal::configItems[0],

@@ -25,7 +25,10 @@
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial
 //#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
-                          // dont forget to set the URL in Crendentials.h  
+                          // dont forget to set the URL in Crendentials.h
+
+//#define RFLINK_MQTT_DISABLED    // to disable MQTT
+//#define RFLINK_PORTAL_DISABLED    // to disable Portal/Web UI
 
 #if (defined(ESP32) || defined(ESP8266))
 // OLED display, 0.91" SSD1306 I2C

@@ -11,6 +11,8 @@
 #include <Arduino.h>
 #include "RFLink.h"
 
+#ifndef RFLINK_MQTT_DISABLED
+
 #ifdef ESP32
 #include <WiFi.h>
 #include "10_Wifi.h"
@@ -63,5 +65,6 @@ void getStatusJsonString(JsonObject &output);
 
 }} // end of MQTT namespace
 
+#endif // RFLINK_MQTT_DISABLED
 
 #endif // WiFi_MQTT_h

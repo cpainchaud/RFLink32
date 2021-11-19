@@ -58,7 +58,9 @@ namespace RFLink { namespace Portal {
           RFLink::getStatusJsonString(obj);
 
           RFLink::Wifi::getStatusJsonString(obj);
+          #ifndef RFLINK_MQTT_DISABLED
           RFLink::Mqtt::getStatusJsonString(obj);
+          #endif // RFLINK_MQTT_DISABLED
           RFLink::Signal::getStatusJsonString(obj);
           RFLink::Serial2Net::getStatusJsonString(obj);
 

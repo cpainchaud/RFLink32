@@ -132,7 +132,9 @@ namespace RFLink {
       #ifndef RFLINK_PORTAL_DISABLED
       RFLink::Portal::init();
       #endif // RFLINK_PORTAL_DISABLED
+      #ifndef RFLINK_MQTT_DISABLED
       RFLink::Mqtt::setup_MQTT();
+      #endif // RFLINK_MQTT_DISABLED
       RFLink::Serial2Net::setup();
       RFLink::Wifi::setup();
 #endif // RFLINK_WIFI_ENABLED
@@ -171,7 +173,9 @@ namespace RFLink {
     }
 
     void mainLoop() {
+      #ifndef RFLINK_MQTT_DISABLED
       RFLink::Mqtt::checkMQTTloop();
+      #endif // RFLINK_MQTT_DISABLED
       RFLink::sendMsgFromBuffer();
 
 #if defined(RFLINK_WIFI_ENABLED)
