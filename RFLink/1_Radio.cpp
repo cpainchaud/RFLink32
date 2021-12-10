@@ -124,7 +124,7 @@ namespace RFLink { namespace Radio  {
 
 
     Config::ConfigItem configItems[] =  {
-            Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[HardwareType::HW_basic_t], paramsUpdatedCallback),
+            Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[RFLink_default_Radio_HardwareType], paramsUpdatedCallback),
 
             Config::ConfigItem(json_name_rx_data,   Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_rx_vcc,    Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
