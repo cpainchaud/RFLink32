@@ -12,8 +12,13 @@
 #include "6_MQTT.h"
 #include "9_Serial2Net.h"
 #include <time.h> // for NTP
-
-
+#ifdef ESP32
+extern "C" {
+  #include "bootloader_random.h"
+}
+#else // NOT ESP32
+  #include <ESP8266TrueRandom.h>
+#endif // ESP32
 
 
 #ifdef RFLINK_AUTOOTA_ENABLED
@@ -45,8 +50,9 @@ namespace RFLink { namespace Wifi {
 
         bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
         bool accessPointParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
+        unsigned short int cpWifiChannel = 1; // channel for CaptivePortal (will be randomized later)
 
-// All json variable names
+        // All json variable names
         const char json_name_client_enabled[] = "client_enabled";
         const char json_name_client_dhcp_enabled[] = "client_dhcp_enabled";
         const char json_name_client_ssid[] = "client_ssid";
@@ -273,8 +279,8 @@ namespace RFLink { namespace Wifi {
           }
 
           if( params::AP_enabled ) {
-            Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s'... "), params::AP_ssid.c_str());
-            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+            Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s' and band=%i... "), params::AP_ssid.c_str(), cpWifiChannel);
+            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()),  cpWifiChannel)
               Serial.println(F("FAILED"));
             else
               Serial.println(F("OK"));
@@ -437,6 +443,13 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
 
         void setup()
         {
+          #ifdef ESP32
+          bootloader_random_enable();
+          cpWifiChannel = esp_random()%13 + 1;
+          bootloader_random_disable();
+          #else
+          cpWifiChannel = ESP8266TrueRandom.random(1,13);
+          #endif // ESP32
 
           refreshClientParametersFromConfig(false);
           refreshAccessPointParametersFromConfig(false);
@@ -487,14 +500,14 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
 
             Serial.println(F("Applying new Wifi AP settings"));
 
-#ifdef ESP32
+            #ifdef ESP32
             bool isEnabled = ((WiFi.getMode() & WIFI_MODE_AP) != 0);
 
             if(params::AP_enabled) {
               if(!isEnabled)
                 WiFi.enableAP(true);
 
-              if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
+              if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()), cpWifiChannel )
                 Serial.println("WIFI AP start FAILED");
               else
                 Serial.println("WIFI AP started");
@@ -502,19 +515,20 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
               Serial.println("Shutting down AP");
               WiFi.enableAP(false);
             }
-#endif
-#ifdef ESP8266
+            #endif
+            #ifdef ESP8266
             if(params::AP_enabled) {
-        WiFi.enableAP(true);
-        if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()) )
-          Serial.println(F("WIFI AP start FAILED"));
-        else
-          Serial.println(F("WIFI AP started"));
-    } else {
-      Serial.println(F("Shutting down AP"));
-      WiFi.enableAP(false);
-    }
-#endif
+                Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s'... "), params::AP_ssid.c_str());
+                WiFi.enableAP(true);
+                if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()), cpWifiChannel )
+                  Serial.println(F("WIFI AP start FAILED"));
+                else
+                  Serial.println(F("WIFI AP started"));
+            } else {
+              Serial.println(F("Shutting down AP"));
+              WiFi.enableAP(false);
+            }
+            #endif
           } // end of accessPointParamsHaveChanges
 
           if( clientParamsHaveChanged ) {
