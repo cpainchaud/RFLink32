@@ -325,7 +325,7 @@ namespace RFLink
       }
     };
 
-    bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks)
+    bool pushNewConfiguration(const JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks)
     {
 
       bool configHasChanged = false;

@@ -134,7 +134,7 @@ namespace RFLink
         ConfigItem *findConfigItem(const char *name, SectionId section);
         void dumpConfigToString(String &destination);
         void dumpConfigToSerial();
-        bool pushNewConfiguration(JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks = true);
+        bool pushNewConfiguration(const JsonObject &data, String &message, bool escapeNewLine, bool triggerUpdateCallbacks = true);
 
         /**
          * @return SectionId::EOF_id is not found
