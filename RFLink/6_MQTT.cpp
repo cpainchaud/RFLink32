@@ -84,7 +84,7 @@ struct timeval lastMqttConnectionAttemptTime;
 bool paramsHaveChanged = true; 
 
 Config::ConfigItem configItems[] =  {
-  Config::ConfigItem(json_name_enabled, Config::SectionId::MQTT_id, false, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_enabled, Config::SectionId::MQTT_id, RFLink_default_MQTT_ENABLED, paramsUpdatedCallback),
   Config::ConfigItem(json_name_server,  Config::SectionId::MQTT_id, MQTT_SERVER, paramsUpdatedCallback),
   Config::ConfigItem(json_name_port,    Config::SectionId::MQTT_id, MQTT_PORT, paramsUpdatedCallback),
   Config::ConfigItem(json_name_id,      Config::SectionId::MQTT_id, MQTT_ID, paramsUpdatedCallback),
@@ -94,10 +94,10 @@ Config::ConfigItem configItems[] =  {
   Config::ConfigItem(json_name_topic_in,   Config::SectionId::MQTT_id, MQTT_TOPIC_IN, paramsUpdatedCallback),
   Config::ConfigItem(json_name_topic_out,  Config::SectionId::MQTT_id, MQTT_TOPIC_OUT, paramsUpdatedCallback),
 
-  Config::ConfigItem(json_name_lwt_enabled, Config::SectionId::MQTT_id, true, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_lwt_enabled, Config::SectionId::MQTT_id, RFLink_default_MQTT_LWT, paramsUpdatedCallback),
   Config::ConfigItem(json_name_topic_lwt,   Config::SectionId::MQTT_id, MQTT_TOPIC_LWT, paramsUpdatedCallback),
 
-  Config::ConfigItem(json_name_ssl_enabled, Config::SectionId::MQTT_id, false, paramsUpdatedCallback),
+  Config::ConfigItem(json_name_ssl_enabled, Config::SectionId::MQTT_id, RFLink_default_MQTT_SSL_ENABLED, paramsUpdatedCallback),
   Config::ConfigItem(json_name_ssl_insecure,Config::SectionId::MQTT_id, true, paramsUpdatedCallback),
   Config::ConfigItem(json_name_ca_cert,     Config::SectionId::MQTT_id, "", paramsUpdatedCallback),
 

@@ -27,7 +27,7 @@
 //#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
                           // dont forget to set the URL in Crendentials.h
 
-//#define RFLINK_MQTT_DISABLED    // to disable MQTT
+//#define RFLINK_MQTT_DISABLED    // to disable MQTT entirely (not compiled at all)
 //#define RFLINK_PORTAL_DISABLED    // to disable Portal/Web UI
 
 #if (defined(ESP32) || defined(ESP8266))
@@ -44,13 +44,20 @@
 #endif
 
 // MQTT messages
-//#define MQTT_ENABLED          // Send RFLink messages over MQTT
+#ifndef RFLink_default_MQTT_ENABLED
+  #define RFLink_default_MQTT_ENABLED false // Send RFLink messages over MQTT
+#endif
+#ifndef RFLink_default_MQTT_SSL_ENABLED
+  #define RFLink_default_MQTT_SSL_ENABLED false // Send MQTT messages over SSL
+#endif
 #define MQTT_LOOP_MS 1000     // MQTTClient.loop(); call period (in mSec)
 #define MQTT_RETAINED_0 false // Retained option
-#define MQTT_LWT              // Let know if Module is Online or Offline via MQTT Last Will message
-// #define MQTT_SSL           // Send MQTT messages over SSL
-// #define CHECK_CACERT       // Send MQTT SSL CA Certificate
+#ifndef RFLink_default_MQTT_LWT              // Let know if Module is Online or Offline via MQTT Last Will message
+  #define RFLink_default_MQTT_LWT true
 #endif
+// #define CHECK_CACERT       // Send MQTT SSL CA Certificate
+
+#endif // (defined(ESP32) || defined(ESP8266))
 
 // Debug default
 #define RFDebug_0 false   // debug RF signals with plugin 001 (no decode)
