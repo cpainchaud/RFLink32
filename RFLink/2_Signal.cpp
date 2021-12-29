@@ -1167,7 +1167,7 @@ namespace RFLink
         if(Radio::hardware == Radio::HardwareType::HW_SX1278_t)
           runtime::appliedSlicer = SLICER_DEFAULT_SX1278;
         else if(Radio::hardware == Radio::HardwareType::HW_RFM69NEW_t)
-          runtime::appliedSlicer = SLICER_DEFAULT_SX1278;
+          runtime::appliedSlicer = SLICER_DEFAULT_RFM69;
         else if(Radio::hardware == Radio::HardwareType::HW_RFM69HCW_t || Radio::hardware == Radio::HardwareType::HW_RFM69CW_t )
           runtime::appliedSlicer = SLICER_DEFAULT_RFM69;
       }
