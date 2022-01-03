@@ -1,6 +1,6 @@
 // *********************************************************************************************************************************
-// * Portions GPLv3 2021 Christophe Painchaud https://github.com/cpainchaud/RFLink
-// * Arduino Project RFLink32 https://github.com/couin3/RFLink (Branch esp)
+// * Portions GPLv3 2021 Christophe Painchaud https://github.com/cpainchaud/RFLink32
+// * Arduino Project RFLink for ESP architecture https://github.com/couin3/RFLink (Branch esp)
 // * Portions Free Software 2018..2020 StormTeam - Marc RIVES
 // * Portions Free Software 2015..2016 StuntTeam - (RFLink R29~R33)
 // * Portions © Copyright 2010..2015 Paul Tonkes (original Nodo 3.7 code)
