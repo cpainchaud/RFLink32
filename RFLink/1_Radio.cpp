@@ -13,9 +13,6 @@
 
 
 #include <SPI.h>
-#include "RFM69/RFM69OOK.h"
-#include "RFM69/RFM69OOKregisters.h"
-RFM69OOK radio;
 
 #include <RadioLib.h>
 
@@ -89,7 +86,6 @@ namespace RFLink { namespace Radio  {
             "RFM69CW",
             "RFM69HCW",
             "SX1278",
-            "RFM69TEST_RADIOLIB",
             "SX1276",
             "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
     };
@@ -411,7 +407,7 @@ namespace RFLink { namespace Radio  {
       {
         case HardwareType::HW_RFM69CW_t:
         case HardwareType::HW_RFM69HCW_t:
-          radio.setFrequency(newFrequency);
+          radio_RFM69->setFrequency(newFrequency / 1000000.0);
           break;
         case HardwareType::HW_SX1278_t:
           radio_SX1278->setFrequency(newFrequency / 1000000.0);
@@ -419,9 +415,7 @@ namespace RFLink { namespace Radio  {
         case HardwareType::HW_SX1276_t:
           radio_SX1276->setFrequency(newFrequency / 1000000.0);
           break;
-        case HardwareType::HW_RFM69NEW_t:
-          radio_RFM69->setFrequency(newFrequency / 1000000.0);
-          break;
+
         default:
           return 0;  // other hardware cannot change its frequency
       }
@@ -552,10 +546,7 @@ namespace RFLink { namespace Radio  {
       if(hardware == HardwareType::HW_basic_t)
         set_Radio_mode_generic(new_State, force);
       else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
-        //set_Radio_mode_RFM69_new(new_State);
         set_Radio_mode_RFM69(new_State, force);
-      else if( hardware == HardwareType::HW_RFM69NEW_t)
-        set_Radio_mode_RFM69_new(new_State, force);
       else if( hardware == HardwareType::HW_SX1278_t )
         set_Radio_mode_SX1278(new_State, force);
       else if( hardware == HardwareType::HW_SX1276_t )
@@ -635,43 +626,6 @@ namespace RFLink { namespace Radio  {
       digitalWrite(pins::TX_NMOS, LOW);  // turn GND to TX receiver OFF
       pinMode(pins::TX_VCC, INPUT);
       pinMode(pins::TX_GND, INPUT);
-    }
-
-    void set_Radio_mode_RFM69(States new_State, bool force)
-    {
-      // @TODO : review compatibility with ASYNC mode
-      if (current_State != new_State || force)
-      {
-        switch (new_State)
-        {
-          case Radio_OFF:
-            if( RFLink::Signal::params::async_mode_enabled )
-              RFLink::Signal::AsyncSignalScanner::stopScanning();
-            radio.sleep();
-            break;
-
-          case Radio_RX:
-            radio.transmitEnd();
-            pinMode(pins::RX_DATA, INPUT);
-            radio.receiveBegin();
-            if( RFLink::Signal::params::async_mode_enabled )
-              RFLink::Signal::AsyncSignalScanner::startScanning();
-            break;
-
-          case Radio_TX:
-            if( RFLink::Signal::params::async_mode_enabled )
-              RFLink::Signal::AsyncSignalScanner::stopScanning();
-            radio.receiveEnd();
-            pinMode(pins::TX_DATA, OUTPUT);
-            radio.setPowerLevel(1);
-            radio.transmitBegin();
-            break;
-
-          case Radio_NA:
-            break;
-        }
-        current_State = new_State;
-      }
     }
 
     void set_Radio_mode_SX1278(States new_State, bool force)
@@ -804,7 +758,7 @@ namespace RFLink { namespace Radio  {
       }
     }
 
-    void set_Radio_mode_RFM69_new(States new_State, bool force)
+    void set_Radio_mode_RFM69(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
       if (current_State != new_State || force)
@@ -858,6 +812,11 @@ namespace RFLink { namespace Radio  {
               hardwareProperlyInitialized = false;
             }
 
+            if(hardware == HardwareType::HW_RFM69HCW_t)
+              radio_RFM69->setOutputPower(13, true);
+            else
+              radio_RFM69->setOutputPower(13, false);
+
             break;
           }
 
@@ -874,7 +833,7 @@ namespace RFLink { namespace Radio  {
         return radio_SX1278->getRSSI(true);
       if(hardware == HardwareType::HW_SX1276_t)
         return radio_SX1276->getRSSI(true);
-      if(hardware == HardwareType::HW_RFM69NEW_t)
+      if(hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t)
         return radio_RFM69->getRSSI();
 
       return -9999.0F;
@@ -908,9 +867,6 @@ namespace RFLink { namespace Radio  {
         success = initialize_SX1276();
       }
       else if(newHardware == HardwareType::HW_RFM69CW_t || newHardware == HardwareType::HW_RFM69HCW_t){
-        success = initialize_RFM69_legacy();
-      }
-      else if(newHardware == HardwareType::HW_RFM69NEW_t){
         success = initialize_RFM69();
       }
       else if(newHardware == HardwareType::HW_basic_t){
@@ -1142,16 +1098,6 @@ namespace RFLink { namespace Radio  {
       return finalResult == 0;
     }
 
-    bool initialize_RFM69_legacy() {
-      radio.reset();
-      radio.initialize();
-      radio.setFrequency(params::frequency);
-      Serial.printf_P(PSTR("RFM69 initialized with Freq = %.2f\r\n"), (double)radio.getFrequency()/1000000);
-      //Serial.print("Temp = "); Serial.println(radio.readTemperature());
-      if(hardware == HardwareType::HW_RFM69HCW_t)
-        radio.setHighPower(true);
-      return true;
-    }
 
     void mainLoop() {
       static time_t nextEnablementAttemptTime = 0;
