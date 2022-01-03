@@ -24,7 +24,7 @@ enum PState
 extern boolean (*Plugin_ptr[PLUGIN_MAX])(byte, const char *); // Receive plugins
 extern byte Plugin_id[PLUGIN_MAX];
 extern byte Plugin_State[PLUGIN_MAX];
-#ifndef ARDUINO_AVR_UNO // Optimize memory limite to 2048 bytes on arduino uno
+#ifndef ARDUINO_AVR_UNO // Optimize memory limit to 2048 bytes on arduino uno
 extern String Plugin_Description[PLUGIN_MAX];
 #endif
 

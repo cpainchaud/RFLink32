@@ -740,20 +740,20 @@ namespace RFLink
         RawSignal.Number++;
 
         if (RawSignal.Number >= RAW_BUFFER_SIZE)
-        {                              // this signal has too many pulses and will be dicarded
+        {                              // this signal has too many pulses and will be discarded
           nextPulseTimeoutTime_us = 0; // stop watching for a timeout
           RawSignal.Number = 0;
           RawSignal.Time = 0;
-          //Serial.println("this signal has too many pulses and will be dicarded");
+          //Serial.println("this signal has too many pulses and will be discarded");
           return;
         }
 
         if (RawSignal.Number == 0 && pulseLength_us < SIGNAL_MIN_PREAMBLE_US)
-        {                              // too short preamnble, let's drop it
+        {                              // too short preamble, let's drop it
           nextPulseTimeoutTime_us = 0; // stop watching for a timeout
           RawSignal.Number = 0;
           RawSignal.Time = 0;
-          //Serial.print("too short preamnble, let's drop it:");Serial.println(pulseLength_us);
+          //Serial.print("too short preamble, let's drop it:");Serial.println(pulseLength_us);
           return;
         }
 
