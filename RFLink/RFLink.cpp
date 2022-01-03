@@ -195,7 +195,7 @@ namespace RFLink {
       }
 
       struct timeval now;
-      gettimeofday(&now, 0);
+      gettimeofday(&now, nullptr);
       if (scheduledRebootTime.tv_sec != 0 && now.tv_sec > scheduledRebootTime.tv_sec) {
         Serial.println(F("***** Rebooting now for scheduled reboot !!! *****"));
         ESP.restart();
