@@ -41,10 +41,10 @@
 
 boolean Plugin_036(byte function, const char *string)
 {
-   const long F007_TH_PULSE_MID = F007_TH_PULSE_MID_D / RawSignal.Multiply;
-
    if (RawSignal.Number != F007_TH_PULSECOUNT)
       return false;
+
+   const long F007_TH_PULSE_MID = F007_TH_PULSE_MID_D / RawSignal.Multiply;
 
    byte toggle = 1;
    byte pulsecounter = 2;                                            // Pulse counter

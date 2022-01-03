@@ -45,10 +45,10 @@
 
 boolean Plugin_006(byte function, const char *string)
 {
-   const long BLYSS_PULSEMID = BLYSS_PULSEMID_D / RawSignal.Multiply;
-
    if (RawSignal.Number != BLYSS_PULSECOUNT)
       return false;
+
+   const long BLYSS_PULSEMID = BLYSS_PULSEMID_D / RawSignal.Multiply;
    unsigned long bitstream = 0L;
    unsigned long bitstream1 = 0L;
    byte bitcounter = 0;

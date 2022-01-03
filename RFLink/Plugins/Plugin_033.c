@@ -43,11 +43,11 @@
 
 boolean Plugin_033(byte function, const char *string)
 {
-   const long CONRAD_PULSEMAX = CONRAD_PULSEMAX_D / RawSignal.Multiply;
-   const long CONRAD_PULSEMIN = CONRAD_PULSEMIN_D / RawSignal.Multiply;
-
    if (RawSignal.Number != CONRAD_PULSECOUNT)
       return false;
+
+   const long CONRAD_PULSEMAX = CONRAD_PULSEMAX_D / RawSignal.Multiply;
+   const long CONRAD_PULSEMIN = CONRAD_PULSEMIN_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L;
    byte checksum = 0;

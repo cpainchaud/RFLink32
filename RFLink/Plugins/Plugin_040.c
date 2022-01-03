@@ -58,17 +58,17 @@
 
 boolean Plugin_040(byte function, const char *string)
 {
-   const long MEBUS_MIDHI = MEBUS_MIDHI_D / RawSignal.Multiply;
-   const long MEBUS_PULSEMIN = MEBUS_PULSEMIN_D / RawSignal.Multiply;
-   const long MEBUS_PULSEMINMAX = MEBUS_PULSEMINMAX_D / RawSignal.Multiply;
-   const long MEBUS_PULSEMAXMIN = MEBUS_PULSEMAXMIN_D / RawSignal.Multiply;
-
    if (RawSignal.Number != MEBUS_PULSECOUNT) {
      #ifdef PLUGIN_040_DEBUG
      Serial.println(F("Mebus: failed  RawSignal.Number != MEBUS_PULSECOUNT"));
      #endif
      return false;
    }
+
+   const long MEBUS_MIDHI = MEBUS_MIDHI_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMIN = MEBUS_PULSEMIN_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMINMAX = MEBUS_PULSEMINMAX_D / RawSignal.Multiply;
+   const long MEBUS_PULSEMAXMIN = MEBUS_PULSEMAXMIN_D / RawSignal.Multiply;
 
    unsigned long bitstream = 0L;
    unsigned int temperature = 0;

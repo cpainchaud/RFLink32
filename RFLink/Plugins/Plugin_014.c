@@ -47,13 +47,13 @@
 
 boolean Plugin_014(byte function, const char *string)
 {
-   const long KOPPLA_PULSEMID = KOPPLA_PULSEMID_D / RawSignal.Multiply;
-   const long KOPPLA_PULSEMAX = KOPPLA_PULSEMAX_D / RawSignal.Multiply;
-   const long KOPPLA_PULSEMIN = KOPPLA_PULSEMIN_D / RawSignal.Multiply;
-
    if ((RawSignal.Number < KOPPLA_PulseLength_MIN) || (RawSignal.Number > KOPPLA_PulseLength_MAX))
       return false;
    unsigned long bitstream = 0L;
+
+   const long KOPPLA_PULSEMID = KOPPLA_PULSEMID_D / RawSignal.Multiply;
+   const long KOPPLA_PULSEMAX = KOPPLA_PULSEMAX_D / RawSignal.Multiply;
+   const long KOPPLA_PULSEMIN = KOPPLA_PULSEMIN_D / RawSignal.Multiply;
 
    // byte preamble = 0; // unused?
    unsigned int sysunit = 0;

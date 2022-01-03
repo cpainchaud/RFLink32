@@ -52,15 +52,15 @@ boolean Plugin_017(byte function, const char *string)
 
    // ;Pulses=82;Pulses(uSec)=2449,2542,4787,1299,1264,674,612,1311,1263,1301,1261,666,608,1315,1255,683,610,663,615,679,611,1299,1263,1307,611,679,1263,663,611,1309,610,666,1255,1315,1255,682,606,1316,611,665,605,678,1248,679,611,1310,1259,1300,611,679,1259,1311,1259,1311,1263,675,603,679,611,1311,1259,667,611,1311,1259,1311,611,667,611,679,611,667,612,678,1247,1315,608,678,600,678,1260,0
 
-    const int RTS_HardwareSyncPulseDuration = 2000 / RawSignal.Multiply;
-    const int RTS_LongPulseMinDuration = 1000 / RawSignal.Multiply;
-    const int RTS_ShortPulseMinDuration = 500 / RawSignal.Multiply;
-    const int RTS_ShortPulseMaxDuration = 750 / RawSignal.Multiply;
-    DeclareRTS_SoftwareSyncPulseDuration;
-    const int RTS_MinRepeatHardwareSyncCount = 5;
-
    if (RawSignal.Number >= RTS_MinPulses && RawSignal.Number <= RTS_MaxPulses) 
    {
+        const int RTS_HardwareSyncPulseDuration = 2000 / RawSignal.Multiply;
+        const int RTS_LongPulseMinDuration = 1000 / RawSignal.Multiply;
+        const int RTS_ShortPulseMinDuration = 500 / RawSignal.Multiply;
+        const int RTS_ShortPulseMaxDuration = 750 / RawSignal.Multiply;
+        DeclareRTS_SoftwareSyncPulseDuration;
+        const int RTS_MinRepeatHardwareSyncCount = 5;
+
         #ifdef PLUGIN_017_DEBUG
         Serial.println(F(PLUGIN_017_ID ": Potential candidate packet"));
         Serial.print(F(PLUGIN_017_ID ": RTS_SoftwareSyncPulseDuration = "));
