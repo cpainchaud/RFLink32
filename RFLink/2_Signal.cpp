@@ -1125,7 +1125,7 @@ namespace RFLink
             RFLink::sendRawPrint(',');
         }
       }
-      RFLink::sendRawPrint(PSTR(";RSSI="));
+      RFLink::sendRawPrint(F(";RSSI="));
       sprintf_P(dbuffer, PSTR("%i;"), (int)signal.rssi);
       RFLink::sendRawPrint(dbuffer);
       RFLink::sendRawPrint(F("\r\n"));

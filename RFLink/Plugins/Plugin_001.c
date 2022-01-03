@@ -233,11 +233,11 @@ boolean Plugin_001(byte function, const char *string)
                RFLink::sendRawPrint(',');
          }
       }
-      RFLink::sendRawPrint(PSTR(";RSSI="));
+      RFLink::sendRawPrint(F(";RSSI="));
       sprintf_P(dbuffer, PSTR("%i;"), (int)RawSignal.rssi);
       RFLink::sendRawPrint(dbuffer);
 
-      RFLink::sendRawPrint(PSTR("REASON="));
+      RFLink::sendRawPrint(F("REASON="));
       RFLink::sendRawPrint(Signal::endReasonToString(RawSignal.endReason));
       RFLink::sendRawPrint(F("\r\n"));
 
