@@ -10,6 +10,7 @@
 #include "6_MQTT.h"
 #include "9_Serial2Net.h"
 #include "11_Config.h"
+#include "12_Portal.h"
 #include "10_Wifi.h"
 #include "13_OTA.h"
 
@@ -31,26 +32,50 @@ namespace RFLink { namespace Portal {
         const char json_name_auth_password[] = "auth_password";
 
         Config::ConfigItem configItems[] =  {
-                Config::ConfigItem(json_name_enabled,      Config::SectionId::Portal_id, true, nullptr),
-                Config::ConfigItem(json_name_auth_enabled, Config::SectionId::Portal_id, false, nullptr),
-                Config::ConfigItem(json_name_auth_user,    Config::SectionId::Portal_id, "", nullptr),
-                Config::ConfigItem(json_name_auth_password,Config::SectionId::Portal_id, "", nullptr),
+                Config::ConfigItem(json_name_enabled,      Config::SectionId::Portal_id, true, paramsUpdatedCallback),
+                Config::ConfigItem(json_name_auth_enabled, Config::SectionId::Portal_id, true, paramsUpdatedCallback),
+                Config::ConfigItem(json_name_auth_user,    Config::SectionId::Portal_id, RFLINK_WEBUI_DEFAULT_USER, paramsUpdatedCallback),
+                Config::ConfigItem(json_name_auth_password,Config::SectionId::Portal_id, RFLINK_WEBUI_DEFAULT_PASSWORD, paramsUpdatedCallback),
                 Config::ConfigItem(), // dont remove it!
         };
 
+        namespace params {
+          bool enabled = true;
+          bool auth_enabled = false;
+          String auth_user;
+          String auth_password;
+        }
+
         AsyncWebServer server(80);
+
+        bool checkHttpAuthentication(AsyncWebServerRequest *request) {
+          if(!params::auth_enabled)
+            return true;
+
+          if(!request->authenticate(params::auth_user.c_str(), params::auth_password.c_str())) {
+            request->requestAuthentication();
+            return false;
+          }
+          return true;
+        }
 
         void notFound(AsyncWebServerRequest *request) {
           request->send(404, F("text/plain"), F("Not found"));
         }
 
         void serverApiConfigGet(AsyncWebServerRequest *request) {
+          if(!checkHttpAuthentication(request))
+            return;
+
           String dump;
           Config::dumpConfigToString(dump);
           request->send(200, F("application/json"), dump);
         }
 
         void serveApiStatusGet(AsyncWebServerRequest *request) {
+          if(!checkHttpAuthentication(request))
+            return;
+
           DynamicJsonDocument output(3000);
 
           auto && obj = output.to<JsonObject>();
@@ -72,11 +97,17 @@ namespace RFLink { namespace Portal {
         }
 
         void serveApiReboot(AsyncWebServerRequest *request) {
+          if(!checkHttpAuthentication(request))
+            return;
+
           request->send(200, F("text/plain"), F("Rebooting in 5 seconds"));
           RFLink::scheduleReboot(5);
         }
 
         void serveApiFirmwareHttpUpdateGetStatus(AsyncWebServerRequest *request){
+          if(!checkHttpAuthentication(request))
+            return;
+
           DynamicJsonDocument output(500);
           JsonObject && root = output.to<JsonObject>();
           OTA::getHttpUpdateStatus(root);
@@ -88,6 +119,9 @@ namespace RFLink { namespace Portal {
 
         void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &json)
         {
+          if(!checkHttpAuthentication(request))
+            return;
+
           if (not json.is<JsonObject>()) {
             request->send(400, F("text/plain"), F("Not an object"));
             return;
@@ -125,6 +159,9 @@ namespace RFLink { namespace Portal {
         }
 
         void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
+          if(!checkHttpAuthentication(request))
+            return;
+
           if (not json.is<JsonObject>()) {
             Serial.println(F("API Config push requested but invalid JSON was received!"));
             request->send(400, F("text/plain"), F("Not an object"));
@@ -159,6 +196,9 @@ namespace RFLink { namespace Portal {
 
 // Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
         void handleFirmwareUpdateFinalResponse(AsyncWebServerRequest *request) {
+          if(!checkHttpAuthentication(request))
+            return;
+
           // the request handler is triggered after the upload has finished...
           // create the response, add header, and send response
           AsyncWebServerResponse *response = request->beginResponse(
@@ -222,7 +262,8 @@ namespace RFLink { namespace Portal {
         }
 
         void serveIndexHtml(AsyncWebServerRequest *request) {
-
+          if(!checkHttpAuthentication(request))
+            return;
           AsyncWebServerResponse *response = request->beginResponse_P(200, F("text/html"), index_html_gz_start, index_html_gz_size);
           response->addHeader(F("Content-Encoding"), F("gzip"));
           request->send(response);
@@ -230,8 +271,10 @@ namespace RFLink { namespace Portal {
 
 
         void init() {
-          server.onNotFound(notFound);
 
+          refreshParametersFromConfig(false);
+
+          server.onNotFound(notFound);
           server.on(PSTR("/"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/index.html"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/wifi"), HTTP_GET, serveIndexHtml);
@@ -258,11 +301,58 @@ namespace RFLink { namespace Portal {
         }
 
         void start() {
-          Serial.print(F("Starting WebServer... "));
-          server.begin();
+          if(params::enabled) {
+            Serial.print(F("Starting WebServer... "));
+            server.begin();
+            Serial.println(F("OK"));
+          }
+        }
+
+        void stop() {
+          Serial.print(F("Stopping WebServer... "));
+          server.end();
           Serial.println(F("OK"));
         }
 
+      void paramsUpdatedCallback() {
+        refreshParametersFromConfig();
+      }
+
+      void refreshParametersFromConfig(bool triggerChanges) {
+        Config::ConfigItem *item;
+        bool changesDetected = false;
+
+        item = Config::findConfigItem(json_name_enabled, Config::SectionId::Portal_id);
+        if (item->getBoolValue() != params::enabled) {
+          changesDetected = true;
+          params::enabled = item->getBoolValue();
+        }
+
+        item = Config::findConfigItem(json_name_auth_enabled, Config::SectionId::Portal_id);
+        if (item->getBoolValue() != params::auth_enabled) {
+          //changesDetected = true; // no need to trigger an update cycle
+          params::auth_enabled = item->getBoolValue();
+        }
+
+        item = Config::findConfigItem(json_name_auth_user, Config::SectionId::Portal_id);
+        if( params::auth_user != item->getCharValue() ) {
+          //changesDetected = true; // no need to trigger an update cycle
+          params::auth_user = item->getCharValue();
+        }
+
+        item = Config::findConfigItem(json_name_auth_password, Config::SectionId::Portal_id);
+        if( params::auth_password != item->getCharValue() ) {
+          //changesDetected = true; // no need to trigger an update cycle
+          params::auth_password = item->getCharValue();
+        }
+
+        if (triggerChanges && changesDetected) {
+          if(params::enabled)
+            server.begin();
+          else
+            server.end();
+        }
+      }
 
     } // end of Portal namespace
 } // end of RFLink namespace

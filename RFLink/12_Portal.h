@@ -16,8 +16,10 @@ namespace RFLink {
          * */
         void init();
         void start();
+        void stop();
 
         void paramsUpdatedCallback();
+        void refreshParametersFromConfig(bool triggerChanges=true);
     }
 }
 

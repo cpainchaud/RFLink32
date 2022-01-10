@@ -37,11 +37,16 @@
 #define OLED_FLIP true   // default false
 
 // WIFI
+//#define RFLINK_WIFI_ENABLED
 #define WIFI_PWR_0 20 // 0~20.5dBm
 //#define RFLINK_SHOW_CONFIG_PORTAL_PIN_BUTTON 32 // if you want start the configuration portal with a button/pin
 #ifndef RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS
 #define RFLINK_WIFIMANAGER_PORTAL_LONG_PRESS 1000 // milliseconds
 #endif
+
+// UI/Portal
+#define RFLINK_WEBUI_DEFAULT_USER "rflink32"
+#define RFLINK_WEBUI_DEFAULT_PASSWORD "433mhz"
 
 // MQTT messages
 #ifndef RFLink_default_MQTT_ENABLED
