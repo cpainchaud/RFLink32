@@ -177,6 +177,7 @@ namespace RFLink
             */
             data_free(data);
             
+            RFLink::Signal::counters::successfullyDecodedSignalsCount++;
             RFLink::sendMsgFromBuffer();
         }
 
