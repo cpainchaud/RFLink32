@@ -168,9 +168,7 @@ namespace RFLink {
       readSerialAndExecute();
 #endif
 
-      if (RFLink::Signal::ScanEvent()) {
-        RFLink::sendMsgFromBuffer();
-      }
+      RFLink::Signal::ScanEvent();
 
       struct timeval now;
       gettimeofday(&now, nullptr);
