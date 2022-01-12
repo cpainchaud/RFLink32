@@ -232,6 +232,7 @@ namespace RFLink
       Toggle = true;
       RawCodeLength = 0;
       PulseLength_us = 0;
+      RawSignal.Pulses = RawSignal.RawPulses;
 
       // ***********************************
       // ***   Scan for Preamble Pulse   ***
@@ -354,6 +355,7 @@ namespace RFLink
       dynamicGapEnd_us = 0;
       RawSignal.Time = micros();
       RawSignal.endReason = EndReasons::Unknown;
+      RawSignal.Pulses = RawSignal.RawPulses;
 
       // ***********************************
       // ***   Scan for Preamble Pulse   ***

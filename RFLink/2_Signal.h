@@ -69,7 +69,8 @@ namespace RFLink {
       #ifdef RFLINK_SIGNAL_RSSI_DEBUG
       float Rssis[RAW_BUFFER_SIZE + 1];
       #endif
-      uint16_t Pulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
+      uint16_t RawPulses[RAW_BUFFER_SIZE + 1]; // Table with the measured pulses in microseconds divided by RawSignal.Multiply. (to keep compatibility with Arduino)
+      uint16_t* Pulses; // pointer used by plugins, points at an element inside RawPulses to avoid costly shifting of memory
       // First pulse is located in element 1. Element 0 is used for special purposes, like signalling the use of a specific plugin
     };
 
