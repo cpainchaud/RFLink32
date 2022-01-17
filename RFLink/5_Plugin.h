@@ -45,4 +45,15 @@ byte PluginTXInitCall(byte Function, char *str);
 byte PluginRXCall(byte Function, const char *str);
 byte PluginTXCall(byte Function, const char *str);
 
+class Plugin {
+public:
+  bool enabled;
+  char *pluginName;
+  bool (*rxScanFunction)(byte, const char *);
+};
+
+namespace PluginManager {
+  extern Plugin plugins[PLUGIN_MAX];
+}
+
 #endif
