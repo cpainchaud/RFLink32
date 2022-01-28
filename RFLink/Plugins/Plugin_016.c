@@ -8,7 +8,7 @@
 #include "../7_Utils.h"
 
 #define PLUGIN_016_ID "Silvercrest"
-#define PLUGIN_016_DEBUG
+//#define PLUGIN_016_DEBUG
 
 const int SLVCR_BitCount = 24;
 const int8_t SLVCR_CodeCount = 8;
@@ -52,7 +52,6 @@ boolean Plugin_016(byte function, const char *string)
             #ifdef PLUGIN_016_DEBUG
             Serial.println(F(PLUGIN_016_ID ": Could not decode PWM!"));
             #endif
-            return false;
             return false;
          }
 

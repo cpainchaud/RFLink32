@@ -38,8 +38,8 @@ extern boolean RFUDebug;  // debug RF signals with plugin 254 (decode 1st)
 extern boolean QRFUDebug; // debug RF signals with plugin 254 but no multiplication (faster?, compact)
 
 // Of all the devices that are compiled, the addresses are stored in a table so that you can jump to them
-void PluginInit(void);
-void PluginTXInit(void);
+void PluginInit();
+void PluginTXInit();
 byte PluginInitCall(byte Function, char *str);
 byte PluginTXInitCall(byte Function, char *str);
 byte PluginRXCall(byte Function, const char *str);
