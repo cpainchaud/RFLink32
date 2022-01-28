@@ -56,17 +56,6 @@ jobs:
         files: |
           firmwares/*
 
-    - name: Publish firmware for RadioLib branch
-      if: github.ref == 'refs/heads/RadioLib' && github.event_name == 'push'
-      uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "nightly-RadioLib"
-        prerelease: true
-        title: "Development Build"
-        files: |
-          firmwares/*
-
     - name: Publish firmware for rtl_433 branch
       if: github.ref == 'refs/heads/rtl_433' && github.event_name == 'push'
       uses: "marvinpinto/action-automatic-releases@latest"

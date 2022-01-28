@@ -925,11 +925,11 @@ namespace RFLink { namespace Radio  {
       if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
         newType = params::rssiThresholdType;
       if(newType == RssiThresholdTypesEnum::Peak)
-        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_PEAK);
+        result = radio_SX1278->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_PEAK);
       else if(newType == RssiThresholdTypesEnum::Fixed)
-        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_FIXED);
+        result = radio_SX1278->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_FIXED);
       else if(newType == RssiThresholdTypesEnum::Average)
-        result = radio_SX1278->setOokThresholdType(SX127X_OOK_THRESH_AVERAGE);
+        result = radio_SX1278->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_AVERAGE);
       Serial.printf_P(PSTR("SX1278 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
@@ -941,7 +941,7 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1278 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
 
-      result = radio_SX1278->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
+      result = radio_SX1278->setOokPeakThresholdDecrement(RADIOLIB_SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
       Serial.printf_P(PSTR("SX1278 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
@@ -998,11 +998,11 @@ namespace RFLink { namespace Radio  {
       if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
         newType = params::rssiThresholdType;
       if(newType == RssiThresholdTypesEnum::Peak)
-        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_PEAK);
+        result = radio_SX1276->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_PEAK);
       else if(newType == RssiThresholdTypesEnum::Fixed)
-        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_FIXED);
+        result = radio_SX1276->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_FIXED);
       else if(newType == RssiThresholdTypesEnum::Average)
-        result = radio_SX1276->setOokThresholdType(SX127X_OOK_THRESH_AVERAGE);
+        result = radio_SX1276->setOokThresholdType(RADIOLIB_SX127X_OOK_THRESH_AVERAGE);
       Serial.printf_P(PSTR("SX1276 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
@@ -1014,7 +1014,7 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("SX1276 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
 
-      result = radio_SX1276->setOokPeakThresholdDecrement(SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
+      result = radio_SX1276->setOokPeakThresholdDecrement(RADIOLIB_SX127X_OOK_PEAK_THRESH_DEC_1_8_CHIP);
       Serial.printf_P(PSTR("SX1276 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
@@ -1072,11 +1072,11 @@ namespace RFLink { namespace Radio  {
       if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
         newType = params::rssiThresholdType;
       if(newType == RssiThresholdTypesEnum::Peak)
-        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_PEAK);
+        result = radio_RFM69->setOokThresholdType(RADIOLIB_RF69_OOK_THRESH_PEAK);
       else if(newType == RssiThresholdTypesEnum::Fixed)
-        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_FIXED);
+        result = radio_RFM69->setOokThresholdType(RADIOLIB_RF69_OOK_THRESH_FIXED);
       else if(newType == RssiThresholdTypesEnum::Average)
-        result = radio_RFM69->setOokThresholdType(RF69_OOK_THRESH_AVERAGE);
+        result = radio_RFM69->setOokThresholdType(RADIOLIB_RF69_OOK_THRESH_AVERAGE);
       Serial.printf_P(PSTR("RFM69 setOokThresholdType(%i)=%i\r\n"), (int) newType, result);
       finalResult |= result;
 
@@ -1087,7 +1087,7 @@ namespace RFLink { namespace Radio  {
       Serial.printf_P(PSTR("RFM69 setOokFixedThreshold(0x%.2X)=%i\r\n"), (int) newValue, result);
       finalResult |= result;
 
-      result = radio_RFM69->setOokPeakThresholdDecrement(RF69_OOK_PEAK_THRESH_DEC_1_8_CHIP);
+      result = radio_RFM69->setOokPeakThresholdDecrement(RADIOLIB_RF69_OOK_PEAK_THRESH_DEC_1_8_CHIP);
       Serial.printf_P(PSTR("RFM69 setOokPeakThresholdDecrement() result=%i\r\n"), result);
       finalResult |= result;
 
