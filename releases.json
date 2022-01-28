@@ -1,0 +1,17 @@
+{
+  "nightly_releases": [
+    {
+      "name": "master",
+      "hardware": {
+        "esp32": "https://github.com/cpainchaud/RFLink32/releases/download/nightly/esp32-firmware-OTA.bin",
+        "d1 mini": "https://github.com/cpainchaud/RFLink32/releases/download/nightly/esp8266-firmware.bin"
+      }
+    },
+    {
+      "name": "RTL-433",
+      "hardware": {
+        "esp32": "https://github.com/cpainchaud/RFLink32/releases/download/nightly-RTL_433/esp32-firmware-OTA.bin"
+      }
+    }
+  ]
+}
