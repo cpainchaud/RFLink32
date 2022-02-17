@@ -66,6 +66,9 @@ Via WifiManager's Config Portal you can upload a new firmware
 **insert screenshot here**
 
 ## 8. Additional info
+### Default login and password of WebUI
+rflink32 / 433mhz
+
 ### Pinout
 - When WebServer is active (which is default), pin setup has to be done there.
 - For safety & simplicity, default WebServer setup is : all pin inactive.
