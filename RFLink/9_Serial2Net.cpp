@@ -38,7 +38,9 @@ namespace RFLink {
       }
 
       void enabledTcpKeepalive() {
+#ifndef SONOFF_RFBRIDGE
         int keepAlive = 1; // used only with ESP32
+#endif // not SONOFF_RFBRIDGE
         int keepIdle = 30;
         int keepInterval = 3;
         int keepCount = 3;
@@ -52,7 +54,11 @@ namespace RFLink {
         setOption(TCP_KEEPCNT, &keepCount);
         #endif
 
+#ifdef SONOFF_RFBRIDGE
+        println(F("This is RFLink-ESP, welcome!"));
+#else // not SONOFF_RFBRIDGE 
         println(F("This is RFLink32, welcome!"));
+#endif // not SONOFF_RFBRIDGE
       }
 
       /**

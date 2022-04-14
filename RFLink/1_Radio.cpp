@@ -14,13 +14,14 @@
 
 #include <SPI.h>
 
+#ifndef SONOFF_RFBRIDGE
 #include <RadioLib.h>
 
 Module radioLibModule(5, -1, 4, -1);
 SX1278 *radio_SX1278 = nullptr;
 SX1276 *radio_SX1276 = nullptr;
 RF69 *radio_RFM69 = nullptr;
-
+#endif // not SONOFF_RFBRIDGE
 
 enum RssiThresholdTypesEnum {
   Undefined = -1,  // Keep this one first in the list
@@ -93,6 +94,7 @@ namespace RFLink { namespace Radio  {
 
     static_assert(sizeof(hardwareNames)/sizeof(char *) == HardwareType::HW_EOF_t+1, "hardwareNames has missing/extra names, please compare with HardwareType enum declarations");
 
+#ifndef SONOFF_RFBRIDGE
 // All json variable names
     const char json_name_hardware[] = "hardware";
 
@@ -389,9 +391,12 @@ namespace RFLink { namespace Radio  {
       }
 
     }
+#endif // not SONOFF_RFBRIDGE
 
     void paramsUpdatedCallback() {
+#ifndef SONOFF_RFBRIDGE
       refreshParametersFromConfig();
+#endif // not SONOFF_RFBRIDGE
     }
 
     int32_t getFrequency() 
@@ -402,6 +407,9 @@ namespace RFLink { namespace Radio  {
     /// Sets the frequency of the transceiver, and returns the previously set frequency
     int32_t setFrequency(int32_t newFrequency)
     {
+#ifdef SONOFF_RFBRIDGE
+      return 0;  // SONOFF hardware cannot change its frequency
+#else // not SONOFF_RFBRIDGE
       int32_t result = getFrequency();
       switch(hardware)  
       {
@@ -421,6 +429,7 @@ namespace RFLink { namespace Radio  {
       }
       params::frequency = newFrequency;
       return result;
+#endif // not SONOFF_RFBRIDGE
     }
 
     HardwareType hardwareIDFromString(const char *name) {
@@ -545,18 +554,22 @@ namespace RFLink { namespace Radio  {
     {
       if(hardware == HardwareType::HW_basic_t)
         set_Radio_mode_generic(new_State, force);
+#ifndef SONOFF_RFBRIDGE
       else if( hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t )
         set_Radio_mode_RFM69(new_State, force);
       else if( hardware == HardwareType::HW_SX1278_t )
         set_Radio_mode_SX1278(new_State, force);
       else if( hardware == HardwareType::HW_SX1276_t )
         set_Radio_mode_SX1276(new_State, force);
+#endif // not SONOFF_RFBRIDGE
       else
         Serial.printf_P(PSTR("Error while trying to switch Radio state: unknown hardware id '%i'\r\n"), new_State);
     }
 
     void setup() {
+#ifndef SONOFF_RFBRIDGE
       refreshParametersFromConfig();
+#endif // not SONOFF_RFBRIDGE
     }
 
     void enableRX_generic()
@@ -628,6 +641,7 @@ namespace RFLink { namespace Radio  {
       pinMode(pins::TX_GND, INPUT);
     }
 
+#ifndef SONOFF_RFBRIDGE
     void set_Radio_mode_SX1278(States new_State, bool force)
     {
       // @TODO : review compatibility with ASYNC mode
@@ -826,15 +840,18 @@ namespace RFLink { namespace Radio  {
         current_State = new_State;
       }
     }
+#endif // not SONOFF_RFBRIDGE
 
 
     float getCurrentRssi() {
+#ifndef SONOFF_RFBRIDGE
       if(hardware == HardwareType::HW_SX1278_t)
         return radio_SX1278->getRSSI(true);
       if(hardware == HardwareType::HW_SX1276_t)
         return radio_SX1276->getRSSI(true);
       if(hardware == HardwareType::HW_RFM69CW_t || hardware == HardwareType::HW_RFM69HCW_t)
         return radio_RFM69->getRSSI();
+#endif // not SONOFF_RFBRIDGE
 
       return -9999.0F;
     }
@@ -860,6 +877,11 @@ namespace RFLink { namespace Radio  {
       bool success = false;
       hardware = newHardware;
 
+#ifdef SONOFF_RFBRIDGE
+      if(newHardware == HardwareType::HW_basic_t){
+        success = true;
+      }
+#else // not defined(SONOFF_RFBRIDGE)
       if(newHardware == HardwareType::HW_SX1278_t){
         success = initialize_SX1278();
       }
@@ -872,6 +894,7 @@ namespace RFLink { namespace Radio  {
       else if(newHardware == HardwareType::HW_basic_t){
         success = true;
       }
+#endif // not SONOFF_RFBRIDGE
       else {
         RFLink::sendRawPrint(F("Unsupported hardwareId="));
         RFLink::sendRawPrint((int)newHardware);
@@ -887,6 +910,7 @@ namespace RFLink { namespace Radio  {
       }
     }
 
+#ifndef SONOFF_RFBRIDGE
     bool initialize_SX1278() {
       radioLibModule = Module(pins::RX_CS, -1, pins::RX_RESET, -1);
       if(radio_SX1278 == nullptr)
@@ -1097,6 +1121,7 @@ namespace RFLink { namespace Radio  {
 
       return finalResult == 0;
     }
+#endif // not SONOFF_RFBRIDGE
 
 
     void mainLoop() {

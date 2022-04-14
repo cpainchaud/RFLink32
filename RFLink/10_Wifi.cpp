@@ -43,9 +43,11 @@ namespace RFLink { namespace Wifi {
             bool AP_enabled;
             String AP_ssid;
             String AP_password;
+#ifndef SONOFF_RFBRIDGE
             String AP_ip;
             String AP_network;
             String AP_mask;
+#endif // not SONOFF_RFBRIDGE
         }
 
         bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
@@ -66,9 +68,11 @@ namespace RFLink { namespace Wifi {
         const char json_name_ap_enabled[] = "ap_enabled";
         const char json_name_ap_ssid[] = "ap_ssid";
         const char json_name_ap_password[] = "ap_password";
+#ifndef SONOFF_RFBRIDGE
         const char json_name_ap_ip[] = "ap_ip";
         const char json_name_ap_network[] = "ap_network";
         const char json_name_ap_mask[] = "ap_mask";
+#endif // not SONOFF_RFBRIDGE
 // end of json variable names
 
 
@@ -86,9 +90,11 @@ namespace RFLink { namespace Wifi {
                 Config::ConfigItem(json_name_ap_enabled,  Config::SectionId::Wifi_id, true, accessPointParamsUpdatedCallback),
                 Config::ConfigItem(json_name_ap_ssid,     Config::SectionId::Wifi_id, "RFLink-AP", accessPointParamsUpdatedCallback),
                 Config::ConfigItem(json_name_ap_password, Config::SectionId::Wifi_id, "", accessPointParamsUpdatedCallback),
+#ifndef SONOFF_RFBRIDGE
                 Config::ConfigItem(json_name_ap_ip,       Config::SectionId::Wifi_id, "192.168.4.1", accessPointParamsUpdatedCallback),
                 Config::ConfigItem(json_name_ap_network,  Config::SectionId::Wifi_id, "192.168.4.0", accessPointParamsUpdatedCallback),
                 Config::ConfigItem(json_name_ap_mask,     Config::SectionId::Wifi_id, "255.255.255.0", accessPointParamsUpdatedCallback),
+#endif // not SONOFF_RFBRIDGE
 
                 Config::ConfigItem()
         };
@@ -182,6 +188,7 @@ namespace RFLink { namespace Wifi {
             params::AP_password = item->getCharValue();
           }
 
+#ifndef SONOFF_RFBRIDGE
           item = Config::findConfigItem(json_name_ap_ip, Config::SectionId::Wifi_id);
           if( params::AP_ip != item->getCharValue() ) {
             changesDetected = true;
@@ -199,6 +206,7 @@ namespace RFLink { namespace Wifi {
             changesDetected = true;
             params::AP_mask = item->getCharValue();
           }
+#endif // not SONOFF_RFBRIDGE
 
           // Applying changes will happen in mainLoop()
           if(triggerChanges && changesDetected) {

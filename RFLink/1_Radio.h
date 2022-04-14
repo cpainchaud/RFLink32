@@ -23,20 +23,36 @@
 #ifdef ESP8266
 // ESP8266 D1 Mini
 #define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#ifdef SONOFF_RFBRIDGE
+#define PIN_RF_RX_NMOS_0 14        // Low Side N-MOSFET, active on HIGH level
+#else // not SONOFF_RFBRIDGE
 #define PIN_RF_RX_NMOS_0 D5        // Low Side N-MOSFET, active on HIGH level
+#endif // not SONOFF_RFBRIDGE
 #define PIN_RF_RX_VCC_0 NOT_A_PIN  // Power to the receiver on this pin
 #define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
 #define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
+#ifdef SONOFF_RFBRIDGE
+#define PIN_RF_RX_DATA_0 4         // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#else // not SONOFF_RFBRIDGE
 #define PIN_RF_RX_DATA_0 D6        // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+#endif // not SONOFF_RFBRIDGE
 #define PIN_RF_RX_RESET NOT_A_PIN  // pin to reset transceiver
 #define PIN_RF_RX_CS NOT_A_PIN     // Used for SPI "Slave Select"
 
 #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+#ifdef SONOFF_RFBRIDGE
+#define PIN_RF_TX_NMOS_0 13        // Low Side N-MOSFET, active on HIGH level
+#else // not SONOFF_RFBRIDGE
 #define PIN_RF_TX_NMOS_0 D7        // Low Side N-MOSFET, active on HIGH level
+#endif // not SONOFF_RFBRIDGE
 #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
 #define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
+#ifdef SONOFF_RFBRIDGE
+#define PIN_RF_TX_DATA_0 5         // Data to the 433Mhz transmitter on this pin
+#else // not SONOFF_RFBRIDGE
 #define PIN_RF_TX_DATA_0 D4        // Data to the 433Mhz transmitter on this pin
+#endif // not SONOFF_RFBRIDGE
 #endif
 
 #ifdef ESP32

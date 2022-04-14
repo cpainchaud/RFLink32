@@ -632,7 +632,7 @@ void replacechar(char *str, char orig, char rep)
   }
 }
 
-#ifdef ESP8266
+#if defined(ESP8266) and !defined(SONOFF_RFBRIDGE)
 uint8_t String2GPIO(String sGPIO)
 {
   byte num_part;
@@ -718,9 +718,9 @@ String GPIO2String(uint8_t uGPIO)
     return "NOT_A_PIN";
   }
 }
-#endif // ESP8266
+#endif // ESP8266 and not SONOFF_RFBRIDGE
 
-#ifdef ESP32
+#if defined(ESP32) || defined(SONOFF_RFBRIDGE)
 uint8_t String2GPIO(String sGPIO)
 {
   char cGPIO[4];
@@ -748,4 +748,4 @@ String GPIO2String(uint8_t uGPIO)
   else
     return "NOT_A_PIN";
 }
-#endif // ESP32
+#endif // ESP32 or SONOFF_RFBRIDGE

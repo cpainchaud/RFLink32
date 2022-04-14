@@ -25,12 +25,16 @@
 #include "4_Display.h"
 #include "5_Plugin.h"
 #include "6_MQTT.h"
+#ifndef SONOFF_RFBRIDGE
 #include "8_OLED.h"
+#endif // not SONOFF_RFBRIDGE
 #include "9_Serial2Net.h"
 #include "10_Wifi.h"
 #include "11_Config.h"
 #include "12_Portal.h"
+#ifndef SONOFF_RFBRIDGE
 #include "13_OTA.h"
+#endif // not SONOFF_RFBRIDGE
 
 #if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
 #include <avr/power.h>
@@ -202,7 +206,9 @@ namespace RFLink {
       }
 
       Radio::mainLoop();
+#ifndef SONOFF_RFBRIDGE
       OTA::mainLoop();
+#endif // not SONOFF_RFBRIDGE
     }
 
     void sendMsgFromBuffer() {
@@ -450,6 +456,12 @@ namespace RFLink {
         RFLink::sendRawPrint(F("Failed to obtain time"));
       }
 
+#ifdef SONOFF_RFBRIDGE
+      // Little Patch to get the right boot time when connected to wifi ... Bug ?
+      if (timeAtBoot.tv_sec == 0) {
+        gettimeofday(&timeAtBoot, NULL);
+      }
+#endif // SONOFF_RFBRIDGE
       output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
 
       output["heap_free"] = ESP.getFreeHeap();

@@ -20,7 +20,11 @@
 #endif
 
 #ifndef DEFAULT_WIFI_CLIENT_HOSTNAME
+#ifdef SONOFF_RFBRIDGE
+#define DEFAULT_WIFI_CLIENT_HOSTNAME "RFLink-ESP"
+#else // not SONOFF_RFBRIDGE
 #define DEFAULT_WIFI_CLIENT_HOSTNAME "RFLink32"
+#endif // not SONOFF_RFBRIDGE
 #endif
 
 #define SERIAL_ENABLED // Send RFLink messages over Serial

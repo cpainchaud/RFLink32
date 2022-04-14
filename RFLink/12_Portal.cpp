@@ -12,7 +12,9 @@
 #include "11_Config.h"
 #include "12_Portal.h"
 #include "10_Wifi.h"
+#ifndef SONOFF_RFBRIDGE
 #include "13_OTA.h"
+#endif // not SONOFF_RFBRIDGE
 
 #if defined(ESP8266)
 #include "ESP8266WiFi.h"
@@ -104,6 +106,7 @@ namespace RFLink { namespace Portal {
           RFLink::scheduleReboot(5);
         }
 
+#ifndef SONOFF_RFBRIDGE
         void serveApiFirmwareHttpUpdateGetStatus(AsyncWebServerRequest *request){
           if(!checkHttpAuthentication(request))
             return;
@@ -157,6 +160,7 @@ namespace RFLink { namespace Portal {
 
           request->send(200, F("text/plain"), F("HTTP OTA scheduled"));
         }
+#endif // not SONOFF_RFBRIDGE
 
         void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
           if(!checkHttpAuthentication(request))
@@ -279,9 +283,13 @@ namespace RFLink { namespace Portal {
           server.on(PSTR("/index.html"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/wifi"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/home"), HTTP_GET, serveIndexHtml);
+#ifndef SONOFF_RFBRIDGE
           server.on(PSTR("/radio"), HTTP_GET, serveIndexHtml);
+#endif // not SONOFF_RFBRIDGE
           server.on(PSTR("/signal"), HTTP_GET, serveIndexHtml);
+#ifndef SONOFF_RFBRIDGE
           server.on(PSTR("/firmware"), HTTP_GET, serveIndexHtml);
+#endif // not SONOFF_RFBRIDGE
           server.on(PSTR("/services"), HTTP_GET, serveIndexHtml);
 
           server.on(PSTR("/api/config"), HTTP_GET, serverApiConfigGet);
@@ -289,14 +297,18 @@ namespace RFLink { namespace Portal {
 
           server.on(PSTR("/api/reboot"), HTTP_GET, serveApiReboot);
 
+#ifndef SONOFF_RFBRIDGE
           server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
           server.on(PSTR("/api/firmware/http_update_status"), HTTP_GET, serveApiFirmwareHttpUpdateGetStatus);
+#endif // not SONOFF_RFBRIDGE
 
           AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler(PSTR("/api/config"), serverApiConfigPush, 4000);
           server.addHandler(handler);
 
+#ifndef SONOFF_RFBRIDGE
           handler = new AsyncCallbackJsonWebHandler(PSTR("/api/firmware/update_from_url"), serveApiFirmwareUpdateFromUrl, 1000);
           server.addHandler(handler);
+#endif // not SONOFF_RFBRIDGE
 
         }
 
