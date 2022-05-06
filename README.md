@@ -23,13 +23,36 @@ You may use:
 
 
 ## 2. Receiver / Transmitter / Transceiver
-We mainly use RXB6 receiver.
+As a starting point, you can use the RXB6 receiver.
 It is simple, steady, running on 3.3v, easy to find and cheap.
 
 Many other receivers will do!
 Simply *** Please avoid generic noname receiver ***
 
 ![Receivers](https://github.com/cpainchaud/RFLink32/blob/master/pictures/RFLink-ESP_Receivers.jpg "Receivers")
+
+For more advanced behavior and reliability, the following receivers are also supported when used with an ESP32 board:
+
+* SX1278
+* SX1276
+* RFM69CW
+* RFM69HCW
+* CC1101
+
+Those advanced receivers require a few pins to be connected to the host, here are the recommended pin assignments:
+
+|  Name         | ESP32 | SX1278/6 | RFM69(H)CW | CC1101 |
+|---------------|-------|----------|------------|--------|
+|               |  3v3  |   VCC    |  3.3V      | VCC    |
+|               |  GND  |   GND    |  GND       | GND    |
+|               |  18   |   SCK    |  SCK       | SCK    |
+|               |  19   |   MISO   |  MISO      | MISO   |
+|               |  23   |   MOSI   |  MOSI      | MOSI   |
+| pins::RX_RESET|  4¹   |  NRESET  |  RESET     |        |
+| pins::RX_CS   |  5¹   |   NSS    |  NSS       | CSN    |
+| pins::RX_DATA<br/>pins::TX_DATA |  26¹  |   DIO2   |  DIO2      | GDO0   |
+
+¹ *These must be configured in the web portal, values suggested here are proven to work reliably.*
 
 ## 3. OLED display
 You can use an OLED display! We used SSD1306 128x64 I2C screen for our testings.
