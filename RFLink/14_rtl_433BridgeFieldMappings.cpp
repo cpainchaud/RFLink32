@@ -68,14 +68,14 @@ namespace RFLink
                 display_SWITCHc(str);
         }
 
-        void display_wind_direction(unsigned int value)
-        {
-            display_wind_direction((double)value);
-        }
-
-        void display_wind_direction(double value)
+        void display_wind_direction_double(double value)
         {
             display_WINDIR(round(value / 22.5));
+        }
+
+        void display_wind_direction_uint(unsigned int value)
+        {
+            display_wind_direction_double(value);
         }
 
         void display_temperature(double value) 
@@ -246,7 +246,7 @@ namespace RFLink
                 multiply_value_by_ten : 1
             },
             {
-                display_functions : { uint_display_fn : &display_wind_direction, str_display_fn : NULL, byte_display_fn : NULL, ulong_display_fn : NULL, double_display_fn : &display_wind_direction },
+                display_functions : { uint_display_fn : &display_wind_direction_uint, str_display_fn : NULL, byte_display_fn : NULL, ulong_display_fn : NULL, double_display_fn : &display_wind_direction_double },
                 prefix : "wind_dir_deg", 
                 prefix_len : 12,
             },            
