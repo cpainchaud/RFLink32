@@ -1,6 +1,6 @@
 #define SILVERCREST_PLUGIN_ID 016
 #define PLUGIN_DESC_016 "Silvercrest remote controlled power sockets"
-#define SerialDebugActivated
+//#define SerialDebugActivated
 
 #ifdef PLUGIN_016
 #include "../4_Display.h"

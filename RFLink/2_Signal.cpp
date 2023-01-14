@@ -626,8 +626,8 @@ namespace RFLink
                 if (RawSignal.RawPulses[i] > params::signal_end_timeout)
                 {
                   RawSignal.Number = &RawSignal.RawPulses[i] - RawSignal.Pulses;
-                  Serial.printf("Breaking at pulse %d\r\n", i);
-                  Serial.printf("RawSignal.Number = %d\r\n", RawSignal.Number);
+                  //Serial.printf("Breaking at pulse %d\r\n", i);
+                  //Serial.printf("RawSignal.Number = %d\r\n", RawSignal.Number);
               
                   // RF: *** data start ***
                   counters::receivedSignalsCount++;
@@ -639,7 +639,7 @@ namespace RFLink
                     //if(responseLength>1)
                     //  sprintf(&pbuffer[responseLength-2], "RSSI=%i;\r\n", (int)RawSignal.rssi);
                     result |= true;
-                    Serial.println("Found a plugin that decodes this");
+                    //Serial.println("Found a plugin that decodes this");
                     RFLink::sendMsgFromBuffer();
                   }
 
