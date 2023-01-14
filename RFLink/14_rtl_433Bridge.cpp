@@ -162,7 +162,7 @@ namespace RFLink
             //Serial.println(buffer);
 
             // Can't use display_XXX, its buffer is way too small
-            Serial.print("20;XX;");
+            Serial.print("YY;XX;");
             Serial.print("rtl_433;");
             Serial.print("ID=");
             Serial.print(r_dev->protocol_num, 4);
