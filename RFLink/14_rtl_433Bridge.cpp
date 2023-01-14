@@ -23,7 +23,7 @@ extern "C" {
 #include "fatal.h"
 #include "list.h"
 #include "pulse_detect.h"
-#include "pulse_demod.h"
+#include "pulse_slicer.h"
 #include "r_api.h"
 #include "r_util.h"
 #include "r_device.h"
@@ -256,9 +256,9 @@ namespace RFLink
 
             //Serial.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
             int decodedCount = run_ook_demods(&r_devs, &pulseData);
-            //int decodedCount = pulse_demod_ppm(pulseData, &tfa_pool_thermometer);
-            //int decodedCount = pulse_demod_ppm(NULL, &tfa_pool_thermometer);
-            //int decodedCount = pulse_demod_ppm(pulseData, NULL);
+            //int decodedCount = pulse_slicer_ppm(pulseData, &tfa_pool_thermometer);
+            //int decodedCount = pulse_slicer_ppm(NULL, &tfa_pool_thermometer);
+            //int decodedCount = pulse_slicer_ppm(pulseData, NULL);
             //Serial.printf("rtl_433 decoded %d messages", decodedCount);
             //Serial.println();
 
