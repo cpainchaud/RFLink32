@@ -21,49 +21,99 @@
 //
 
 #ifdef ESP8266
-// ESP8266 D1 Mini
-#ifndef PIN_RF_RX_PMOS_0
-  #define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#endif
-#ifndef PIN_RF_RX_NMOS_0
-  #define PIN_RF_RX_NMOS_0 D6 // Low Side N-MOSFET, active on HIGH level
-#endif
-#ifndef PIN_RF_RX_VCC_0
-  #define PIN_RF_RX_VCC_0 NOT_A_PIN  // Power to the receiver on this pin
-#endif
-#ifndef PIN_RF_RX_GND_0
-  #define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
-#endif
-#ifndef PIN_RF_RX_NA_0
-  #define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
-#endif
-#ifndef PIN_RF_RX_DATA_0
-  #define PIN_RF_RX_DATA_0 D5 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
-#endif
-#ifndef PIN_RF_RX_RESET
-  #define PIN_RF_RX_RESET NOT_A_PIN // pin to reset transceiver
-#endif
-#ifndef PIN_RF_RX_CS
-  #define PIN_RF_RX_CS NOT_A_PIN    // Used for SPI "Slave Select"
-#endif
 
-#ifndef PIN_RF_TX_PMOS_0
-  #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
-#endif
-#ifndef PIN_RF_TX_NMOS_0
-  #define PIN_RF_TX_NMOS_0 D7 // Low Side N-MOSFET, active on HIGH level
-#endif
-#ifndef PIN_RF_TX_VCC_0
-  #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
-#endif
-#ifndef PIN_RF_TX_GND_0
-  #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
-#endif
-#ifndef PIN_RF_TX_NA_0
-  #define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
-#endif
-#ifndef PIN_RF_TX_DATA_0
-  #define PIN_RF_TX_DATA_0 D7 // Data to the 433Mhz transmitter on this pin
+// Is it an ESP8285?
+#ifdef TARGET_BOARD_ESP8285
+
+  #ifndef PIN_RF_RX_PMOS_0
+    #define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+  #endif
+  #ifndef PIN_RF_RX_NMOS_0
+    #define PIN_RF_RX_NMOS_0 14 // Low Side N-MOSFET, active on HIGH level
+  #endif
+  #ifndef PIN_RF_RX_VCC_0
+    #define PIN_RF_RX_VCC_0 NOT_A_PIN  // Power to the receiver on this pin
+  #endif
+  #ifndef PIN_RF_RX_GND_0
+    #define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
+  #endif
+  #ifndef PIN_RF_RX_NA_0
+    #define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
+  #endif
+  #ifndef PIN_RF_RX_DATA_0
+    #define PIN_RF_RX_DATA_0 4 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+  #endif
+  #ifndef PIN_RF_RX_RESET
+    #define PIN_RF_RX_RESET NOT_A_PIN // pin to reset transceiver
+  #endif
+  #ifndef PIN_RF_RX_CS
+    #define PIN_RF_RX_CS NOT_A_PIN    // Used for SPI "Slave Select"
+  #endif
+
+  #ifndef PIN_RF_TX_PMOS_0
+    #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+  #endif
+  #ifndef PIN_RF_TX_NMOS_0
+    #define PIN_RF_TX_NMOS_0 13 // Low Side N-MOSFET, active on HIGH level
+  #endif
+  #ifndef PIN_RF_TX_VCC_0
+    #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+  #endif
+  #ifndef PIN_RF_TX_GND_0
+    #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
+  #endif
+  #ifndef PIN_RF_TX_NA_0
+    #define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
+  #endif
+  #ifndef PIN_RF_TX_DATA_0
+    #define PIN_RF_TX_DATA_0 5 // Data to the 433Mhz transmitter on this pin
+  #endif
+
+#else // it's a ESP8266 D1 Mini like
+
+  #ifndef PIN_RF_RX_PMOS_0
+    #define PIN_RF_RX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+  #endif
+  #ifndef PIN_RF_RX_NMOS_0
+    #define PIN_RF_RX_NMOS_0 D6 // Low Side N-MOSFET, active on HIGH level
+  #endif
+  #ifndef PIN_RF_RX_VCC_0
+    #define PIN_RF_RX_VCC_0 NOT_A_PIN  // Power to the receiver on this pin
+  #endif
+  #ifndef PIN_RF_RX_GND_0
+    #define PIN_RF_RX_GND_0 NOT_A_PIN  // Ground to the receiver on this pin
+  #endif
+  #ifndef PIN_RF_RX_NA_0
+    #define PIN_RF_RX_NA_0 NOT_A_PIN   // Alt. RX_DATA. Forced as input
+  #endif
+  #ifndef PIN_RF_RX_DATA_0
+    #define PIN_RF_RX_DATA_0 D5 // On this input, the 433Mhz-RF signal is received. LOW when no signal.
+  #endif
+  #ifndef PIN_RF_RX_RESET
+    #define PIN_RF_RX_RESET NOT_A_PIN // pin to reset transceiver
+  #endif
+  #ifndef PIN_RF_RX_CS
+    #define PIN_RF_RX_CS NOT_A_PIN    // Used for SPI "Slave Select"
+  #endif
+
+  #ifndef PIN_RF_TX_PMOS_0
+    #define PIN_RF_TX_PMOS_0 NOT_A_PIN // High Side P-MOSFET, active on LOW level
+  #endif
+  #ifndef PIN_RF_TX_NMOS_0
+    #define PIN_RF_TX_NMOS_0 D7 // Low Side N-MOSFET, active on HIGH level
+  #endif
+  #ifndef PIN_RF_TX_VCC_0
+    #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
+  #endif
+  #ifndef PIN_RF_TX_GND_0
+    #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
+  #endif
+  #ifndef PIN_RF_TX_NA_0
+    #define PIN_RF_TX_NA_0 NOT_A_PIN   // Spare RX pin. Forced as input
+  #endif
+  #ifndef PIN_RF_TX_DATA_0
+    #define PIN_RF_TX_DATA_0 D7 // Data to the 433Mhz transmitter on this pin
+  #endif
 #endif
 #endif
 
@@ -128,10 +178,12 @@ namespace RFLink { namespace Radio {
     enum HardwareType
     {
         HW_basic_t=0,
+        #ifndef RFLINK_NO_RADIOLIB_SUPPORT
         HW_RFM69CW_t,
         HW_RFM69HCW_t,
         HW_SX1278_t,
         HW_SX1276_t,
+        #endif
         HW_EOF_t,
     };
     #ifndef RFLink_default_Radio_HardwareType

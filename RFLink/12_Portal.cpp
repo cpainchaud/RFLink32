@@ -117,6 +117,7 @@ namespace RFLink { namespace Portal {
           request->send(200, "application/json", buffer);
         }
 
+        #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
         void serveApiFirmwareUpdateFromUrl(AsyncWebServerRequest *request, JsonVariant &json)
         {
           if(!checkHttpAuthentication(request))
@@ -157,6 +158,7 @@ namespace RFLink { namespace Portal {
 
           request->send(200, F("text/plain"), F("HTTP OTA scheduled"));
         }
+        #endif // FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
 
         void serverApiConfigPush(AsyncWebServerRequest *request, JsonVariant &json) {
           if(!checkHttpAuthentication(request))
@@ -193,8 +195,8 @@ namespace RFLink { namespace Portal {
           request->send(200, F("application/json"), response);
         }
 
-
-// Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
+        #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
+        // Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
         void handleFirmwareUpdateFinalResponse(AsyncWebServerRequest *request) {
           if(!checkHttpAuthentication(request))
             return;
@@ -211,7 +213,7 @@ namespace RFLink { namespace Portal {
           //restartRequired = true;
         }
 
-// Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
+        // Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
         void handleChunksReception(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
           //Upload handler chunks in data
 
@@ -260,6 +262,7 @@ namespace RFLink { namespace Portal {
           }
           return;
         }
+        #endif // FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
 
         void serveIndexHtml(AsyncWebServerRequest *request) {
           if(!checkHttpAuthentication(request))
@@ -281,22 +284,28 @@ namespace RFLink { namespace Portal {
           server.on(PSTR("/home"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/radio"), HTTP_GET, serveIndexHtml);
           server.on(PSTR("/signal"), HTTP_GET, serveIndexHtml);
+          #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
           server.on(PSTR("/firmware"), HTTP_GET, serveIndexHtml);
+          #endif
           server.on(PSTR("/services"), HTTP_GET, serveIndexHtml);
 
           server.on(PSTR("/api/config"), HTTP_GET, serverApiConfigGet);
           server.on(PSTR("/api/status"), HTTP_GET, serveApiStatusGet);
 
           server.on(PSTR("/api/reboot"), HTTP_GET, serveApiReboot);
-
+          #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
           server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
+          #endif
+
           server.on(PSTR("/api/firmware/http_update_status"), HTTP_GET, serveApiFirmwareHttpUpdateGetStatus);
 
           AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler(PSTR("/api/config"), serverApiConfigPush, 4000);
           server.addHandler(handler);
 
+          #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
           handler = new AsyncCallbackJsonWebHandler(PSTR("/api/firmware/update_from_url"), serveApiFirmwareUpdateFromUrl, 1000);
           server.addHandler(handler);
+          #endif
 
         }
 

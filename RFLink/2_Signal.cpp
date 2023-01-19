@@ -1164,10 +1164,12 @@ namespace RFLink
       //sendRawPrint(printBuf, true);
 
       if(newSlicer == Slicer_enum::Default){
+        #ifndef RFLINK_NO_RADIOLIB_SUPPORT
         if(Radio::hardware == Radio::HardwareType::HW_SX1278_t)
           runtime::appliedSlicer = SLICER_DEFAULT_SX1278;
         else if(Radio::hardware == Radio::HardwareType::HW_RFM69HCW_t || Radio::hardware == Radio::HardwareType::HW_RFM69CW_t )
           runtime::appliedSlicer = SLICER_DEFAULT_RFM69;
+        #endif
       }
       else {
         runtime::appliedSlicer = newSlicer;

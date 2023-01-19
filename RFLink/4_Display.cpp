@@ -632,7 +632,7 @@ void replacechar(char *str, char orig, char rep)
   }
 }
 
-#ifdef ESP8266
+#if defined(ESP8266) && !defined(TARGET_BOARD_ESP8285)
 uint8_t String2GPIO(String sGPIO)
 {
   byte num_part;
@@ -718,9 +718,7 @@ String GPIO2String(uint8_t uGPIO)
     return "NOT_A_PIN";
   }
 }
-#endif // ESP8266
-
-#ifdef ESP32
+#else // ESP32 or 8285
 uint8_t String2GPIO(String sGPIO)
 {
   char cGPIO[4];

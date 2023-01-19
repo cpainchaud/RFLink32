@@ -558,7 +558,9 @@ void saveRTSRecord(uint8_t eepromRecordNumber, uint32_t address, uint16_t rollin
 
 void sendFrame(uint8_t* frame, bool isFirst)
 {
+    #ifndef RFLINK_NO_RADIOLIB_SUPPORT
     uint32_t originalFrequency = Radio::setFrequency(433420000);
+    #endif
     RawSignal.Multiply = 1;
 
     const int RTS_HalfBitPulseDuration = 640 / RawSignal.Multiply;
@@ -613,7 +615,9 @@ void sendFrame(uint8_t* frame, bool isFirst)
     delayMicroseconds(RTS_InterframeSilenceDuration); // Inter-frame silence
 
     RawSignal.Multiply = RFLink::Signal::params::sample_rate; // restore setting
+    #ifndef RFLINK_NO_RADIOLIB_SUPPORT
     Radio::setFrequency(originalFrequency);
+    #endif
 }
 
 #endif //PLUGIN_TX_017
