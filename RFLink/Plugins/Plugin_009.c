@@ -460,20 +460,24 @@ boolean  PluginTX_009(byte function, const char *string)
 
 void X10_Send(uint32_t address)
 {
+  // #TODO: re-implement with sendRawSignal command
    int fpulse = 375; // Pulse witdh in microseconds
    int fretrans = 4; // Number of code retransmissions
    uint32_t fdatabit;
    uint32_t fdatamask = 0x80000000;
    uint32_t fsendbuff;
 
+   noInterrupts();
+   Radio::set_Radio_mode(Radio::States::Radio_TX);
+
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = address;
 
       // send SYNC 12P High, 10P low
-      digitalWrite(TX_DATA, HIGH);
+      digitalWrite(Radio::pins::TX_DATA, HIGH);
       delayMicroseconds(fpulse * 12);
-      digitalWrite(TX_DATA, LOW);
+      digitalWrite(Radio::pins::TX_DATA, LOW);
       delayMicroseconds(fpulse * 10);
       // end send SYNC
       // Send command
@@ -484,9 +488,9 @@ void X10_Send(uint32_t address)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
@@ -498,11 +502,14 @@ void X10_Send(uint32_t address)
          }
       }
       // Send Stop/delay
-      digitalWrite(TX_DATA, HIGH);
+      digitalWrite(Radio::pins::TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(TX_DATA, LOW);
+      digitalWrite(Radio::pins::TX_DATA, LOW);
       delayMicroseconds(fpulse * 20);
    }
+
+   interrupts();
+   Radio::set_Radio_mode(Radio::States::Radio_RX);
    return;
 }
 #endif //PLUGIN_TX_009
