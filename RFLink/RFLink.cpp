@@ -319,11 +319,15 @@ namespace RFLink {
       #endif // !RFLINK_SERIAL2NET_DISABLED
     };
 
+    /**
+    */
     bool executeCliCommand(char *cmd) {
       static byte ValidCommand = 0;
 
       // Copy input command to InputBuffer_Serial, because many plugins are based on it !
-      memcpy(InputBuffer_Serial, cmd, INPUT_COMMAND_SIZE);
+      if(cmd != InputBuffer_Serial) { // sometimes we already have the command in the right buffer
+        memcpy(InputBuffer_Serial, cmd, INPUT_COMMAND_SIZE);;
+      }
 
       if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port
         // 10;....;..;ON;
@@ -433,6 +437,7 @@ namespace RFLink {
       }
       ValidCommand = 0;
       sendMsgFromBuffer(); // in case there is a response waiting to be sent
+      resetSerialBuffer();
       return true;
     }
 
