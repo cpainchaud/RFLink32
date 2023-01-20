@@ -44,7 +44,7 @@ jobs:
         mkdir firmwares
         cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware-OTA.bin
         cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
-        cp .pio/build/sonoff_bridge/firmware.bin firmwares/sonoff_bridge.bin
+        cp .pio/build/sonoff_bridge/firmware.bin firmwares/sonoff_bridge-firmware.bin
         cd firmwares
         cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin .
         cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/sdk/bin/bootloader_dio_40m.bin .
