@@ -129,6 +129,7 @@ namespace RFLink { namespace Radio  {
     Config::ConfigItem configItems[] =  {
             Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[RFLink_default_Radio_HardwareType], paramsUpdatedCallback),
 
+            #ifndef RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
             Config::ConfigItem(json_name_rx_data,   Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_rx_vcc,    Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_rx_nmos,   Config::SectionId::Radio_id, PIN_RF_RX_NMOS_0, paramsUpdatedCallback),
@@ -143,6 +144,7 @@ namespace RFLink { namespace Radio  {
             Config::ConfigItem(json_name_tx_nmos,   Config::SectionId::Radio_id, PIN_RF_TX_NMOS_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_tx_pmos,   Config::SectionId::Radio_id, PIN_RF_TX_PMOS_0, paramsUpdatedCallback),
             Config::ConfigItem(json_name_tx_gnd,    Config::SectionId::Radio_id, PIN_RF_TX_GND_0, paramsUpdatedCallback),
+            #endif // RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
             #ifndef RFLINK_NO_RADIOLIB_SUPPORT
             Config::ConfigItem(json_name_rssi_thresh_type,  Config::SectionId::Radio_id, RssiThresholdTypesEnum::Undefined, paramsUpdatedCallback, true),
@@ -185,6 +187,8 @@ namespace RFLink { namespace Radio  {
         }
         // changes will be applied at the end of this function
       }
+
+      #ifndef RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
       item = Config::findConfigItem(json_name_rx_data, Config::SectionId::Radio_id);
       if( pins::RX_DATA != item->getLongIntValue() ) {
@@ -265,6 +269,7 @@ namespace RFLink { namespace Radio  {
         changesDetected = true;
         pins::TX_GND = item->getLongIntValue();
       }
+      #endif // RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
       long int value;
 
