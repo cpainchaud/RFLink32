@@ -288,6 +288,7 @@ boolean Plugin_009(byte function, const char *string)
 #endif //PLUGIN_009
 
 #ifdef PLUGIN_TX_009
+#include "1_Radio.h"
 void X10_Send(uint32_t address);
 
 boolean  PluginTX_009(byte function, const char *string)
@@ -488,16 +489,16 @@ void X10_Send(uint32_t address)
          fsendbuff = (fsendbuff << 1);     // Shift left
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(Radio::pins::, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(Radio::pins::, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write 1
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 4);
          }
       }
@@ -507,9 +508,9 @@ void X10_Send(uint32_t address)
       digitalWrite(Radio::pins::TX_DATA, LOW);
       delayMicroseconds(fpulse * 20);
    }
-
-   interrupts();
    Radio::set_Radio_mode(Radio::States::Radio_RX);
+   interrupts();
+
    return;
 }
 #endif //PLUGIN_TX_009
