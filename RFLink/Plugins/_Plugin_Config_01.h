@@ -106,7 +106,7 @@
 // #define PLUGIN_TX_006           // Blyss
 // #define PLUGIN_TX_007           // Conrad RSL2
 // #define PLUGIN_TX_008           // Kambrook
-// #define PLUGIN_TX_009           // X10 RF
+#define PLUGIN_TX_009           // X10 RF
 // #define PLUGIN_TX_010		   // TRC02 RGB switch
 // #define PLUGIN_TX_011           // Home Confort
 // #define PLUGIN_TX_012           // Flamingo FA500R  (11)
