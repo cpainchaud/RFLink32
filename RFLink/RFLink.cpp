@@ -82,18 +82,6 @@ namespace RFLink {
         Serial.println(F("Failed to obtain time"));
       }
 
-#if (defined(__AVR_ATmega328P__) || defined(__AVR_ATmega2560__))
-      // Low Power Arduino
-    ADCSRA = 0;            // disable ADC
-    power_all_disable();   // turn off all modules
-    power_timer0_enable(); // Timer 0
-    power_usart0_enable(); // UART
-    delay(250);            // Wait ESP-01S
-    power_spi_enable(); // SPI
-#elif defined(ESP32)
-      //btStop();
-#endif
-
 #if (defined(ESP32) || defined(ESP8266))
       Serial.println(); // ESP "Garbage" message
       Serial.print(F("Arduino IDE Version :\t"));
