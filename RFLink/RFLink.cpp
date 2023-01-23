@@ -437,8 +437,15 @@ namespace RFLink {
     void getStatusJsonString(JsonObject &output) {
 
       char buffer[90];
-
       struct timeval now;
+
+      #ifdef ESP8266
+      // Little Patch to get the right boot time when connected to wifi ... Bug ?
+      if (timeAtBoot.tv_sec == 0) {
+        gettimeofday(&timeAtBoot, NULL);
+      }
+      #endif
+
       if (gettimeofday(&now, NULL) != 0) {
         RFLink::sendRawPrint(F("Failed to obtain time"));
       }
