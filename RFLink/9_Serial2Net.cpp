@@ -38,7 +38,6 @@ namespace RFLink {
       }
 
       void enabledTcpKeepalive() {
-        int keepAlive = 1; // used only with ESP32
         int keepIdle = 30;
         int keepInterval = 3;
         int keepCount = 3;
@@ -46,6 +45,7 @@ namespace RFLink {
         #ifdef ESP8266
         this->keepAlive(keepIdle, keepInterval, keepCount);
         #else
+        int keepAlive = 1;
         setSocketOption(SO_KEEPALIVE, (char *) &keepAlive, sizeof(keepAlive));
         setOption(TCP_KEEPIDLE, &keepIdle);
         setOption(TCP_KEEPINTVL, &keepInterval);
@@ -148,7 +148,7 @@ namespace RFLink {
       }
 
       item = Config::findConfigItem(json_name_port, Config::SectionId::Serial2Net_id);
-      if (item->getLongIntValue() != params::port) {
+      if (item->getUnsignedLongIntValue() != params::port) {
         changesDetected = true;
         params::port = item->getLongIntValue();
       }

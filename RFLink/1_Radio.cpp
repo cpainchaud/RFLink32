@@ -96,7 +96,7 @@ namespace RFLink { namespace Radio  {
             #endif
             "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
     };
-#define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
+#define hardwareNames_count (int)(sizeof(hardwareNames)/sizeof(char *))
 
     static_assert(sizeof(hardwareNames)/sizeof(char *) == HardwareType::HW_EOF_t+1, "hardwareNames has missing/extra names, please compare with HardwareType enum declarations");
 
@@ -271,9 +271,9 @@ namespace RFLink { namespace Radio  {
       }
       #endif // RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
+      #ifndef RFLINK_NO_RADIOLIB_SUPPORT
       long int value;
 
-      #ifndef RFLINK_NO_RADIOLIB_SUPPORT
       item = Config::findConfigItem(json_name_rssi_thresh_type, Config::SectionId::Radio_id);
       if(item->isUndefined()){
         if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
