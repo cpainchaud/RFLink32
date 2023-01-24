@@ -271,9 +271,9 @@ namespace RFLink { namespace Radio  {
       }
       #endif // RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
+      #ifndef RFLINK_NO_RADIOLIB_SUPPORT
       long int value;
 
-      #ifndef RFLINK_NO_RADIOLIB_SUPPORT
       item = Config::findConfigItem(json_name_rssi_thresh_type, Config::SectionId::Radio_id);
       if(item->isUndefined()){
         if(params::rssiThresholdType != RssiThresholdTypesEnum::Undefined)
