@@ -148,7 +148,7 @@ namespace RFLink {
       }
 
       item = Config::findConfigItem(json_name_port, Config::SectionId::Serial2Net_id);
-      if (item->getLongIntValue() != params::port) {
+      if (item->getUnsignedLongIntValue() != params::port) {
         changesDetected = true;
         params::port = item->getLongIntValue();
       }

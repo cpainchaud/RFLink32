@@ -96,7 +96,7 @@ namespace RFLink { namespace Radio  {
             #endif
             "EOF" // this is always the last one and matches index HardareType::HW_EOF_t
     };
-#define hardwareNames_count sizeof(hardwareNames)/sizeof(char *)
+#define hardwareNames_count (int)(sizeof(hardwareNames)/sizeof(char *))
 
     static_assert(sizeof(hardwareNames)/sizeof(char *) == HardwareType::HW_EOF_t+1, "hardwareNames has missing/extra names, please compare with HardwareType enum declarations");
 

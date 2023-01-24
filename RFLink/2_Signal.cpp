@@ -114,49 +114,49 @@ namespace RFLink
       }
 
       item = Config::findConfigItem(json_name_min_raw_pulses, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::min_raw_pulses)
+      if (item->getUnsignedLongIntValue() != params::min_raw_pulses)
       {
         changesDetected = true;
         params::min_raw_pulses = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_seek_timeout, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::seek_timeout)
+      if (item->getUnsignedLongIntValue() != params::seek_timeout)
       {
         changesDetected = true;
         params::seek_timeout = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_min_preamble, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::min_preamble)
+      if (item->getUnsignedLongIntValue() != params::min_preamble)
       {
         changesDetected = true;
         params::min_preamble = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_min_pulse_len, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::min_pulse_len)
+      if (item->getUnsignedLongIntValue() != params::min_pulse_len)
       {
         changesDetected = true;
         params::min_pulse_len = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_signal_end_timeout, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::signal_end_timeout)
+      if (item->getUnsignedLongIntValue() != params::signal_end_timeout)
       {
         changesDetected = true;
         params::signal_end_timeout = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_signal_repeat_time, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::signal_repeat_time)
+      if (item->getUnsignedLongIntValue() != params::signal_repeat_time)
       {
         changesDetected = true;
         params::signal_repeat_time = item->getLongIntValue();
       }
 
       item = Config::findConfigItem(json_name_scan_high_time, Config::SectionId::Signal_id);
-      if (item->getLongIntValue() != params::scan_high_time)
+      if (item->getUnsignedLongIntValue() != params::scan_high_time)
       {
         changesDetected = true;
         params::scan_high_time = item->getLongIntValue();
@@ -1059,7 +1059,7 @@ namespace RFLink
           return;
         }
 
-        while(RawSignal.Number >= params::min_raw_pulses) {
+        while(RawSignal.Number >= (int)params::min_raw_pulses) {
 
           Serial.printf_P(PSTR("Sending your signal to Plugins (%i pulses)\r\n"), RawSignal.Number);
           displaySignal(RawSignal);

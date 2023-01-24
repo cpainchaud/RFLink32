@@ -83,6 +83,11 @@ namespace RFLink
                 return (long int)this->defaultValue;
             }
 
+            inline unsigned long int getUnsignedLongIntDefaultValue()
+            {
+                return (unsigned long int)this->defaultValue;
+            }
+
             inline bool getBoolDefaultValue()
             {
                 return boolDefaultValue;
@@ -113,6 +118,19 @@ namespace RFLink
             }
 
             inline void setLongIntValue(long int newValue)
+            {
+                this->jsonRef.set(newValue);
+            }
+
+            inline unsigned long int getUnsignedLongIntValue()
+            {
+              if(isUndefined())
+                return getUnsignedLongIntDefaultValue();
+
+              return (unsigned long int)this->jsonRef.as<unsigned long>();
+            }
+
+            inline void setUnsignedLongIntValue(unsigned long int newValue)
             {
                 this->jsonRef.set(newValue);
             }
