@@ -25,11 +25,18 @@ void SerialPrintFreeHeap()
 
 void SerialPrintMaxAllocHeap()
 {
-    Serial.print(ESP.getMaxAllocHeap());
+    Serial.print(
+        #ifdef ESP8266
+        ESP.getMaxFreeBlockSize()
+        #else
+        ESP.getMaxAllocHeap()
+        #endif
+    );
 }
 
 void SerialPrintFreeMemInfo()
 {
+    #ifdef ESP32
     Serial.print("8bit aligned, Free = ");
     Serial.print(heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
     Serial.print(", Max block = ");
@@ -38,6 +45,7 @@ void SerialPrintFreeMemInfo()
     Serial.print(heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_32BIT));
     Serial.print(", Max block = ");
     Serial.print(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_32BIT));
+    #endif
 }
 
 }
