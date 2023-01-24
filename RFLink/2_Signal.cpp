@@ -260,7 +260,7 @@ namespace RFLink
       // ************************
       // ***   Message Loop   ***
       // ************************
-      int end_timeout = 20000; //params::signal_end_timeout; 
+      unsigned long end_timeout = 20000; //params::signal_end_timeout; 
       while (RawCodeLength < RAW_BUFFER_SIZE)
       {
 
