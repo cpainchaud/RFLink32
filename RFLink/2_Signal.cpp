@@ -836,6 +836,9 @@ namespace RFLink
           cmd >>= 1;
         }
       }
+
+      Radio::set_Radio_mode(Radio::States::Radio_TX);
+      noInterrupts();
       // send bits
       for (byte nRepeat = 0; nRepeat < AC_FRETRANS; nRepeat++)
       {
@@ -926,6 +929,8 @@ namespace RFLink
         delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
       }
       // End transmit
+      Radio::set_Radio_mode(Radio::States::Radio_RX);
+      interrupts();
     }
 
     void RawSendRF(RawSignalStruct *signal)
