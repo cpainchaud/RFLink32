@@ -71,11 +71,12 @@ inline short pulse_type_76(uint16_t pulse) {
     return 1;
 }
 
-uint16_t lastSeenID = 0;
-unsigned long lastSeenTime = 0;
 
 boolean Plugin_076(byte function, const char *string)
 {
+    static uint16_t lastSeenID = 0;
+    static unsigned long lastSeenTime = 0;
+    
     uint16_t code = 0;
 
     if (RawSignal.Number != PLUGIN_076_PULSE_COUNT)
