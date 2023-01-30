@@ -878,7 +878,7 @@ namespace RFLink { namespace Radio  {
         sprintf(printBuf, PSTR("Switching from Radio hardware '%s' to '%s'"), hardwareNames[hardware], hardwareNames[newHardware]);
         RFLink::sendRawPrint(printBuf, true);
       } else {
-        sprintf(printBuf, PSTR("Now trying to initialize hardware '%s"), hardwareNames[hardware]);
+        sprintf(printBuf, PSTR("Now trying to initialize hardware '%s'"), hardwareNames[hardware]);
         RFLink::sendRawPrint(printBuf, true);
       }
 
