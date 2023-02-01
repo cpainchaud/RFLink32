@@ -11,8 +11,7 @@
 #include <LittleFS.h>
 #else
 #include <FS.h>
-#include <LITTLEFS.h>
-#define LittleFS LITTLEFS
+#include <LittleFS.h>
 #endif
 
 // Inspired by 
