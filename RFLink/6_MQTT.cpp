@@ -26,7 +26,10 @@
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 WiFiClient WIFIClient;
+
+#ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
 WiFiClientSecure WIFIClientSecure;
+#endif
 
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -75,9 +78,11 @@ const char json_name_topic_out[] = "topic_out";
 const char json_name_lwt_enabled[] = "lwt_enabled";
 const char json_name_topic_lwt[] = "topic_lwt";
 
+#ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
 const char json_name_ssl_enabled[] = "ssl_enabled";
 const char json_name_ssl_insecure[] = "ssl_insecure";
 const char json_name_ca_cert[] = "ca_cert";
+#endif
 // end of json variable names
 
 struct timeval lastMqttConnectionAttemptTime;
@@ -97,9 +102,11 @@ Config::ConfigItem configItems[] =  {
   Config::ConfigItem(json_name_lwt_enabled, Config::SectionId::MQTT_id, RFLink_default_MQTT_LWT, paramsUpdatedCallback),
   Config::ConfigItem(json_name_topic_lwt,   Config::SectionId::MQTT_id, MQTT_TOPIC_LWT, paramsUpdatedCallback),
 
+  #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
   Config::ConfigItem(json_name_ssl_enabled, Config::SectionId::MQTT_id, RFLink_default_MQTT_SSL_ENABLED, paramsUpdatedCallback),
   Config::ConfigItem(json_name_ssl_insecure,Config::SectionId::MQTT_id, true, paramsUpdatedCallback),
   Config::ConfigItem(json_name_ca_cert,     Config::SectionId::MQTT_id, "", paramsUpdatedCallback),
+  #endif
 
   Config::ConfigItem()
 };
@@ -177,6 +184,8 @@ void refreshParametersFromConfig(bool triggerChanges) {
       params::topic_lwt = item->getCharValue();
     }
 
+    #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
+
     item = Config::findConfigItem(json_name_ssl_enabled, Config::SectionId::MQTT_id);
     if( item->getBoolValue() != params::ssl_enabled) {
       changesDetected = true;
@@ -199,7 +208,7 @@ void refreshParametersFromConfig(bool triggerChanges) {
       WIFIClientSecure.setCACert((const uint8_t*)params::ca_cert.c_str(), params::ca_cert.length());
       #endif
     }
-
+    #endif
 
     // Applying changes will happen in mainLoop()
     if(triggerChanges && changesDetected) {
@@ -218,6 +227,7 @@ void setup_MQTT()
 
   MQTTClient.setKeepAlive(MQTT_KEEPALIVE);
 
+  #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
   Serial.print(F("MQTT setup SSL mode :\t\t\t"));
   if(params::ssl_enabled) {
     #ifdef ESP32
@@ -229,13 +239,16 @@ void setup_MQTT()
   }
   else
     Serial.println(F("Insecure (No Key/Cert/Fp)"));
+  #endif // MQTT_CLIENT_SSL_DISABLED
 
   if (params::port == 0)
     params::port = 1883;
 
+  #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
   if(params::ssl_enabled)
     MQTTClient.setClient(WIFIClientSecure);
   else
+  #endif
     MQTTClient.setClient(WIFIClient);
 
   MQTTClient.setServer(params::server.c_str(), params::port);
@@ -337,11 +350,13 @@ void checkMQTTloop()
 
   if(paramsHaveChanged) {
     paramsHaveChanged = false;
+    #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
     if(params::ssl_enabled)
       MQTTClient.setClient(WIFIClientSecure);
-    else {
+    else
+    #endif
       MQTTClient.setClient(WIFIClient);
-    }
+
     MQTTClient.setServer(params::server.c_str(), params::port);
     reconnect(1, true);
     gettimeofday(&lastMqttConnectionAttemptTime, nullptr);
