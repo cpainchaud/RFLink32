@@ -150,7 +150,7 @@
   #define PIN_RF_TX_NMOS_0 NOT_A_PIN // Low Side N-MOSFET, active on HIGH level
 #endif
 #ifndef PIN_RF_TX_VCC_0
-  #define PIN_RF_TX_VCC_0 4  // +5 volt / Vcc power to the transmitter on this pin
+  #define PIN_RF_TX_VCC_0 NOT_A_PIN  // +5 volt / Vcc power to the transmitter on this pin
 #endif
 #ifndef PIN_RF_TX_GND_0
   #define PIN_RF_TX_GND_0 NOT_A_PIN  // Ground power to the transmitter on this pin
