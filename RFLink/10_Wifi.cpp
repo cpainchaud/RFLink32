@@ -280,8 +280,13 @@ namespace RFLink { namespace Wifi {
           }
 
           if( params::AP_enabled ) {
+            #ifdef ESP32
+            WiFi.setHostname(params::client_hostname.c_str());
+            #else
+            WiFi.hostname(params::client_hostname);
+            #endif
             Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s' and band=%i... "), params::AP_ssid.c_str(), cpWifiChannel);
-            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()),  cpWifiChannel)
+            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()))
               Serial.println(F("FAILED"));
             else
               Serial.println(F("OK"));
