@@ -8,6 +8,8 @@
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 */
+#ifdef ESP32
+
 #include "4_Display.h"
 #include "14_rtl_433BridgeFieldMappings.h"
 
@@ -301,3 +303,4 @@ namespace RFLink
         }
     }
 }
+#endif

@@ -11,6 +11,7 @@
 #ifndef rtl_433Bridge_h
 #define rtl_433Bridge_h
 
+#ifdef ESP32
 namespace RFLink 
 { 
     namespace rtl_433Bridge 
@@ -19,4 +20,6 @@ namespace RFLink
         int processReceivedData();
     }
 }
+#endif
+
 #endif

@@ -618,7 +618,9 @@ namespace RFLink
 
           if (success)
           { 
+            #ifdef ESP32
             counters::receivedSignalsCount += rtl_433Bridge::processReceivedData(); 
+            #endif
 
             bool result = false;
             int PulsesCount = RawSignal.Number;

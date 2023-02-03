@@ -8,6 +8,7 @@
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 */
+#ifdef ESP32
 #include "2_Signal.h"
 #include "3_Serial.h"
 #include "4_Display.h"
@@ -269,3 +270,4 @@ namespace RFLink
         }
     }
 }
+#endif

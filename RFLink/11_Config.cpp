@@ -299,8 +299,10 @@ namespace RFLink
 
       printFile();
 
+      #ifdef ESP32
       // register rtl_433 protocols
       rtl_433Bridge::register_all_protocols(0);
+      #endif
     }
 
     class CallbackManager

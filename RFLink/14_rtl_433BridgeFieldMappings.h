@@ -11,6 +11,7 @@
 #ifndef rtl_433BridgeFieldMappings_h
 #define rtl_433BridgeFieldMappings_h
 
+#ifdef ESP32
 #include <stdint.h>
 #include "4_Display.h"
 
@@ -50,5 +51,6 @@ namespace RFLink
 
     }
 }
+#endif
 
 #endif
