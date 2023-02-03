@@ -17,7 +17,7 @@ namespace RFLink {
       #ifdef ESP32
       static const uint16_t __buffer_size = 1024;
       #else
-      static const uint16_t __buffer_size = 128;
+      static const uint16_t __buffer_size = 256;
       #endif
       uint16_t buffer_end;
 
