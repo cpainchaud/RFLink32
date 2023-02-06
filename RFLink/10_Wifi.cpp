@@ -12,6 +12,7 @@
 #include "6_MQTT.h"
 #include "9_Serial2Net.h"
 #include <time.h> // for NTP
+#include <ESPNtpClient.h> // for NTP
 #ifdef ESP32
 extern "C" {
   #include "bootloader_random.h"
@@ -47,6 +48,27 @@ namespace RFLink { namespace Wifi {
             String AP_ip;
             String AP_network;
             String AP_mask;
+        }
+
+        namespace ntp {
+          const PROGMEM char* ntpServer = "pool.ntrgergfergp.org";
+          bool wifiFirstConnected = false; // Track if this is the first time we connect to Wifi
+          boolean syncEventTriggered = false; // True if a time even has been triggered
+          NTPEvent_t ntpEvent; // Last triggered event
+
+          void processSyncEvent (NTPEvent_t event) {
+            Serial.println("processSyncEvent called");
+            switch (event.event) {
+              case timeSyncd:
+              case partlySync:
+              case syncNotNeeded:
+              case accuracyError:
+                Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (event));
+                break;
+              default:
+                break;
+            }
+          }
         }
 
         bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
@@ -156,7 +178,7 @@ namespace RFLink { namespace Wifi {
           // Applying changes will happen in mainLoop()
           if(triggerChanges && changesDetected) {
             clientParamsHaveChanged = true;
-            Serial.println(F("Client Wifi settings haver changed and will be applied at next loop"));
+            Serial.println(F("Client Wifi settings have changed and will be applied at next loop"));
           }
         }
 
@@ -322,62 +344,7 @@ namespace RFLink { namespace Wifi {
 #endif
         }
 
-        #ifdef ESP8266
-        /*bool getLocalTime(struct tm * info, uint32_t ms=5000)
-        {
-            uint32_t start = millis();
-            time_t now;
-            while((millis()-start) <= ms) {
-                time(&now);
-                localtime_r(&now, info);
-                if(info->tm_year > (2016 - 1900)){
-                    return true;
-                }
-                delay(10);
-            }
-            return false;
-        }*/
-        #endif
-
-        void printLocalTime(struct timeval *newTime = nullptr)
-        {
-          struct tm tmp;
-          struct tm *timeinfo;
-
-          if(newTime == nullptr) {
-            if(!getLocalTime(&tmp)){
-              Serial.println(F("Failed to obtain time"));
-              return;
-            }
-            timeinfo = &tmp;
-          }
-          else {
-            timeinfo = localtime(&newTime->tv_sec);
-          }
-
-          Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
-                          timeinfo->tm_year+1900, timeinfo->tm_mon+1, timeinfo->tm_mday,
-                          timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-        }
-
-        
-        void ntpUpdateCallback(struct timeval *newTime){
-
-          if(timeAtBoot.tv_sec < 10000 ) {
-            timeAtBoot.tv_sec = newTime->tv_sec - 10;
-            printLocalTime(newTime);
-          }
-
-        }
-
         void reconnectServices() {
-          #ifdef ESP32
-          // in case NTP forces a time drift we need to recalculate timeAtBoot
-          sntp_set_time_sync_notification_cb(ntpUpdateCallback);
-          #endif
-
-          configTzTime("UTC", RFLink::params::ntpServer.c_str());
-
           #ifndef RFLINK_MQTT_DISABLED
           if(RFLink::Mqtt::params::enabled)
             RFLink::Mqtt::reconnect(1, true);
@@ -413,6 +380,7 @@ namespace RFLink { namespace Wifi {
 
         void eventHandler_WiFiStationGotIp(WiFiEvent_t event, WiFiEventInfo_t info) {
           Serial.printf_P(PSTR("WiFi Client has received a new IP: %s\r\n"), WiFi.localIP().toString().c_str());
+          ntp::wifiFirstConnected = true;
           reconnectServices();
         }
 
@@ -437,6 +405,7 @@ WiFiEventHandler e2;
 void eventHandler_WiFiStationGotIp(const WiFiEventStationModeGotIP& evt) {
   Serial.printf_P(PSTR("WiFi Client has received a new IP: %s\r\n"), WiFi.localIP().toString().c_str());
   Serial.flush();
+  ntp::wifiFirstConnected = true;
   reconnectServices();
 }
 WiFiEventHandler e3;
@@ -459,6 +428,11 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
           #else
           cpWifiChannel = ESP8266TrueRandom.random(1,13);
           #endif // ESP32
+
+          NTP.onNTPSyncEvent ([] (NTPEvent_t event) {
+            ntp::ntpEvent = event;
+            ntp::syncEventTriggered = true;
+          });
 
           refreshClientParametersFromConfig(false);
           refreshAccessPointParametersFromConfig(false);
@@ -503,6 +477,23 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
         }
 
         void mainLoop() {
+
+          if (ntp::wifiFirstConnected) {
+            Serial.println(F("First WiFi connection established, starting NTP"));
+            ntp::wifiFirstConnected = false;
+            NTP.setTimeZone (TZ_Etc_UTC);
+            NTP.setInterval (600);
+            NTP.setNTPTimeout (2000);
+            // NTP.setMinSyncAccuracy (5000);
+            // NTP.settimeSyncThreshold (3000);
+            NTP.begin (ntp::ntpServer, false);
+            Serial.println(F("NTP started"));
+          }
+
+          if (ntp::syncEventTriggered) {
+            ntp::syncEventTriggered = false;
+            ntp::processSyncEvent (ntp::ntpEvent);
+          }
 
           if(accessPointParamsHaveChanged) {
             accessPointParamsHaveChanged = false;
@@ -579,6 +570,10 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
             wifi_client[F("status")] = F("disabled");
           }
 
+        }
+
+        bool ntpIsSynced() {
+          return NTP.syncStatus() == NTPStatus_t::syncd;
         }
 
     } // end of Wifi namespace

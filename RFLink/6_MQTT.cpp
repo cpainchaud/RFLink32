@@ -23,14 +23,16 @@
 #include <ESP8266WiFi.h>
 #endif
 
-
+#include <ESPNtpClient.h>
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 WiFiClient WIFIClient;
 
 #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
 WiFiClientSecure *WIFIClientSecure =  nullptr;
-BearSSL::X509List *sslTrustedAnchors  = nullptr;
+  #ifndef ESP32
+  BearSSL::X509List *sslTrustedAnchors  = nullptr;
+  #endif
 #endif
 
 #include <LittleFS.h>
@@ -251,6 +253,9 @@ void reconnect(int retryCount, bool force)
   if(paramsHaveChanged)
     return;
 
+  if(params::ssl_enabled && !params::ssl_insecure && !Wifi::ntpIsSynced()) // Certificates cannot be validated if time is not synced
+    return;
+
 
   struct timeval currentTime;
   gettimeofday(&currentTime, nullptr);
@@ -364,10 +369,12 @@ void checkMQTTloop()
       if(WIFIClientSecure == nullptr) {
         WIFIClientSecure = new WiFiClientSecure();
       }
+      #ifndef ESP32
       if(sslTrustedAnchors != nullptr) {
         delete sslTrustedAnchors;
         sslTrustedAnchors = nullptr;
       }
+      #endif
       MQTTClient.setClient(*WIFIClientSecure);
 
       if(!params::ssl_insecure) {
@@ -383,6 +390,7 @@ void checkMQTTloop()
             WIFIClientSecure->setTrustAnchors(sslTrustedAnchors);
             #endif
             Serial.println(F("OK!"));
+            Serial.println(F("NOTE: until NTP time is synchronized, MQTT will try to connect"));
           } else {
             vars::disabledBecauseOfError = true;
             vars::lastError = F("Cannot open ca_crt file: ");

@@ -33,6 +33,7 @@ namespace RFLink {
         bool clientNetworkIsUp();
 
         void getStatusJsonString(JsonObject &output);
+        bool ntpIsSynced();
     }
 
     namespace AutoOTA {
