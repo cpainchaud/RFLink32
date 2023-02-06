@@ -65,7 +65,15 @@ namespace RFLink
     };
 #define configItemListsSize (sizeof(configItemLists) / sizeof(ConfigItem *))
 
-    StaticJsonDocument<4096> doc;
+    #ifndef RFLINK_CONFIG_JSON_BUFFER_SIZE
+      #ifdef ESP8266
+        #define RFLINK_CONFIG_JSON_BUFFER_SIZE 2200
+      #else
+        #define RFLINK_CONFIG_JSON_BUFFER_SIZE 4096
+      #endif
+    #endif
+
+    StaticJsonDocument<RFLINK_CONFIG_JSON_BUFFER_SIZE> doc; // Current config's JSON document
 
     void resetConfig()
     {
