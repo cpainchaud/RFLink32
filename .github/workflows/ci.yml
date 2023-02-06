@@ -42,12 +42,12 @@ jobs:
       if: github.event_name == 'push'
       run: |
         mkdir firmwares
+        cp .pio/build/ESP32_sw/bootloader.bin firmwares/bootloader_dio_40m.bin
         cp .pio/build/ESP32_sw/firmware.bin firmwares/esp32-firmware-OTA.bin
         cp .pio/build/ESP32_sw/partitions.bin firmwares/esp32-partitions.bin
         cp .pio/build/sonoff_bridge/firmware.bin firmwares/sonoff_bridge-firmware.bin
         cd firmwares
         cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin .
-        cp /home/runner/.platformio/packages/framework-arduinoespressif32/tools/sdk/bin/bootloader_dio_40m.bin .
         python ../tools/esp32-makeimg.py bootloader_dio_40m.bin esp32-partitions.bin boot_app0.bin esp32-firmware-OTA.bin esp32-full.img
         cd ..
 

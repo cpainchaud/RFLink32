@@ -5,8 +5,7 @@
 #include <LittleFS.h>
 #else
 #include <FS.h>
-#include <LITTLEFS.h>
-#define LittleFS LITTLEFS
+#include <LittleFS.h>
 #endif
 
 #include "1_Radio.h"
@@ -663,13 +662,13 @@ namespace RFLink
 
     bool saveConfigToFlash()
     {
+      Signal::AsyncSignalScanner::stopScanning();
 
       Serial.print(F("Saving JSON config to FLASH.... "));
-      Signal::AsyncSignalScanner::stopScanning();
 
       if (LittleFS.exists(F("/tmp.json")))
         LittleFS.remove(F("/tmp.json"));
-      File file = LittleFS.open(F("/tmp.json"), "w");
+      File file = LittleFS.open(F("/tmp.json"), "w", true);
 
       auto bytes_written = serializeJson(doc, file);
       file.close();

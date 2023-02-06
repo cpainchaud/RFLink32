@@ -23,6 +23,9 @@ SX1276 *radio_SX1276 = nullptr;
 RF69 *radio_RFM69 = nullptr;
 #endif
 
+#define setPinMode(pin, mode) if (pin != -1) pinMode(pin, mode)
+#define safeDigitalWrite(pin, value) if (pin != -1) digitalWrite(pin, value)
+
 
 enum RssiThresholdTypesEnum {
   Undefined = -1,  // Keep this one first in the list
@@ -585,17 +588,17 @@ namespace RFLink { namespace Radio  {
     {
       // RX pins
       pinMode(pins::RX_NA, INPUT);       // Initialise in/output ports
-      pinMode(pins::RX_DATA, INPUT);     // Initialise in/output ports
-      pinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
-      pinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
-      digitalWrite(pins::RX_NMOS, HIGH); // turn GND to RF receiver ON
-      digitalWrite(pins::RX_PMOS, LOW);  // turn VCC to RF receiver ON
-      pinMode(pins::RX_GND, OUTPUT);     // Initialise in/output ports
-      pinMode(pins::RX_VCC, OUTPUT);     // Initialise in/output ports
-      digitalWrite(pins::RX_GND, LOW);   // turn GND to RF receiver ON
-      digitalWrite(pins::RX_VCC, HIGH);  // turn VCC to RF receiver ON
+      setPinMode(pins::RX_DATA, INPUT);     // Initialise in/output ports
+      setPinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
+      setPinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
+      safeDigitalWrite(pins::RX_NMOS, HIGH); // turn GND to RF receiver ON
+      safeDigitalWrite(pins::RX_PMOS, LOW);  // turn VCC to RF receiver ON
+      setPinMode(pins::RX_GND, OUTPUT);     // Initialise in/output ports
+      setPinMode(pins::RX_VCC, OUTPUT);     // Initialise in/output ports
+      safeDigitalWrite(pins::RX_GND, LOW);   // turn GND to RF receiver ON
+      safeDigitalWrite(pins::RX_VCC, HIGH);  // turn VCC to RF receiver ON
       if (pins::PULLUP_RX_DATA)
-        pinMode(pins::RX_DATA, INPUT_PULLUP); // Initialise in/output ports
+        setPinMode(pins::RX_DATA, INPUT_PULLUP); // Initialise in/output ports
       delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
       if(RFLink::Signal::params::async_mode_enabled)
         RFLink::Signal::AsyncSignalScanner::startScanning();
@@ -608,30 +611,30 @@ namespace RFLink { namespace Radio  {
         RFLink::Signal::AsyncSignalScanner::stopScanning();
 
       // RX pins
-      pinMode(pins::RX_DATA, INPUT);
-      pinMode(pins::RX_NA, INPUT);
-      pinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
-      pinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
-      digitalWrite(pins::RX_PMOS, HIGH); // turn VCC to RF receiver OFF
-      digitalWrite(pins::RX_NMOS, LOW);  // turn GND to RF receiver OFF
-      pinMode(pins::RX_VCC, INPUT);
-      pinMode(pins::RX_GND, INPUT);
+      setPinMode(pins::RX_DATA, INPUT);
+      setPinMode(pins::RX_NA, INPUT);
+      setPinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
+      setPinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
+      safeDigitalWrite(pins::RX_PMOS, HIGH); // turn VCC to RF receiver OFF
+      safeDigitalWrite(pins::RX_NMOS, LOW);  // turn GND to RF receiver OFF
+      setPinMode(pins::RX_VCC, INPUT);
+      setPinMode(pins::RX_GND, INPUT);
     }
 
     void enableTX_generic()
     {
       // TX Pins
-      pinMode(pins::TX_NA, INPUT);       // Initialise in/output ports
-      pinMode(pins::TX_DATA, OUTPUT);    // Initialise in/output ports
-      digitalWrite(pins::TX_DATA, LOW);  // No signal yet
-      pinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
-      pinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
-      digitalWrite(pins::TX_NMOS, HIGH); // turn GND to TX receiver ON
-      digitalWrite(pins::TX_PMOS, LOW);  // turn VCC to TX receiver ON
-      pinMode(pins::TX_GND, OUTPUT);     // Initialise in/output ports
-      pinMode(pins::TX_VCC, OUTPUT);     // Initialise in/output ports
-      digitalWrite(pins::TX_GND, LOW);   // turn GND to TX receiver ON
-      digitalWrite(pins::TX_VCC, HIGH);  // turn VCC to TX receiver ON
+      setPinMode(pins::TX_NA, INPUT);       // Initialise in/output ports
+      setPinMode(pins::TX_DATA, OUTPUT);    // Initialise in/output ports
+      safeDigitalWrite(pins::TX_DATA, LOW);  // No signal yet
+      setPinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
+      setPinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
+      safeDigitalWrite(pins::TX_NMOS, HIGH); // turn GND to TX receiver ON
+      safeDigitalWrite(pins::TX_PMOS, LOW);  // turn VCC to TX receiver ON
+      setPinMode(pins::TX_GND, OUTPUT);     // Initialise in/output ports
+      setPinMode(pins::TX_VCC, OUTPUT);     // Initialise in/output ports
+      safeDigitalWrite(pins::TX_GND, LOW);   // turn GND to TX receiver ON
+      safeDigitalWrite(pins::TX_VCC, HIGH);  // turn VCC to TX receiver ON
       delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
     }
 
@@ -639,15 +642,15 @@ namespace RFLink { namespace Radio  {
     {
       // TX Pins
       delayMicroseconds(TRANSMITTER_STABLE_DELAY_US);
-      digitalWrite(pins::TX_DATA, LOW);  // No more signal
-      pinMode(pins::TX_DATA, INPUT);     //
-      pinMode(pins::TX_NA, INPUT);       //
-      pinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
-      pinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
-      digitalWrite(pins::TX_PMOS, HIGH); // turn VCC to TX receiver OFF
-      digitalWrite(pins::TX_NMOS, LOW);  // turn GND to TX receiver OFF
-      pinMode(pins::TX_VCC, INPUT);
-      pinMode(pins::TX_GND, INPUT);
+      safeDigitalWrite(pins::TX_DATA, LOW);  // No more signal
+      setPinMode(pins::TX_DATA, INPUT);     //
+      setPinMode(pins::TX_NA, INPUT);       //
+      setPinMode(pins::TX_NMOS, OUTPUT);    // MOSFET, always output
+      setPinMode(pins::TX_PMOS, OUTPUT);    // MOSFET, always output
+      safeDigitalWrite(pins::TX_PMOS, HIGH); // turn VCC to TX receiver OFF
+      safeDigitalWrite(pins::TX_NMOS, LOW);  // turn GND to TX receiver OFF
+      setPinMode(pins::TX_VCC, INPUT);
+      setPinMode(pins::TX_GND, INPUT);
     }
 
     #ifndef RFLINK_NO_RADIOLIB_SUPPORT
@@ -678,7 +681,7 @@ namespace RFLink { namespace Radio  {
               hardwareProperlyInitialized = false;
             }
 
-            pinMode(pins::RX_DATA, INPUT);
+            setPinMode(pins::RX_DATA, INPUT);
 
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::startScanning();
@@ -691,7 +694,7 @@ namespace RFLink { namespace Radio  {
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::stopScanning();
 
-            pinMode(pins::TX_DATA, OUTPUT);
+            setPinMode(pins::TX_DATA, OUTPUT);
 
             auto success = radio_SX1278->transmitDirect();
             if(success != 0) {
@@ -743,7 +746,7 @@ namespace RFLink { namespace Radio  {
               hardwareProperlyInitialized = false;
             }
 
-            pinMode(pins::RX_DATA, INPUT);
+            setPinMode(pins::RX_DATA, INPUT);
 
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::startScanning();
@@ -756,7 +759,7 @@ namespace RFLink { namespace Radio  {
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::stopScanning();
 
-            pinMode(pins::TX_DATA, OUTPUT);
+            setPinMode(pins::TX_DATA, OUTPUT);
 
             auto success = radio_SX1276->transmitDirect();
             if(success != 0) {
@@ -814,7 +817,7 @@ namespace RFLink { namespace Radio  {
               hardwareProperlyInitialized = false;
             }
 
-            pinMode(pins::RX_DATA, INPUT);
+            setPinMode(pins::RX_DATA, INPUT);
 
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::startScanning();
@@ -827,7 +830,7 @@ namespace RFLink { namespace Radio  {
             if( RFLink::Signal::params::async_mode_enabled )
               RFLink::Signal::AsyncSignalScanner::stopScanning();
 
-            pinMode(pins::TX_DATA, OUTPUT);
+            setPinMode(pins::TX_DATA, OUTPUT);
 
             auto success = radio_RFM69->transmitDirect();
             if(success != 0 ) {

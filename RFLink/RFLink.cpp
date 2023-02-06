@@ -73,10 +73,11 @@ namespace RFLink {
     void setup() {
 
       delay(250);         // Time needed to switch back from Upload to Console
-      Serial.begin(BAUD); // Initialise the serial port
 
       Serial.setRxBufferSize(512);
       Serial.setTimeout(1);
+
+      Serial.begin(BAUD); // Initialise the serial port
 
       if (gettimeofday(&timeAtBoot, NULL) != 0) {
         Serial.println(F("Failed to obtain time"));

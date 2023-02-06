@@ -16,6 +16,7 @@
 extern "C" {
   #include "bootloader_random.h"
 }
+#include "esp_sntp.h"
 #else // NOT ESP32
   #include <ESP8266TrueRandom.h>
 #endif // ESP32
@@ -279,8 +280,13 @@ namespace RFLink { namespace Wifi {
           }
 
           if( params::AP_enabled ) {
+            #ifdef ESP32
+            WiFi.setHostname(params::client_hostname.c_str());
+            #else
+            WiFi.hostname(params::client_hostname);
+            #endif
             Serial.printf_P(PSTR("* WIFI AP starting with SSID '%s' and band=%i... "), params::AP_ssid.c_str(), cpWifiChannel);
-            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()),  cpWifiChannel)
+            if( !WiFi.softAP(params::AP_ssid.c_str(), params::AP_password.c_str()))
               Serial.println(F("FAILED"));
             else
               Serial.println(F("OK"));
@@ -384,13 +390,13 @@ namespace RFLink { namespace Wifi {
         void eventHandler_WiFiStationConnected(WiFiEvent_t event, WiFiEventInfo_t info) {
 
           Serial.print(F("Connected to AP SSID:"));
-          for(int i=0; i<info.connected.ssid_len; i++){
-            Serial.print((char) info.connected.ssid[i]);
+          for(int i=0; i<info.wifi_sta_connected.ssid_len; i++){
+            Serial.print((char) info.wifi_sta_connected.ssid[i]);
           }
 
           Serial.print("  BSSID: ");
           for(int i=0; i<6; i++){
-            Serial.printf("%02X", info.connected.bssid[i]);
+            Serial.printf("%02X", info.wifi_sta_connected.bssid[i]);
 
             if(i<5){
               Serial.print(":");
@@ -398,10 +404,10 @@ namespace RFLink { namespace Wifi {
           }
 
           Serial.print(F("  Channel: "));
-          Serial.print(info.connected.channel);
+          Serial.print(info.wifi_sta_connected.channel);
 
           Serial.print(F("  Auth mode: "));
-          Serial.println(info.connected.authmode);
+          Serial.println(info.wifi_sta_connected.authmode);
 
         }
 
@@ -455,9 +461,9 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
           refreshAccessPointParametersFromConfig(false);
 
 #ifdef ESP32
-          WiFi.onEvent(eventHandler_WiFiStationConnected, SYSTEM_EVENT_STA_CONNECTED);
-          WiFi.onEvent(eventHandler_WiFiStationGotIp, SYSTEM_EVENT_STA_GOT_IP);
-          WiFi.onEvent(eventHandler_WiFiStationLostIp, SYSTEM_EVENT_STA_LOST_IP);
+          WiFi.onEvent(eventHandler_WiFiStationConnected, ARDUINO_EVENT_WIFI_STA_CONNECTED );
+          WiFi.onEvent(eventHandler_WiFiStationGotIp, ARDUINO_EVENT_WIFI_STA_GOT_IP );
+          WiFi.onEvent(eventHandler_WiFiStationLostIp, ARDUINO_EVENT_WIFI_STA_LOST_IP );
 #else
           e1 = WiFi.onSoftAPModeStationConnected(&eventHandler_WiFiStationConnected);
           e2 = WiFi.onStationModeGotIP(&eventHandler_WiFiStationGotIp);

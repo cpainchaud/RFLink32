@@ -695,8 +695,10 @@ namespace RFLink
 
       void stopScanning()
       {
-        scanningStopped = true;
-        detachInterrupt(Radio::pins::RX_DATA);
+        if(params::async_mode_enabled) {
+          scanningStopped = true;
+          detachInterrupt(Radio::pins::RX_DATA);
+        }
       }
 
       void IRAM_ATTR RX_pin_changed_state()
