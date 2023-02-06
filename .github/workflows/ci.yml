@@ -58,7 +58,7 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "nightly"
         prerelease: true
-        title: "Development Build"
+        title: "Latest *almost* stable Build"
         files: |
           firmwares/*
 
@@ -70,6 +70,17 @@ jobs:
         automatic_release_tag: "nightly-RTL_433"
         prerelease: true
         title: "RTL_433 Development Build"
+        files: |
+          firmwares/*
+
+    - name: Publish firmware for testing-only branch
+      if: github.ref == 'refs/heads/testing-only' && github.event_name == 'push'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "nightly-testing-only"
+        prerelease: true
+        title: "TESTING ONLY - ONLY USE IF INSTRUCTED BY SOMEONE"
         files: |
           firmwares/*
 
