@@ -5,6 +5,7 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
 #include <index.html.gz.h>
+#include <LittleFS.h>
 
 #include "2_Signal.h"
 #include "6_MQTT.h"
@@ -23,6 +24,7 @@
 #include "AsyncTCP.h"
 #include "Update.h"
 #endif
+#include <LittleFS.h>
 
 namespace RFLink { namespace Portal {
 
@@ -214,7 +216,7 @@ namespace RFLink { namespace Portal {
         }
 
         // Taken from of https://github.com/ayushsharma82/AsyncElegantOTA
-        void handleChunksReception(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        void handleFirmwareUpdateChunksReception(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
           //Upload handler chunks in data
 
           if (!index) {
@@ -264,6 +266,81 @@ namespace RFLink { namespace Portal {
         }
         #endif // FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
 
+
+        void handleFileUploadFinalResponse(AsyncWebServerRequest *request) {
+          if(!checkHttpAuthentication(request))
+            return;
+
+          //Serial.println(F("File upload via API request... done"));
+
+          AsyncWebServerResponse *response = request->beginResponse(
+                  200, "text/plain",
+                  "OK"
+          );
+          response->addHeader(F("Connection"), F("close"));
+          response->addHeader(F("Access-Control-Allow-Origin"), "*");
+          request->send(response);
+        }
+
+        void handleFileUploadChunksReception(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        //Upload handler chunks in data
+
+          if(!checkHttpAuthentication(request))
+            return;
+
+          if (!index) {
+            Serial.print(F("File upload via API requested... "));
+            if(!request->hasParam(F("filename"), false)) {
+              Serial.println(F("missing 'filename' parameter"));
+              return request->send(400, F("text/plain"), F("missing 'filename' parameter"));
+            }
+            String desiredFilename = request->getParam(F("filename"), false)->value();
+            Serial.println(desiredFilename);
+            #ifdef ESP32
+            auto file = request->_tempFile = LittleFS.open(String('/' + desiredFilename), "w", true);
+            #else
+            auto file = request->_tempFile = LittleFS.open(String('/' + desiredFilename), "w");
+            #endif
+
+            if(!file) {
+              //Serial.println(F("failed to open file for writing"));
+              return request->send(500, F("text/plain"), F("failed to open file for writing"));
+            }
+          }
+
+          if (len) {
+            // stream the incoming chunk to the opened file
+            auto written_bytes_count = request->_tempFile.write(data, len);
+            if(written_bytes_count != len) {
+              request->_tempFile.close();
+              Serial.println(F("failed to write chunk to file"));
+              return request->send(500, F("text/plain"), F("failed to write chunk to file"));
+            }
+          }
+          if (final) {
+
+            //Serial.println(F("File Uploaded !"));
+            // close the file handle as the upload is now done
+
+            #ifndef RFLINK_MQTT_DISABLED
+            String desiredFilename('/' + request->getParam(F("filename"), false)->value());
+            if(desiredFilename == Mqtt::mqtt_ca_cert_filename) {
+              RFLink::Mqtt::triggerParamsHaveChanged();
+              /*if(LittleFS.exists(Mqtt::mqtt_ca_cert_filename)) {
+                Serial.println(F("MQTT CA cert file exists, MQTT will be reconfigured on next loop"));
+              } else {
+                Serial.println(F("MQTT CA cert file does not exist, MQTT will not be reconfigured on next loop"));
+              }
+              Serial.print(F("written filename:"));
+              Serial.println(request->_tempFile.fullName());*/
+            }
+            #endif
+
+            request->_tempFile.close();
+            request->send(200, F("text/plain"), F("File Uploaded !"));
+          }
+        }
+
         void serveIndexHtml(AsyncWebServerRequest *request) {
           if(!checkHttpAuthentication(request))
             return;
@@ -294,8 +371,11 @@ namespace RFLink { namespace Portal {
 
           server.on(PSTR("/api/reboot"), HTTP_GET, serveApiReboot);
           #ifndef FIRMWARE_UPGRADE_VIA_WEBSERVER_DISABLED
-          server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse, handleChunksReception);
+          server.on(PSTR("/api/firmware/update"), HTTP_POST, handleFirmwareUpdateFinalResponse,
+                    handleFirmwareUpdateChunksReception);
           #endif
+          server.on(PSTR("/upload"), HTTP_POST, handleFileUploadFinalResponse,
+                    handleFileUploadChunksReception);
 
           server.on(PSTR("/api/firmware/http_update_status"), HTTP_GET, serveApiFirmwareHttpUpdateGetStatus);
 

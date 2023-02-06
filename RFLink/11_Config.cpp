@@ -668,7 +668,11 @@ namespace RFLink
 
       if (LittleFS.exists(F("/tmp.json")))
         LittleFS.remove(F("/tmp.json"));
+      #ifdef ESP32
       File file = LittleFS.open(F("/tmp.json"), "w", true);
+      #else
+      File file = LittleFS.open(F("/tmp.json"), "w");
+      #endif
 
       auto bytes_written = serializeJson(doc, file);
       file.close();

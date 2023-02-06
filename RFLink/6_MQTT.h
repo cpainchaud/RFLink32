@@ -8,6 +8,10 @@
 #ifndef WiFi_MQTT_h
 #define WiFi_MQTT_h
 
+#ifndef RFLINK_WIFI_ENABLED
+#define RFLINK_MQTT_DISABLED
+#endif
+
 #ifndef RFLINK_MQTT_DISABLED
 
 #include <Arduino.h>
@@ -32,7 +36,10 @@
 
 extern char MQTTbuffer[PRINT_BUFFER_SIZE]; // Buffer for MQTT message
 
+
 namespace RFLink { namespace Mqtt {
+
+    extern const char *mqtt_ca_cert_filename;
 
     extern Config::ConfigItem configItems[];
     extern struct timeval lastMqttConnectionAttemptTime;
@@ -67,6 +74,8 @@ void paramsUpdatedCallback();
 void refreshParametersFromConfig(bool triggerChanges=true);
 
 void getStatusJsonString(JsonObject &output);
+
+void triggerParamsHaveChanged();
 
 }} // end of MQTT namespace
 

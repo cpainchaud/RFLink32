@@ -9,6 +9,7 @@
 #include "RFLink.h"
 
 #ifndef RFLINK_MQTT_DISABLED
+#ifdef RFLINK_WIFI_ENABLED
 
 #include "3_Serial.h"
 #include "4_Display.h"
@@ -28,8 +29,10 @@
 WiFiClient WIFIClient;
 
 #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
-WiFiClientSecure WIFIClientSecure;
+WiFiClientSecure *WIFIClientSecure =  nullptr;
 #endif
+
+#include <LittleFS.h>
 
 
 // MQTT_KEEPALIVE : keepAlive interval in Seconds
@@ -64,6 +67,12 @@ namespace RFLink { namespace Mqtt {
     String ca_cert;
   }
 
+  namespace vars {
+    String ca_cert_content;
+    String lastError;
+    bool disabledBecauseOfError = false;
+  }
+
 // All json variable names
 const char json_name_enabled[] = "enabled";
 const char json_name_server[] = "server";
@@ -82,6 +91,7 @@ const char json_name_topic_lwt[] = "topic_lwt";
 const char json_name_ssl_enabled[] = "ssl_enabled";
 const char json_name_ssl_insecure[] = "ssl_insecure";
 const char json_name_ca_cert[] = "ca_cert";
+const char *mqtt_ca_cert_filename = "/mqtt_ca_cert.pem";
 #endif
 // end of json variable names
 
@@ -197,17 +207,6 @@ void refreshParametersFromConfig(bool triggerChanges) {
       changesDetected = true;
       params::ssl_insecure = item->getBoolValue();
     }
-
-    item = Config::findConfigItem(json_name_ca_cert, Config::SectionId::MQTT_id);
-    if( params::ca_cert != item->getCharValue() ) {
-      changesDetected = true;
-      params::ca_cert = item->getCharValue();
-      #ifdef ESP32
-      WIFIClientSecure.setCACert(params::ca_cert.c_str());
-      #else
-      WIFIClientSecure.setCACert((const uint8_t*)params::ca_cert.c_str(), params::ca_cert.length());
-      #endif
-    }
     #endif
 
     // Applying changes will happen in mainLoop()
@@ -221,39 +220,19 @@ void refreshParametersFromConfig(bool triggerChanges) {
 
 void setup_MQTT()
 {
-  refreshParametersFromConfig(false);
-
   lastMqttConnectionAttemptTime.tv_sec = 0;
 
-  MQTTClient.setKeepAlive(MQTT_KEEPALIVE);
+  refreshParametersFromConfig(false);
 
-  #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
-  Serial.print(F("MQTT setup SSL mode :\t\t\t"));
-  if(params::ssl_enabled) {
-    #ifdef ESP32
-    WIFIClientSecure.setCACert(params::ca_cert.c_str());
-    #else
-    WIFIClientSecure.setCACert((const uint8_t*)params::ca_cert.c_str(), params::ca_cert.length());
-    #endif
-    Serial.println(F("Using ca_cert"));
-  }
-  else
-    Serial.println(F("Insecure (No Key/Cert/Fp)"));
-  #endif // MQTT_CLIENT_SSL_DISABLED
+  MQTTClient.setKeepAlive(MQTT_KEEPALIVE);
 
   if (params::port == 0)
     params::port = 1883;
 
-  #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
-  if(params::ssl_enabled)
-    MQTTClient.setClient(WIFIClientSecure);
-  else
-  #endif
-    MQTTClient.setClient(WIFIClient);
-
-  MQTTClient.setServer(params::server.c_str(), params::port);
   MQTTClient.setCallback(callback);
+
   bResub = true;
+  paramsHaveChanged = true; // force parameters to be applied at next loop
 }
 
 void callback(char *topic, byte *payload, unsigned int length)
@@ -267,6 +246,10 @@ void reconnect(int retryCount, bool force)
 {
   if(!params::enabled)
     return;
+
+  if(paramsHaveChanged)
+    return;
+
 
   struct timeval currentTime;
   gettimeofday(&currentTime, nullptr);
@@ -335,6 +318,9 @@ void publishMsg()
   if(!params::enabled)
     return;
 
+  if(!MQTTClient.connected())
+    return;
+
   static boolean MQTT_RETAINED = MQTT_RETAINED_0;
 
   if (!MQTTClient.connected())
@@ -344,22 +330,84 @@ void publishMsg()
 
 void checkMQTTloop()
 {
-  if(!params::enabled) {
-    return;
-  }
+  if(!RFLink::Wifi::clientNetworkIsUp()) return;
 
   if(paramsHaveChanged) {
     paramsHaveChanged = false;
+    vars::disabledBecauseOfError = false;
+
+    Serial.println(F("MQTT parameters have changed, first disconnecting..."));
+
+    if(MQTTClient.connected()) {
+      MQTTClient.disconnect();
+    }
+
+    if(WIFIClient.connected()) {
+      WIFIClient.stop();
+    }
+
     #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
-    if(params::ssl_enabled)
-      MQTTClient.setClient(WIFIClientSecure);
+    if(WIFIClientSecure != nullptr) {
+      if(WIFIClientSecure->connected())
+        WIFIClientSecure->stop();
+      delete WIFIClientSecure;
+      WIFIClientSecure = nullptr;
+    }
+    #endif
+
+    Serial.println(F("MQTT parameters have changed, now applying..."));
+
+
+    #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
+    if(params::ssl_enabled) {
+      if(WIFIClientSecure == nullptr) {
+        WIFIClientSecure = new WiFiClientSecure();
+      }
+      MQTTClient.setClient(*WIFIClientSecure);
+
+      if(!params::ssl_insecure) {
+        Serial.print(F("MQTT SSL trusted CA is required... "));
+        if(LittleFS.exists(mqtt_ca_cert_filename)) {
+          File caCertFile = LittleFS.open(mqtt_ca_cert_filename, "r");
+          if(caCertFile) {
+            vars::ca_cert_content = caCertFile.readString();
+            #ifdef ESP32
+            WIFIClientSecure->setCACert(vars::ca_cert_content.c_str());
+            #else
+            WIFIClientSecure->setCACert((const uint8_t*)vars::ca_cert_content.c_str(), vars::ca_cert_content.length());
+            #endif
+            Serial.println(F("OK!"));
+          } else {
+            vars::disabledBecauseOfError = true;
+            vars::lastError = F("Cannot open ca_crt file: ");
+            vars::lastError += mqtt_ca_cert_filename;
+          }
+        }
+        else {
+          vars::disabledBecauseOfError = true;
+          vars::lastError = F("MQTT CA cert file not found in LittleFS volume!");
+          Serial.println(vars::lastError);
+        }
+      } else {
+        WIFIClientSecure->setInsecure();
+      }
+    }
     else
     #endif
       MQTTClient.setClient(WIFIClient);
 
+    if(vars::disabledBecauseOfError) {
+      Serial.println(F("MQTT disabled because of previous error"));
+      return;
+    }
+
     MQTTClient.setServer(params::server.c_str(), params::port);
     reconnect(1, true);
     gettimeofday(&lastMqttConnectionAttemptTime, nullptr);
+    return;
+  }
+
+  if(!params::enabled || vars::disabledBecauseOfError) {
     return;
   }
 
@@ -400,10 +448,15 @@ void getStatusJsonString(JsonObject &output) {
 
 }
 
+void triggerParamsHaveChanged() {
+  paramsHaveChanged = true;
+}
+
 
 }} // end of Mqtt namespace
 
-#endif // RFLINK_MQTT_DISABLED
+#endif // RFLINK_WIFI_ENABLED
+#endif // not RFLINK_MQTT_DISABLED
 
 
 

@@ -446,6 +446,9 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
 #endif
 
 
+        bool clientNetworkIsUp() {
+          return WiFi.isConnected();
+        }
 
         void setup()
         {

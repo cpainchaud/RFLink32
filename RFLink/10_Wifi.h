@@ -30,6 +30,8 @@ namespace RFLink {
         void accessPointParamsUpdatedCallback();
         void reconnectServices();
 
+        bool clientNetworkIsUp();
+
         void getStatusJsonString(JsonObject &output);
     }
 
