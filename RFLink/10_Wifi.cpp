@@ -323,7 +323,7 @@ namespace RFLink { namespace Wifi {
         }
 
         #ifdef ESP8266
-        bool getLocalTime(struct tm * info, uint32_t ms=5000)
+        /*bool getLocalTime(struct tm * info, uint32_t ms=5000)
         {
             uint32_t start = millis();
             time_t now;
@@ -336,7 +336,7 @@ namespace RFLink { namespace Wifi {
                 delay(10);
             }
             return false;
-        }
+        }*/
         #endif
 
         void printLocalTime(struct timeval *newTime = nullptr)
@@ -422,7 +422,7 @@ namespace RFLink { namespace Wifi {
 #endif //ESP32
 
 #ifdef ESP8266
-        WiFiEventHandler e1;
+WiFiEventHandler e1;
 void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected& evt) {
   Serial.println(F("Connected to AP!"));
  

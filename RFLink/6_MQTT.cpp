@@ -30,6 +30,7 @@ WiFiClient WIFIClient;
 
 #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
 WiFiClientSecure *WIFIClientSecure =  nullptr;
+BearSSL::X509List *sslTrustedAnchors  = nullptr;
 #endif
 
 #include <LittleFS.h>
@@ -363,6 +364,10 @@ void checkMQTTloop()
       if(WIFIClientSecure == nullptr) {
         WIFIClientSecure = new WiFiClientSecure();
       }
+      if(sslTrustedAnchors != nullptr) {
+        delete sslTrustedAnchors;
+        sslTrustedAnchors = nullptr;
+      }
       MQTTClient.setClient(*WIFIClientSecure);
 
       if(!params::ssl_insecure) {
@@ -374,7 +379,8 @@ void checkMQTTloop()
             #ifdef ESP32
             WIFIClientSecure->setCACert(vars::ca_cert_content.c_str());
             #else
-            WIFIClientSecure->setCACert((const uint8_t*)vars::ca_cert_content.c_str(), vars::ca_cert_content.length());
+            sslTrustedAnchors = new X509List(vars::ca_cert_content.c_str());
+            WIFIClientSecure->setTrustAnchors(sslTrustedAnchors);
             #endif
             Serial.println(F("OK!"));
           } else {
