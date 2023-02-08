@@ -49,6 +49,11 @@ namespace RFLink { namespace Wifi {
             String AP_mask;
         }
 
+        namespace ntp {
+          bool synchronized = false;
+          bool required = false;
+        }
+
         bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
         bool accessPointParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
         unsigned short int cpWifiChannel = 1; // channel for CaptivePortal (will be randomized later)
@@ -376,7 +381,7 @@ namespace RFLink { namespace Wifi {
           sntp_set_time_sync_notification_cb(ntpUpdateCallback);
           #endif
 
-          configTzTime("UTC", RFLink::params::ntpServer.c_str());
+          configTzTime("UTC", RFLink::params::ntpServer);
 
           #ifndef RFLINK_MQTT_DISABLED
           if(RFLink::Mqtt::params::enabled)
@@ -450,6 +455,10 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
           return WiFi.isConnected();
         }
 
+        bool ntpIsSynchronized() {
+          return ntp::synchronized;
+        }
+
         void setup()
         {
           #ifdef ESP32
@@ -503,6 +512,23 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
         }
 
         void mainLoop() {
+
+          if(!ntp::synchronized && WiFi.isConnected()) {
+            time_t now;
+            struct tm timeinfo;
+
+            time(&now);
+            localtime_r(&now, &timeinfo);
+            // Is time set? If not, tm_year will be (1970 - 1900).
+            if (timeinfo.tm_year < (2022 - 1900)) {
+              Serial.println("NTP not synced");
+            } else {
+              char strftime_buf[64];
+              strftime(strftime_buf, sizeof(strftime_buf), "Time is %c", &timeinfo);
+              Serial.println(strftime_buf);
+              ntp::synchronized = true;
+            }
+          }
 
           if(accessPointParamsHaveChanged) {
             accessPointParamsHaveChanged = false;

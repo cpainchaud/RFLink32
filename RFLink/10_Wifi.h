@@ -31,6 +31,7 @@ namespace RFLink {
         void reconnectServices();
 
         bool clientNetworkIsUp();
+        bool ntpIsSynchronized();
 
         void getStatusJsonString(JsonObject &output);
     }

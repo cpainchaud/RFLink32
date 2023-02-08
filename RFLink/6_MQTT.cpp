@@ -30,7 +30,9 @@ WiFiClient WIFIClient;
 
 #ifndef RFLINK_MQTT_CLIENT_SSL_DISABLED
 WiFiClientSecure *WIFIClientSecure =  nullptr;
+#ifndef ESP32
 BearSSL::X509List *sslTrustedAnchors  = nullptr;
+#endif
 #endif
 
 #include <LittleFS.h>
@@ -251,6 +253,8 @@ void reconnect(int retryCount, bool force)
   if(paramsHaveChanged)
     return;
 
+  if(!Wifi::ntpIsSynchronized() && params::ssl_enabled && !params::ssl_insecure) // secured SSL is not possible without NTP
+    return;
 
   struct timeval currentTime;
   gettimeofday(&currentTime, nullptr);
@@ -364,10 +368,12 @@ void checkMQTTloop()
       if(WIFIClientSecure == nullptr) {
         WIFIClientSecure = new WiFiClientSecure();
       }
+      #ifndef ESP32
       if(sslTrustedAnchors != nullptr) {
         delete sslTrustedAnchors;
         sslTrustedAnchors = nullptr;
       }
+      #endif
       MQTTClient.setClient(*WIFIClientSecure);
 
       if(!params::ssl_insecure) {
@@ -383,6 +389,9 @@ void checkMQTTloop()
             WIFIClientSecure->setTrustAnchors(sslTrustedAnchors);
             #endif
             Serial.println(F("OK!"));
+            if(!Wifi::ntpIsSynchronized()){
+              Serial.println(F("MQTT SSL CA cert loaded, but NTP is not synchronized, so it will remain disabled until NTP is synchronized"));
+            }
           } else {
             vars::disabledBecauseOfError = true;
             vars::lastError = F("Cannot open ca_crt file: ");
