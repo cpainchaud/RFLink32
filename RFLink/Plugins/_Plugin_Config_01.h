@@ -12,6 +12,13 @@
 // When needed additional plugins can be added or selected plugins can be enabled/disabled.
 //
 // BEWARE OF THE PLUGIN_MAX setting!!       TX: 51      RX: 24
+
+#ifndef _RFLINK_PLUGIN_CONFIG_01_H_
+#define _RFLINK_PLUGIN_CONFIG_01_H_
+
+#include "2_Signal.h"
+#include "1_Radio.h"
+
 // ****************************************************************************************************************************************
 // Translation Plugin for oversized packets due to their breaks/pause being too short between packets
 // Used for Flamingo FA500R and various others, do NOT exclude this plugin.
@@ -100,7 +107,7 @@
 // ------------------------------------------------------------------------
 // -- Any of the following protocols can be excluded whenever not needed --
 // ------------------------------------------------------------------------
-// #define PLUGIN_TX_003           // Kaku : Klik-Aan-Klik-Uit (with code wheel) aka ARC
+#define PLUGIN_TX_003           // Kaku : Klik-Aan-Klik-Uit (with code wheel) aka ARC
 #define PLUGIN_TX_004 // NewKAKU : Klik-Aan-Klik-Uit with automatic coding aka Intertechno.
 // #define PLUGIN_TX_005           // Eurodomest
 // #define PLUGIN_TX_006           // Blyss
@@ -138,3 +145,5 @@
 // -------------------
 //       -=#=-
 // -------------------
+
+#endif // _RFLINK_PLUGIN_CONFIG_01_H_
