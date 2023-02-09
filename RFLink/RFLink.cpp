@@ -394,14 +394,20 @@ namespace RFLink {
             // -------------------------------------------------------
             // Handle Generic Commands / Translate protocol data into Nodo text commands
             // -------------------------------------------------------
-            Radio::set_Radio_mode(Radio::Radio_TX);
+            if (Radio::pins::TX_DATA == NOT_A_PIN) {
+              display_Header();
+              display_Name(PSTR("ERROR: TX_DATA PIN is not defined!"));
+              display_Footer();
+            }
+            else {
+              Radio::set_Radio_mode(Radio::Radio_TX);
+              if (PluginTXCall(0, cmd))
+                ValidCommand = 1;
+              else // Answer that an invalid command was received?
+                ValidCommand = 2;
 
-            if (PluginTXCall(0, cmd))
-              ValidCommand = 1;
-            else // Answer that an invalid command was received?
-              ValidCommand = 2;
-
-            Radio::set_Radio_mode(Radio::Radio_RX);
+              Radio::set_Radio_mode(Radio::Radio_RX);
+            }
           }
         }
       } // if > 7
