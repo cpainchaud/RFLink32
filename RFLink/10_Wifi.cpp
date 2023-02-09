@@ -360,7 +360,7 @@ namespace RFLink { namespace Wifi {
             timeinfo = localtime(&newTime->tv_sec);
           }
 
-          Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
+          Serial.printf_P(PSTR("%04i-%02i-%02i %02i:%02i:%02i"),
                           timeinfo->tm_year+1900, timeinfo->tm_mon+1, timeinfo->tm_mday,
                           timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         }
@@ -377,8 +377,9 @@ namespace RFLink { namespace Wifi {
 
         void reconnectServices() {
           #ifdef ESP32
+          // the following was commented out so ESP8266 and ESP32 behave the same
           // in case NTP forces a time drift we need to recalculate timeAtBoot
-          sntp_set_time_sync_notification_cb(ntpUpdateCallback);
+          //sntp_set_time_sync_notification_cb(ntpUpdateCallback);
           #endif
 
           configTzTime("UTC", RFLink::params::ntpServer);
@@ -521,12 +522,13 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
             localtime_r(&now, &timeinfo);
             // Is time set? If not, tm_year will be (1970 - 1900).
             if (timeinfo.tm_year < (2022 - 1900)) {
-              Serial.println("NTP not synced");
+              //Serial.println("NTP not synced");
             } else {
-              char strftime_buf[64];
-              strftime(strftime_buf, sizeof(strftime_buf), "Time is %c", &timeinfo);
-              Serial.println(strftime_buf);
+              timeAtBoot.tv_sec = now;
               ntp::synchronized = true;
+              Serial.print(F("NTP synchronized: "));
+              printLocalTime();
+              Serial.println();
             }
           }
 
