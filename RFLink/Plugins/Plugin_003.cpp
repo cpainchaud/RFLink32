@@ -710,8 +710,9 @@ boolean  PluginTX_003(byte function, const char *string)
        // ==========================================================================
        if (strncasecmp(InputBuffer_Serial + 3, "AB400D;", 7) == 0)
    { // KAKU Command eg. Kaku;A1;On
-      if (InputBuffer_Serial[16] != ';')
-         return false;
+      if (InputBuffer_Serial[16] != ';') {
+        return false;
+      }
       x = 17; // character pointer
       InputBuffer_Serial[12] = 0x30;
       InputBuffer_Serial[13] = 0x78;           // Get home from hexadecimal value
@@ -923,9 +924,6 @@ void Arc_Send(unsigned long bitstream)
    uint32_t fdatamask = 0x00000001;
    uint32_t fsendbuff;
 
-   noInterrupts();
-   Radio::set_Radio_mode(Radio::States::Radio_TX);
-
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = bitstream;
@@ -967,9 +965,6 @@ void Arc_Send(unsigned long bitstream)
       digitalWrite(Radio::pins::TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 31);
    }
-
-   Radio::set_Radio_mode(Radio::States::Radio_RX);
-   interrupts();
 }
 
 void NArc_Send(unsigned long bitstream)
@@ -979,9 +974,6 @@ void NArc_Send(unsigned long bitstream)
    uint32_t fdatabit;
    uint32_t fdatamask = 0x00000001;
    uint32_t fsendbuff;
-
-   noInterrupts();
-   Radio::set_Radio_mode(Radio::States::Radio_TX);
 
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
@@ -1025,8 +1017,6 @@ void NArc_Send(unsigned long bitstream)
       delayMicroseconds(fpulse * 31);
    }
 
-  Radio::set_Radio_mode(Radio::States::Radio_RX);
-  interrupts();
 }
 
 void TriState_Send(unsigned long bitstream)
@@ -1036,9 +1026,6 @@ void TriState_Send(unsigned long bitstream)
    uint32_t fdatabit;
    uint32_t fdatamask = 0x00000003;
    uint32_t fsendbuff;
-
-   noInterrupts();
-   Radio::set_Radio_mode(Radio::States::Radio_TX);
 
    // reverse data bits (2 by 2)
    for (unsigned short i = 0; i < 12; i++)
@@ -1100,7 +1087,5 @@ void TriState_Send(unsigned long bitstream)
       delayMicroseconds(fpulse * 31);
    }
 
-  Radio::set_Radio_mode(Radio::States::Radio_RX);
-  interrupts();
 }
 #endif //PLUGIN_TX_003
