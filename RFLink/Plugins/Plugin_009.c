@@ -468,9 +468,6 @@ void X10_Send(uint32_t address)
    uint32_t fdatamask = 0x80000000;
    uint32_t fsendbuff;
 
-   noInterrupts();
-   Radio::set_Radio_mode(Radio::States::Radio_TX);
-
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = address;
@@ -508,8 +505,6 @@ void X10_Send(uint32_t address)
       digitalWrite(Radio::pins::TX_DATA, LOW);
       delayMicroseconds(fpulse * 20);
    }
-   Radio::set_Radio_mode(Radio::States::Radio_RX);
-   interrupts();
 
    return;
 }
