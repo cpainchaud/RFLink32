@@ -3,6 +3,9 @@
 //##                          Plugin-076: Came TOP-432 Door/gate Opener Remotes                        ##
 //#######################################################################################################
 
+#ifndef RFLINK_PLUGIN_076_H
+#define RFLINK_PLUGIN_076_H
+
 /*********************************************************************************************\
  * This plugin takes care of decoding the CAME TOP-342 protocol
  *   
@@ -28,6 +31,12 @@
  *
  \*********************************************************************************************/
 
+#include "_Plugin_Config_01.h"
+#ifndef Config_h // To help with IDEs completions
+using namespace RFLink;
+using namespace RFLink::Signal;
+using namespace RFLink::Radio;
+#endif
 
 #define PLUGIN_DESC_076 "CAME-TOP432"
 
@@ -209,3 +218,5 @@ boolean  PluginTX_076(byte function, const char *string)
 }
 
 #endif // PLUGIN_TX_076;
+
+#endif // RFLINK_PLUGIN_076_H

@@ -338,7 +338,7 @@ boolean QRFUDebug = QRFUDebug_0; // debug RF signals with plugin 254 but no mult
 #endif
 
 #ifdef PLUGIN_076
-#include "./Plugins/Plugin_076.c"
+#include "./Plugins/Plugin_076.cpp"
 #endif
 
 #ifdef PLUGIN_077
