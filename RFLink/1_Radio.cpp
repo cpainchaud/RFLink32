@@ -587,7 +587,7 @@ namespace RFLink { namespace Radio  {
     void enableRX_generic()
     {
       // RX pins
-      pinMode(pins::RX_NA, INPUT);       // Initialise in/output ports
+      setPinMode(pins::RX_NA, INPUT);       // Initialise in/output ports
       setPinMode(pins::RX_DATA, INPUT);     // Initialise in/output ports
       setPinMode(pins::RX_NMOS, OUTPUT);    // MOSFET, always output
       setPinMode(pins::RX_PMOS, OUTPUT);    // MOSFET, always output
