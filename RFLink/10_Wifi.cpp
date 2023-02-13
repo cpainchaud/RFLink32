@@ -49,6 +49,11 @@ namespace RFLink { namespace Wifi {
             String AP_mask;
         }
 
+        namespace ntp {
+          bool synchronized = false;
+          bool required = false;
+        }
+
         bool clientParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
         bool accessPointParamsHaveChanged = false; // this will be set to True when Client Wifi mode configuration has changed
         unsigned short int cpWifiChannel = 1; // channel for CaptivePortal (will be randomized later)
@@ -323,7 +328,7 @@ namespace RFLink { namespace Wifi {
         }
 
         #ifdef ESP8266
-        bool getLocalTime(struct tm * info, uint32_t ms=5000)
+        /*bool getLocalTime(struct tm * info, uint32_t ms=5000)
         {
             uint32_t start = millis();
             time_t now;
@@ -336,7 +341,7 @@ namespace RFLink { namespace Wifi {
                 delay(10);
             }
             return false;
-        }
+        }*/
         #endif
 
         void printLocalTime(struct timeval *newTime = nullptr)
@@ -355,7 +360,7 @@ namespace RFLink { namespace Wifi {
             timeinfo = localtime(&newTime->tv_sec);
           }
 
-          Serial.printf_P(PSTR("Current time is %04i-%02i-%02i %02i:%02i:%02i\r\n"),
+          Serial.printf_P(PSTR("%04i-%02i-%02i %02i:%02i:%02i"),
                           timeinfo->tm_year+1900, timeinfo->tm_mon+1, timeinfo->tm_mday,
                           timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         }
@@ -372,11 +377,12 @@ namespace RFLink { namespace Wifi {
 
         void reconnectServices() {
           #ifdef ESP32
+          // the following was commented out so ESP8266 and ESP32 behave the same
           // in case NTP forces a time drift we need to recalculate timeAtBoot
-          sntp_set_time_sync_notification_cb(ntpUpdateCallback);
+          //sntp_set_time_sync_notification_cb(ntpUpdateCallback);
           #endif
 
-          configTzTime("UTC", RFLink::params::ntpServer.c_str());
+          configTzTime("UTC", RFLink::params::ntpServer);
 
           #ifndef RFLINK_MQTT_DISABLED
           if(RFLink::Mqtt::params::enabled)
@@ -422,7 +428,7 @@ namespace RFLink { namespace Wifi {
 #endif //ESP32
 
 #ifdef ESP8266
-        WiFiEventHandler e1;
+WiFiEventHandler e1;
 void eventHandler_WiFiStationConnected(const WiFiEventSoftAPModeStationConnected& evt) {
   Serial.println(F("Connected to AP!"));
  
@@ -448,6 +454,10 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
 
         bool clientNetworkIsUp() {
           return WiFi.isConnected();
+        }
+
+        bool ntpIsSynchronized() {
+          return ntp::synchronized;
         }
 
         void setup()
@@ -503,6 +513,24 @@ void eventHandler_WiFiStationDisconnected(const WiFiEventStationModeDisconnected
         }
 
         void mainLoop() {
+
+          if(!ntp::synchronized && WiFi.isConnected()) {
+            time_t now;
+            struct tm timeinfo;
+
+            time(&now);
+            localtime_r(&now, &timeinfo);
+            // Is time set? If not, tm_year will be (1970 - 1900).
+            if (timeinfo.tm_year < (2022 - 1900)) {
+              //Serial.println("NTP not synced");
+            } else {
+              timeAtBoot.tv_sec = now;
+              ntp::synchronized = true;
+              Serial.print(F("NTP synchronized: "));
+              printLocalTime();
+              Serial.println();
+            }
+          }
 
           if(accessPointParamsHaveChanged) {
             accessPointParamsHaveChanged = false;

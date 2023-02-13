@@ -52,7 +52,7 @@ void CallReboot(void) {
 namespace RFLink {
 
     namespace params {
-      String ntpServer("pool.ntp.org");
+      const char *ntpServer = "pool.ntp.org";
     }
 
     struct timeval timeAtBoot;

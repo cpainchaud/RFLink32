@@ -74,7 +74,7 @@
 namespace RFLink {
 
     namespace params {
-      extern String ntpServer;
+      extern const char  *ntpServer;
     }
 
     extern struct timeval timeAtBoot; // used to calculate update

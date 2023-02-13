@@ -231,7 +231,7 @@ namespace RFLink
           ConfigItem *item = findConfigItem(section_kv.key().c_str(), lookupSectionID);
           if (item == nullptr)
           {
-            Serial.printf_P(PSTR("section '%s' has extra configuration item named '%s' it will be dicarded\r\n"), kv.key().c_str(), section_kv.key().c_str());
+            Serial.printf_P(PSTR("section '%s' has extra configuration item named '%s' it will be discarded\r\n"), kv.key().c_str(), section_kv.key().c_str());
             sectionObject.remove(section_kv.key().c_str());
             fileHasChanged = true;
             continue;

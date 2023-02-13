@@ -216,6 +216,14 @@
  * 360/1380  12/46
  * 20;54;DEBUG;Pulses=50;Pulses(uSec)=1410,390,1350,360,1350,360,1380,360,1350,360,1380,360,1380,360,1380,360,1350,360,1350,360,1350,360,1380,360,1380,360,1380,360,1350,360,1380,360,1350,360,1350,360,390,1350,390,1350,390,1320,390,1320,420,1320,420,1320,390,6990;
  \*********************************************************************************************/
+
+#include "_Plugin_Config_01.h"
+#ifndef Config_h // To help with IDEs completions
+using namespace RFLink;
+using namespace RFLink::Signal;
+using namespace RFLink::Radio;
+#endif
+
 #define KAKU_PLUGIN_ID 003
 #define PLUGIN_DESC_003 "Kaku / AB400D / Impuls / PT2262 / Sartano / Tristate"
 #define KAKU_CodeLength 12                        // number of data bits
@@ -619,7 +627,11 @@ boolean Plugin_003(byte function, const char *string)
 #endif //PLUGIN_003
 
 #ifdef PLUGIN_TX_003
-void Arc_Send(unsigned long address);        // sends 0 and float
+#include "../3_Serial.h"
+#include "../4_Display.h"
+#include "../1_Radio.h"
+
+void Arc_Send(unsigned long bitstream);        // sends 0 and float
 void NArc_Send(unsigned long bitstream);     // sends 0 and 1
 void TriState_Send(unsigned long bitstream); // sends 0, 1 and float
 
@@ -911,6 +923,9 @@ void Arc_Send(unsigned long bitstream)
    uint32_t fdatamask = 0x00000001;
    uint32_t fsendbuff;
 
+   noInterrupts();
+   Radio::set_Radio_mode(Radio::States::Radio_TX);
+
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = bitstream;
@@ -925,33 +940,36 @@ void Arc_Send(unsigned long bitstream)
          // PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
          }
          else
          { // Write float
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
       }
       // Send sync bit
-      digitalWrite(TX_DATA, HIGH);
+      digitalWrite(Radio::pins::TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(TX_DATA, LOW); // and lower the signal
+      digitalWrite(Radio::pins::TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 31);
    }
+
+   Radio::set_Radio_mode(Radio::States::Radio_RX);
+   interrupts();
 }
 
 void NArc_Send(unsigned long bitstream)
@@ -962,6 +980,9 @@ void NArc_Send(unsigned long bitstream)
    uint32_t fdatamask = 0x00000001;
    uint32_t fsendbuff;
 
+   noInterrupts();
+   Radio::set_Radio_mode(Radio::States::Radio_TX);
+
    for (int nRepeat = 0; nRepeat <= fretrans; nRepeat++)
    {
       fsendbuff = bitstream;
@@ -976,33 +997,36 @@ void NArc_Send(unsigned long bitstream)
          // PT2262 data can be 0, 1 or float. Only 0 and float is used by regular ARC
          if (fdatabit != fdatamask)
          { // Write 0
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
          }
          else
          { // Write 1
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
       }
       // Send sync bit
-      digitalWrite(TX_DATA, HIGH);
+      digitalWrite(Radio::pins::TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(TX_DATA, LOW); // and lower the signal
+      digitalWrite(Radio::pins::TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 31);
    }
+
+  Radio::set_Radio_mode(Radio::States::Radio_RX);
+  interrupts();
 }
 
 void TriState_Send(unsigned long bitstream)
@@ -1012,6 +1036,9 @@ void TriState_Send(unsigned long bitstream)
    uint32_t fdatabit;
    uint32_t fdatamask = 0x00000003;
    uint32_t fsendbuff;
+
+   noInterrupts();
+   Radio::set_Radio_mode(Radio::States::Radio_TX);
 
    // reverse data bits (2 by 2)
    for (unsigned short i = 0; i < 12; i++)
@@ -1034,43 +1061,46 @@ void TriState_Send(unsigned long bitstream)
                                            // data can be 0, 1 or float.
          if (fdatabit == 0)
          { // Write 0
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
          }
          else if (fdatabit == 1)
          { // Write 1
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
          else
          { // Write float
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 1);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, HIGH);
+            digitalWrite(Radio::pins::TX_DATA, HIGH);
             delayMicroseconds(fpulse * 3);
-            digitalWrite(TX_DATA, LOW);
+            digitalWrite(Radio::pins::TX_DATA, LOW);
             delayMicroseconds(fpulse * 1);
          }
       }
       // Send sync bit
-      digitalWrite(TX_DATA, HIGH);
+      digitalWrite(Radio::pins::TX_DATA, HIGH);
       delayMicroseconds(fpulse * 1);
-      digitalWrite(TX_DATA, LOW); // and lower the signal
+      digitalWrite(Radio::pins::TX_DATA, LOW); // and lower the signal
       delayMicroseconds(fpulse * 31);
    }
+
+  Radio::set_Radio_mode(Radio::States::Radio_RX);
+  interrupts();
 }
 #endif //PLUGIN_TX_003
