@@ -192,6 +192,7 @@ boolean  PluginTX_076(byte function, const char *string)
         signal.Delay = 15;
         signal.Multiply = RFLink::Signal::params::sample_rate;
 
+        signal.Pulses = RawSignal.RawPulses;
         signal.Pulses[1] = PLUGIN_076_PREAMBLE / signal.Multiply;
 
         for(int i=0; i<12; i++){
