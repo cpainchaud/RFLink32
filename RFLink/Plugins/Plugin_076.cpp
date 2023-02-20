@@ -60,6 +60,7 @@ using namespace RFLink::Radio;
 #if defined(PLUGIN_076)
 #include "1_Radio.h"
 #include "2_Signal.h"
+#include "4_Display.h"
 
 #if defined(DEBUG) || defined(RFLINK_DEBUG)
 #define PLUGIN_076_DEBUG
@@ -176,6 +177,7 @@ boolean Plugin_076(byte function, const char *string)
 
 #ifdef PLUGIN_TX_076
 
+#include "3_Serial.h"
 
 boolean  PluginTX_076(byte function, const char *string)
 {
