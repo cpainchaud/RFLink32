@@ -1025,7 +1025,7 @@ void TriState_Send(unsigned long bitstream)
    int fretrans = 8; // Number of code retransmissions
    uint32_t fdatabit;
    uint32_t fdatamask = 0x00000003;
-   uint32_t fsendbuff;
+   uint32_t fsendbuff = 0;
 
    // reverse data bits (2 by 2)
    for (unsigned short i = 0; i < 12; i++)
