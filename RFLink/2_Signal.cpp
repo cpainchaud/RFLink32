@@ -25,6 +25,7 @@ namespace RFLink
     RawSignalStruct RawSignal = {0, 0, 0, 0, 0UL, false, -9999.0F, EndReasons::Unknown}; // current message
 
     #define SLICER_DEFAULT_RFM69 Slicer_enum::Legacy
+    #define SLICER_DEFAULT_CC1101 Slicer_enum::Legacy
     #define SLICER_DEFAULT_SX1278 Slicer_enum::RSSI_Advanced
 
     namespace commands
@@ -1176,6 +1177,8 @@ namespace RFLink
           runtime::appliedSlicer = SLICER_DEFAULT_SX1278;
         else if(Radio::hardware == Radio::HardwareType::HW_RFM69HCW_t || Radio::hardware == Radio::HardwareType::HW_RFM69CW_t )
           runtime::appliedSlicer = SLICER_DEFAULT_RFM69;
+        else if(Radio::hardware == Radio::HardwareType::HW_CC1101_t )
+          runtime::appliedSlicer = SLICER_DEFAULT_CC1101;
         #endif
       }
       else {
