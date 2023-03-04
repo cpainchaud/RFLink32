@@ -5,7 +5,7 @@ This is a Radio Frequency to MQTT/Serial/TCP gateway built for ESP32 and ESP8266
 It receives and decodes OOK 433MHz signals from your sensors, alarms and pushes them over MQTT/TCP/Serial.
 For some devices it can also send commands to control them.
 
-This project is forked from RFLink-ESP (for ESP8266), which itself is forked from the original RFlink project "Release 29" for Arduino.
+This project is forked from RFLink-ESP (for ESP8266), which itself is forked from the original RFlink project *"Release 29"* for Arduino.
 
 This fork provides additional features:
 
@@ -19,7 +19,7 @@ This fork provides additional features:
 We extensively use ESP32 dev kits.
 This is the default settings in `Platformio.ini` and `RFLink.h` files.
 
-You may also use other ESP8266/ESP8255 based boards, when there are no pin limitations. NodeMCUv2 is known to work.
+You may also use other ESP8266/ESP8255 based boards when there are no pin limitations. NodeMCUv2 is known to work.
 
 ## 2. Receiver / Transmitter / Transceiver
 
@@ -65,7 +65,7 @@ We used a SSD1306 128x64 I2C screen in our tests.
 
 ## 4. IDE
 
-We strongly recommend using the [PlatformIO IDE](https://platformio.org/install) however, you may alternatively use the [Arduino IDE 1.8.10](https://www.arduino.cc/en/Guide/HomePage).
+We strongly recommend using the [PlatformIO IDE](https://platformio.org/install) but you can alternatively use the [Arduino IDE 1.8.10](https://www.arduino.cc/en/Guide/HomePage).
 
 ## 5. Framework
 
