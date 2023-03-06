@@ -1,74 +1,84 @@
 # RFLink-ESP Firmware Flashing Guide
 
-
 ## Downloading firmwares
 
-Releases can be find here https://github.com/cpainchaud/RFLink32/releases
+Releases can be found [here](https://github.com/cpainchaud/RFLink32/releases)
 
-Nightly/Development released are the latest firmware compiled from latest commits,
-they are the only ones available today at this early stage of the project.
+Nightly/Development releases are the latest firmware compiled from the latest commits.
+They are the only ones available today in this early stage of the project.
 
 The following files are at your disposal:
-- esp32-firmware-OTA.bin: to upgrade existing RFLink-ESP devices 
+
+- esp32-firmware-OTA.bin: to upgrade existing RFLink-ESP devices
 - esp32-full.img: to flash a new device or erase a previous installation
+- sonoff_bridge-firmware.img: firmware for the [Sonoff RF Bridge](doc/sonoff_rf_bridge.md)
 
-## First time Flash or full reset
+## First time flash or full reset
 
-If you are already installed RFLink on your device, beware the following will overwrite
-all your existing configurations. Please have a look at the OTA Update if you just looking 
-to upgrade an existing RFLink-ESP device!
+If you have already installed RFLink on your device, beware the following will overwrite all your existing configuration.
+Please have a look at the OTA Update if you just looking to upgrade an existing RFLink-ESP device!
 
 ### Using Esptool:
-If you have not yet installed 'esptool' module for python:
 
-`python -m pip install esptool`
+If you have not yet installed the 'esptool' module for python:
+
+```shell
+python -m pip install esptool
+```
 
 Erase flash entirely to ensure nothing will go wrong
 
-`python esptool.py --chip esp32 --baud 460800 erase_flash`
+```shell
+python esptool.py --chip esp32 --baud 460800 erase_flash
+```
 
 Install the firmware
 
-`python esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.img`
+```shell
+python esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.img
+```
 
-Sub-sequent updates should be done via OTA mechanisms.
+Subsequent updates should be done via the OTA mechanism.
 
 ## OTA updates
 
-While this procedure is not supposed to overwrite your existing configurations, we strongly
-advise you to make a backup of your configurations first!
+While this procedure is not supposed to overwrite your existing configuration, we strongly advise you to make a backup of your configuration first!
 
-#### Using WebUI
+### Using WebUI
+
 ...TODO...
 
-#### Using RFLink serial commands
+### Using RFLink serial commands
+
 ...TODO...
 
-#### Using Esptool
+### Using Esptool
 
-`python.exe esptool.py --chip esp32 --baud 460800 write_flash -z 0x10000 esp32-firmware-OTA.bin`
+```shell
+python.exe esptool.py --chip esp32 --baud 460800 write_flash -z 0x10000 esp32-firmware-OTA.bin
+```
 
-#### Using Espressif's official tool "Flash Download Tools (ESP8266 & ESP32 & ESP32-S2)" at https://www.espressif.com/en/support/download/other-tools:
+### Using Espressif's official tool
 
-At first menu, select Developper Mode:
+Download [Flash Download Tools](https://www.espressif.com/en/support/download/other-tools)  (ESP8266, ESP32, ESP32-S2)
 
-![esp_tool1](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_dev_mode.png)
+If you want to flash firmware for a Sonoff RF Bridge then [follow this guide](doc/sonoff_rf_bridge.md).
 
-Then pick your model:
+At the first menu, select Developer Mode.
 
-![esp_tool2](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_pick_model.png)
+![esp_tool1](pictures/espressif_tool_dev_mode.png)
 
-Select your firmware file and make sure you input address=0x10000, then select your COM PORT
-and click start!
+Then pick your model.
 
-![esp_tool3](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_fill_fields.png)
+![esp_tool2](pictures/espressif_tool_pick_model.png)
+
+Select your firmware file and make sure you input `address=0x10000`, select your COM PORT and click start.
+
+![esp_tool3](pictures/espressif_tool_fill_fields.png)
 
 A progress bar will show up (you may have to keep pressing your BOOT button
-until the process starts)
+until the process starts).
 
-![esp_tool4](https://github.com/cpainchaud/RFLink32/blob/master/pictures/espressif_tool_progress.png)
+![esp_tool4](pictures/espressif_tool_progress.png)
 
 Reboot and enjoy!
-
-
-

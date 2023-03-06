@@ -1,45 +1,45 @@
 # RFLink ESP
 
-This is an Radio Frequency to MQTT/Serial/TCP gateway built for an ESP32 and eventually ESP8266 board (see #MCU for more). 
+This is a Radio Frequency to MQTT/Serial/TCP gateway built for ESP32 and ESP8266 boards (see #MCU for more).
 
-It receives and decodes OOK 433MHz signals from your sensors, alarms push them over MQTT/TCP/Serial.
+It receives and decodes OOK 433MHz signals from your sensors, alarms and pushes them over MQTT/TCP/Serial.
 For some devices it can also send commands to control them.
 
-Project is forked RFLink-ESP (for ESP8266), itself forked from original RFlink project "Release 29" for Arduino only board.
+This project is forked from RFLink-ESP (for ESP8266), which itself is forked from the original RFlink project *"Release 29"* for Arduino.
 
-This fork is providing additional features from the others:
-- Fully (almost) configurable from a web interface, although CLI is still and will remain available.
-- No more recompilation for most options which are configurable at runtime and saved in Flash.
-- Far more advanced debugs and troubleshooting helpers.
+This fork provides additional features:
+
+- Fully (almost) configurable from a web interface whilst retaining the CLI.
+- No recompilation for most options which are configurable at runtime and saved in Flash.
+- More advanced debugging and troubleshooting helpers.
 - Restructured source code with namespaces and classes (Work in Progress)
 
 ## 1. MCU
-We use extensively ESP32 dev kits.
 
-This is default settings in Platformio.ini and RFLink.h files.
+We extensively use ESP32 dev kits.
+This is the default settings in `Platformio.ini` and `RFLink.h` files.
 
-You may use:
-- Other ESP8266/ESP8255 based boards, when no pins limitations. NodeMCUv2 is known working.
-
+You may also use other ESP8266/ESP8255 based boards when there are no pin limitations. NodeMCUv2 is known to work.
 
 ## 2. Receiver / Transmitter / Transceiver
-As a starting point, you can use the RXB6 receiver.
-It is simple, steady, running on 3.3v, easy to find and cheap.
 
-Many other receivers will do!
-Simply *** Please avoid generic noname receiver ***
+As a starting point, you can use the RXB6 receiver which is a simple and stable 3.3v component - it is easy to find and cheap.
+Many other receivers are also supported.
 
-![Receivers](https://github.com/cpainchaud/RFLink32/blob/master/pictures/RFLink-ESP_Receivers.jpg "Receivers")
+> **Avoid using generic noname receivers!**
+
+![Receivers](pictures/RFLink-ESP_Receivers.jpg "A picture that has six receivers of various makes lying in a rowS on the left. To the right is a single breadboard with an ESP and a RXB6 receiver wired up to it.")
 
 For more advanced behavior and reliability, the following receivers are also supported when used with an ESP32 board:
 
-* SX1278
-* SX1276
-* RFM69CW
-* RFM69HCW
-* CC1101
+- SX1278
+- SX1276
+- RFM69CW
+- RFM69HCW
+- CC1101
 
-Those advanced receivers require a few pins to be connected to the host, here are the recommended pin assignments:
+These advanced receivers require a few pins to be connected to the host.
+The recommended pin assignments are:
 
 |  Name         | ESP32 | SX1278/6 | RFM69(H)CW | CC1101 |
 |---------------|-------|----------|------------|--------|
@@ -55,48 +55,74 @@ Those advanced receivers require a few pins to be connected to the host, here ar
 ¹ *These must be configured in the web portal, values suggested here are proven to work reliably.*
 
 ## 3. OLED display
-You can use an OLED display! We used SSD1306 128x64 I2C screen for our testings.
 
-*** This is highly experimental ***, and thus not activated by default.
+You can use an OLED display.
+We used a SSD1306 128x64 I2C screen in our tests.
 
-![OLED](https://github.com/cpainchaud/RFLink32/blob/master/pictures/RFLink-ESP_OLED_2.jpg "OLED") 
+**This is highly experimental** and therefore not enabled by default.
+
+![OLED](pictures/RFLink-ESP_OLED_2.jpg "A picture of a breadboard with an ESP and OLED display wired up. There is text showing on the OLED screen.")
 
 ## 4. IDE
-- We strongly recommend using PlatformIO IDE (https://platformio.org/install)
-- You may alternatively use Arduino IDE 1.8.10 (https://www.arduino.cc/en/Guide/HomePage)
+
+We strongly recommend using the [PlatformIO IDE](https://platformio.org/install) but you can alternatively use the [Arduino IDE 1.8.10](https://www.arduino.cc/en/Guide/HomePage).
 
 ## 5. Framework
-We use Arduino Core for ESP8266 https://github.com/esp8266/Arduino
+
+We use [Arduino Core for ESP8266](https://github.com/esp8266/Arduino).
 
 ## 6. Libraries
-So far, in addition of core libraries, we use:
+
+In addition to the core libraries, the following are also in use:
+
 - PubSubClient for MQTT messaging https://github.com/knolleary/pubsubclient
 - u8g2/u8x8 library for OLED display https://github.com/olikraus/u8g2
 
-## 7. COMPILE OPTIONS AND FLAGS
-Many features are not enabled by default or can be disabled for various reasons : firmware size, compability etc etc. Here is a listing with some instructions:
-### OTA (disabled by default)
-There are 3 types of OTA tp update your firwware
-#### Arduino/ESP's classic push over UDP (disabled by default)
-- RFLINK_OTA_ENABLED we recommaend that you enable a password for this method or anyone on your network could push a new firmware
-- RFLINK_OTA_PASSWORD="my_password_here" or RFLINK_OTA_PASSWORD='"'${sysenv.OTA_SEC}'"' in platforomio.ini with an environement variable called OTA_SEC
-#### AutoOTA
-Your device will download new firmware from a specific URL you specify.
-- RFLINK_AUTOOTA_ENABLED
-- AutoOTA_URL in Credentials.h or in platformio.ini
-#### Config Portal Web Upload
-Via WifiManager's Config Portal you can upload a new firmware
-**insert screenshot here**
+## 7. Compile Options and Flags
 
-## 8. Additional info
-### Default login and password of WebUI
+Many features are not enabled by default or can be disabled for various reasons like firmware size or compatibility.
+
+### OTA *(disabled by default)*
+
+There are 3 types of OTA to update your firmware:
+
+#### Arduino/ESP's classic push over UDP *(disabled by default)*
+
+- `RFLINK_OTA_ENABLED` we recommend that you enable a password for this method or anyone on your network could push a new firmware to the device.
+- `RFLINK_OTA_PASSWORD="my_password_here"` or `RFLINK_OTA_PASSWORD='"'${sysenv.OTA_SEC}'"'` in `platformio.ini` with an environment variable called `OTA_SEC`
+
+#### AutoOTA
+
+The device will download new firmware from a specified URL.
+
+- RFLINK_AUTOOTA_ENABLED
+- AutoOTA_URL in `Credentials.h` or in `platformio.ini`
+
+#### Config Portal Web Upload
+
+A firmware file can be uploaded via the Config Portal's Firmware page.
+
+![Firmware Screen](pictures/webui-firmware.png "A screen capture showing the Update via upload and the Update via HTTP URL sections from the Config Portal.")
+
+## 8. Additional Info
+
+### Config Portal
+
+#### Repository
+
+The Config Portal web ui is located in its [own repository](https://github.com/cpainchaud/rflink-webui).
+
+#### Default Login Details
+
 rflink32 / 433mhz
 
 ### Pinout
-- When WebServer is active (which is default), pin setup has to be done there.
-- For safety & simplicity, default WebServer setup is : all pin inactive.
-- You may add decoupling capacitors and antenna to improve results.
-- This is a simple RX pin wiring :
+
+- Pin setup has to be done via the Config Portal when it is active.
+- For safety and simplicity all pins are inactive by default.
+- Decoupling capacitors and antenna can be added to improve results.
+
+Simple RX pin wiring:
 
 |  Name         | D1 mini | RXB6  |
 |---------------|---------|-------|
@@ -105,15 +131,17 @@ rflink32 / 433mhz
 | PIN_RF_TX_DATA|   D7    | 7 DAT |
 | PIN_RF_TX_GND |   D8    | 8 GND |
 
-![Pinout](https://github.com/cpainchaud/RFLink32/blob/master/pictures/RFLink-ESP_Pinout.jpg "Pinout") 
+![Pinout](pictures/RFLink-ESP_Pinout.jpg "A picture of a breadboard with both an ESP and RXB6 receiver seated in and wired up together.")
 
 ### Alternative Pinout
+
 - ESP8266 can't draw more than 12mA on a GPIO pin.
 - Some receivers have current spikes bigger than that (eg RXB12).
-- This lead to a non working receiver / non starting ESP.
-- Here is a more safe wiring
+- This leads to a non working receiver or non starting ESP.
 
-|  Name (Alt)   | D1 mini | RXB6  |
+Safe alternative wiring:
+
+|  Name         | D1 mini | RXB6  |
 |---------------|---------|-------|
 | PIN_RF_TX_VCC |   3v3   | 5 VCC |
 | PIN_RF_TX_NA  |   N/A   | 6 DER |
@@ -121,4 +149,5 @@ rflink32 / 433mhz
 | PIN_RF_TX_GND |   GND   | 8 GND |
 
 ### Thanks
-Special thanks to: Axellum, Etimou, Schmurtz, Zoomx 
+
+Special thanks to: Axellum, Etimou, Schmurtz, Zoomx
