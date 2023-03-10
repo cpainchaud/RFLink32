@@ -360,6 +360,11 @@ void checkMQTTloop()
     }
     #endif
 
+    if(!params::enabled) {
+      Serial.println(F("MQTT is disabled, nothing to do."));
+      return;
+    }
+
     Serial.println(F("MQTT parameters have changed, now applying..."));
 
 
