@@ -449,6 +449,10 @@ namespace RFLink {
       output["uptime"] = now.tv_sec - timeAtBoot.tv_sec;
 
       output["heap_free"] = ESP.getFreeHeap();
+      #ifdef ESP32
+      output["heap_min_free"] = ESP.getMinFreeHeap();
+      output["heap_max_alloc"] = ESP.getMaxAllocHeap();
+      #endif
 #ifdef ESP8266
       output["heap_frag"] = ESP.getHeapFragmentation();
       output["stack_free_cont"] = ESP.getFreeContStack();
@@ -457,7 +461,6 @@ namespace RFLink {
 
       sprintf_P(buffer, PSTR("RFLink_ESP_%d.%d-%s"), BUILDNR, REVNR, PSTR(RFLINK_BUILDNAME));
       output["sw_version"] = buffer;
-
     }
 
 }

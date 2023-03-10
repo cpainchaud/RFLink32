@@ -70,6 +70,12 @@ namespace RFLink { namespace Portal {
             return;
 
           String dump;
+          if(! dump.reserve(2048))
+          {
+            Serial.println(F("Not enough memory"));
+            request->send(500, F("text/plain"), F("Not enough memory"));
+            return;
+          }
           Config::dumpConfigToString(dump);
           request->send(200, F("application/json"), dump);
         }
@@ -92,10 +98,13 @@ namespace RFLink { namespace Portal {
           RFLink::Serial2Net::getStatusJsonString(obj);
 
           String buffer;
-          buffer.reserve(512);
+          if(!buffer.reserve(512) ) {
+            request->send(500, F("text/plain"), F("Not enough memory"));
+            return;
+          }
           serializeJson(output, buffer);
 
-          request->send(200, "application/json", buffer);
+          request->send(200, F("application/json"), buffer);
         }
 
         void serveApiReboot(AsyncWebServerRequest *request) {
