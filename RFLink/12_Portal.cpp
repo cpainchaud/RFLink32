@@ -78,7 +78,7 @@ namespace RFLink { namespace Portal {
           if(!checkHttpAuthentication(request))
             return;
 
-          DynamicJsonDocument output(3000);
+          DynamicJsonDocument output(1000);
 
           auto && obj = output.to<JsonObject>();
 
