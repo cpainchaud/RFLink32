@@ -4,9 +4,9 @@
 //#######################################################################################################
 /*********************************************************************************************\
  * This plugin takes care of decoding the Auriol protocol for sensor type Z32171A
- * 
+ *
  * Author  (present)  : StormTeam 2018..2020 - Marc RIVES (aka Couin3)
- * Support (present)  : https://github.com/couin3/RFLink 
+ * Support (present)  : https://github.com/couin3/RFLink
  * Author  (original) : StuntTeam 2015..2016
  * Support (original) : http://sourceforge.net/projects/rflink/
  * License            : This code is free for use in any open source project when this header is included.
@@ -17,7 +17,7 @@
  * Technical Information:
  * Decodes signals from a Auriol Weatherstation outdoor unit, (40 bits, 433 MHz).
  *
- * Auriol Message Format: 
+ * Auriol Message Format:
  * 1011 1111 1001 1010 0110 0001 1011 0100 1001 0001
  * B    F    9    A    6    1    B    4    9    1
  * AAAA AAAA BBBB CCDD EEEE EEEE EEEE FFFF FFFF GGHH
@@ -27,7 +27,7 @@
  * C = possibly battery indicator ?
  * D = trend (2 bits) indicating temp equal/up/down ?
  * E = Temperature => 0x61b  (0x61b-0x4c4)=0x157 *5)=0x6b3 /9)=0xBE => 0xBE = 190 decimal!
- * F = humidity: 49% 
+ * F = humidity: 49%
  * G = ?
  * H = channel: 1 (2 bits)
  *
@@ -47,6 +47,19 @@
 #ifdef PLUGIN_044
 #include "../4_Display.h"
 
+// Checksum check from rtl_433 (named infactory decoder)
+static int crc_check(uint8_t *b) {
+  uint8_t msg_crc, crc, msg[5];
+  memcpy(msg, b, 5);
+  msg_crc = msg[1] >> 4;
+  // for CRC computation, channel bits are at the CRC position(!)
+  msg[1] = (msg[1] & 0x0F) | (msg[4] & 0x0F) << 4;
+  // crc4() only works with full bytes
+  crc = crc4(msg, 4, 0x13, 0); // Koopmann 0x9, CCITT-4; FP-4; ITU-T G.704
+  crc ^= msg[4] >> 4;          // last nibble is only XORed
+  return (crc == msg_crc);
+}
+
 boolean Plugin_044(byte function, const char *string)
 {
    if (RawSignal.Number != AURIOLV3_PULSECOUNT)
@@ -57,13 +70,15 @@ boolean Plugin_044(byte function, const char *string)
    const long AURIOLV3_PULSEMINMAX = AURIOLV3_PULSEMINMAX_D / RawSignal.Multiply;
    const long AURIOLV3_PULSEMAXMIN = AURIOLV3_PULSEMAXMIN_D / RawSignal.Multiply;
 
-   unsigned long bitstream1 = 0L; // holds first 4x4=16 bits
-   unsigned long bitstream2 = 0L; // holds last  6x4=24 bits
+   uint16_t bitstream1 = 0L; // holds first 4x4=16 bits
+   uint32_t bitstream2 = 0L; // holds last  6x4=24 bits
    byte bitcounter = 0;           // counts number of received bits (converted from pulses)
    byte rc = 0;
    byte channel = 0;
    unsigned long temperature = 0;
    byte humidity = 0;
+   byte battery_low = 0;
+
    //==================================================================================
    // Get all 40 bits
    //==================================================================================
@@ -77,7 +92,7 @@ boolean Plugin_044(byte function, const char *string)
          {
             bitstream1 <<= 1;
             bitstream1 |= 0x1;
-            bitcounter++; // only need to count the first 10 bits
+            bitcounter++; // only need to count the first 16 bits
          }
          else
          {
@@ -94,7 +109,7 @@ boolean Plugin_044(byte function, const char *string)
          if (bitcounter < 16)
          {
             bitstream1 <<= 1;
-            bitcounter++; // only need to count the first 10 bits
+            bitcounter++; // only need to count the first 16 bits
          }
          else
             bitstream2 <<= 1;
@@ -109,6 +124,18 @@ boolean Plugin_044(byte function, const char *string)
          return false; // not seen the RF packet recently
       if (bitstream2 == 0)
          return false;
+
+      uint8_t data[5] = {
+          (uint8_t)((bitstream1 >> 8) & 0xFF),
+          (uint8_t)(bitstream1 & 0xFF),
+          (uint8_t)((bitstream2 >> 16) & 0xFF),
+          (uint8_t)((bitstream2 >> 8) & 0xFF),
+          (uint8_t)(bitstream2 & 0xFF),
+      };
+      if (crc_check(data) == false) {
+         // CRC error
+         return false;
+      }
    }
    else
    {
@@ -118,6 +145,8 @@ boolean Plugin_044(byte function, const char *string)
    // now process sensor type
    //==================================================================================
    rc = (bitstream1 >> 8) & 0xFF;              // get rolling code
+   battery_low = (bitstream1 >> 2) & 1;
+
    temperature = ((bitstream2) >> 12) & 0xFFF; // get 12 temperature bits
    temperature = (temperature - 0x4c4) & 0xFFFF;
    temperature = (((temperature)*5) / 9) & 0xFFFF;
@@ -133,8 +162,16 @@ boolean Plugin_044(byte function, const char *string)
       if (temperature > 0x258)
          return false; // temperature out of range ( > 60.0 degrees)
    }
+
    humidity = (bitstream2 >> 4) & 0xff; // humidity
+   // BCD coded
+   humidity = (humidity >> 4) * 10 + (humidity & 0xf);
+   if (humidity > 100) {
+      return false;
+   }
+
    channel = (bitstream2)&0x03;         // channel number
+
    //==================================================================================
    // Output
    //==================================================================================
@@ -145,10 +182,13 @@ boolean Plugin_044(byte function, const char *string)
    display_IDc(c_ID);
    display_TEMP(temperature);
    display_HUM(humidity);
+   display_BAT(battery_low == false);
    display_Footer();
+
    //==================================================================================
    RawSignal.Repeats = true; // suppress repeats of the same RF packet
    RawSignal.Number = 0;
+
    return true;
 }
 #endif // PLUGIN_044
