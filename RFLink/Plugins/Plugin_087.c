@@ -14,7 +14,7 @@
  * *************************/
 
 #define NOXALARMPLUGIN_ID 087
-#define PLUGIN_DESC_087 PSTR("NOXALARM")
+#define PLUGIN_DESC_087 "NOXALARM"
 
 
 #define NOX_SUPERPREAMBLE_PULSE_LEN 20000 
