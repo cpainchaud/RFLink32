@@ -365,6 +365,8 @@ namespace RFLink { namespace Radio  {
         {
           case HardwareType::HW_CC1101_t:
             maxValue = 812000;
+          default:
+            break;
         }
 
         if (value < 0 || value > maxValue ) {
