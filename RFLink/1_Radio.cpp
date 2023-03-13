@@ -90,7 +90,7 @@ namespace RFLink { namespace Radio  {
 
     States current_State = Radio_NA;
 
-    const char * hardwareNames[] = {
+    const char * const hardwareNames[] = {
             "generic",
             #ifndef RFLINK_NO_RADIOLIB_SUPPORT
             "RFM69CW",

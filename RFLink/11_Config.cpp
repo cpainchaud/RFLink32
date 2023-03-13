@@ -27,14 +27,14 @@ namespace RFLink
 
     namespace commands
     {
-      String set("set");
-      String reset("reset");
-      String dump("dump");
+      const char set[] = "set";
+      const char reset[] = "reset";
+      const char dump[] = "dump";
     }
 
     const char configFileName[] = "/config.json";
 
-    const char *jsonSections[] = {
+    const char * const jsonSections[] = {
             "wifi",
             "ota",
             "core",
@@ -50,7 +50,7 @@ namespace RFLink
 
     static_assert(sizeof(jsonSections) / sizeof(char *) == SectionId::EOF_id + 1, "jsonSections has missing/extra sections names, please compare with SectionId enum declations");
 
-    ConfigItem *configItemLists[] = {
+    ConfigItem * const configItemLists[] = {
 #if defined(RFLINK_WIFI_ENABLED)
             &RFLink::Wifi::configItems[0],
             #ifndef RFLINK_MQTT_DISABLED
