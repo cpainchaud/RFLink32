@@ -35,15 +35,15 @@ namespace RFLink
 { 
     namespace rtl_433Bridge 
     {
-        const r_device r_devices[] = {
-#define DECL(name) name,
+        const r_device * const r_devices[] = {
+#define DECL(name) &name,
             DEVICES
 #undef DECL
 /*            somfy_rts,
             lacrosse_tx35,
             tfa_pool_thermometer*/
         };
-        const int num_r_devices = sizeof(r_devices) / sizeof(r_device);
+        const int num_r_devices = sizeof(r_devices) / sizeof(r_device*);
 
         list_t r_devs = {0};
 
@@ -222,9 +222,9 @@ namespace RFLink
             for (int i = 0; i < num_r_devices; i++) 
             {
                 // register all device protocols that are not disabled
-                if (r_devices[i].disabled <= disabled) 
+                if (r_devices[i]->disabled <= disabled) 
                 {
-                    register_protocol(&r_devices[i], NULL);
+                    register_protocol(r_devices[i], NULL);
                 }
             }
         }
