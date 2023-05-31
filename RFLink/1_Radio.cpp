@@ -49,24 +49,24 @@ namespace RFLink { namespace Radio  {
 
 
     namespace pins {
-      int8_t RX_PMOS = PIN_RF_RX_PMOS_0;
-      int8_t RX_NMOS = PIN_RF_RX_NMOS_0;
-      int8_t RX_VCC = PIN_RF_RX_VCC_0;
-      int8_t RX_GND = PIN_RF_RX_GND_0;
-      int8_t RX_NA = PIN_RF_RX_NA_0;
-      int8_t RX_DATA = PIN_RF_RX_DATA_0;
+      int8_t RX_PMOS = PIN_RF_RX_PMOS;
+      int8_t RX_NMOS = PIN_RF_RX_NMOS;
+      int8_t RX_VCC = PIN_RF_RX_VCC;
+      int8_t RX_GND = PIN_RF_RX_GND;
+      int8_t RX_NA = PIN_RF_RX_NA;
+      int8_t RX_DATA = PIN_RF_RX_DATA;
       int8_t RX_RESET = PIN_RF_RX_RESET;
       int8_t RX_CS = PIN_RF_RX_CS;
 
-      boolean PULLUP_RX_DATA = PULLUP_RF_RX_DATA_0;
+      boolean PULLUP_RX_DATA = PULLUP_RF_RX_DATA;
 
 
-      int8_t TX_PMOS = PIN_RF_TX_PMOS_0;
-      int8_t TX_NMOS = PIN_RF_TX_NMOS_0;
-      int8_t TX_VCC = PIN_RF_TX_VCC_0;
-      int8_t TX_GND = PIN_RF_TX_GND_0;
-      int8_t TX_NA = PIN_RF_TX_NA_0;
-      int8_t TX_DATA = PIN_RF_TX_DATA_0;
+      int8_t TX_PMOS = PIN_RF_TX_PMOS;
+      int8_t TX_NMOS = PPIN_RF_TX_NMOS;
+      int8_t TX_VCC = PIN_RF_TX_VCC;
+      int8_t TX_GND = PIN_RF_TX_GND;
+      int8_t TX_NA = PIN_RF_TX_NA;
+      int8_t TX_DATA = PIN_RF_TX_DATA;
     }
 
     namespace params {
@@ -135,20 +135,20 @@ namespace RFLink { namespace Radio  {
             Config::ConfigItem(json_name_hardware,  Config::SectionId::Radio_id, hardwareNames[RFLink_default_Radio_HardwareType], paramsUpdatedCallback),
 
             #ifndef RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
-            Config::ConfigItem(json_name_rx_data,   Config::SectionId::Radio_id, PIN_RF_RX_DATA_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_rx_vcc,    Config::SectionId::Radio_id, PIN_RF_RX_VCC_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_rx_nmos,   Config::SectionId::Radio_id, PIN_RF_RX_NMOS_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_rx_pmos,   Config::SectionId::Radio_id, PIN_RF_RX_PMOS_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_rx_gnd,    Config::SectionId::Radio_id, PIN_RF_RX_GND_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_rx_na,     Config::SectionId::Radio_id, PIN_RF_RX_NA_0, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_data,   Config::SectionId::Radio_id, PIN_RF_RX_DATA, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_vcc,    Config::SectionId::Radio_id, PIN_RF_RX_VCC, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_nmos,   Config::SectionId::Radio_id, PIN_RF_RX_NMOS, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_pmos,   Config::SectionId::Radio_id, PIN_RF_RX_PMOS, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_gnd,    Config::SectionId::Radio_id, PIN_RF_RX_GND, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_rx_na,     Config::SectionId::Radio_id, PIN_RF_RX_NA, paramsUpdatedCallback),
             Config::ConfigItem(json_name_rx_reset,  Config::SectionId::Radio_id, PIN_RF_RX_RESET, paramsUpdatedCallback),
             Config::ConfigItem(json_name_rx_cs,  Config::SectionId::Radio_id, PIN_RF_RX_CS, paramsUpdatedCallback),
 
-            Config::ConfigItem(json_name_tx_data,   Config::SectionId::Radio_id, PIN_RF_TX_DATA_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_tx_vcc,    Config::SectionId::Radio_id, PIN_RF_TX_VCC_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_tx_nmos,   Config::SectionId::Radio_id, PIN_RF_TX_NMOS_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_tx_pmos,   Config::SectionId::Radio_id, PIN_RF_TX_PMOS_0, paramsUpdatedCallback),
-            Config::ConfigItem(json_name_tx_gnd,    Config::SectionId::Radio_id, PIN_RF_TX_GND_0, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_tx_data,   Config::SectionId::Radio_id, PIN_RF_TX_DATA, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_tx_vcc,    Config::SectionId::Radio_id, PIN_RF_TX_VCC, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_tx_nmos,   Config::SectionId::Radio_id, PPIN_RF_TX_NMOS, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_tx_pmos,   Config::SectionId::Radio_id, PIN_RF_TX_PMOS, paramsUpdatedCallback),
+            Config::ConfigItem(json_name_tx_gnd,    Config::SectionId::Radio_id, PIN_RF_TX_GND, paramsUpdatedCallback),
             #endif // RFLINK_USE_HARDCODED_RADIO_PINS_ONLY
 
             #ifndef RFLINK_NO_RADIOLIB_SUPPORT

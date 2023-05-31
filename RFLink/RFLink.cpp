@@ -164,7 +164,7 @@ namespace RFLink {
       RFLink::Serial2Net::serverLoop();
 #endif // !RFLINK_SERIAL2NET_DISABLED
 
-#if defined(SERIAL_ENABLED) && PIN_RF_TX_DATA_0 != NOT_A_PIN
+#if defined(SERIAL_ENABLED)
       readSerialAndExecute();
 #endif
 
