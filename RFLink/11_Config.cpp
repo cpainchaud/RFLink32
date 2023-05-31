@@ -78,7 +78,15 @@ namespace RFLink
     void resetConfig()
     {
       if (LittleFS.exists(configFileName))
+      {
+        Serial.println(F("Removing config file..."));
         LittleFS.remove(configFileName);
+        if(LittleFS.exists(configFileName))
+        {
+          Serial.println(F("Failed to remove config file!"));
+        }
+      }
+      LittleFS.end();
 
       Serial.println(F("Config has been reset and requires a reboot to complete"));
     }
