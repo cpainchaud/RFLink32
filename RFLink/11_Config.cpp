@@ -670,7 +670,8 @@ namespace RFLink
 
     bool saveConfigToFlash()
     {
-      Signal::AsyncSignalScanner::stopScanning();
+      if(Signal::AsyncSignalScanner::isEnabled())
+        Signal::AsyncSignalScanner::stopScanning();
 
       Serial.print(F("Saving JSON config to FLASH.... "));
 
@@ -688,7 +689,8 @@ namespace RFLink
       if (bytes_written == 0)
       {
         Serial.println(F("failed!"));
-        Signal::AsyncSignalScanner::startScanning();
+        if(Signal::AsyncSignalScanner::isEnabled())
+          Signal::AsyncSignalScanner::startScanning();
         return false;
       }
       else
@@ -699,7 +701,8 @@ namespace RFLink
         Serial.println(F("OK"));
       }
 
-      Signal::AsyncSignalScanner::startScanning();
+      if(Signal::AsyncSignalScanner::isEnabled())
+        Signal::AsyncSignalScanner::startScanning();
 
       return true;
     }
