@@ -20,7 +20,7 @@ This device does not support OTA,  flashing via serial or the Config Portal.
 
 ### Connecting the Serial
 
-To put the device into flashing mode, the pairing button must be held down whilst inserting the UART dongle into the USB on your computer.
+To put the device into flashing mode, the pairing button must be held down whilst inserting the UART dongle into the USB on your computer. Finding a proper time to release the pairing button could be tricky. The button should be release after `esptool` is executed and just before `Connecting...` apears.
 
 If your UART dongle cannot supply the required power then disconnect the 3.3v pin on UART (while keeping the RX, TX and GND pins connected) and then plug the device in via the built in USB port (marked as `J1` on the board) to power it via an appropriate USB power adapter that can provide 1 amp.
 
@@ -30,27 +30,33 @@ If your UART dongle cannot supply the required power then disconnect the 3.3v pi
 
 *After each step below, you will need to disconnect and reconnect your UART device (or if powering the board via `J1` - connect and disconnect this instead).*
 
+If you have not yet installed the 'esptool' module for python:
+
+```shell
+python -m pip install esptool
+```
+
 Create a backup of the Sonoff firmware:
 
 ```shell
-esptool.exe --baud 460800 read_flash 0x00000 0x100000 Backup_SonoffRFBridge.bin
+python esptool.py --baud 460800 read_flash 0x00000 0x100000 Backup_SonoffRFBridge.bin
 ```
 
 Erase firmware:
 
 ```shell
-esptool.exe --baud 460800 erase_flash
+python esptool.py --baud 460800 erase_flash
 ```
 
 Flash the RFLink firmware:
 
 ```shell
-esptool.exe --baud 460800 write_flash -fs 1MB -fm dout 0x0 sonoff_bridge-firmware.bin
+python esptool.py --baud 460800 write_flash -fs 1MB -fm dout 0x0 sonoff_bridge-firmware.bin
 ```
 
-You can then use either the CLI connected via the UART to configure the RF bridge or the Config Portal.
+You can then use either the [CLI](/CLI_Reference_Guide.md) connected via the UART to configure the RF bridge or the Config Portal.
 
-To use the Config Portal, connect to the RFLink-AP access point and navigate to `http://192.168.4.1` in your web browser.
+To use the Config Portal, connect to the RFLink-AP access point and navigate to `http://192.168.4.1` in your web browser. Use `rflink32` for username and `433mhz` for password.
 
 ## Hardware Modification
 
