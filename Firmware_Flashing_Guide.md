@@ -29,13 +29,13 @@ python -m pip install esptool
 Erase flash entirely to ensure nothing will go wrong
 
 ```shell
-python esptool.py --chip esp32 --baud 460800 erase_flash
+python -m esptool --chip esp32 --baud 460800 erase_flash
 ```
 
 Install the firmware
 
 ```shell
-python esptool.py --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.img
+python -m esptool --chip esp32 --baud 460800 write_flash -z 0x1000 esp32-full.img
 ```
 
 Subsequent updates should be done via the OTA mechanism.
@@ -51,12 +51,6 @@ While this procedure is not supposed to overwrite your existing configuration, w
 ### Using RFLink serial commands
 
 ...TODO...
-
-### Using Esptool
-
-```shell
-python.exe esptool.py --chip esp32 --baud 460800 write_flash -z 0x10000 esp32-firmware-OTA.bin
-```
 
 ### Using Espressif's official tool
 
