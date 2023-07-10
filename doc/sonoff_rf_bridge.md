@@ -39,19 +39,19 @@ python -m pip install esptool
 Create a backup of the Sonoff firmware:
 
 ```shell
-python esptool.py --baud 460800 read_flash 0x00000 0x100000 Backup_SonoffRFBridge.bin
+python -m esptool --baud 460800 read_flash 0x00000 0x100000 Backup_SonoffRFBridge.bin
 ```
 
 Erase firmware:
 
 ```shell
-python esptool.py --baud 460800 erase_flash
+python -m esptool --baud 460800 erase_flash
 ```
 
 Flash the RFLink firmware:
 
 ```shell
-python esptool.py --baud 460800 write_flash -fs 1MB -fm dout 0x0 sonoff_bridge-firmware.bin
+python -m esptool --baud 460800 write_flash -fs 1MB -fm dout 0x0 sonoff_bridge-firmware.bin
 ```
 
 You can then use either the [CLI](/CLI_Reference_Guide.md) connected via the UART to configure the RF bridge or the Config Portal.
