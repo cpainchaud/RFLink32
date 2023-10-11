@@ -21,6 +21,7 @@
 // https://github.com/altelch/Somfy-RTS/blob/master/Somfy-RTS.py
 // https://forum.arduino.cc/index.php?topic=208346.30
 // https://matdomotique.wordpress.com/2016/04/21/domoticz-rflink-et-somfy/
+// https://github.com/merbanan/rtl_433/blob/master/src/devices/somfy_rts.c
 
 #define PLUGIN_017_ID "RTS"
 
@@ -33,6 +34,12 @@
 #define RTS_CMD_PROG     0x8    // Used for (de-)registering remotes
 #define RTS_CMD_SUN_FLAG 0x9    // Sun + Flag  Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
 #define RTS_CMD_FLAG     0xA    // Disable sun detector (FLAG symbol on the Telis Soliris RC)
+#define RTS_CMD_TELFIX   0xF    // Detect TEL FIX
+
+#define RTS_CMD_SEED_STOP 0x5 // Stop
+#define RTS_CMD_SEED_UP   0x6 // Move up
+#define RTS_CMD_SEED_DOWN 0x8 // Move down
+#define RTS_CMD_SEED_PROG 0xC // Used for (de-)registering remotes
 
 const int bitsPerByte = 8;
 
@@ -263,28 +270,54 @@ boolean Plugin_017(byte function, const char *string)
         Serial.println(F(PLUGIN_017_ID ": Checksum OK"));
         #endif
 
-        // map RTS command to RFLink command
-        switch (command)
+        if (command == RTS_CMD_TELFIX)
         {
-            case RTS_CMD_MY:
-                command = CMD_Stop;
-                break;
-            case RTS_CMD_UP:
-                command = CMD_Up;
-                break;       
-            case RTS_CMD_DOWN:
-                command = CMD_Down;
-                break;
-            case RTS_CMD_PROG:
-                command = CMD_Pair;
-                break;
-            case RTS_CMD_MY_UP:
-            case RTS_CMD_MY_DOWN:
-            case RTS_CMD_UP_DOWN:
-            case RTS_CMD_SUN_FLAG:
-            case RTS_CMD_FLAG:
-            default:
-                command = CMD_Unknown;
+            command = frame[0] & 0xf;
+
+            // map RTS command to RFLink command
+            switch (command)
+            {
+                case RTS_CMD_SEED_STOP:
+                    command = CMD_Stop;
+                    break;
+                case RTS_CMD_SEED_UP:
+                    command = CMD_Up;
+                    break;
+                case RTS_CMD_SEED_DOWN:
+                    command = CMD_Down;
+                    break;
+                case RTS_CMD_SEED_PROG:
+                    command = CMD_Pair;
+                    break;
+                default:
+                    command = CMD_Unknown;
+            }
+        }
+        else
+        {
+            // map RTS command to RFLink command
+            switch (command)
+            {
+                case RTS_CMD_MY:
+                    command = CMD_Stop;
+                    break;
+                case RTS_CMD_UP:
+                    command = CMD_Up;
+                    break;
+                case RTS_CMD_DOWN:
+                    command = CMD_Down;
+                    break;
+                case RTS_CMD_PROG:
+                    command = CMD_Pair;
+                    break;
+                case RTS_CMD_MY_UP:
+                case RTS_CMD_MY_DOWN:
+                case RTS_CMD_UP_DOWN:
+                case RTS_CMD_SUN_FLAG:
+                case RTS_CMD_FLAG:
+                default:
+                    command = CMD_Unknown;
+            }
         }
 
          // all is good, output the received packet
@@ -319,7 +352,7 @@ boolean PluginTX_017(byte function, const char *string)
     //10;RTSSHOW; => Show Rolling code table stored in internal EEPROM (includes RTS settings)
     //10;RTSINVERT; => Toggle RTS ON/OFF inversion
     //10;RTSLONGTX; => Toggle RTS long transmit ON/OFF 
-    //10;RTS;1a602a;0;UP; => RTS protocol, address, unused, command
+    //10;RTS;1a602a;0;UP; => RTS protocol, address, telfix_flag, command
     //10;RTS;1b602b;0123;PAIR; => Pairing for RTS rolling code: RTS protocol, address, rolling code number (hex), PAIR command (eeprom record number is set to 0)
     //10;RTS;1b602b;0123;0;PAIR; => Extended Pairing for RTS rolling code: RTS protocol, address, rolling code number (hex), eeprom record number (hex), PAIR command    
 
@@ -470,24 +503,50 @@ boolean PluginTX_017(byte function, const char *string)
                     0x9     Sun + Flag  Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
                     0xA     Flag        Disable sun detector (FLAG symbol on the Telis Soliris RC)
     */
+
     uint8_t button = 0;
-    switch(command)
+    bool telfix = value != 0;
+    if (!telfix)
     {
-        case VALUE_STOP:
-            button = RTS_CMD_MY;
-            break;
-        case VALUE_UP:
-            button = RTS_CMD_UP;
-            break;
-        case VALUE_DOWN:
-            button = RTS_CMD_DOWN;
-            break;
-        case VALUE_PAIR:
-            button = RTS_CMD_PROG;
-            code = value; // use as initial code value
-            break;
-        default:
-            return false;
+        switch(command)
+        {
+            case VALUE_STOP:
+                button = RTS_CMD_MY;
+                break;
+            case VALUE_UP:
+                button = RTS_CMD_UP;
+                break;
+            case VALUE_DOWN:
+                button = RTS_CMD_DOWN;
+                break;
+            case VALUE_PAIR:
+                button = RTS_CMD_PROG;
+                code = value; // use as initial code value
+                break;
+            default:
+                return false;
+        }
+    }
+    else
+    {
+        switch(command)
+        {
+            case VALUE_STOP:
+                button = RTS_CMD_SEED_STOP;
+                break;
+            case VALUE_UP:
+                button = RTS_CMD_SEED_UP;
+                break;
+            case VALUE_DOWN:
+                button = RTS_CMD_SEED_DOWN;
+                break;
+            case VALUE_PAIR:
+                button = RTS_CMD_SEED_PROG;
+                code = value; // use as initial code value
+                break;
+            default:
+                return false;
+        }
     }
 
     uint8_t frame[RTS_ExpectedByteCount];
@@ -504,8 +563,25 @@ boolean PluginTX_017(byte function, const char *string)
     #endif
 
     // build frame
-    frame[0] = 0xAC; // Encryption key. Doesn't matter much
-    frame[1] = button << 4;  // Which button did  you press? The 4 LSB will be the checksum
+    if (!telfix)
+    {
+        frame[0] = 0xAC; // Encryption key. Doesn't matter much
+    }
+    else
+    {
+        frame[0] = 0x80; // Encryption key. Doesn't matter much
+        frame[0] |= button;
+    }
+
+    if (!telfix)
+    {
+        frame[1] = button << 4;  // Which button did  you press? The 4 LSB will be the checksum
+    }
+    else
+    {
+        frame[1] = 0xF << 4;  // Which button did  you press? The 4 LSB will be the checksum
+    }
+
     frame[2] = code >> 8;    // Rolling code (big endian)
     frame[3] = code;         // Rolling code
     frame[4] = address >> 16; // Remote address
