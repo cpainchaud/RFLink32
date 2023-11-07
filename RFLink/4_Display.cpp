@@ -407,10 +407,19 @@ boolean retrieve_decimalNumber(unsigned long &value, byte maxDigits, const char*
     if ((prefix != NULL) && (strncasecmp(ptr, prefix, strlen(prefix)) == 0))
       ptr += strlen(prefix);
 
-    if (strlen(ptr) > maxDigits)
+    //Make this length check more forgiving by dropping leading 0s
+    size_t len = strlen(ptr);
+
+    while(len > 1 && ptr[0] == '0')
+    {
+        ptr++;
+        len--;
+    }
+
+    if (len > maxDigits)
       return false;
 
-    for (byte i = 0; i < strlen(ptr); i++)
+    for (byte i = 0; i < len; i++)
       if (!isdigit(ptr[i]))
         return false;
 
@@ -430,10 +439,19 @@ boolean retrieve_hexNumber(unsigned long &value, byte maxNibbles, const char* pr
     if ((prefix != NULL) && (strncasecmp(ptr, prefix, strlen(prefix)) == 0))
       ptr += strlen(prefix);
 
-    if (strlen(ptr) > maxNibbles)
+    //Make this length check more forgiving by dropping leading 0s
+    size_t len = strlen(ptr);
+
+    while(len > 1 && ptr[0] == '0')
+    {
+        ptr++;
+        len--;
+    }
+
+    if (len > maxNibbles)
       return false;
 
-    for (byte i = 0; i < strlen(ptr); i++)
+    for (byte i = 0; i < len; i++)
       if (!isxdigit(ptr[i]))
         return false;
 
