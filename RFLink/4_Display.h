@@ -106,7 +106,7 @@ boolean retrieve_byte(byte &, const char* = NULL);  // calls retrieve_hexNumber(
 boolean retrieve_nibble(byte &, const char* = NULL);  // calls retrieve_hexNumber(, 1, )
 
 boolean retrieve_ID(unsigned long &);  // calls retrieve_long(, "ID=") and limits the value to 0x03FFFFFF (26 bits)
-boolean retrieve_Switch(byte &);  // calls retrieve_nibble(, "SWITCH=")
+boolean retrieve_Switch(byte &);  // calls retrieve_byte(, "SWITCH=")
 boolean retrieve_Command(byte &); // calls retrieve_command(, "CMD=") 
 
 boolean retrieve_End();  // returns true if the token "pointer" is at the end of the input string
