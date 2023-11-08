@@ -12,8 +12,27 @@
 
 const int SLVCR_BitCount = 24;
 const int8_t SLVCR_CodeCount = 8;
-const uint16_t SLVCR_OnCodes[SLVCR_CodeCount] = {0xf756, 0x7441, 0xd9c5, 0xe3aa, 0x6af3, 0x453f, 0x0f6e, 0xc170};
-const uint16_t SLVCR_OffCodes[SLVCR_CodeCount] = {0x20e7, 0x5212, 0x9d88, 0x8c0b, 0x16bc, 0x3b99, 0xb8dd, 0xae24};
+//There are no buttons for which the first bit is high on these remotes, so just copy the first 4 values to the last 4 too...
+const uint16_t SLVCR_OnCodes_D[SLVCR_CodeCount] = {0xcd63, 0xf7b4, 0xb4f7, 0x4ceb, 0xcd63, 0xf7b4, 0xb4f7, 0x4ceb};
+const uint16_t SLVCR_OffCodes_D[SLVCR_CodeCount] = {0xae81, 0x8159, 0x782a, 0x9292, 0xae81, 0x8159, 0x782a, 0x9292};
+const uint16_t SLVCR_OnCodes_5[SLVCR_CodeCount] = {0xfa1b, 0x3da3, 0x0254, 0x8c27, 0xfa1b, 0x3da3, 0x0254, 0x8c27};
+const uint16_t SLVCR_OffCodes_5[SLVCR_CodeCount] = {0x6e41, 0x1bb9, 0xa3fa, 0xc002, 0x6e41, 0x1bb9, 0xa3fa, 0xc002};
+//These codes are known to work with remote 0xB, and are the default
+const uint16_t SLVCR_OnCodes_default[SLVCR_CodeCount] = {0xf756, 0x7441, 0xd9c5, 0xe3aa, 0x6af3, 0x453f, 0x0f6e, 0xc170};
+const uint16_t SLVCR_OffCodes_default[SLVCR_CodeCount] = {0x20e7, 0x5212, 0x9d88, 0x8c0b, 0x16bc, 0x3b99, 0xb8dd, 0xae24};
+
+static const uint16_t * SLVCR_Codes(int remoteId, boolean bOn)
+{
+   switch(remoteId)
+   {
+      case 0xD:
+      return bOn? SLVCR_OnCodes_D: SLVCR_OffCodes_D;
+      case 0x5:
+      return bOn? SLVCR_OnCodes_5: SLVCR_OffCodes_5;
+      default:
+      return bOn? SLVCR_OnCodes_default: SLVCR_OffCodes_default;
+   }
+}
 
 boolean Plugin_016(byte function, const char *string)
 {
@@ -55,16 +74,18 @@ boolean Plugin_016(byte function, const char *string)
             return false;
          }
 
-        SerialDebugPrint(F(PLUGIN_016_ID ": packet = "));
-        SerialDebugPrint(packet[0], 16);
-        SerialDebugPrint(packet[1], 16);
-        SerialDebugPrintln(packet[2], 16);
+         {
+            const size_t buflen = sizeof(PLUGIN_016_ID ": packet = ") + 7;
+            char printbuf[buflen];
+            snprintf(printbuf, buflen, "%s%02x%02x%02x", PLUGIN_016_ID ": packet = ", packet[0], packet[1], packet[2]);
+            SerialDebugPrintln(printbuf);
+         }
 
-        // The button Id is in the second nibble of the last byte
-        uint8_t buttonId = packet[2] & 0x0F;
+         // The button Id is in the second nibble of the last byte
+         uint8_t buttonId = packet[2] & 0x0F;
 
-        SerialDebugPrint("buttonId =");
-        SerialDebugPrintln(buttonId, 16);
+         SerialDebugPrint(PLUGIN_016_ID ": buttonId =");
+         SerialDebugPrintln(buttonId, 16);
 
          // If button Id has bit 1 set, then invert the command
          enum CMD_OnOff effectiveCommandOn = CMD_On;
@@ -81,11 +102,13 @@ boolean Plugin_016(byte function, const char *string)
          uint16_t commandBits = ((uint16_t)(packet[0] & 0x0F) << 12)| ((uint16_t)packet[1]) << 4 | (packet[2] & 0xF0) >> 4; //(packet >> 4) & 0xFFFF;
          enum CMD_OnOff command = CMD_Unknown;
          byte commandCodeIndex = 0;
+         const uint16_t* OnCodes = SLVCR_Codes(remoteId, 1);
+         const uint16_t* OffCodes = SLVCR_Codes(remoteId, 0);
          while (commandCodeIndex < SLVCR_CodeCount && command == CMD_Unknown)
          {
-            if (commandBits == SLVCR_OnCodes[commandCodeIndex])
+            if (commandBits == OnCodes[commandCodeIndex])
                command = effectiveCommandOn;
-            else if (commandBits == SLVCR_OffCodes[commandCodeIndex])
+            else if (commandBits == OffCodes[commandCodeIndex])
                command = effectiveCommandOff;
 
             commandCodeIndex++;
@@ -171,12 +194,13 @@ boolean PluginTX_016(byte function, const char *string)
    uint16_t commandCode = 0;  
 
    byte codeIndex = 1 << ((buttonId & 0x1) << 1); // one of the first 4, or one of the last four, depending on the first bit of the buttonId
-   const uint16_t* OnCommandArray = SLVCR_OnCodes;
-   const uint16_t* OffCommandArray = SLVCR_OffCodes;
+   const uint16_t* OnCommandArray = SLVCR_Codes(remoteId, 1);
+   const uint16_t* OffCommandArray = SLVCR_Codes(remoteId, 0);
    if (buttonId & 2)  // invert if second bit is set
    {
-      OnCommandArray = SLVCR_OffCodes;
-      OffCommandArray = SLVCR_OnCodes;
+      const uint16_t* tmp = OnCommandArray;
+      OnCommandArray = OffCommandArray;
+      OffCommandArray = tmp;
    }
 
    switch(buttonCommand)

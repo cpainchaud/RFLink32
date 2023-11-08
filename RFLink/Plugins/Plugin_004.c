@@ -198,7 +198,7 @@ boolean  PluginTX_004(byte function, const char *string)
 
 
    bitstream = (ID_bitstream << 6); // 26 bits on top
-   bitstream |= Switch_bitstream; // Complete transmitted address
+   bitstream |= Switch_bitstream & 0xF; // Complete transmitted address
    // bitstream &= 0xFFFFFFCF;    // Bit 4 and 5 are left for cmd
    bitstream |= (Cmd_bitstream << 4);
 

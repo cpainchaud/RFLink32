@@ -512,7 +512,7 @@ boolean retrieve_ID(unsigned long &ul_ID)
 
 boolean retrieve_Switch(byte &b_Switch)
 {
-    return retrieve_nibble(b_Switch, "SWITCH=");
+    return retrieve_byte(b_Switch, "SWITCH=");
 }
 
 boolean retrieve_Command(byte &b_Cmd)
