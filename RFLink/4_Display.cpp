@@ -36,6 +36,12 @@ void display_Name(const char *input)
   strcat(pbuffer, dbuffer);
 }
 
+void display_NameEx(const char *name, unsigned int id)
+{
+  sprintf_P(dbuffer, PSTR(";%s-%04X"), name, id);
+  strcat(pbuffer, dbuffer);
+}
+
 // Common Footer
 void display_Footer(void)
 {
@@ -211,6 +217,13 @@ void display_RAIN(unsigned int input)
   strcat(pbuffer, dbuffer);
 }
 
+// RAINTOT=1234 => Total rain in mm. (hexadecimal) 0x8d = 141 decimal = 14.1 mm (needs division by 10)
+void display_RAINTOT(unsigned int input)
+{
+  sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";RAINTOT="), input);
+  strcat(pbuffer, dbuffer);
+}
+
 // RAINRATE=1234 => Rain rate in mm. (hexadecimal) 0x8d = 141 decimal = 14.1 mm (needs division by 10)
 void display_RAINRATE(unsigned int input)
 {
@@ -356,6 +369,21 @@ void display_CHAN(byte channel)
 {
   sprintf_P(dbuffer, PSTR("%s%04x"), PSTR(";CHN="), channel);
   strcat(pbuffer, dbuffer);
+}
+
+// DEBUG=..... => provide DEBUG Data
+void display_DEBUG(byte data[], unsigned int size)
+{
+  sprintf_P(dbuffer, PSTR("%s"), PSTR(";DEBUG="));
+  strcat(pbuffer, dbuffer);
+
+  char buffer[size*2 + 1];
+  for (unsigned int i = 0; i < size; i++)
+  {
+    sprintf_P(buffer+i*2, PSTR("%02x"), data[i]);
+  }
+
+  strcat(pbuffer, buffer);
 }
 
 // --------------------- //
