@@ -17,6 +17,7 @@ extern char pbuffer[PRINT_BUFFER_SIZE]; // Buffer for printing data
 
 void display_Header(void);
 void display_Name(const char *);
+void display_NameEx(const char *name, unsigned int id);
 void display_Footer(void);
 void display_Splash(void);
 void display_IDn(unsigned long, byte);
@@ -52,6 +53,7 @@ void display_UV(unsigned int);
 void display_LUX(unsigned int);
 void display_BAT(boolean);
 void display_RAIN(unsigned int);
+void display_RAINTOT(unsigned int);
 void display_RAINRATE(unsigned int);
 void display_WINSP(unsigned int);
 void display_AWINSP(unsigned int);
@@ -81,6 +83,7 @@ void display_DIST(unsigned int);
 void display_METER(unsigned int);
 void display_VOLT(unsigned int);
 void display_RGBW(unsigned int);
+void display_DEBUG(byte data[], unsigned int size);
 
 // These functions are here to help writing the emitting part of a plugin by interpreting the received command
 // A local copy of the original InputBuffer_Serial is split by semi colons into tokens seperated when calling
