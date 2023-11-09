@@ -62,6 +62,7 @@
 #define PLUGIN_045 // Auriol
 #define PLUGIN_046 // Auriol v2 / Xiron
 #define PLUGIN_047 // Auriol v4
+#define PLUGIN_048 // Oregon Weather
 #define PLUGIN_049 // Lacrosse TX141
 // -------------------
 // Motion Sensors, include when needed
