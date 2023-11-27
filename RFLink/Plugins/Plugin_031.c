@@ -72,8 +72,16 @@
 
 #ifdef PLUGIN_031
 #include "../4_Display.h"
+#include "../7_Utils.h"
 
-uint8_t Plugin_031_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len);
+/*********************************************************************************************\
+ * Calculates CRC-8 checksum
+ * reference http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
+ *           http://lucsmall.com/2012/04/30/weather-station-hacking-part-3/
+ *           https://github.com/lucsmall/WH2-Weather-Sensor-Library-for-Arduino/blob/master/WeatherSensorWH2.cpp
+ \*********************************************************************************************/
+#define Plugin_031_ProtocolAlectoCRC8(addr, len) crc8((addr), (len), 0x31, 0)
+
 // unsigned int Plugin_031_ProtocolAlectoRainBase = 0;
 
 boolean Plugin_031(byte function, const char *string)
@@ -188,28 +196,5 @@ boolean Plugin_031(byte function, const char *string)
    return true;
 }
 
-/*********************************************************************************************\
- * Calculates CRC-8 checksum
- * reference http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
- *           http://lucsmall.com/2012/04/30/weather-station-hacking-part-3/
- *           https://github.com/lucsmall/WH2-Weather-Sensor-Library-for-Arduino/blob/master/WeatherSensorWH2.cpp
- \*********************************************************************************************/
-uint8_t Plugin_031_ProtocolAlectoCRC8(uint8_t *addr, uint8_t len)
-{
-   uint8_t crc = 0;
-   // Indicated changes are from reference CRC-8 function in OneWire library
-   while (len--)
-   {
-      uint8_t inbyte = *addr++;
-      for (uint8_t i = 8; i; i--)
-      {
-         uint8_t mix = (crc ^ inbyte) & 0x80; // changed from & 0x01
-         crc <<= 1;                           // changed from right shift
-         if (mix)
-            crc ^= 0x31; // changed from 0x8C;
-         inbyte <<= 1;   // changed from right shift
-      }
-   }
-   return crc;
-}
+
 #endif // PLUGIN_031
