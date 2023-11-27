@@ -48,6 +48,14 @@ void reflect_nibbles(uint8_t message[], unsigned num_bytes)
     }
 }
 
+void invert_bytes(uint8_t message[], unsigned num_bytes)
+{
+    for (unsigned i = 0; i < num_bytes; ++i)
+    {
+        message[i] = ~message[i];
+    }
+}
+
 unsigned extract_nibbles_4b1s(uint8_t *message, unsigned offset_bits, unsigned num_bits, uint8_t *dst)
 {
     unsigned ret = 0;
@@ -378,9 +386,9 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max)
     return (value > min && value < max);
 }
 
-bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration)
+bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration, uint8_t bitOffset)
 {
-    if (pulseIndex + expectedBitCount * 2 > pulsesCount)
+    if (pulseIndex + (expectedBitCount - 1) * 2  > pulsesCount)
     {
         #ifdef PWM_DEBUG
         Serial.print(F("PWM: Not enough pulses: pulseIndex = "));
@@ -397,8 +405,9 @@ bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses
 
     const uint8_t bitsPerByte = 8;
     //const uint8_t expectedByteCount = expectedBitCount / bitsPerByte;
+    const uint8_t endBitCount = expectedBitCount + bitOffset;
 
-    for(int8_t bitIndex = 0; bitIndex < expectedBitCount; bitIndex++)
+    for(uint8_t bitIndex = bitOffset; bitIndex < endBitCount; bitIndex++)
     {
         int currentFrameByteIndex = bitIndex / bitsPerByte;
         uint16_t bitDuration = pulses[pulseIndex];

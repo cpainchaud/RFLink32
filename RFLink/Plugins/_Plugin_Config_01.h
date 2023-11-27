@@ -64,6 +64,7 @@
 #define PLUGIN_047 // Auriol v4
 #define PLUGIN_048 // Oregon Weather
 #define PLUGIN_049 // Lacrosse TX141
+#define PLUGIN_050 // FineOffset WH2 / ClimeMet CM9088 Temperature/Humidity
 // -------------------
 // Motion Sensors, include when needed
 // -------------------
