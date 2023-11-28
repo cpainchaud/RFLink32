@@ -63,6 +63,12 @@ uint8_t reflect4(uint8_t x);
 /// @param num_bytes number of bytes to reflect
 void reflect_nibbles(uint8_t message[], unsigned num_bytes);
 
+/// Invert each bit in each byte of a number of bytes.
+///
+/// @param message bytes of message data
+/// @param num_bytes number of bytes to invert
+void invert_bytes(uint8_t message[], unsigned num_bytes);
+
 /// Unstuff nibbles with 1-bit separator (4B1S) to bytes, returns number of successfully unstuffed nibbles.
 ///
 /// @param message bytes of message data
@@ -211,10 +217,12 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
  *  @param pulses                 the pulses to decode
  *  @param pulsesCount            the numnber of items inside @pulses
  *  @param pulseIndex             the index of the first pulse to be decoded
- *  @param shortPulseMinDuration  the minimum duration of a half bit
- *  @param shortPulseMaxDuration  the maximum duration of a half bit
- *  @param longPulseMinDuration   the minimum duration of a half bit
- *  @param longPulseMaxDuration   the maximum duration of a half bit
+ *  @param shortPulseMinDuration  the minimum duration of a short (low) bit
+ *  @param shortPulseMaxDuration  the maximum duration of a short (low) bit
+ *  @param longPulseMinDuration   the minimum duration of a long (high) bit
+ *  @param longPulseMaxDuration   the maximum duration of a long (high) bit
+ *  @param bitOffset              offset (in bits) in output buffer to read first bit into
+ *  @param 
  *  @return true if pulses could be decoded, giving enough bits, false if not or pulses were not of valid lengths
 
     The PWM encoding uses pair of pulses like this:
@@ -225,18 +233,26 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
     So, for instance, we would receive this: ----__----__----__--____
     This gives 4 pairs, hence 4 bits, long/short, long/short, long/short, short/long 
 
+    Note that for efficiency reasons, this method does not consider the second pulse of the pair and thus does not test
+    it for duration validity.
+    
+    Because this method actually doesn't check the length of the second pulse of a PWM, it can also be used for devices
+    which have a constant-length gap between the data pulse and the next one, ie:
+
+    Long then gap  : ----___
+    Short then gap : --___
+
     This method uses the following truth table
 
        Pair      |  Value
      ------------+--------  
       long/short |    1
       short/long |    0
+      long/gap   |    1
+      short/gap  |    0
 
     If you need the opposite, simply use the ~ operator on the frame bytes
 
-    Note that for efficiency reasons, this method does not consider the second pulse of the pair and thus does not test
-    it for duration validity.
-    
     Bits are placed in the frame in the order they appear, ie MSB first. To illustrate, consider the following set of pulses:
 
     --_-__--_--_--_--_-__--_--_-__-__--_--_--_-__-__-__--_-__--_--_--_-__-__
@@ -255,7 +271,7 @@ inline bool value_between(uint32_t value, uint32_t min, uint32_t max);
     But because the ESP32 is a little endian architecture, the bytes will be reversed two by two (0 - 3, 1 - 2)
     Using ntohs or ntohl from <netinet/in.h> is thus recommended in that case
 */
-bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration);
+bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration, uint8_t bitOffset = 0);
 
 /**
  *  Decodes the pulses as a Manchester encoded series of pulses
