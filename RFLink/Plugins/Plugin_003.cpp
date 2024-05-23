@@ -651,42 +651,33 @@ boolean  PluginTX_003(byte function, const char *string)
    //10;Kaku;00004f;e;ON;
    //10;Kaku;000050;10;ON;
    //10;Kaku;000049;b;ON;
-   //012345678901234567890
    // ==========================================================================
    if (strncasecmp(InputBuffer_Serial + 3, "KAKU;", 5) == 0)
    { // KAKU Command eg. Kaku;A1;On
       if (InputBuffer_Serial[14] != ';')
          return false;
+      
+      // split into multiple words
+      replacechar(InputBuffer_Serial, ';', 0x00);
 
-      x = 15; // character pointer
-      InputBuffer_Serial[10] = 0x30;
-      InputBuffer_Serial[11] = 0x78;           // Get home from hexadecimal value
-      InputBuffer_Serial[14] = 0x00;           // Get home from hexadecimal value
-      Home = str2int(InputBuffer_Serial + 10); // KAKU home A is intern 0
-      if (Home < 0x51)                         // take care of upper/lower case
-         Home = Home - 'A';
-      else if (Home < 0x71) // take care of upper/lower case
+      Home = tolower(strtol(&InputBuffer_Serial[12], NULL, 16));
+      if ('0' <= Home <= 'p')
          Home = Home - 'a';
       else
-      {
          return false; // invalid value
-      }
 
-      while ((c = InputBuffer_Serial[x++]) != ';')
+      x = 15; // character pointer
+      // This looks illegal, but for c in [0,16] it seems okay
+      while ((c = tolower(InputBuffer_Serial[x++])) != 0x00)
       { // Address: 1 to 16/32
          if (c >= '0' && c <= '9')
          {
-            Address = Address * 10;
-            Address = Address + c - '0';
+            Address = 10 * Address + c - '0';
          }
          if (c >= 'a' && c <= 'f')
          {
             Address = Address + (c - 'a' + 10);
          } // 31?
-         if (c >= 'A' && c <= 'F')
-         {
-            Address = Address + (c - 'A' + 10);
-         } // 51?
       }
       //if (Address==0) {                        // group command is given: 0=all
       //   command=2;                            // Set 2nd bit for group.
@@ -696,9 +687,8 @@ boolean  PluginTX_003(byte function, const char *string)
       //}
 
       bitstream = Home | ((Address - 1) << 4);
-      command |= str2cmd(InputBuffer_Serial + x) == VALUE_ON;  // ON/OFF command
+      command = str2cmd(&InputBuffer_Serial[x]) == VALUE_ON;  // ON/OFF command
       bitstream = bitstream | (0x600 | ((command & 1) << 11)); // create the bitstream
-      //Serial.println(bitstream);
       Arc_Send(bitstream);
       success = true;
       // --------------- END KAKU SEND ------------
