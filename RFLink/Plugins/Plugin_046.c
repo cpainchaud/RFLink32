@@ -28,7 +28,7 @@
  * E = Always 1111 ?
  * F = Always 0000 0000 ?
  *
- * Xiron Message Format: 
+ * Xiron Message Format (also known as Nexus-TH in other sources): 
  * 01101110 10 00 000011101101 1111 00110011
  * AAAAAAAA BB CC DDDDDDDDDDDD EEEE FFFFFFFF
  * ID       ?? Ch Temperature  ?    Humidity
@@ -178,8 +178,10 @@ boolean Plugin_046(byte function, const char *string)
    }
    if (type == 1)
    {
-      if (humidity > 100)
-         return false; // humidity out of range ( > 100)
+      // Certain sensors return humidity higher than 100% when the sensor is saturated.
+      // Clamp it to 99% instead of rejecting the measurement
+      if (humidity >= 100)
+         humidity = 99;
    }
    //==================================================================================
    // Output
