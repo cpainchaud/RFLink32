@@ -12,8 +12,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define BUILDNR 0x05 // 0x07       // shown in version
-#define REVNR 0x01   // 0X42       // shown in version and startup string
+#define BUILDNR 0x05    // shown in version
+#define REVNR 0x03      // shown in version and startup string
 
 #ifndef RFLINK_BUILDNAME
 #define RFLINK_BUILDNAME "unknown"
