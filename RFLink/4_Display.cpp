@@ -158,6 +158,16 @@ void display_TEMP(unsigned int input)
   strcat(pbuffer, dbuffer);
 }
 
+// TEMP=+999.9 => Temperature celcius (decimal +-ddd.d), no conversion needed
+void display_TEMPD(int input)
+{
+  sprintf_P(dbuffer, PSTR("%s%+03d."), PSTR(";TEMPD="), input);
+  int l = strlen(dbuffer);
+  dbuffer[l - 1] = dbuffer[l - 2];
+  dbuffer[l - 2] = '.';
+  strcat(pbuffer, dbuffer);
+}
+
 // HUM=99 => Humidity (decimal value: 0-100 to indicate relative humidity in %)
 void display_HUM(byte input)
 {
@@ -277,6 +287,23 @@ void display_WINTMP(unsigned int input)
 void display_CHIME(unsigned int input)
 {
   sprintf_P(dbuffer, PSTR("%s%03d"), PSTR(";CHIME="), input);
+  strcat(pbuffer, dbuffer);
+}
+
+// TREND => Temperature trend (UP/DOWN/STABLE)
+void display_TREND(byte input)
+{
+  switch (input) {
+    case TREND_Stable:
+      sprintf_P(dbuffer, PSTR("%s"), PSTR(";TREND=STABLE"));
+      break;
+    case TREND_Up:
+      sprintf_P(dbuffer, PSTR("%s"), PSTR(";TREND=UP"));
+      break;
+    case TREND_Down:
+      sprintf_P(dbuffer, PSTR("%s"), PSTR(";TREND=DOWN"));
+      break;
+  }
   strcat(pbuffer, dbuffer);
 }
 

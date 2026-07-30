@@ -45,6 +45,7 @@ enum CMD_OnOff
 void display_CMD(boolean, byte);
 void display_SET_LEVEL(byte);
 void display_TEMP(unsigned int);
+void display_TEMPD(int);
 void display_HUM(byte);
 void display_BARO(unsigned int);
 void display_HSTATUS(byte);
@@ -62,6 +63,13 @@ void display_WINDIR(unsigned int);
 void display_WINCHL(unsigned int);
 void display_WINTMP(unsigned int);
 void display_CHIME(unsigned int);
+enum TREND_Temp
+{
+    TREND_Stable,
+    TREND_Up,
+    TREND_Down
+};
+void display_TREND(byte);
 enum SMOKE_OnOff
 {
     SMOKE_Off,

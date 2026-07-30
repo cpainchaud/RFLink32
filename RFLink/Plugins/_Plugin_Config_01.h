@@ -66,6 +66,7 @@
 #define PLUGIN_048 // Oregon Weather
 #define PLUGIN_049 // Lacrosse TX141
 #define PLUGIN_050 // FineOffset WH2 / ClimeMet CM9088 Temperature/Humidity
+#define PLUGIN_051 // Hyundai WS Senzor 77(TH) Temperature/Humidity 433.92 MHz
 // -------------------
 // Motion Sensors, include when needed
 // -------------------
