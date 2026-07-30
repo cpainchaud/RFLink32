@@ -8,6 +8,9 @@
 #ifndef RFLink_h
 #define RFLink_h
 
+//bugfix to use 64-bit integers with ArduinoJson
+#define ARDUINOJSON_USE_LONG_LONG 1
+
 #include <ArduinoJson.h>
 #include <time.h>
 #include <sys/time.h>
@@ -27,8 +30,11 @@
 //#define RFLINK_AUTOOTA_ENABLED // if you want to the device to self-update at boot from a given URKL
                           // dont forget to set the URL in Crendentials.h
 
-//#define RFLINK_MQTT_DISABLED    // to disable MQTT entirely (not compiled at all)
-//#define RFLINK_PORTAL_DISABLED    // to disable Portal/Web UI
+//enable only serial messages
+#define RFLINK_MQTT_DISABLED    // to disable MQTT entirely (not compiled at all)
+#define RFLINK_PORTAL_DISABLED    // to disable Portal/Web UI
+#define RFLINK_NO_RADIOLIB_SUPPORT
+#define RFLINK_SERIAL2NET_DISABLED
 
 #if (defined(ESP32) || defined(ESP8266))
 // OLED display, 0.91" SSD1306 I2C

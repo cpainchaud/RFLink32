@@ -194,7 +194,9 @@ namespace RFLink
       // Applying changes will happen in mainLoop()
       if (triggerChanges && changesDetected)
       {
-        Serial.println(F("Signal parameters have changed."));
+        #ifdef DEBUG
+          Serial.println(F("Signal parameters have changed."));
+        #endif
         if (params::async_mode_enabled && AsyncSignalScanner::isStopped())
         {
           AsyncSignalScanner::startScanning();
@@ -1185,7 +1187,9 @@ namespace RFLink
         runtime::appliedSlicer = newSlicer;
       }
 
-      sprintf_P(printBuf, PSTR("Applied slicer '%s'"), slicerIdToString(runtime::appliedSlicer));
+      #ifdef DEBUG
+        sprintf_P(printBuf, PSTR("Applied slicer '%s'"), slicerIdToString(runtime::appliedSlicer));
+      #endif
       sendRawPrint(printBuf, true);
 
       return true;

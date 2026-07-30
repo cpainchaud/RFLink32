@@ -506,78 +506,106 @@ namespace RFLink { namespace Radio  {
     {
       if (pins::RX_PMOS != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_PMOS :\t"));
-        Serial.println(GPIO2String(pins::RX_PMOS));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_PMOS :\t"));
+          Serial.println(GPIO2String(pins::RX_PMOS));
+        #endif
       }
       if (pins::RX_NMOS != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_NMOS :\t"));
-        Serial.println(GPIO2String(pins::RX_NMOS));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_NMOS :\t"));
+          Serial.println(GPIO2String(pins::RX_NMOS));
+        #endif
       }
       if (pins::RX_VCC != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_VCC :\t"));
-        Serial.println(GPIO2String(pins::RX_VCC));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_VCC :\t"));
+          Serial.println(GPIO2String(pins::RX_VCC));
+        #endif
       }
       if (pins::RX_GND != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_GND :\t"));
-        Serial.println(GPIO2String(pins::RX_GND));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_GND :\t"));
+          Serial.println(GPIO2String(pins::RX_GND));
+        #endif
       }
       if (pins::RX_NA != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_NA :\t"));
-        Serial.println(GPIO2String(pins::RX_NA));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_NA :\t"));
+          Serial.println(GPIO2String(pins::RX_NA));
+        #endif
       }
       if (pins::RX_DATA != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_DATA :\t"));
-        Serial.print(GPIO2String(pins::RX_DATA));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_DATA :\t"));
+          Serial.print(GPIO2String(pins::RX_DATA));
         if (pins::PULLUP_RX_DATA)
           Serial.println(F(" (Pullup enabled)"));
         else
           Serial.println();
+        #endif
       }
       if (pins::RX_CS != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_CS :\t"));
-        Serial.println(GPIO2String(pins::RX_CS));
+        #ifdef DEBUG
+          Serial.print(F("Radio pin RF_RX_CS :\t"));
+          Serial.println(GPIO2String(pins::RX_CS));
+        #endif
       }
       if (pins::RX_RESET != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_RX_RESET :\t"));
-        Serial.println(GPIO2String(pins::RX_RESET));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_RX_RESET :\t"));
+          Serial.println(GPIO2String(pins::RX_RESET));
+        #endif
       }
       //
       if (pins::TX_PMOS != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_PMOS :\t"));
-        Serial.println(GPIO2String(pins::TX_PMOS));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_PMOS :\t"));
+          Serial.println(GPIO2String(pins::TX_PMOS));
+        #endif
       }
       if (pins::TX_NMOS != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_NMOS :\t"));
-        Serial.println(GPIO2String(pins::TX_NMOS));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_NMOS :\t"));
+          Serial.println(GPIO2String(pins::TX_NMOS));
+        #endif
       }
       if (pins::TX_VCC != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_VCC :\t"));
-        Serial.println(GPIO2String(pins::TX_VCC));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_VCC :\t"));
+          Serial.println(GPIO2String(pins::TX_VCC));
+        #endif
       }
       if (pins::TX_GND != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_GND :\t"));
-        Serial.println(GPIO2String(pins::TX_GND));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_GND :\t"));
+          Serial.println(GPIO2String(pins::TX_GND));
+        #endif
       }
       if (pins::TX_DATA != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_DATA :\t"));
-        Serial.println(GPIO2String(pins::TX_DATA));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_DATA :\t"));
+          Serial.println(GPIO2String(pins::TX_DATA));
+        #endif
       }
       if (pins::TX_NA != NOT_A_PIN)
       {
-        Serial.print(F("Radio pin RF_TX_NA :\t"));
-        Serial.println(GPIO2String(pins::TX_NA));
+        #ifdef DEBUG 
+          Serial.print(F("Radio pin RF_TX_NA :\t"));
+          Serial.println(GPIO2String(pins::TX_NA));
+        #endif
       }
     }
 #endif // ESP8266 || ESP32
@@ -963,7 +991,9 @@ namespace RFLink { namespace Radio  {
         sprintf(printBuf, PSTR("Switching from Radio hardware '%s' to '%s'"), hardwareNames[hardware], hardwareNames[newHardware]);
         RFLink::sendRawPrint(printBuf, true);
       } else {
-        sprintf(printBuf, PSTR("Now trying to initialize hardware '%s'"), hardwareNames[hardware]);
+        #ifdef DEBUG
+          sprintf(printBuf, PSTR("Now trying to initialize hardware '%s'"), hardwareNames[hardware]);
+        #endif
         RFLink::sendRawPrint(printBuf, true);
       }
 
@@ -997,7 +1027,9 @@ namespace RFLink { namespace Radio  {
       if(!success) {
         RFLink::sendRawPrint(F("Hardware failed to initialize, we will retry later!"), true);
       } else {
-        RFLink::sendRawPrint(F("Hardware initialization was successful!"), true);
+        #ifdef DEBUG
+          RFLink::sendRawPrint(F("Hardware initialization was successful!"), true);
+        #endif
         hardwareProperlyInitialized = true;
         Radio::set_Radio_mode(Radio::current_State, true);
       }
