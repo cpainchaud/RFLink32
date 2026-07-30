@@ -78,11 +78,6 @@ bool decode_pulse_pairs(uint8_t frame[], uint8_t expectedBitCount,
   return true;
 }
 
-// TODO why can't  we use the function defined in 7_Utils?
-inline bool value_between(uint16_t value, uint16_t min, uint16_t max) {
-  return ((value > min) && (value < max));
-}
-
 inline bool isLowPulseIndex(const int pulseIndex) { return (pulseIndex % 2 == 0); }
 
 u_short countPreamblePairs(const uint16_t pulses[], int *pulseIndex, size_t pulseCount, size_t AVTK_SyncPairsCount, uint16_t AVTK_PulseMinDuration, uint16_t AVTK_PulseMaxDuration) {

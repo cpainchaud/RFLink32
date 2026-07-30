@@ -366,26 +366,6 @@ int add_nibbles(uint8_t const message[], unsigned num_bytes)
     return result;
 }
 
-inline bool value_between(int value, int min, int max)
-{
-    return (value > min && value < max);
-}
-
-inline bool value_between(uint8_t value, uint8_t min, uint8_t max)
-{
-    return (value > min && value < max);
-}
-
-inline bool value_between(uint16_t value, uint16_t min, uint16_t max)
-{
-    return (value > min && value < max);
-}
-
-inline bool value_between(uint32_t value, uint32_t min, uint32_t max)
-{
-    return (value > min && value < max);
-}
-
 bool decode_pwm(uint8_t frame[], uint8_t expectedBitCount, uint16_t const pulses[], const int pulsesCount, int pulseIndex, uint16_t shortPulseMinDuration, uint16_t shortPulseMaxDuration, uint16_t longPulseMinDuration, uint16_t longPulseMaxDuration, uint8_t bitOffset)
 {
     if (pulseIndex + (expectedBitCount - 1) * 2  > pulsesCount)
