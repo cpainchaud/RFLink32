@@ -186,6 +186,9 @@ boolean  PluginTX_004(byte function, const char *string)
       return false;
    if (!retrieve_Switch(Switch_bitstream))
       return false;
+   if (Switch_bitstream < 1 || Switch_bitstream > 0x10)
+      return false;
+   Switch_bitstream--; // 1 to 16 -> 0 to 15 (displayed value is one more)
    if (!retrieve_Command(Cmd_bitstream, Cmd_dimmer))
       return false;
    if (!retrieve_End())
