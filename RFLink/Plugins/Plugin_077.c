@@ -466,12 +466,12 @@ boolean PluginTX_077(byte function, const char *string)
     char *address = strings[2];
     char *buttons = strings[3];
 
-		noInterrupts();
-
 #ifdef PLUGIN_077_DEBUG
     Serial.println(F(PLUGIN_077_ID ": Sending preamble"));
 #endif
 		for (u_short count = 0; count < sendTimes; count++) {
+         // one frame at a time, all repeats would exceed the ESP32 interrupt watchdog (300ms)
+         noInterrupts();
          for (u_int i = 0; i < preambleSize; i++) {
             sendBit(preamble[i]);
          }
@@ -494,8 +494,8 @@ boolean PluginTX_077(byte function, const char *string)
          Serial.println(buttons);
 #endif
       sendManchester(buttons);
+         interrupts();
 		}
-		interrupts();
 
     return true;
 	}
