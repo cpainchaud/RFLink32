@@ -444,6 +444,8 @@ boolean PluginTX_017(byte function, const char *string)
     if (!retrieve_word(value))
         return false;
     retrieve_byte(eepromRecordNumber); // may fail, but that's fine, it does not touch the token "pointer" in this case
+    if (eepromRecordNumber >= RTS_ConfigFileRecordCount)
+        return false;
     if (!retrieve_Command(command))
         return false;
 
@@ -505,7 +507,8 @@ boolean PluginTX_017(byte function, const char *string)
     */
 
     uint8_t button = 0;
-    bool telfix = value != 0;
+    // for PAIR, value is the initial rolling code, not the telfix flag
+    bool telfix = command != VALUE_PAIR && value != 0;
     if (!telfix)
     {
         switch(command)
