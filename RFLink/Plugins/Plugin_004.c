@@ -47,6 +47,7 @@
 #define PLUGIN_DESC_004 "NewKaku"
 #define NewKAKU_RawSignalLength 132            // regular KAKU packet length
 #define NewKAKUdim_RawSignalLength 148         // KAKU packet length including DIM bits
+#define NewKAKUnoStart_RawSignalLength 130     // regular KAKU packet received without its start bit
 #define NewKAKU_mT_D 650 // us, approx. in between 1T and 4T
 
 #ifdef PLUGIN_004
@@ -55,7 +56,8 @@
 boolean Plugin_004(byte function, const char *string)
 {
    // nieuwe KAKU bestaat altijd uit start bit + 32 bits + evt 4 dim bits. Ongelijk, dan geen NewKAKU
-   if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength))
+   // A packet caught late can miss its start bit while its 32 bits are complete
+   if ((RawSignal.Number != NewKAKU_RawSignalLength) && (RawSignal.Number != NewKAKUdim_RawSignalLength) && (RawSignal.Number != NewKAKUnoStart_RawSignalLength))
       return false;
    if (RawSignal.Pulses[0] == 15)
       return true; // Home Easy, skip KAKU
@@ -75,6 +77,8 @@ boolean Plugin_004(byte function, const char *string)
    // RawSignal.Pulses[1] startbit with duration of 1T => ignore
    // RawSignal.Pulses[2] long space after startbit with duration of 8T => ignore
    i = 3; // RawSignal.Pulses[3] is first pulse of a T,xT,T,xT combination
+   if (RawSignal.Number == NewKAKUnoStart_RawSignalLength)
+      i = 1; // no start bit: the first bit begins at RawSignal.Pulses[1], the 32 bits still end before 130
    do
    {
       P0 = RawSignal.Pulses[i];     // * RawSignal.Multiply;
