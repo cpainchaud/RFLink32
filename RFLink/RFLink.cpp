@@ -74,24 +74,41 @@ namespace RFLink {
 
 #if (defined(ESP32) || defined(ESP8266))
       Serial.println(); // ESP "Garbage" message
-      Serial.print(F("Arduino IDE Version :\t"));
-      Serial.println(ARDUINO);
+      delay(1000);
+
+      #ifdef DEBUG 
+        Serial.print(F("Arduino IDE Version :\t")); 
+        Serial.println(ARDUINO); 
+      #endif
 #endif
 #ifdef ESP32
-      Serial.print(F("ESP SDK version:\t"));
-      Serial.println(ESP.getSdkVersion());
+      #ifdef DEBUG 
+        Serial.print(F("ESP SDK version:\t")); 
+        Serial.println(ESP.getSdkVersion()); 
+      #endif
 #endif
 #ifdef ESP8266
-      Serial.print(F("ESP CoreVersion :\t"));
-      Serial.println(ESP.getCoreVersion());
+      #ifdef DEBUG 
+        Serial.print(F("ESP CoreVersion :\t")); 
+        Serial.println(ESP.getCoreVersion()); 
+      #endif
 #endif // ESP8266
-      Serial.print(F("Sketch File :\t\t"));
-      Serial.println(F(__FILE__)); // "RFLink.ino" version is in 20;00 Message
-      Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__));
+      #ifdef DEBUG 
+        Serial.print(F("Sketch File :\t\t")); 
+        Serial.println(F(__FILE__)); // "RFLink.ino" version is in 20;00 Message 
+        Serial.println(F("Compiled on :\t\t" __DATE__ " at " __TIME__)); 
+      #endif
 
-      display_Header();
-      display_Splash();
-      display_Footer();
+      //compatiblity to old RFLink 1.48
+      display_Header(); 
+      display_Name(PSTR("RFLink Gateway"));
+      display_Footer(); 
+
+      #ifdef DEBUG 
+        display_Header(); 
+        DEBUG display_Splash(); 
+        DEBUG display_Footer(); 
+      #endif
 
 #ifdef SERIAL_ENABLED
       Serial.print(pbuffer);
@@ -180,7 +197,10 @@ namespace RFLink {
       }
 
       Radio::mainLoop();
+
+      #ifndef RFLINK_PORTAL_DISABLED
       OTA::mainLoop();
+      #endif
     }
 
     void sendMsgFromBuffer() {

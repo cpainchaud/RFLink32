@@ -93,6 +93,7 @@ namespace RFLink
 
     void printFile()
     {
+      #ifdef DEBUG
       // Open file for reading
       Serial.println(F("Now dumping JSON file content:"));
       File file = LittleFS.open(configFileName, "r");
@@ -111,6 +112,7 @@ namespace RFLink
 
       // Close the file
       file.close();
+      #endif
     }
 
     ConfigItem *findConfigItem(const char *name, SectionId section)
@@ -135,7 +137,9 @@ namespace RFLink
 
     void setup()
     {
-      Serial.print(F("Loading persistent filesystem... "));
+      #ifdef DEBUG
+        Serial.print(F("Loading persistent filesystem... "));
+      #endif
 
       #ifdef ESP32
       if (!LittleFS.begin(true))
@@ -146,14 +150,20 @@ namespace RFLink
         Serial.println(F(" FAILED!!"));
         return;
       }
-      Serial.print(F("OK. "));
+      #ifdef DEBUG
+        Serial.print(F("OK. "));
+      #endif
 
 #ifdef ESP32
-      Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
+      #ifdef DEBUG
+        Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), LittleFS.usedBytes() / 1024, LittleFS.totalBytes() / 1024);
+      #endif
 #else // this is ESP8266
       FSInfo info;
       LittleFS.info(info);
-      Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
+      #ifdef DEBUG
+        Serial.printf_P(PSTR("File system usage: %u/%uKB.\r\n"), info.usedBytes / 1024, info.totalBytes / 1024);
+      #endif
 #endif
 
 
@@ -194,7 +204,9 @@ namespace RFLink
       //sprintf(tmp, "Counted %i config items in total", countConfigItems);
       //Serial.println(tmp);
 
-      Serial.printf(PSTR("Now opening JSON config file '%s'\r\n"), configFileName);
+      #ifdef DEBUG
+        Serial.printf(PSTR("Now opening JSON config file '%s'\r\n"), configFileName);
+      #endif
 
       File file = LittleFS.open(configFileName, "r");
       DeserializationError error = deserializeJson(doc, file);
@@ -202,7 +214,9 @@ namespace RFLink
         Serial.println(F("Failed to read file, using default configuration"));
       file.close();
 
-      Serial.printf_P(PSTR("JSON file mem usage: %u / %u\r\n"), doc.memoryUsage(), doc.memoryPool().capacity());
+      #ifdef DEBUG
+        Serial.printf_P(PSTR("JSON file mem usage: %u / %u\r\n"), doc.memoryUsage(), doc.memoryPool().capacity());
+      #endif
 
       bool fileHasChanged = false;
 

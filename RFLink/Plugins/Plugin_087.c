@@ -108,8 +108,8 @@ boolean Plugin_087(byte function, const char *string)
 
 #ifdef PLUGIN_TX_087
 
-#include "1_Radio.h"
-#include "2_Signal.h"
+#include "../1_Radio.h"
+#include "../2_Signal.h"
 
 boolean PluginTX_087(byte function, const char *string)
 {

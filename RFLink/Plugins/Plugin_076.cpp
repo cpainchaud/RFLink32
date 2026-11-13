@@ -58,9 +58,9 @@ using namespace RFLink::Radio;
 #define PLUGIN_076_REPEAT_IGNORE_TIME_MS 1500
 
 #if defined(PLUGIN_076)
-#include "1_Radio.h"
-#include "2_Signal.h"
-#include "4_Display.h"
+#include "../1_Radio.h"
+#include "../2_Signal.h"
+#include "../4_Display.h"
 
 #if defined(DEBUG) || defined(RFLINK_DEBUG)
 #define PLUGIN_076_DEBUG
@@ -177,7 +177,7 @@ boolean Plugin_076(byte function, const char *string)
 
 #ifdef PLUGIN_TX_076
 
-#include "3_Serial.h"
+#include "../3_Serial.h"
 
 boolean  PluginTX_076(byte function, const char *string)
 {

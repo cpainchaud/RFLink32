@@ -288,7 +288,7 @@ boolean Plugin_009(byte function, const char *string)
 #endif //PLUGIN_009
 
 #ifdef PLUGIN_TX_009
-#include "1_Radio.h"
+#include "../1_Radio.h"
 void X10_Send(uint32_t address);
 
 boolean  PluginTX_009(byte function, const char *string)
