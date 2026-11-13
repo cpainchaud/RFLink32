@@ -104,6 +104,8 @@ boolean Plugin_018(byte function, const char *string)
                 break;
             }
         }
+        else
+            return false; // not a Louvolite packet, let other plugins try it
 
         // all is good, output the received packet
         display_Header();

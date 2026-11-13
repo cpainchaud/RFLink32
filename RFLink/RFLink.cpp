@@ -304,7 +304,9 @@ namespace RFLink {
 
       // Copy input command to InputBuffer_Serial, because many plugins are based on it !
       if(cmd != InputBuffer_Serial) { // sometimes we already have the command in the right buffer
-        memcpy(InputBuffer_Serial, cmd, INPUT_COMMAND_SIZE);;
+        // cmd may be shorter than INPUT_COMMAND_SIZE (Serial2Net buffer is 1025 bytes)
+        strncpy(InputBuffer_Serial, cmd, INPUT_COMMAND_SIZE - 1);
+        InputBuffer_Serial[INPUT_COMMAND_SIZE - 1] = 0;
       }
 
       if (strlen(cmd) > 7) { // need to see minimal 8 characters on the serial port

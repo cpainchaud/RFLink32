@@ -240,19 +240,18 @@ void debugRawSignal(int size)
 
 void sendRF(int currentPulses) 
 {
-   noInterrupts();
- 
    for (int j=0; j < RawSignal.Repeats; j++) {
-      for (int i = 0; i < currentPulses; i=i+2) 
+      // one frame at a time, all repeats would exceed the ESP32 interrupt watchdog (300ms)
+      noInterrupts();
+      for (int i = 0; i < currentPulses; i=i+2)
       {
       digitalWrite(TX_DATA, HIGH);
       delayMicroseconds(RawSignal.Pulses[i]*RawSignal.Multiply);
       digitalWrite(TX_DATA, LOW);
       delayMicroseconds(RawSignal.Pulses[i+1]*RawSignal.Multiply);
       }
+      interrupts();
    }
-
-   interrupts();
 }
 
 void addSinglePulse(unsigned long value, int *currrentPulses)

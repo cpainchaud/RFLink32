@@ -841,10 +841,12 @@ namespace RFLink
       }
 
       Radio::set_Radio_mode(Radio::States::Radio_TX);
-      noInterrupts();
       // send bits
       for (byte nRepeat = 0; nRepeat < AC_FRETRANS; nRepeat++)
       {
+        // Interrupts are disabled for one frame only (~80ms): disabling them for all
+        // repeats (~400ms) triggers the ESP32 interrupt watchdog (300ms) and reboots
+        noInterrupts();
         data = bitstream;
         if (cmd != 0xff)
           cmd = command;
@@ -930,10 +932,10 @@ namespace RFLink
         delayMicroseconds(AC_FPULSE);
         digitalWrite(Radio::pins::TX_DATA, LOW);
         delayMicroseconds(AC_FPULSE * 40); //31*335=10385 40*260=10400
+        interrupts();
       }
       // End transmit
       Radio::set_Radio_mode(Radio::States::Radio_RX);
-      interrupts();
     }
 
     void RawSendRF(RawSignalStruct *signal)
