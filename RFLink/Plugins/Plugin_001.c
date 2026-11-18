@@ -89,7 +89,8 @@
 
 boolean Plugin_001(byte function, const char *string)
 {
-    if (string == NULL || RawSignal.Number == 0)
+    // string is always NULL for RX calls (PluginRXCall(0, 0)), so only skip init calls where no signal is present
+    if (RawSignal.Number == 0 || RawSignal.Multiply == 0)
         return false;
 
    // byte HEconversiontype = 1; // 0=No conversion, 1=conversion to Elro 58 pulse protocol (same as FA500R Method 1)
