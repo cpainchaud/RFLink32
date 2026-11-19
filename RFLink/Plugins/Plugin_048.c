@@ -538,6 +538,17 @@ unsigned long oregon_getRollingCodeAndChannel() {
 	return (((osdata[2] & 0x0F) + (osdata[3] & 0xF0)) << 8) | (osdata[2] >> 4); // A004 => RC A0, CH = 04 (1=1,2=2,4=3)
 }
 
+// BJ601 (FCC ID 2AZUG-BJ601) sends a preamble of ~10 x (480us high, 2930us low) before the Oregon V3 data.
+// Used to tell a BJ601 with flag nibble 8 (ID FA28) apart from a THGR810 (also FA28).
+boolean oregon_isBJ601Signal() {
+	byte hits = 0;
+	for (int x = 2; x < 24 && x < RawSignal.Number; x += 2) {
+		unsigned long p = RawSignal.Pulses[x] * RawSignal.Multiply;
+		if (p >= 2600 && p <= 3300) hits++;
+	}
+	return hits >= 3;
+}
+
 boolean oregon_getBatteryOk() {
 	return !((osdata[3] & 0x08) == 0x08); // 1000b
 }
@@ -629,11 +640,14 @@ boolean Plugin_048(byte function, const char *string) {
 		display_DEBUG(osdata, OSDATA_SIZE);
 		display_Footer();
 	}
-	else if (id == 0xfa28 || id == 0x1a2d || id == 0x1a3d || (id & 0xfff) == 0xACC || id == 0xca2c || id == 0xfab8) {
+	else if (id == 0xfa28 || (id & 0xfff0) == 0xfa20 || id == 0x1a2d || id == 0x1a3d || (id & 0xfff) == 0xACC || id == 0xca2c || id == 0xfab8) {
 	   /*
 		   1a2d  Indoor Temp/Hygro: THGN122N, THGN123N, THGR122NX, THGR228N, THGR238, THGR268, THGR122X
 		   1a3d  Outdoor Temp/Hygro: THGR918, THGRN228NX, THGN500
 		   fa28  Indoor Temp/Hygro: THGR810
+		   fa2x  Outdoor Temp/Hygro: BJ601 (FCC ID 2AZUG-BJ601), low nibble of byte 1 is a flag:
+		         bit 1 = repeat (0/8 first packet, 2/A repeats), bit 3 toggles between transmissions.
+		         FA28 collides with THGR810 -> BJ601 recognised by its preamble (oregon_isBJ601Signal)
 		   *aac  Outdoor Temp/Hygro: RTGR328N
 		   ca2c  Outdoor Temp/Hygro: THGR328N
 		   fab8  Outdoor Temp/Hygro: WTGR800
@@ -645,6 +659,9 @@ boolean Plugin_048(byte function, const char *string) {
 		   OSV2 1A2D103742197005378E THGR228N
 		   OSV3 FA28A428202290834B46
 		   OSV3 FA2814A93022304443BE THGR810
+		   OSV3 FA20043F140530A94725 BJ601  5.1C 93%
+		   OSV3 FA22043F140530A94923 BJ601  5.1C 93% (same packet, repeat)
+		   OSV3 FA282408742228A44E72 BJ601 -22.7C 42% (freezer, channel nibble 2)
 		   OSV2 1A2D1002 02060552A4C
 				1A3D10D91C273083..
 				1A3D10D90C284083..
@@ -656,11 +673,18 @@ boolean Plugin_048(byte function, const char *string) {
 		if (checksum(1, 8, osdata[8]) != 0) return false; // checksum = all nibbles 0-15 results is nibbles 16.17			 
 
 		temp = oregon_getTemperature();
-		hum = ((osdata[7] & 0x0F) * 16) + (osdata[6] >> 4);
+		hum = ((osdata[7] & 0x0F) * 10) + (osdata[6] >> 4); // BCD -> decimal, display_HUM prints %02d
+
+		byte idByte = osdata[1];
+		if ((id & 0xfff0) == 0xfa20 && (id != 0xfa28 || oregon_isBJ601Signal())) {
+			// BJ601: low nibble of byte 1 is a flag (0/2/8/A), not part of the ID -> mask it so the sensor keeps one stable ID
+			id = 0xfa20;
+			idByte &= 0xf0;
+		}
 
 		display_Header();
 		display_NameEx(PSTR("Oregon"), id);
-		display_IDn((osdata[1] << 8 | osdata[3]), 4);
+		display_IDn((idByte << 8 | osdata[3]), 4);
 		display_TEMP(temp);
 		display_HUM(hum);
 		boolean batOK = !((osdata[4] & 0x0F) >= 4);
