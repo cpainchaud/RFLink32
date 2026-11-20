@@ -2,6 +2,8 @@
 
 #include "RFLink.h"
 
+#ifndef RFLINK_PORTAL_DISABLED
+
 #ifdef ESP32
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
@@ -163,3 +165,5 @@ namespace RFLink
 
   } // end of AutoOTA namespace
 } // end of RFLink namespace
+
+#endif // RFLINK_PORTAL_DISABLED

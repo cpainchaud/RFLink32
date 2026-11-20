@@ -16,8 +16,8 @@
 #ifndef _RFLINK_PLUGIN_CONFIG_01_H_
 #define _RFLINK_PLUGIN_CONFIG_01_H_
 
-#include "2_Signal.h"
-#include "1_Radio.h"
+#include "../2_Signal.h"
+#include "../1_Radio.h"
 
 // ****************************************************************************************************************************************
 // Translation Plugin for oversized packets due to their breaks/pause being too short between packets
